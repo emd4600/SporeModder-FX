@@ -19,9 +19,11 @@ SporeModder FX was programmed in Java 1.8, using the Eclipse tool. Additionally,
  - [RichTextFX](https://github.com/FXMisc/RichTextFX) and all its dependencies.
  - [JSPF](https://github.com/gearlles/jspf) (Java Simple Plugin Framework)
  - [JSON-java](https://github.com/stleary/JSON-java)
+ - [Java DDS ImageIO Plugin](https://github.com/GoldenGnu/java-dds)
  - [WinMerge](http://winmerge.org/) (not a Java library, but it's included in the public release to compare files)
  - Even though it was not directly used, the custom ribbon developed in this program was heavily based in [FXRibbon](https://github.com/dukke/FXRibbon)
  
 Also wanted to give thanks to:
- - rob55rod, for all his advice that ensured the program didn't end up being a total unusable mess.
+ - [rob55rod/Splitwirez](
+https://github.com/Splitwirez), for all his advice that ensured the program didn't end up being a total unusable mess.
  - BentLent, Snek, Psi and Darhagonable, for testing the program.

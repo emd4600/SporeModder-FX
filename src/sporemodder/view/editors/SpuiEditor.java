@@ -146,7 +146,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	};
 	
 	
-	private final SporeUserInterface spui = new SporeUserInterface();
+	private SporeUserInterface spui;
 	private final SpuiViewer viewer = new SpuiViewer(this);
 	
 	private VBox inspectorPane;
@@ -174,7 +174,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	/** The selected element whose properties are being displayed in the inspector. */
 	private final ObjectProperty<InspectableObject> selectedElement = new SimpleObjectProperty<>();
 	/** The selected window that is remarked in the viewer. Will be the same as selected element or null if element is not a window. */
-	private final ObjectProperty<WindowBase> selectedWindow = new SimpleObjectProperty<>();
+	private final ObjectProperty<IWindow> selectedWindow = new SimpleObjectProperty<>();
 	
 	private SpuiDraggableType draggable;
 	/** The original area of the window that is being modified by dragging the mouse. */
@@ -311,8 +311,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     			onInspectorUpdateRequest = null;
     			propertiesContainer.setContent(newValue.generateUI(this));
     			
-    			if (newValue instanceof WindowBase) {
-        			selectedWindow.set((WindowBase) newValue); 
+    			if (newValue instanceof IWindow) {
+        			selectedWindow.set((IWindow) newValue); 
         		}
     			
 //    			if (newValue instanceof WindowBase) {
@@ -332,7 +332,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     			
     			boolean disable = newValue == null || newValue != selectedWindow.get();
         		
-        		proceduresGallery.setDisable(disable);
+    			// We can't add procedures to the layout window
+        		proceduresGallery.setDisable(disable || selectedWindow.get() == viewer.getLayoutWindow());
             	windowsGallery.setDisable(disable);
     		} else {
     			propertiesContainer.setContent(null);
@@ -389,7 +390,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     		mouseClickX = event.getX();
     		mouseClickY = event.getY();
     		
-    		if (event.getButton() == MouseButton.SECONDARY && selectedWindow.get() != null) {
+    		if (event.getButton() == MouseButton.SECONDARY && selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
     			SPUIRectangle rect = selectedWindow.get().getRealArea();
         		
         		for (SpuiDraggableType type : SpuiDraggableType.values()) {
@@ -411,7 +412,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     		if (draggable != null) {
     			SPUIRectangle newArea = selectedWindow.get().getArea();
     			if (!originalArea.compare(newArea)) {
-    				DesignerClass clazz = selectedWindow.get().getDesignerClass();
+    				DesignerClass clazz = ((SpuiElement) selectedWindow.get()).getDesignerClass();
     				DesignerProperty property = clazz.getProperty(0xeec1b005);
     				
     				addEditAction(new SpuiPropertyAction<SPUIRectangle>(new SPUIRectangle(originalArea), new SPUIRectangle(newArea), (v) -> {
@@ -509,7 +510,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	SpuiElement element = clazz.createInstance();
     	clazz.fillDefaults(this, element);
     	
-    	WindowBase window = selectedWindow.get();
+    	WindowBase window = (WindowBase) selectedWindow.get();
     	DesignerProperty property = window.getDesignerClass().getProperty(0xeec1b00c);
 		InspectorValueList<Object> component = property.getInspectorListComponent();
     	
@@ -536,21 +537,19 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	selectInspectable(element);
     }
     
-    @SuppressWarnings("unchecked")
 	private void addWindow(String className) {
     	DesignerClass clazz = SporeUserInterface.getDesigner().getClass(className);
     	SpuiElement childWindow = clazz.createInstance();
     	clazz.fillDefaults(this, childWindow);
     	
-    	WindowBase window = selectedWindow.get();
-    	DesignerProperty property = window.getDesignerClass().getProperty(0xeec1b00b);
-		List<IWindow> children = (List<IWindow>) property.getValue(window);
+    	IWindow window = selectedWindow.get();
+		List<IWindow> children = window.getChildren();
     	
     	List<IWindow> oldValue = new ArrayList<>(children);
     	children.add((IWindow) childWindow);
-    	generateWindowTree((FilterableTreeItem<IWindow>) window.getTreeItem(), (IWindow) childWindow);
+    	generateWindowTree(getWindowItem(window), (IWindow) childWindow);
     	
-    	property.processUpdate(this);
+    	repaint();
     	
     	List<IWindow> newValue = new ArrayList<>(children);
     	
@@ -559,15 +558,15 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 				removeElement(childWindow);
 				children.clear();
     			children.addAll(oldValue);
-    			property.processUpdate(SpuiEditor.this);
+    			repaint();
 			}
 
 			@Override public void redo() {
 				children.clear();
     			children.addAll(newValue);
-    			generateWindowTree((FilterableTreeItem<IWindow>) window.getTreeItem(), (IWindow) childWindow);
+    			generateWindowTree(getWindowItem(window), (IWindow) childWindow);
     			selectInspectable(childWindow);
-    			property.processUpdate(SpuiEditor.this);
+    			repaint();
 			}
 
 			@Override public String getText() {
@@ -632,7 +631,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	GraphicsContext g = overlayCanvas.getGraphicsContext2D();
 		g.clearRect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
 		
-		if (selectedWindow.get() != null) {
+		if (selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
 			SPUIRectangle rect = selectedWindow.get().getRealArea();
 			
 			g.setStroke(ACTIVE_COLOR);
@@ -711,7 +710,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		}
 	}
     
-    public WindowBase getSelectedWindow() {
+    public IWindow getSelectedWindow() {
     	return selectedWindow.get();
     }
     
@@ -744,9 +743,16 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	public void loadFile(File file) throws IOException {
 		this.file = file;
 		
+		rootWindowsItem.getChildren().clear();
+		rootImagesItem.getChildren().clear();
+		rootDrawablesItem.getChildren().clear();
+		spui = new SporeUserInterface();
+		
 		try (FileStream stream = new FileStream(file, "r")) {
-			spui.read(stream);
-			viewer.getLayoutWindow().getChildren().addAll(spui.getRootWindows());
+			if (stream.length() != 0) {
+				spui.read(stream);
+				viewer.getLayoutWindow().getChildren().addAll(spui.getRootWindows());
+			}
 		}
 		
 		if (!spui.getUnloadedFiles().isEmpty()) {
@@ -768,6 +774,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		viewer.repaint();
 		
 		rootWindowsItem.setValue(viewer.getLayoutWindow());
+		viewer.getLayoutWindow().setTreeItem(rootWindowsItem);
 		
 		for (IWindow window : viewer.getLayoutWindow().getChildren()) {
 			generateWindowTree(rootWindowsItem, window);
@@ -824,7 +831,12 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		super.setActive(isActive);
 		
 		if (isActive && mustReload) {
-			//TODO
+			try {
+				loadFile(getFile());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		HashManager.get().setUpdateProjectRegistry(isActive);
@@ -1177,7 +1189,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	
 	@SuppressWarnings("unchecked")
 	private FilterableTreeItem<IWindow> getWindowItem(IWindow window) {
-		return (FilterableTreeItem<IWindow>) ((SpuiElement)window).getTreeItem();
+		return (FilterableTreeItem<IWindow>) ((InspectableObject)window).getTreeItem();
 	}
 	
 	private void removeDropStyle() {

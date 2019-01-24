@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ProjectSettingsUI">
+	<children>
+      <TitledPane animated="false" collapsible="false" text="Project Settings">
+         <content>
+            <VBox>
+               <children>
+            				<Label text="Project Name:" />
+            				<TextField fx:id="tfName" />
+            				<Label fx:id="nameErrorLabel" text="A project with this name already exists." visible="false" />
+                  <Label text="Source Projects:" />
+            				<ListView fx:id="sourcesList" prefHeight="149.0" prefWidth="579.0" />
+            				<HBox spacing="5.0">
+            					<children>
+            						<Button fx:id="btnAdd" mnemonicParsing="false" text="Add" />
+            						<Button fx:id="btnRemove" disable="true" mnemonicParsing="false" text="Remove" />
+            					</children>
+            				</HBox>
+               </children>
+            </VBox>
+         </content>
+      </TitledPane>
+      <TitledPane animated="false" collapsible="false" prefHeight="200.0" prefWidth="200.0" text="Packing Settings">
+         <content>
+            <VBox>
+               <children>
+                  <BorderPane>
+                     <left>
+                        <Label text="Package Name:" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="20.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <center>
+                        <TextField fx:id="packageNameField" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <Label fx:id="packageNameErrorLabel" text="This package name is already being used by another project." visible="false" />
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Packing path:">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </Label>
+                        <ChoiceBox fx:id="packPathBox" prefHeight="26.0" prefWidth="214.0" />
+                     </children>
+                  </HBox>
+                  <BorderPane>
+                     <center>
+                        <TextField fx:id="packPathField" disable="true" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </TextField>
+                     </center>
+                     <right>
+                        <Button fx:id="findPackPathButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </BorderPane>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label text="Embedded package signature:">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </Label>
+                        <ChoiceBox fx:id="signatureBox" prefHeight="26.0" prefWidth="214.0" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+         </content></TitledPane>
+	</children>
+</VBox>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" prefWidth="600.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.GamePathsUI">
+   <children>
+      <Label text="It seems SporeModder FX hasn't been able to find your Spore installation path. We recommend that you specify it manually , since this will allow you to pack your mods directly into the game folder and run Spore by pressing F7. You can always change this later on the program settings." wrapText="true">
+         <padding>
+            <Insets bottom="15.0" />
+         </padding>
+      </Label>
+      <Label text="Spore Path:" />
+      <BorderPane>
+         <right>
+            <Button fx:id="findSporeButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <TextField fx:id="sporeField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets right="10.0" />
+               </BorderPane.margin>
+            </TextField>
+         </center>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </BorderPane>
+      <Label text="Galactic Adventures Path:" />
+      <BorderPane>
+         <right>
+            <Button fx:id="findGAButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+         </right>
+         <center>
+            <TextField fx:id="gaField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets right="10.0" />
+               </BorderPane.margin>
+            </TextField>
+         </center>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </BorderPane>
+   </children>
+</VBox>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="lib" path="E:/Programming/JavaFX/richtextfx-0.8.2.jar" sourcepath="E:/Programming/JavaFX/richtextfx-0.8.2-sources.jar"/>
+	<classpathentry kind="lib" path="E:/Programming/JavaFX/flowless-0.6-SNAPSHOT.jar" sourcepath="E:/Programming/JavaFX/flowless-0.6-SNAPSHOT-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/E:/Programming/JavaFX/flowless-0.6-SNAPSHOT-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="E:/Programming/JavaFX/reactfx-2.0-M5.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/E:/Programming/JavaFX/reactfx-2.0-M5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="E:/Programming/JavaFX/undofx-1.4.0.jar"/>
+	<classpathentry kind="lib" path="E:/Programming/JavaFX/wellbehavedfx-0.3.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/E:/Programming/JavaFX/wellbehavedfx-0.3.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="E:/Programming/Java Plugin/dist/jspf.core-1.0.2.jar"/>
+	<classpathentry kind="lib" path="/FileStructures/bin" sourcepath="/FileStructures/src"/>
+	<classpathentry kind="lib" path="/JavaFXRibbon/bin" sourcepath="/JavaFXRibbon/src"/>
+	<classpathentry kind="lib" path="E:/Programming/json-20180813.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

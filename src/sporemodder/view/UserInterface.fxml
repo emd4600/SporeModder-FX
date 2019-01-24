@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import emord.javafx.ribbon.RibbonWindow?>
+
+<StackPane fx:id="mainNode" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.UserInterface">
+   <children>
+      <RibbonWindow fx:id="ribbonWindow" />
+      <FlowPane fx:id="dialogOverlay" alignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="dialog-overlay-pane" opacity="0.0" mouseTransparent="true"/>
+   </children>
+</StackPane>

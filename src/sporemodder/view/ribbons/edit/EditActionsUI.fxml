@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import emord.javafx.ribbon.RibbonGroup?>
+<?import emord.javafx.ribbon.RibbonButton?>
+<?import emord.javafx.ribbon.RibbonMenuButton?>
+<?import javafx.scene.layout.RowConstraints?>
+
+
+<RibbonGroup fx:id="mainNode" text="Edit Actions" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9.0.1" fx:controller="sporemodder.view.ribbons.edit.EditActionsUI">
+   <nodes>
+   	  <RibbonButton fx:id="btnSave" contentDisplay="TOP" mnemonicParsing="false" text="Save" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnUndo" contentDisplay="TOP" mnemonicParsing="false" text="Undo" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnRedo" contentDisplay="TOP" mnemonicParsing="false" text="Redo" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonMenuButton fx:id="btnUndoHistory" contentDisplay="TOP" mnemonicParsing="false" text="" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+   </nodes>
+</RibbonGroup>
+

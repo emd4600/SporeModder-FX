@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import emord.javafx.ribbon.RibbonGroup?>
+<?import emord.javafx.ribbon.RibbonMenuButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<RibbonGroup fx:id="mainNode" text="Number Converter" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ribbons.util.NumberConverterUI">
+	<nodes>
+		<RibbonMenuButton fx:id="menuButton" contentDisplay="TOP" mnemonicParsing="false" text="Number Type" textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
+			<fx:define>
+				<ToggleGroup fx:id="toggleGroup" />  
+			</fx:define>
+			<items>
+				<RadioMenuItem mnemonicParsing="false" text="int8" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="int16" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="int32" toggleGroup="$toggleGroup" selected="true" />
+				<RadioMenuItem mnemonicParsing="false" text="int64" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="uint8" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="uint16" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="uint32" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="uint64" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="float" toggleGroup="$toggleGroup" />
+				<RadioMenuItem mnemonicParsing="false" text="double" toggleGroup="$toggleGroup" />
+			</items>
+		</RibbonMenuButton>
+		<GridPane>
+			<columnConstraints>
+				<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
+				<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="180.0" />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+				<RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+			</rowConstraints>
+			<children>
+				<Label text="Hexadecimal:" />
+				<Label text="Decimal:" GridPane.rowIndex="1" />
+				<TextField prefHeight="26.0" prefWidth="145.0" GridPane.columnIndex="1" fx:id="tfHexadecimal" />
+				<TextField GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="tfDecimal" />
+			</children>
+		</GridPane>
+		
+	</nodes>
+</RibbonGroup>

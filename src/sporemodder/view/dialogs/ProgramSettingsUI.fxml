@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" prefWidth="600.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ProgramSettingsUI">
+   <children>
+      <TitledPane fx:id="gameSettingsPanel" animated="false" collapsible="false" text="Game Settings">
+         <content>
+            <VBox prefWidth="465.0">
+               <children>
+                  <Button fx:id="autoDetectButton" mnemonicParsing="false" text="Auto-detect game paths">
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Label text="Spore Path:" />
+                  <BorderPane>
+                     <right>
+                        <Button fx:id="findSporeButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <TextField fx:id="sporeField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </TextField>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </BorderPane>
+                  <Label layoutX="20.0" layoutY="20.0" text="Galactic Adventures Path:" />
+                  <BorderPane layoutX="20.0" layoutY="37.0">
+                     <right>
+                        <Button fx:id="findGAButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <TextField fx:id="gaField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </TextField>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </BorderPane>
+                  <Label layoutX="20.0" layoutY="63.0" text="Custom Path:" />
+                  <BorderPane layoutX="20.0" layoutY="80.0">
+                     <right>
+                        <Button fx:id="findCustomPathButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <TextField fx:id="customPathField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </TextField>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                  </BorderPane>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label fx:id="gameTypeLabel" text="Game to execute:">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </Label>
+                        <ChoiceBox fx:id="gamePathBox" prefWidth="250.0" />
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <Label fx:id="commandLineLabel" text="Command line arguments:" />
+                  <TextField fx:id="commandLineField" />
+               </children>
+            </VBox>
+         </content>
+      </TitledPane>
+      <TitledPane animated="false" collapsible="false" prefHeight="200.0" prefWidth="200.0" text="User Interface Settings">
+         <content>
+            <VBox prefWidth="465.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT">
+                     <children>
+                        <Label fx:id="styleLabel" text="Style:">
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </Label>
+                        <ChoiceBox fx:id="stylesBox" prefWidth="150.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </content>
+      </TitledPane>
+   </children>
+</VBox>

@@ -1,0 +1,60 @@
+/** -- XML -- */
+
+.xml-cdata {
+	-fx-fill: #808080;
+}
+
+.xml-attribute {
+	-fx-fill: #FF0000;
+}
+
+.xml-attribute_value {
+	-fx-fill: #2A00FF;
+}
+
+.xml-pattern {
+	-fx-fill: #7F007F;
+	-fx-font-weight: bold; 
+}
+
+.xml-comment {
+	/* -fx-fill: #3F5FBF;*/
+	-fx-fill: green;
+}
+
+
+/** -- ArgScript -- */
+
+.argscript-comment {
+	-fx-fill: green;
+}
+
+.argscript-block {
+	-fx-fill: #BA9745;
+	-fx-font-weight: bold;
+}
+
+.argscript-command {
+	-fx-fill: rgb(176, 176, 0);
+	-fx-font-weight: bold;
+}
+
+.argscript-option {
+	-fx-fill: rgb(255, 128, 0);
+}
+
+.argscript-enum {
+	-fx-fill: rgb(128, 0, 0);
+}
+
+.argscript-variable {
+	-fx-fill: #AA90D4;	
+	-fx-font-style: italic;
+}
+
+/** -- Property Lists (modification from ArgScript) -- */
+
+.propeditor-property {
+	-fx-font-weight: bold;
+	-fx-fill: #CE81D6;
+}

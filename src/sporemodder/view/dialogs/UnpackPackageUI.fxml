@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:id="mainNode" prefHeight="307.0" prefWidth="500.0" spacing="10.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.UnpackPackageUI">
+   <children>
+      <Label text="Destination project:">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField fx:id="nameField" />
+      <Label fx:id="infoLabel" text="A new project will be created." />
+      <CheckBox fx:id="cbReadOnly" mnemonicParsing="false" text="Read-only project" />
+      <TitledPane animated="false" prefHeight="186.0" prefWidth="294.0" text="Formats to convert">
+         <font>
+            <Font size="16.0" />
+         </font>
+         <content>
+            <VBox fx:id="settingsPane" prefHeight="200.0" prefWidth="100.0" spacing="10.0" />
+         </content>
+      </TitledPane>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</VBox>

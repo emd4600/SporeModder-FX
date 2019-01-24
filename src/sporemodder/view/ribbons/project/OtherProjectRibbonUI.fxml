@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import emord.javafx.ribbon.RibbonGroup?>
+<?import emord.javafx.ribbon.RibbonButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<RibbonGroup fx:id="mainNode" text="Other" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ribbons.project.OtherProjectRibbonUI">
+   <nodes>
+      <RibbonButton fx:id="btnSettings" contentDisplay="TOP" mnemonicParsing="false" text="Project Settings" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+   </nodes>
+</RibbonGroup>

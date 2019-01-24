@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import emord.javafx.ribbon.RibbonGroup?>
+<?import emord.javafx.ribbon.RibbonButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<RibbonGroup fx:id="mainNode" text="Basic Actions" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ribbons.project.BasicActionsUI">
+   <nodes>
+      <RibbonButton fx:id="btnNewFile" contentDisplay="TOP" mnemonicParsing="false" text="New File" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnNewFolder" contentDisplay="TOP" mnemonicParsing="false" text="New Folder" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnRename" contentDisplay="TOP" mnemonicParsing="false" text="Rename" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnRemove" contentDisplay="TOP" mnemonicParsing="false" text="Remove" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnModify" contentDisplay="TOP" mnemonicParsing="false" text="Modify" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnDuplicate" contentDisplay="TOP" mnemonicParsing="false" text="Duplicate" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnImportExternal" contentDisplay="TOP" mnemonicParsing="false" text="Import Files" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnRefresh" contentDisplay="TOP" mnemonicParsing="false" text="Refresh" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+   </nodes>
+</RibbonGroup>

@@ -1,0 +1,149 @@
+# -- SCENARIO -- #
+avatarPosition	0x7102E68
+avatarHealthMultiplier	0x7C8CBFE
+avatarIsInvulnerable	0x7C8D9A6
+avatarOrientation	0x7102E69
+avatarScale	0x7579CB4
+bAvatarLocked	0x7734A68
+initialPosseMembers	0x7749AD3
+numAllowedPosseMembers	0x7749AFE
+classes	0x72A9B58
+acts	0x7102E6A
+markers	0x7102E6C
+winText	0x7102E70
+loseText	0x7102E71
+introText	0x7102E72
+type	0x7102E76
+bIsMission	0x7102E77
+classIDCounter	0x7906D3C
+mScreenshotTypes	0x7CF8E1B
+mAvatarAsset	0x7102E78
+markerPositioningVersion	0x7F33740
+usedAppPackIds	0x7F33741
+cameraTarget	0x7EA0C00
+cameraOrientation	0x7EA0C10
+cameraDistance	0x7EA0C20
+avatarAssetKeyDEPRECATED	0x7102E67
+avatarServerIDDEPRECATED	0x7102E6F
+atmosphereScoreDEPRECATED	0x7102E6D
+temperatureScoreDEPRECATED	0x7102E6E
+classesOld	0x7102E6B
+initialPosseMemberKeysDEPRECATED	0x7749AD2
+waterScoreDEPRECATED	0x7102E73
+mbIsTimeLockedDEPRECATED	0x7102E74
+mTimeElapsedDEPRECATED	0x7102E75
+mbCustomScreenshotThumbnailDEPRECATED	0x74B9F5A
+
+# -- SCENARIO STRING -- #
+mNonLocalizedString	0x72AB171
+mLocalizedStringTableID	0x72AB172
+mLocalizedStringInstanceID	0x72AB173
+mComments	0x72AB174
+
+# -- SCENARIO ASSET -- #
+mKey	0x62B74270
+mMachineId	0x62B74271
+mServerId	0x62B74272
+mModelType	0x62B74273
+
+# -- SCENARIO CLASS -- #
+acts	0x7114973
+castName	0x7114975
+mAsset	0x7114976
+gameplayObjectGfxOverrideAsset	0x96A94671
+gameplayObjectGfxOverrideAsset_Secondary	0x96A94670
+gfxOverrideType	0x96A9466E
+gfxOverrideTypeSecondary	0x96A9466F
+
+assetKeyDEPRECATED	0x7114972
+modelTypeDEPRECATED	0x74FC4F6
+serverIDDEPRECATED	0x7114974
+isDeepEditEnabled	0x96A9466B
+
+# -- SCENARIO MARKER -- #
+classIndex	0x71147E5
+position	0x71147E6
+orientation	0x71147E7
+elevation	0x71147EA
+mFlags	0x71147EB
+scale	0x71147E8
+relativeScaleToDefault	0x71147E9
+pitch	0x78D5A93
+gain	0x78D5A94
+teleportPosition	0x78D5895
+teleportOrientation	0x71148E7
+teleportScale	0x71148EA
+oldDistances	0x71148E9
+acts	0x76CA8D3
+
+# -- SCENARIO MARKER ACT -- #
+wanderRadius	0x76DC170
+patrolPositionDEPRECATED	0x76DC171
+teleportPositionDEPRECATED	0x76DC172
+patrolPath	0x7114773
+patrolStyle	0x7114774
+
+# -- SCENARIO POSSE MEMBER -- #
+mAsset	0x1C3F08B3
+isLocked	0x7C4C078
+assetKeyDEPRECATED	0x1C3F08B1
+serverIDDEPRECATED	0x1C3F08B2
+
+# -- SCENARIO ACT -- #
+name	0x711477D
+description	0x711477E
+timeLimitSecs	0x711477C
+bTimeVisible	0x711477F
+actMusicId	0x78FE86A
+goals	0x711477B
+
+# -- SCENARIO GOAL -- #
+type	0x7114B5F
+targetClassIndex	0x7114B60
+targetClass2Index	0x733DF78
+requiredCount	0x71D3B1D
+visibility	0x71D3B1E
+dialog	0x728FFD81
+flags	0x7BBDEA5
+
+# -- SCENARIO DIALOG -- #
+bubbleType	0xAF2CD7A2
+text	0xAF2CD7A3
+animType	0xAF2CD7A4
+
+# -- SCENARIO CLASS ACT -- #
+teamBehavior	0x7114ED5
+stanceBehavior	0x7114ED6
+pickupBehavior	0x7114ED7
+giveBehavior	0x73923EF
+movementBehavior	0x7114ED8
+pickupTargetClassIndex	0x7114ED9
+giveTargetClassIndex	0x73B8345
+trackTargetClassIndex	0x7114EDA
+awareness	0x7114EDB
+damageMultiplier	0x7CC8D8A
+speedMultiplier	0x7CC8D8F
+health_DEPRECATED	0x7114EDC
+healthMultiplier	0x7CF7330
+damageTuning	0x7CF7430
+radiusTuning	0x7CF7530
+jumpTuning	0x7CF7630
+spawnDelay_	0x7114FDD
+invulnerable	0x75F7AA0
+isDead	0x75F7AA1
+visible	0x7114EDE
+dialogs_chatter	0x7114EE1
+dialogs_inspect	0x7114EE3
+descriptionDEPRECATED	0x7114EDF
+customBehavior	0x7B787EA
+customBehaviorEntries	0x7B787FD
+
+# -- BEHAVIOR ENTRY -- #
+condition.conditionType	0x1C3F08B1
+condition.target.type	0x7B7A2F2
+condition.target.value	0x7B7A2F3
+action.actionType	0x7B78786
+action.target.type	0x7BD3FAE
+action.target.value	0x7BD3FB4
+action.secondaryTarget.type	0x7BD3FB8
+action.secondaryTarget.value	0x7BD3FBD

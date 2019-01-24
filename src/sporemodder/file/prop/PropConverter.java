@@ -1,0 +1,276 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
+package sporemodder.file.prop;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import emord.filestructures.FileStream;
+import emord.filestructures.MemoryStream;
+import emord.filestructures.StreamReader;
+import emord.filestructures.StreamWriter;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import sporemodder.HashManager;
+import sporemodder.ProjectManager;
+import sporemodder.UIManager;
+import sporemodder.file.Converter;
+import sporemodder.file.DocumentException;
+import sporemodder.file.ResourceKey;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.dbpf.DBPFItem;
+import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.util.ProjectItem;
+
+public class PropConverter implements Converter {
+	
+	private static String extension = null;
+	private static String soundExtension = null;
+	
+	private boolean decode(StreamReader stream, File outputFile) throws IOException {
+		PropertyList list = new PropertyList();
+		list.read(stream);
+		
+		try (PrintWriter out = new PrintWriter(outputFile)) {
+		    out.println(list.toArgScript());
+		}
+		
+		return true;
+	}
+
+	@Override
+	public boolean decode(StreamReader stream, File outputFolder, ResourceKey key) throws IOException {
+		return decode(stream, Converter.getOutputFile(key, outputFolder, "prop_t"));
+	}
+
+	@Override
+	public boolean encode(File input, StreamWriter output) throws IOException, ParserConfigurationException, SAXException {
+		String name = input.getName();
+		if (name.endsWith(".prop.xml")) {
+			try (InputStream in = new FileInputStream(input)) {
+				XmlPropParser.xmlToProp(in, output, null, null);
+				return true;
+			}
+		}
+		else {
+			PropertyList list = new PropertyList();
+			ArgScriptStream<PropertyList> stream = list.generateStream();
+			stream.setFastParsing(true);
+			stream.process(input);
+			list.write(output);
+			return true;
+		}
+	}
+	
+	private void addAutoLocale(String autoLocale, int tableID, DBPFPackingTask packer) throws IOException {
+		if (autoLocale != null) {
+			byte[] data = autoLocale.getBytes("US-ASCII");
+			DBPFItem item = new DBPFItem();
+			item.name.setInstanceID(tableID);
+			item.name.setGroupID(0x02FABF01);  // locale~
+			item.name.setTypeID(0x02FAC0B6);  // .locale
+			packer.writeFileData(item, data, data.length);
+			packer.addFile(item);
+		}
+	}
+	
+	private void addPropItem(String name, String extension, int groupID, DBPFPackingTask packer, byte[] data, int length) throws IOException {
+		DBPFItem item = packer.getTemporaryItem();
+		item.name.setInstanceID(HashManager.get().getFileHash(name));
+		item.name.setGroupID(groupID);
+		item.name.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // soundProp or prop
+		packer.writeFileData(item, data, length);
+		packer.addFile(item);
+	}
+	
+	private String getTableIDString(File input, String[] splits) {
+		String name = splits[0];
+		if (splits[0].endsWith("~")) {
+			name = HashManager.get().hexToString(HashManager.get().getFileHash(splits[0]));
+		}
+		return "auto_" + input.getParentFile().getName() + "_" + name;
+	}
+	
+	@Override
+	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+		checkExtensions();
+		
+		String[] splits = input.getName().split("\\.", 2);
+		if (splits.length < 2) return false;  // no extension
+				
+		if (splits[1].equals(extension + ".xml") || splits[1].equals(soundExtension + ".xml")) {
+			packer.setCurrentFile(input);
+			
+			try (InputStream in = new FileInputStream(input);
+					MemoryStream output = new MemoryStream()) {
+				
+				List<String> autoLocaleStrings = new ArrayList<String>();
+				String autoLocaleName = getTableIDString(input, splits);
+				XmlPropParser.xmlToProp(in, output, autoLocaleStrings, autoLocaleName);
+				
+				// Use getFileHash instead of fnvHash because we want it to be saved into the project registry
+				addAutoLocale(PropertyList.createAutolocaleFile(autoLocaleStrings), HashManager.get().getFileHash(autoLocaleName), packer);
+				
+				addPropItem(splits[0], splits[1], groupID, packer, output.getRawData(), (int) output.length());
+				
+				return true;
+			}
+		}
+		else if (splits[1].equals(extension + ".prop_t") || splits[1].equals(soundExtension + ".prop_t")) {
+			packer.setCurrentFile(input);
+			
+			try (MemoryStream output = new MemoryStream()) {
+				// Use getFileHash instead of fnvHash because we want it to be saved into the project registry
+				int tableID = HashManager.get().getFileHash(getTableIDString(input, splits));
+				
+				PropertyList list = new PropertyList();
+				ArgScriptStream<PropertyList> stream = list.generateStream();
+				stream.process(input);
+				
+				if (!stream.getErrors().isEmpty()) {
+					throw new DocumentException(stream.getErrors().get(0));
+				}
+				
+				addAutoLocale(list.createAutolocaleFile(tableID), tableID, packer);
+				list.write(output);
+				
+				addPropItem(splits[0], splits[1], groupID, packer, output.getRawData(), (int) output.length());
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isDecoder(ResourceKey key) {
+		// There are two extensions for PROP: the standard and the sound one
+		return key.getTypeID() == 0x00B1B104 || key.getTypeID() == 0x02B9F662;
+	}
+
+	private void checkExtensions() {
+		if (extension == null) {
+			extension = HashManager.get().getTypeName(0x00B1B104);
+			soundExtension = HashManager.get().getTypeName(0x02B9F662);
+		}
+	}
+	
+	@Override
+	public boolean isEncoder(File file) {
+		checkExtensions();
+		return file.isFile() && (
+				file.getName().endsWith("." + extension + ".xml") || 
+				file.getName().endsWith("." + extension + ".prop_t") ||
+				file.getName().endsWith("." + soundExtension + ".xml") || 
+				file.getName().endsWith("." + soundExtension + ".prop_t"));
+	}
+
+	@Override
+	public String getName() {
+		return "Properties File (." + HashManager.get().getTypeName(0x00B1B104) + ", ." + HashManager.get().getTypeName(0x02B9F662) + ")";
+	}
+
+	@Override
+	public boolean isEnabledByDefault() {
+		return true;
+	}
+
+	@Override
+	public int getOriginalTypeID(String extension) {
+		checkExtensions();
+		return extension.startsWith("." + soundExtension) ? 0x02B9F662 : 0x00B1B104;
+	}
+	
+	public static String intoValidText(String text) {
+		return text.replaceAll("\"", "&quot;");
+	}
+	
+	public static String intoOriginalText(String text) {
+		return text.replaceAll("&quot;", "\"");
+	}
+	
+	@Override
+	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
+		if (!item.isRoot() && item.isMod()) {
+			
+			if (isEncoder(item.getFile())) {
+				MenuItem menuItem = new MenuItem("Convert to PROP");
+				menuItem.setMnemonicParsing(false);
+				menuItem.setOnAction(event -> {
+					// This is after isEncoder(), so we can assume it has extension
+					final String name = item.getName().substring(0, item.getName().lastIndexOf("."));
+					File file = new File(item.getFile().getParentFile(), name);
+					
+					boolean result = UIManager.get().tryAction(() -> {
+						try (FileStream stream = new FileStream(new File(item.getFile().getParentFile(), name), "rw")) {
+							encode(item.getFile(), stream);
+							
+							ProjectManager.get().selectItem(ProjectManager.get().getSiblingItem(item, name));
+						}
+					}, "Cannot encode file.");
+					if (!result) {
+						// Delete the file, as it hasn't been written properly
+						file.delete();
+					}
+				});
+				contextMenu.getItems().add(menuItem);
+			}
+			else {
+				ResourceKey key = ProjectManager.get().getResourceKey(item);
+				
+				TreeItem<ProjectItem> parentItem = item.getTreeItem().getParent();
+				if (parentItem != null && !parentItem.getValue().isRoot()) {
+					key.setGroupID(parentItem.getValue().getName());
+				}
+				
+				if (isDecoder(key)) {
+					MenuItem menuItem = new MenuItem("Convert to PROP_T");
+					menuItem.setMnemonicParsing(false);
+					menuItem.setOnAction(event -> {
+						final File outputFile = Converter.getOutputFile(key, item.getFile().getParentFile(), "prop_t");
+						boolean result = UIManager.get().tryAction(() -> {
+							try (FileStream stream = new FileStream(item.getFile(), "r")) {
+								decode(stream, outputFile);
+								
+								ProjectManager.get().selectItem(ProjectManager.get().getSiblingItem(item, outputFile.getName()));
+							}
+						}, "Cannot decode file.");
+						if (!result) {
+							// Delete the file, as it hasn't been written properly
+							outputFile.delete();
+						}
+					});
+					contextMenu.getItems().add(menuItem);
+				}
+			}
+		}
+	}
+
+}

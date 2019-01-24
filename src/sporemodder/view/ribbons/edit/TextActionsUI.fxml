@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import emord.javafx.ribbon.RibbonGroup?>
+<?import javafx.scene.layout.RowConstraints?>
+
+
+<RibbonGroup fx:id="mainNode" text="Text Actions" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9.0.1" fx:controller="sporemodder.view.ribbons.edit.TextActionsUI">
+   <nodes>
+      <GridPane prefHeight="62.0" prefWidth="262.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="217.5999755859375" minWidth="10.0" prefWidth="169.800048828125" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="72.199951171875" minWidth="10.0" prefWidth="72.199951171875" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" vgrow="NEVER" />
+          <RowConstraints minHeight="10.0" vgrow="NEVER" />
+        </rowConstraints>
+         <children>
+            <Label text="Find:" />
+            <TextField fx:id="tfFind" prefHeight="26.0" prefWidth="174.0" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets right="10.0" />
+               </GridPane.margin>
+            </TextField>
+            <Button fx:id="btnFindUp" styleClass="button-no-background" contentDisplay="GRAPHIC_ONLY" prefHeight="26.0" prefWidth="26.0" mnemonicParsing="false" GridPane.columnIndex="1" />
+            <Button fx:id="btnFindDown" styleClass="button-no-background" contentDisplay="GRAPHIC_ONLY" prefHeight="26.0" prefWidth="26.0" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+         </children>
+      </GridPane>
+   </nodes>
+</RibbonGroup>

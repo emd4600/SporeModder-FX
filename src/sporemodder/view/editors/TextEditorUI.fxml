@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.ScrollPane?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import org.fxmisc.richtext.CodeArea?>
+
+
+<BorderPane fx:id="mainPane" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/9.0.1" fx:controller="sporemodder.view.editors.TextEditorUI">
+   <center>
+      <VirtualizedScrollPane fx:id="scrollPane" maxWidth="1.7976931348623157E308" maxHeight="1.7976931348623157E308" BorderPane.alignment="CENTER">
+         <content>
+            <CodeArea fx:id="codeArea" maxWidth="1.7976931348623157E308" maxHeight="1.7976931348623157E308"/>
+         </content>
+      </VirtualizedScrollPane>
+   </center>
+</BorderPane>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" prefWidth="449.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.UnpackPresetsUI">
+   <children>
+      <Label fx:id="label" prefHeight="158.0" prefWidth="450.0" text="Presets are groups of .package files that SporeModder FX has considered that will be useful for modding. Using presets is recommended for better perfomance and easier mod development. Check in the following list all the presets you want to unpack (WARNING: this might take a few minutes)." textAlignment="JUSTIFY" wrapText="true" />
+      <VBox fx:id="presetsPane" />
+   </children>
+</VBox>

@@ -27,8 +27,8 @@ public class RWSectionManifest extends RWObject {
 	
 	public static final int TYPE_CODE = 0x10004;
 	
-	public int field_0;
-	public int field_4;
+	public int field_0 = 4;
+	public int field_4 = 12;
 	public final RWSectionTypes types;
 	public final RWSectionExternalArenas externalArenas;
 	public final RWSectionSubReferences subReferences;

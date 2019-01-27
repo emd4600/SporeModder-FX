@@ -72,6 +72,10 @@ public class VisualEffect extends EffectComponent {
 		super(effectDirectory, version);
 	}
 	
+	@Override public String toString() {
+		return KEYWORD + ' '  + getName();
+	}
+	
 	@Override public void copy(EffectComponent _effect) {
 		VisualEffect effect = (VisualEffect)_effect;
 		

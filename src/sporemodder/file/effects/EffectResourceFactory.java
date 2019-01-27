@@ -29,4 +29,5 @@ public interface EffectResourceFactory extends ElementFactory {
 	public void addParser(ArgScriptStream<EffectUnit> stream);
 	
 	public EffectResource create(EffectDirectory effectDirectory, int version);
+	public String getKeyword();
 }

@@ -312,7 +312,6 @@ public class Project {
 		
 		// The user did not specify a custom path or it does not exist.
 		if (folder == null || !folder.isDirectory()) {
-			//TODO throw an exception
 			return null;
 		}
 		

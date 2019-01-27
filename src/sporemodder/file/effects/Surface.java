@@ -33,6 +33,7 @@ import sporemodder.view.editors.PfxEditor;
 
 public class Surface {
 
+	public static final int FLAG_BOUNCE = 1;
 	public static final int FLAG_PIN = 2;
 	public static final int FLAG_PIN_MOVE = 4;
 	public static final int FLAG_PIN_EMIT = 8;
@@ -132,10 +133,10 @@ public class Surface {
 			flags |= FLAG_ALIGN;
 		}
 		if (line.getOptionArguments(args, "bounce", 1)) {
+			flags |= FLAG_BOUNCE;
 			if ((value = stream.parseFloat(args, 0)) != null) {
 				bounce = value.floatValue();
 			}
-			
 		}
 		
 		if (line.getOptionArguments(args, "slide", 1) && (value = stream.parseFloat(args, 0)) != null) {

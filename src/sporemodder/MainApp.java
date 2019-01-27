@@ -33,10 +33,6 @@ import javafx.stage.Stage;
 
 /**
  * The main class of the program.
- * 
- * @version 2.0.0
- * @author Eric
- *
  */
 public class MainApp extends Application {
 	

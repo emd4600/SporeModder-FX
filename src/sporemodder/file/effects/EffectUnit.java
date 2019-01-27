@@ -19,8 +19,11 @@
 package sporemodder.file.effects;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
@@ -46,7 +49,7 @@ public class EffectUnit {
 	private final Map<String, ImportEffect> exportedImports = new HashMap<String, ImportEffect>();
 	
 	/** Contains the start positions of each one of the components/resources. */
-	private final Map<EffectFileElement, Integer> elementPositions = new HashMap<EffectFileElement, Integer>();
+	private final ObservableMap<EffectFileElement, Integer> elementPositions = FXCollections.observableMap(new LinkedHashMap<>());
 	
 	/** The current effect that is being parsed (we can only parse one at a time). */
 	private VisualEffect currentEffect;
@@ -63,6 +66,21 @@ public class EffectUnit {
 	
 	public EffectDirectory getEffectDirectory() {
 		return effectDirectory;
+	}
+	
+	public void reset() {
+		components.clear();
+		resources.clear();
+		lastError = null;
+		exports.clear();
+		exportedImports.clear();
+		elementPositions.clear();
+		currentEffect = null;
+		isParsingComponent = false;
+	}
+	
+	public ObservableMap<EffectFileElement, Integer> getElements() {
+		return elementPositions;
 	}
 	
 	public boolean isParsingComponent() {

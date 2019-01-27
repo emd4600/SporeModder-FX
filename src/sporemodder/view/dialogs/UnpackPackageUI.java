@@ -21,6 +21,7 @@ package sporemodder.view.dialogs;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javafx.fxml.FXML;
@@ -63,6 +64,7 @@ public class UnpackPackageUI implements Controller {
 	@FXML private VBox settingsPane;
 	
 	private final List<CheckBox> converterBoxes = new ArrayList<CheckBox>();
+	private final List<Converter> converters = new ArrayList<>();
 
 	@Override
 	public Region getMainNode() {
@@ -74,12 +76,16 @@ public class UnpackPackageUI implements Controller {
 		
 		cbReadOnly.setTooltip(new Tooltip("Read-only projects cannot be packed and its contents cannot be directly edited. Use this when you want to ensure that you don't override the .package accidentally."));
 		
-		for (Converter converter : FormatManager.get().getConverters()) {
+		List<Converter> converters = FormatManager.get().getConverters();
+		ListIterator<Converter> it = converters.listIterator(converters.size());
+		while (it.hasPrevious()) {
+			Converter converter = it.previous();
 			CheckBox cb = new CheckBox(converter.getName());
 			cb.setSelected(converter.isEnabledByDefault());
 			
 			converterBoxes.add(cb);
 			settingsPane.getChildren().add(cb);
+			this.converters.add(converter);
 			
 			//TODO add converter settings?
 		}
@@ -129,12 +135,11 @@ public class UnpackPackageUI implements Controller {
 				
 				project.setReadOnly(cbReadOnly.isSelected());
 				
-				List<Converter> allConverters = FormatManager.get().getConverters();
 				List<Converter> selectedConverters = new ArrayList<Converter>();
 				
-				for (int i = 0; i < allConverters.size(); i++) {
+				for (int i = 0; i < converters.size(); i++) {
 					if (converterBoxes.get(i).isSelected()) {
-						selectedConverters.add(allConverters.get(i));
+						selectedConverters.add(converters.get(i));
 					}
 				}
 				

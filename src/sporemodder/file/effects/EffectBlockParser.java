@@ -41,6 +41,7 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 			
 			if (line.getArguments(args, 1, 3)) {
 				name = args.get(0);
+				effect.name = name;
 				
 				if (args.size() > 1) {
 					if (args.size() != 3 || !args.get(1).equals(":")) {

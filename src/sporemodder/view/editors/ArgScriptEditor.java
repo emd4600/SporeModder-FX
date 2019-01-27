@@ -84,14 +84,14 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 		
 		setSyntaxHighlighting((text, syntax) -> {
 			if (stream != null) {
+				onStreamParse();
+				
 				stream.process(getText());
 				SyntaxHighlighter streamSyntax = stream.getSyntaxHighlighter();
 				stream.addErrorsSyntax();
 				syntax.addExtras(streamSyntax, false);
 				
 				setErrorInfo(streamSyntax);
-				
-				onStreamParse();
 			}
 		});
 		

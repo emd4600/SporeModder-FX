@@ -185,7 +185,7 @@ public class DecalEffect extends EffectComponent {
 				}
 			}));
 			
-			this.addParser("rotation", ArgScriptParser.create((parser, line) -> {
+			this.addParser("rotate", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1)) {
 					effect.rotation.clear();

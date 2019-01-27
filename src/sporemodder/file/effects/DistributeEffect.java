@@ -54,6 +54,8 @@ public class DistributeEffect extends EffectComponent {
 		ENUM_SOURCE.add(6, "sphereCubeSurface");
 	}
 	
+	public static final int FLAG_SURFACES = 0x1000;
+	
 	// 0x40 (1000000b) -> heading, pitch, roll ?
 	// 0x100 (00000001 00000000b) -> model ?
 	public int flags;
@@ -437,6 +439,8 @@ public class DistributeEffect extends EffectComponent {
 				Surface surface = new Surface();
 				surface.parse(stream, line);
 				effect.surfaces.add(surface);
+				
+				effect.flags |= FLAG_SURFACES;
 			}));
 			
 			this.addParser("mapEmit", ArgScriptParser.create((parser, line) -> {

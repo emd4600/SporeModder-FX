@@ -304,6 +304,10 @@ public class SplitterResource extends EffectResource {
 		public EffectResource create(EffectDirectory effectDirectory, int version) {
 			return new SplitterResource(effectDirectory, version);
 		}
+		
+		@Override public String getKeyword() {
+			return KEYWORD;
+		}
 	}
 	
 	@Override

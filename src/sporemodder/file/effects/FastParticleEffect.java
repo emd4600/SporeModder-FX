@@ -674,6 +674,7 @@ public class FastParticleEffect extends EffectComponent {
 			if (!commandWritten) writer.command("emit");
 			commandWritten = true;
 			
+			writer.option("speed");
 			float value = (emitSpeed[1] - emitSpeed[0]) / 2.0f;
 			if (value == 0.0f) writer.floats(emitSpeed[0]);
 			else writer.floats(emitSpeed[0] + value, value);

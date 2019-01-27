@@ -529,6 +529,7 @@ public class MaterialResource extends EffectResource {
 					property.valueRes.parse(args, 1, words);
 					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, words, 1);
 					
+					property.name.setGroupID(0);
 					if (args.get(0).equals("diffuse")) {
 						property.name.setInstanceID(0);
 					}
@@ -538,7 +539,8 @@ public class MaterialResource extends EffectResource {
 					}
 					else if (args.get(0).startsWith("sampler")) {
 						try {
-							property.name.setInstanceID(Integer.parseInt(args.get(0).substring(7)) - 2);
+							//property.name.setInstanceID(Integer.parseInt(args.get(0).substring(7)) - 2);
+							property.name.setInstanceID(Integer.parseInt(args.get(0).substring(7)) - 0);
 						}
 						catch (Exception e) {
 							stream.addError(new DocumentError(e.getLocalizedMessage(), args.getRealPosition(args.getPosition(1) + 7), args.getEndPosition(1)));
@@ -584,6 +586,9 @@ public class MaterialResource extends EffectResource {
 			return new MaterialResource(effectDirectory, version);
 		}
 		
+		@Override public String getKeyword() {
+			return KEYWORD;
+		}
 	}
 
 

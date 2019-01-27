@@ -21,7 +21,10 @@ package sporemodder;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -34,7 +37,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import emord.filestructures.FileStream;
+import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamWriter;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -61,6 +69,8 @@ import javafx.stage.FileChooser;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFUnpackingTask;
+import sporemodder.file.prop.PropertyList;
+import sporemodder.file.prop.XmlPropParser;
 import sporemodder.util.DefaultProjectItemFactory;
 import sporemodder.util.ImportProjectTask;
 import sporemodder.util.NameRegistry;
@@ -931,6 +941,11 @@ public class ProjectManager extends AbstractManager {
 	 * the operation is finished.
 	 */
 	public boolean pack(Project project, boolean storeDebugInformation) {
+		File outputPackage = project.getOutputPackage();
+		if (outputPackage == null) {
+			UIManager.get().showDialog(new Alert(AlertType.ERROR, "The specified output folder does not exist."));
+			return false;
+		}
 		if (FileManager.get().isProtectedPackage(project.getOutputPackage())) {
 			Alert alert = new Alert(AlertType.WARNING, "The package name \"" + project.getPackageName() + "\" is protected and should not be packed. "
 					+ "Packing protected packages might cause irreversible changes to he game. Are you sure you want to proceed?", ButtonType.YES, ButtonType.CANCEL);
@@ -1725,6 +1740,32 @@ public class ProjectManager extends AbstractManager {
 		}
 	}
 	
+	private void importFile(File sourceFile, File destFolder) throws IOException {
+		String fileName = sourceFile.getName();
+		
+		if (fileName.endsWith(".prop.xml")) {
+			String name = fileName.substring(0, fileName.length() - ".prop.xml".length()) + ".prop.prop_t";
+			File dest = new File(destFolder, name);
+			try (InputStream in = new FileInputStream(sourceFile);
+					StreamWriter out = new FileStream(dest, "rw")) {
+				
+				MemoryStream stream = XmlPropParser.xmlToProp(in);
+				stream.seek(0);
+				
+				PropertyList list = new PropertyList();
+				list.read(stream);
+				Files.write(dest.toPath(), list.toArgScript().getBytes("US-ASCII"));
+				
+				stream.close();
+			} catch (ParserConfigurationException | SAXException e) {
+				throw new IOException(e);
+			}
+		}
+		else {
+			Files.copy(sourceFile.toPath(), new File(destFolder, fileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+	}
+	
 	public boolean importFiles(ProjectItem item) throws IOException {
 		if (!item.canImportFiles()) return false;
 		
@@ -1734,9 +1775,11 @@ public class ProjectManager extends AbstractManager {
 		List<File> result = chooser.showOpenMultipleDialog(UIManager.get().getScene().getWindow());
 		UIManager.get().setOverlay(false);
 		
+		HashManager.get().setUpdateProjectRegistry(true);
+		
 		if (result != null && !result.isEmpty()) {
 			// If the user clicked on a file, import the files in the folder that contains it
-			TreeItem<ProjectItem> treeItem = item.isFolder() ? item.getTreeItem() : item.getTreeItem().getParent();
+			ProjectTreeItem treeItem = item.isFolder() ? item.getTreeItem() : (ProjectTreeItem)item.getTreeItem().getParent();
 			item = treeItem.getValue();
 			
 			if (!item.isMod()) {
@@ -1747,11 +1790,11 @@ public class ProjectManager extends AbstractManager {
 			
 			File destFolder = item.getFile();
 			for (File file : result) {
-				copy(file, new File(destFolder, file.getName()));
+				importFile(file, destFolder);
 			}
 			
 			// The easiest way to rearrange the mod/source status is just reloading the nodes
-			((ProjectTreeItem) treeItem).requestReload();
+			treeItem.requestReload();
 			// If it is expanded we need to ensure its children are reloaded
 			if (treeItem.isExpanded()) {
 				treeItem.setExpanded(false);
@@ -1763,6 +1806,8 @@ public class ProjectManager extends AbstractManager {
 			
 			UIManager.get().notifyUIUpdate(false);
 		}
+		
+		HashManager.get().setUpdateProjectRegistry(false);
 		
 		return true;
 	}

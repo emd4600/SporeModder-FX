@@ -18,7 +18,18 @@
 ****************************************************************************/
 package sporemodder.view.editors;
 
+import java.util.Map;
+
+import javafx.collections.MapChangeListener;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import sporemodder.HashManager;
+import sporemodder.UIManager;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.effects.EffectComponent;
 import sporemodder.file.effects.EffectFileElement;
@@ -26,6 +37,11 @@ import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.effects.ImportEffect;
 
 public class PfxEditor extends ArgScriptEditor<EffectUnit> {
+	
+	private static class ExportPair {
+		EffectComponent component;
+		String exportName;
+	}
 	
 	public static final String HYPERLINK_FILE = "file";
 	public static final String HYPERLINK_TEXTURE = "file-texture";
@@ -35,11 +51,57 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 	public static final String HYPERLINK_MAP = "map";
 	public static final String HYPERLINK_SPLITTER = "splitter";
 	
+	private static final double TAB_PANE_HEIGHT = 300;
+	
+	private final TabPane tabPane = new TabPane();
+	private final ListView<EffectFileElement> componentsList = new ListView<>();
+	private final ListView<ImportEffect> exportsList = new ListView<>();
+	private final ListView<ExportPair> importsList = new ListView<>();
+	
+	private final Pane inspectorPane = new VBox(5);
+	private final ScrollPane propertiesContainer = new ScrollPane();
+	
+	private final EffectUnit effectUnit = new EffectUnit(null);
+	
 	public PfxEditor() {
 		super();
 		
-		EffectUnit unit = new EffectUnit(null);
-		stream = unit.generateStream();
+		stream = effectUnit.generateStream();
+		
+		Tab componentsTab = new Tab("Components", componentsList);
+    	Tab exportsTab = new Tab("Exports", exportsList);
+    	Tab importsTab = new Tab("Imports", importsList);
+    	componentsTab.setClosable(false);
+    	exportsTab.setClosable(false);
+    	importsTab.setClosable(false);
+    	
+    	tabPane.getTabs().addAll(componentsTab, exportsTab, importsTab);
+    	tabPane.getSelectionModel().select(0);
+    	tabPane.setPrefHeight(TAB_PANE_HEIGHT);
+    	
+    	propertiesContainer.setFitToWidth(true);
+    	
+    	inspectorPane.getChildren().addAll(tabPane, propertiesContainer);
+    	VBox.setVgrow(propertiesContainer, Priority.ALWAYS);
+    	
+    	effectUnit.getElements().addListener((MapChangeListener.Change<? extends EffectFileElement, ? extends Integer> c) -> {
+    		fillComponentsList(c.getMap());
+    	});
+	}
+	
+	private void showInspector(boolean show) {
+		if (show) {
+			UIManager.get().getUserInterface().getInspectorPane().setTitle("Effects Editor");
+			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+		} else {
+			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
+			UIManager.get().getUserInterface().setInspectorContent(null);
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 	
 	public static String getHyperlinkType(EffectComponent element) {
@@ -92,5 +154,13 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 				getCodeArea().requestFollowCaret();
 			}
 		}
+	}
+	
+	private void fillComponentsList(Map<? extends EffectFileElement, ? extends Integer> map) {
+		componentsList.getItems().setAll(map.keySet());
+	}
+	
+	@Override protected void onStreamParse() {
+		effectUnit.reset();
 	}
 }

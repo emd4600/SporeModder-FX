@@ -40,6 +40,10 @@ public abstract class EffectResource implements EffectFileElement {
 		this.version = version;
 	}
 	
+	@Override public String toString() {
+		return getFactory().getKeyword() + ' '  + getName();
+	}
+	
 	@Override public String getName() {
 		return resourceID.toString();
 	}

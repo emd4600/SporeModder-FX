@@ -37,6 +37,10 @@ public class ImportEffect extends EffectComponent {
 	public EffectComponentFactory getFactory() {
 		return null;
 	}
+	
+	@Override public String toString() {
+		return KEYWORD + ' '  + getName();
+	}
 
 	@Override
 	public void read(StreamReader stream) throws IOException {

@@ -277,6 +277,10 @@ public class MapResource extends EffectResource {
 		public EffectResource create(EffectDirectory effectDirectory, int version) {
 			return new MapResource(effectDirectory, version);
 		}
+
+		@Override public String getKeyword() {
+			return KEYWORD;
+		}
 	}
 
 	@Override

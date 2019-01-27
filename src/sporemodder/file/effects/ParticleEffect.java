@@ -113,6 +113,7 @@ public class ParticleEffect extends EffectComponent {
 	public static final int EMITMAP_HEIGHT = 0x40;
 	public static final int EMITMAP_DENSITY = 0x80;
 	
+	public static final int FLAG_SURFACES = 0x1000;
 	public static final int FLAG_COLLIDEMAP = 0x2000;
 	public static final int COLLIDE_PINTOMAP = 0x40000;
 	public static final int FLAG_KILLOUTSIDEMAP = 0x20000;
@@ -477,6 +478,8 @@ public class ParticleEffect extends EffectComponent {
 				Surface surface = new Surface();
 				surface.parse(stream, line);
 				effect.surfaces.add(surface);
+				
+				effect.flags |= FLAG_SURFACES;
 			}));
 			
 			parseEmitMap();
@@ -2137,6 +2140,7 @@ public class ParticleEffect extends EffectComponent {
 			if (!commandWritten) writer.command("emit");
 			commandWritten = true;
 			
+			writer.option("speed");
 			float value = (emitSpeed[1] - emitSpeed[0]) / 2.0f;
 			if (value == 0.0f) writer.floats(emitSpeed[0]);
 			else writer.floats(emitSpeed[0] + value, value);

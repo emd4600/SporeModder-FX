@@ -1,0 +1,22 @@
+<pfxDefine>
+	<element typeCode="0x01" name="Particles">
+		<command keyword="color">
+			<argument type="colorRGB" name="colorValues" animatable="true" />
+			<option name="vary" />
+				<argument type="colorRGB" name="colorVary" />
+			</option>
+		</command>
+		<command keyword="alpha">
+			<argument type="float" name="alphaValues" animatable="true" />
+			<option name="vary" />
+				<argument type="float" name="alphaVary" />
+			</option>
+		</command>
+		<command keyword="size">
+			<argument type="float" name="sizeValues" animatable="true" />
+			<option name="vary" />
+				<argument type="float" name="sizeVary" />
+			</option>
+		</command>
+	</element>
+</pfxDefine>

@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: default
-download_url: https://github.com/Emd4600/SporeModder-FX/releases/download/v2.0.0/SporeModder.FX.2.0.0.zip
+download_url: https://github.com/Emd4600/SporeModder-FX/releases/download/v2.0.0/SporeModder.FX.2.0.1.zip
 icon_url: https://i.imgur.com/2Q4lPDh.png
 title: SporeModder FX
 ---

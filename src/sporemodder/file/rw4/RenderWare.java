@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
@@ -41,12 +43,15 @@ public class RenderWare {
 	private final List<RWObject> objects = new ArrayList<RWObject>();
 	private final RWHeader header = new RWHeader(this);
 	
+	// Only updated when reading
+	private final List<RWSectionInfo> sectionInfos = new ArrayList<>();
+	
 	public void read(StreamReader stream) throws IOException {
-		List<RWSectionInfo> infos = header.read(stream);
+		header.read(stream, sectionInfos);
 		
 		// First we must create the objects
 		// Don't read the objects themselves as they might reference an object that does not yet exist.
-		for (RWSectionInfo info : infos) {
+		for (RWSectionInfo info : sectionInfos) {
 			RWObject object = createObject(info.typeCode);
 			objects.add(object);
 			
@@ -56,10 +61,15 @@ public class RenderWare {
 			else {
 				System.err.println("Unrecognised RW section type: 0x" + Integer.toHexString(info.typeCode));
 			}
+			
+			System.out.println("0x" + Integer.toHexString(info.typeCode) + "\t" + info.pData);
 		}
 		
 		// Now that all objects have been created, read the sub references
 		header.sectionManifest.subReferences.readReferences(stream);
+		for (SubReference r : header.sectionManifest.subReferences.references) {
+			System.out.println("SubReference: " + r.offset);
+		}
 		
 		// Read the objects
 		for (RWObject object : objects) {
@@ -77,8 +87,10 @@ public class RenderWare {
 	}
 	
 	public void write(StreamWriter stream) throws IOException {
+		header.sectionManifest.subReferences.references.clear();
 		// First we need to create the list with all the type codes
 		List<Integer> typeCodes = header.sectionManifest.types.typeCodes;
+		typeCodes.clear();
 		typeCodes.add(0);
 		typeCodes.add(RWBaseResource.TYPE_CODE);
 		typeCodes.add(0x10031);
@@ -86,18 +98,15 @@ public class RenderWare {
 		typeCodes.add(0x10010);
 		
 		// We will do it in a separate list because these have to be sorted
-		List<Integer> newTypeCodes = new ArrayList<Integer>();
+		Set<Integer> newTypeCodes = new TreeSet<Integer>();
 		
 		for (RWObject object : objects) {
 			// Don't add the base resource one as this is special
 			// Also don't repeat codes
 			int typeCode = object.getTypeCode();
-			if (typeCode != RWBaseResource.TYPE_CODE && !newTypeCodes.contains(typeCode)) {
-				newTypeCodes.add(typeCode);
-			}
+			if (typeCode != RWBaseResource.TYPE_CODE) newTypeCodes.add(typeCode);
 		}
 		
-		Collections.sort(newTypeCodes);
 		typeCodes.addAll(newTypeCodes);
 		
 		// Now we would write the header BUT we don't have all
@@ -389,5 +398,9 @@ public class RenderWare {
 			stream.skip(28);
 			return RenderWareType.get(stream.readLEInt());
 		}
+	}
+
+	public String getName(RWObject object) {
+		return object.getClass().getSimpleName() + '-' + sectionInfos.indexOf(object.sectionInfo);
 	}
 }

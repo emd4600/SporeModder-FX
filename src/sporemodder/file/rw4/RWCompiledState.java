@@ -45,7 +45,6 @@ public class RWCompiledState extends RWObject {
 
 	@Override
 	public void write(StreamWriter stream) throws IOException {
-		stream.writeLEInt(data.data.length);
 		stream.write(data.data);
 	}
 

@@ -42,6 +42,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import sporemodder.HashManager;
 import sporemodder.UIManager;
 import sporemodder.file.prop.PropertyList;
 import sporemodder.file.prop.XmlPropParser;
@@ -58,10 +59,17 @@ public class ImportProjectTask extends ResumableTask<Void> {
 	private final HashMap<Path, Exception> failedFiles = new LinkedHashMap<Path, Exception>();
 	private long ellapsedTime;
 	
-	public ImportProjectTask(Project destination, File sourceFolder) {
+	private NameRegistry fileRegistry;
+	private NameRegistry propRegistry;
+	private NameRegistry typeRegistry;
+	
+	public ImportProjectTask(Project destination, File sourceFolder, NameRegistry fileRegistry, NameRegistry propRegistry, NameRegistry typeRegistry) {
 		super();
 		this.destination = destination;
 		this.sourceFolder = sourceFolder;
+		this.fileRegistry = fileRegistry;
+		this.propRegistry = propRegistry;
+		this.typeRegistry = typeRegistry;
 	}
 
 	@Override
@@ -105,6 +113,9 @@ public class ImportProjectTask extends ResumableTask<Void> {
 				Path dest = target.resolve(source.relativize(file));
 				
 				if (file.toString().endsWith(".prop.xml")) {
+					// Read the file with its original registries
+					HashManager.get().replaceRegistries(fileRegistry, propRegistry, typeRegistry);
+					
 					String name = dest.getFileName().toString();
 					name = name.substring(0, name.length() - ".prop.xml".length()) + ".prop.prop_t";
 					dest = dest.getParent().resolve(name);
@@ -115,6 +126,9 @@ public class ImportProjectTask extends ResumableTask<Void> {
 						
 						MemoryStream stream = XmlPropParser.xmlToProp(in);
 						stream.seek(0);
+						
+						// Write the file with the program registries
+						HashManager.get().replaceRegistries(null, null, null);
 						
 						PropertyList list = new PropertyList();
 						list.read(stream);

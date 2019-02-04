@@ -19,7 +19,6 @@
 package sporemodder.file.rw4;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import emord.filestructures.StreamReader;
@@ -73,7 +72,7 @@ public class RWHeader {
 	 * @return
 	 * @throws IOException
 	 */
-	public List<RWSectionInfo> read(StreamReader stream) throws IOException {
+	public List<RWSectionInfo> read(StreamReader stream, List<RWSectionInfo> sectionInfos) throws IOException {
 		// magic
 		stream.skip(28);
 		type = RenderWareType.get(stream.readLEInt());
@@ -97,7 +96,6 @@ public class RWHeader {
 		sectionManifest.read(stream);
 		
 		stream.seek(pSectionInfo);
-		List<RWSectionInfo> sectionInfos = new ArrayList<RWSectionInfo>();
 		for (int i = 0; i < sectionCount; i++) {
 			RWSectionInfo sectionInfo = new RWSectionInfo();
 			sectionInfo.read(stream);

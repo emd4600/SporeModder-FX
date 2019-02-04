@@ -77,7 +77,7 @@ public abstract class RWKeyframe {
 	public static class LocRot extends RWKeyframe {
 		
 		public static final int COMPONENTS = 0x101;
-		public static final int SIZE = 36;
+		public static final int SIZE = 32;
 		
 		public final Vector3 location = new Vector3();
 		public final Vector4 rotation = new Vector4();
@@ -86,7 +86,7 @@ public abstract class RWKeyframe {
 		public void read(StreamReader stream) throws IOException {
 			rotation.readLE(stream);
 			location.readLE(stream);
-			stream.skip(4);
+			//stream.skip(4);
 			time = stream.readLEFloat();
 		}
 
@@ -94,7 +94,7 @@ public abstract class RWKeyframe {
 		public void write(StreamWriter stream) throws IOException {
 			rotation.writeLE(stream);
 			location.writeLE(stream);
-			stream.writePadding(4);
+			//stream.writePadding(4);
 			stream.writeLEFloat(time);
 		}
 

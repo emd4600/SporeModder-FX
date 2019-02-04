@@ -30,6 +30,8 @@ import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
 import sporemodder.file.dds.DDSPixelFormat.Format;
 
 public class DDSTexture {
@@ -285,5 +287,9 @@ public class DDSTexture {
 			throw new IOException("0x" + Integer.toHexString(format) + " is not a supported format!");
 		}
 		return bytes;
+	}
+	
+	public Image toJavaFX() throws IOException {
+		return SwingFXUtils.toFXImage(toBufferedImage(), null);
 	}
 }

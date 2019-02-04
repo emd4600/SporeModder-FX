@@ -47,15 +47,22 @@ public class HashManager extends AbstractManager {
 	/** The default decimal format object used to print float values. */
 	private DecimalFormat defaultDecimalFormat;
 	
-	/** The registry used to look for instance and group IDs; it is read from reg_file.txt */
-	private final NameRegistry fileRegistry = new NameRegistry(this, "File Names", "reg_file.txt");
-	/** The registry used to look for type IDs; it is read from reg_type.txt */
-	private final NameRegistry typeRegistry = new NameRegistry(this, "Types", "reg_type.txt");
-	/** The registry used to look for property IDs; it is read from reg_property.txt */
-	private final NameRegistry propRegistry = new NameRegistry(this, "Properties", "reg_property.txt");
+	/** The original registry used to look for instance and group IDs; it is read from reg_file.txt */
+	private final NameRegistry originalFileRegistry = new NameRegistry(this, "File Names", "reg_file.txt");
+	/** The original registry used to look for type IDs; it is read from reg_type.txt */
+	private final NameRegistry originalTypeRegistry = new NameRegistry(this, "Types", "reg_type.txt");
+	/** The original registry used to look for property IDs; it is read from reg_property.txt */
+	private final NameRegistry originalPropRegistry = new NameRegistry(this, "Properties", "reg_property.txt");
 	
 	/** The registry used to look for simulator attribute IDs; it is read from reg_simulator.txt */
 	private final NameRegistry simulatorRegistry = new NameRegistry(this, "Simulator Attributes", "reg_simulator.txt");
+	
+	/** The registry used to look for instance and group IDs; it is read from reg_file.txt */
+	private NameRegistry fileRegistry = originalFileRegistry;
+	/** The registry used to look for type IDs; it is read from reg_type.txt */
+	private NameRegistry typeRegistry = originalTypeRegistry;
+	/** The registry used to look for property IDs; it is read from reg_property.txt */
+	private NameRegistry propRegistry = originalPropRegistry;
 	
 	/** A temporary registry that keeps names used by a certain Project. This is only updated when doing certain actions, like packing the mod. */
 	private final NameRegistry projectRegistry = new NameRegistry(this, "Names used by the project", "names.txt");
@@ -94,6 +101,12 @@ public class HashManager extends AbstractManager {
 		registries.put(propRegistry.getFileName(), propRegistry);
 		registries.put(simulatorRegistry.getFileName(), simulatorRegistry);
 		registries.put(projectRegistry.getFileName(), projectRegistry);
+	}
+	
+	public void replaceRegistries(NameRegistry file, NameRegistry prop, NameRegistry type) {
+		fileRegistry = file == null ? originalFileRegistry : file;
+		propRegistry = prop == null ? originalPropRegistry : prop;
+		typeRegistry = type == null ? originalTypeRegistry : type;
 	}
 	
 	public NameRegistry getRegistry(String fileName) {

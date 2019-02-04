@@ -23,6 +23,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,7 +108,9 @@ public class DBPFPackingTask extends Task<Void> {
 			//TODO support DBBF maybe?
 			
 			// Doesn't really make sense to let the user disable converters.
-			List<Converter> converters = FormatManager.get().getConverters();
+			List<Converter> converters = new ArrayList<>(FormatManager.get().getConverters());
+			// Reverse them so the most common ones (.prop, .rw4) are first
+			Collections.reverse(converters);
 			
 			File[] folders = inputFolder.listFiles(new FileFilter() {
 

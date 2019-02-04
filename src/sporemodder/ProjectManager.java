@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -1892,7 +1891,32 @@ public class ProjectManager extends AbstractManager {
 		hasher.getProjectRegistry().clear();
 		hasher.setExtraRegistry(new NameRegistry(hasher, null, null));
 		
-		ImportProjectTask task = new ImportProjectTask(project, sourceFolder);
+		// Use the old registries to load files, if possible
+		NameRegistry fileRegistry = null;
+		NameRegistry propRegistry = null;
+		NameRegistry typeRegistry = null;
+		
+		try {
+			File registryFile = new File(sourceFolder.getParentFile(), "reg_file.txt");
+			if (registryFile.exists()) {
+				fileRegistry = new NameRegistry(hasher, "Old SporeModder File Names", registryFile.getName());
+				fileRegistry.read(registryFile);
+			}
+			registryFile = new File(sourceFolder.getParentFile(), "reg_properties.txt");
+			if (registryFile.exists()) {
+				propRegistry = new NameRegistry(hasher, "Old SporeModder Properties", registryFile.getName());
+				propRegistry.read(registryFile);
+			}
+			registryFile = new File(sourceFolder.getParentFile(), "reg_type.txt");
+			if (registryFile.exists()) {
+				typeRegistry = new NameRegistry(hasher, "Old SporeModder Types", registryFile.getName());
+				typeRegistry.read(registryFile);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		ImportProjectTask task = new ImportProjectTask(project, sourceFolder, fileRegistry, propRegistry, typeRegistry);
 		task.showProgressDialog();
 		
 		hasher.setUpdateProjectRegistry(false);

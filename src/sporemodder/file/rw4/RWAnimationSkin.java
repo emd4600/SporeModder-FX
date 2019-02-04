@@ -56,6 +56,7 @@ public class RWAnimationSkin extends RWObject {
 		for (int i = 0; i < count; i++) {
 			
 			BonePose pose = new BonePose();
+			data.add(pose);
 
 			RWMatrix3x4 matrix = new RWMatrix3x4();
 			matrix.read(stream);

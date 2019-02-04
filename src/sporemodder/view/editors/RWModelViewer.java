@@ -23,17 +23,19 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import javax.imageio.ImageIO;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
-import javafx.collections.ObservableList;
+import javafx.beans.property.ObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Point3D;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Camera;
 import javafx.scene.Group;
@@ -43,15 +45,22 @@ import javafx.scene.PointLight;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.Shadow;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.paint.PhongMaterial;
@@ -63,7 +72,11 @@ import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import javafx.stage.FileChooser;
+import sporemodder.FileManager;
+import sporemodder.UIManager;
 import sporemodder.file.BoundingBox;
+import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
 import sporemodder.file.rw4.MaterialStateCompiler;
 import sporemodder.file.rw4.RWBBox;
@@ -84,7 +97,32 @@ import sporemodder.util.ProjectItem;
  * An editor used for visualizing RenderWare models. This has a built-in texture patcher. It is called 'viewer' instead of 'editor' because
  * although some things can be modified, it's main goal is to visualize it.
  */
-public class RWModelViewer implements ItemEditor {
+public class RWModelViewer extends AbstractEditableEditor implements ItemEditor, EditHistoryEditor {
+	
+	private static abstract class RWUndoableAction implements EditHistoryAction {
+		private String selectedObject;
+		private String text;
+		private RWUndoableAction(String text) {
+			this.text = text;
+		}
+		@Override public String getText() {
+			return text;
+		}
+	}
+	
+	/** The maximum amount of remembered edit history actions. */
+	private static final int MAX_EDIT_HISTORY = 25;
+	
+	private static final RWUndoableAction ORIGINAL_ACTION = new RWUndoableAction(null) {
+
+		@Override public void undo() {}
+
+		@Override public void redo() {}
+
+		@Override public String getText() {
+			return "Original";
+		}
+	};
 	
 	private static final double AXIS_LENGTH = 250.0;
 	private static final double AXIS_WIDTH = 0.005;
@@ -127,6 +165,8 @@ public class RWModelViewer implements ItemEditor {
 		}
 	}
 	
+	private static final double TREE_VIEW_HEIGHT = 300;
+	
 	// WARNING: JavaFX uses Y axis for Spore's Z axis (up-down) 
 
 	private final XformCamera cameraXform = new XformCamera();
@@ -153,8 +193,10 @@ public class RWModelViewer implements ItemEditor {
 	
 	private RenderWare renderWare;
 	private BoundingBox bbox;
-	private final List<MeshView> meshes = new ArrayList<MeshView>();
-	private final List<RWMeshCompiledStateLink> rwMeshes = new ArrayList<RWMeshCompiledStateLink>();
+	private final List<MeshView> meshes = new ArrayList<>();
+	private final List<RWMeshCompiledStateLink> rwMeshes = new ArrayList<>();
+	private final Map<RWRaster, Image> rasterImages = new HashMap<>();
+	private final Map<RWRaster, ObjectProperty<Image>> rasterImageProperties = new HashMap<>();
 	
 	private double mouseX;
 	private double mouseY;
@@ -163,10 +205,52 @@ public class RWModelViewer implements ItemEditor {
 	
 	double mousePosX, mousePosY, mouseOldX, mouseOldY, mouseDeltaX, mouseDeltaY;
 	
+	// -- Inspector -- //
+	
+	private final Pane inspectorPane = new VBox(5);
+	private final ScrollPane propertiesContainer = new ScrollPane();
+	private TreeView<String> treeView = new TreeView<>();
+	
+	private TreeItem<String> tiTextures = new TreeItem<String>("Textures");
+	
+	private final Map<String, RWObject> nameMap = new HashMap<>();
+	private final Map<String, TreeItem<String>> itemsMap = new HashMap<>();
+	
+	// For undo redo:
+	private final Stack<RWUndoableAction> editHistory = new Stack<>();
+	private int undoRedoIndex = -1;
+	private boolean isUndoingAction;
+	
+	
 	private RWModelViewer() {
 		super();
 		
 		mainNode = new Pane();
+		
+		propertiesContainer.setFitToWidth(true);
+    	
+    	inspectorPane.getChildren().addAll(treeView, propertiesContainer);
+    	VBox.setVgrow(propertiesContainer, Priority.ALWAYS);
+    	
+    	TreeItem<String> rootItem = new TreeItem<>();
+    	treeView.setRoot(rootItem);
+    	treeView.setShowRoot(false);
+    	treeView.setMaxHeight(TREE_VIEW_HEIGHT);
+    	
+    	rootItem.getChildren().add(tiTextures);
+    	tiTextures.setExpanded(true);
+    	
+    	treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+    		if (newValue != null) {
+    			fillPropertiesPane(newValue.getValue());
+    		} else {
+    			propertiesContainer.setContent(null);
+    		}
+    	});
+    	
+    	// Add an original action that does nothing:
+    	addEditAction(ORIGINAL_ACTION);
+    	
 	}
 	
 	private TriangleMesh readMesh(RWMesh mesh) throws IOException {
@@ -349,6 +433,20 @@ public class RWModelViewer implements ItemEditor {
 		return newImage;
 	}
 	
+	private Image imageFromRaster(RWRaster raster) throws IOException {
+		Image image = raster.toJavaFX();
+		// Note: apparently not only SkinPaints. Most cases will use this.
+		return removeAlphaChannel(image);
+	}
+	
+	private void loadImages() throws IOException {
+		List<RWRaster> rasters = renderWare.getObjects(RWRaster.class);
+		for (RWRaster raster : rasters) {
+			Image image = imageFromRaster(raster);
+			rasterImages.put(raster, image);
+		}
+	}
+	
 	private void loadMaterial(RWCompiledState compiledState, MeshView meshView) throws IOException {
 		MaterialStateCompiler state = compiledState.data;
 		state.decompile();
@@ -361,30 +459,23 @@ public class RWModelViewer implements ItemEditor {
 		if (!state.textureSlots.isEmpty()) {
 			RWObject diffuseRaster = state.textureSlots.get(0).raster;
 			if (diffuseRaster != null) {
-				Image image = ((RWRaster) diffuseRaster).toJavaFX();
-				
-				// Special case: SkinPaint parts use the alpha channel not for transparency, but for tinting,
-				// so we want to remove the transparency:
-//				if (state.rendererID == 0x80000004) {
-//					image = removeAlphaChannel(image);
-//				}
-				
-				// Note: apparently not only SkinPaints. Most cases will use this.
-				image = removeAlphaChannel(image);
-				
-				material.setDiffuseMap(image);
+				rasterImageProperties.put((RWRaster)diffuseRaster, material.diffuseMapProperty());
+				material.setDiffuseMap(rasterImages.get(diffuseRaster));
 			}
 			
 			if (state.textureSlots.size() > 1) {
 				RWObject normalRaster = state.textureSlots.get(1).raster;
 				if (normalRaster != null) {
-					material.setBumpMap(((RWRaster) normalRaster).toJavaFX());
+					rasterImageProperties.put((RWRaster)normalRaster, material.bumpMapProperty());
+					material.setBumpMap(rasterImages.get(normalRaster));
 				}
 			}
 		}
 	}
 	
 	private void loadModel(ProjectItem item) throws IOException {
+		this.file = item.getFile();
+		this.item = item;
 		try (StreamReader stream = new FileStream(item.getFile(), "r")) {
 			renderWare = new RenderWare();
 			renderWare.read(stream);
@@ -409,9 +500,9 @@ public class RWModelViewer implements ItemEditor {
 					stream.read(data.data);
 				}
 			}
+			
+			loadImages();
 		}
-		
-		rwMeshes.addAll(renderWare.getObjects(RWMeshCompiledStateLink.class));
 		
 		getBBox();
 		
@@ -467,6 +558,7 @@ public class RWModelViewer implements ItemEditor {
 		
 		bindDimensions();
 		
+		mainNode.getChildren().clear();
 		mainNode.getChildren().add(subScene);
 		
 //		mainNode.setOnMousePressed((event) -> {
@@ -535,6 +627,21 @@ public class RWModelViewer implements ItemEditor {
 //				}
 //			}
 //		});
+		
+		fillTreeView();
+	}
+	
+	private void fillTreeView() {
+		if (renderWare != null) {
+			List<RWRaster> rasters = renderWare.getObjects(RWRaster.class);
+			for (RWRaster raster : rasters) {
+				String name = renderWare.getName(raster);
+				nameMap.put(name, raster);
+				TreeItem<String> item = new TreeItem<String>(name);
+				itemsMap.put(name, item);
+				tiTextures.getChildren().add(item);
+			}
+		}
 	}
 	
 	private void buildCamera() {
@@ -697,14 +804,24 @@ public class RWModelViewer implements ItemEditor {
 	@Override
 	public void loadFile(ProjectItem item) throws IOException {
 		if (item != null) {
+			this.item = item;
 			loadModel(item);
 		}
 	}
+	
+	private void showInspector(boolean show) {
+		if (show) {
+			UIManager.get().getUserInterface().getInspectorPane().setTitle("Effects Editor");
+			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+		} else {
+			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
+			UIManager.get().getUserInterface().setInspectorContent(null);
+		}
+	}
 
-	@Override
-	public void setActive(boolean isActive) {
-		// TODO Auto-generated method stub
-		
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 
 	@Override
@@ -713,13 +830,8 @@ public class RWModelViewer implements ItemEditor {
 	}
 
 	@Override
-	public void save() {
-	}
-
-	@Override
 	public boolean isEditable() {
-		// RWs are not editable.... yet
-		return false;
+		return true;
 	}
 	
 	class XformCamera extends Group {
@@ -749,20 +861,209 @@ public class RWModelViewer implements ItemEditor {
 	}
 
 	@Override
-	public void setDestinationFile(File file) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean supportsSearching() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean supportsEditHistory() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
+	}
+	
+	private void fillPropertiesPane(String selectedName) {
+		RWObject object = nameMap.get(selectedName);
+		if (object == null) {
+			propertiesContainer.setContent(null);
+		} 
+		else if (object instanceof RWRaster) {
+			fillTexturePane(selectedName, (RWRaster) object);
+		}
+		else {
+			propertiesContainer.setContent(null);
+		}
+	}
+	
+	private void fillTexturePane(String name, RWRaster raster) {
+		Button exportButton = new Button("Export");
+		Button importButton = new Button("Import");
+		
+		HBox hbox = new HBox(5);
+		hbox.getChildren().addAll(exportButton, importButton);
+		
+		ImageView viewer = new ImageView(rasterImages.get(raster));
+		ScrollPane scrollPane = new ScrollPane(viewer);
+		scrollPane.setPrefHeight(300);
+		
+		VBox vbox = new VBox(5);
+		vbox.getChildren().addAll(hbox, scrollPane);
+		vbox.setFillWidth(true);
+		
+		propertiesContainer.setContent(vbox);
+		
+		
+		exportButton.setOnAction(event -> {
+			FileChooser chooser = new FileChooser();
+			chooser.getExtensionFilters().addAll(FileManager.FILEFILTER_ALL, FileManager.FILEFILTER_DDS);
+			chooser.setSelectedExtensionFilter(FileManager.FILEFILTER_DDS);
+			File file = chooser.showSaveDialog(UIManager.get().getScene().getWindow());
+			if (file != null) {
+				UIManager.get().tryAction(() -> raster.toDDSTexture().write(file), "Texture could not be exported.");
+			}
+		});
+		
+		importButton.setOnAction(event -> {
+			FileChooser chooser = new FileChooser();
+			chooser.getExtensionFilters().addAll(FileManager.FILEFILTER_ALL, FileManager.FILEFILTER_DDS);
+			chooser.setSelectedExtensionFilter(FileManager.FILEFILTER_DDS);
+			File file = chooser.showOpenDialog(UIManager.get().getScene().getWindow());
+			if (file != null) {
+				UIManager.get().tryAction(() -> {
+					DDSTexture oldTexture = raster.toDDSTexture();
+					Image oldImage = rasterImages.get(raster);
+					byte[] oldData = raster.textureData.data;
+					
+					DDSTexture texture = new DDSTexture();
+					texture.read(file);
+					raster.fromDDSTexture(texture);
+					raster.textureData.data = texture.getData();
+					
+					Image image = imageFromRaster(raster);
+					viewer.setImage(image);
+					rasterImages.put(raster, image);
+					rasterImageProperties.get(raster).set(image);
+					
+					addEditAction(new RWUndoableAction(name + ": Texture") {
+
+						@Override public void undo() {
+							raster.fromDDSTexture(oldTexture);
+							raster.textureData.data = oldData;
+							rasterImages.put(raster, oldImage);
+							rasterImageProperties.get(raster).set(oldImage);
+						}
+
+						@Override public void redo() {
+							raster.fromDDSTexture(texture);
+							raster.textureData.data = texture.getData();
+							rasterImages.put(raster, image);
+							rasterImageProperties.get(raster).set(image);
+						}
+					});
+				}, "Texture could not be imported. Only DDS textures are supported.");
+			}
+		});
+	}
+	
+	@Override
+	public boolean canUndo() {
+		// We can't undo the first action cause we couldn't go to the previous action
+		return editHistory.size() > 1 && undoRedoIndex > 0;
+	}
+
+	@Override
+	public boolean canRedo() {
+		return undoRedoIndex != editHistory.size() - 1;
+	}
+
+	private String getSelectedName() {
+		if (treeView.getSelectionModel().getSelectedItem() == null) return null;
+		return treeView.getSelectionModel().getSelectedItem().getValue();
+	}
+	
+	@Override public void undo() {
+		isUndoingAction = true;
+		
+		RWUndoableAction action = editHistory.get(undoRedoIndex);
+		
+		action.undo();
+		--undoRedoIndex;
+		
+		if (action.selectedObject != null) {
+			if (getSelectedName().equals(action.selectedObject)) {
+				fillPropertiesPane(action.selectedObject);
+			} else {
+				treeView.getSelectionModel().select(itemsMap.get(action.selectedObject));
+			}
+		}
+		
+		if (undoRedoIndex == 1 && editHistory.get(0) == ORIGINAL_ACTION) {
+			setIsSaved(true);
+		} else {
+			setIsSaved(false);
+		}
+		
+		isUndoingAction = false;
+		
+		UIManager.get().notifyUIUpdate(false);
+	}
+
+	@Override public void redo() {
+		isUndoingAction = true;
+		
+		// We redo the last action we did
+		++undoRedoIndex;
+		
+		RWUndoableAction action = editHistory.get(undoRedoIndex);
+		action.redo();
+		
+		if (action.selectedObject != null) {
+			if (action.selectedObject.equals(getSelectedName())) {
+				fillPropertiesPane(action.selectedObject);
+			} else {
+				treeView.getSelectionModel().select(itemsMap.get(action.selectedObject));
+			}
+		}
+		
+		setIsSaved(false);
+		
+		isUndoingAction = false;
+		
+		UIManager.get().notifyUIUpdate(false);
+	}
+	
+	private void deleteActionsAfterIndex(int index) {
+		for (int i = editHistory.size()-1; i > index; --i) {
+			editHistory.remove(i);
+		}
+	}
+	
+	public void addEditAction(RWUndoableAction action) {
+		if (!isUndoingAction) {
+			// If the edit undoed certain actions we start a new edit branch now
+			deleteActionsAfterIndex(undoRedoIndex);
+			action.selectedObject = getSelectedName();
+			editHistory.push(action);
+			++undoRedoIndex;
+			
+			if (editHistory.size() > MAX_EDIT_HISTORY) {
+				editHistory.remove(0);
+				--undoRedoIndex;
+			}
+			
+			if (action != ORIGINAL_ACTION) setIsSaved(false);
+			
+			UIManager.get().notifyUIUpdate(false);
+		}
+	}
+
+	@Override public List<? extends EditHistoryAction> getActions() {
+		return editHistory;
+	}
+
+	@Override public int getUndoRedoIndex() {
+		return undoRedoIndex;
+	}
+
+	@Override
+	protected void saveData() throws Exception {
+		try (FileStream stream = new FileStream(getFile(), "rw")) {
+			renderWare.write(stream);
+			
+			setIsSaved(true);
+		}
+	}
+
+	@Override
+	protected void restoreContents() throws Exception {
+		loadModel(getItem());
 	}
 }

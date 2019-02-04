@@ -169,8 +169,6 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	private TreeView<IDrawable> tvDrawables;
 	private FilterableTreeItem<IDrawable> rootDrawablesItem;
 	
-	private boolean mustReload;
-	
 	/** The selected element whose properties are being displayed in the inspector. */
 	private final ObjectProperty<InspectableObject> selectedElement = new SimpleObjectProperty<>();
 	/** The selected window that is remarked in the viewer. Will be the same as selected element or null if element is not a window. */
@@ -830,15 +828,6 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	public void setActive(boolean isActive) {
 		super.setActive(isActive);
 		
-		if (isActive && mustReload) {
-			try {
-				loadFile(getFile());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
 		HashManager.get().setUpdateProjectRegistry(isActive);
 		
 		if (isActive) {
@@ -896,8 +885,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	}
 
 	@Override
-	protected void restoreContents() {
-		mustReload = true;
+	protected void restoreContents() throws Exception {
+		loadFile(getFile());
 	}
 
 	public void repaint() {

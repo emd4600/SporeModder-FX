@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import sporemodder.file.dds.DDSTexture;
 
@@ -46,6 +45,10 @@ public class RWRaster extends RWObject {
 
 	public RWRaster(RenderWare renderWare) {
 		super(renderWare);
+	}
+	
+	public void copy(RWRaster other) {
+		
 	}
 
 	@Override
@@ -110,6 +113,6 @@ public class RWRaster extends RWObject {
 	}
 	
 	public Image toJavaFX() throws IOException {
-		return SwingFXUtils.toFXImage(toDDSTexture().toBufferedImage(), null);
+		return toDDSTexture().toJavaFX();
 	}
 }

@@ -167,10 +167,6 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		}
 	}
 	
-	public void setDestinationFile(File file) {
-		this.file = file;
-	}
-	
 	/**
 	 * Returns the file that is shown in the text editor. By default this just returns the item file,
 	 * but certain editors might want to show other files related to that item instead.

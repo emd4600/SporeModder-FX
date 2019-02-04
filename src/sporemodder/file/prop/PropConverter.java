@@ -209,11 +209,15 @@ public class PropConverter implements Converter {
 	}
 	
 	public static String intoValidText(String text) {
-		return text.replaceAll("\"", "&quot;");
+		text = text.replaceAll("\"", "&quot;");
+		text = text.replaceAll("#", "&hash;");
+		return text;
 	}
 	
 	public static String intoOriginalText(String text) {
-		return text.replaceAll("&quot;", "\"");
+		text = text.replaceAll("&quot;", "\"");
+		text = text.replaceAll("&hash;", "#");
+		return text;
 	}
 	
 	@Override

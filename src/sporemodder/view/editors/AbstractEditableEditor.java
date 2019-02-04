@@ -48,6 +48,9 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 	/** If true, the file will be saved when setActive(null) is called. */
 	private boolean isAutosaveEnabled = true;
 	
+	/** If true, the contents of the file must be reloaded when the editor is set active again. */
+	private boolean mustRestoreContents;
+	
 	public AbstractEditableEditor() {
 		isSavedProperty().addListener((obs, oldValue, isSaved) -> {
 			if (item != null) {
@@ -73,7 +76,7 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 					}
 					else {
 						// The user didn't want to save the changes, so restore the original contents
-						restoreContents();
+						mustRestoreContents = true;
 						setIsSaved(true);
 					}
 				}
@@ -81,6 +84,13 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 			else if (!isActive && isAutosaveEnabled && EditorManager.get().isAutosaveEnabled()) {
 				// Using save() will include the file, which we don't want
 				saveInternal();
+			}
+			
+			if (isActive && mustRestoreContents) {
+				UIManager.get().tryAction(() -> {
+					restoreContents();
+				}, "Could not restore contents.");
+				mustRestoreContents = false;
 			}
 		});
 	}
@@ -166,6 +176,10 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 		}
 	}
 	
+	@Override public void setDestinationFile(File file) {
+		this.file = file;
+	}
+	
 	/**
 	 * Called when the file is saved, only when it has passed all user checks and if it needs to be saved.
 	 * This method must write the data into the file.
@@ -177,5 +191,5 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 	/**
 	 * Called when the user switches tab and decides not to save the contents.
 	 */
-	protected abstract void restoreContents();
+	protected abstract void restoreContents() throws Exception;
 }

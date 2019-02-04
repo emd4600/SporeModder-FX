@@ -71,9 +71,9 @@ public class MaterialStateCompiler {
 	private static final int FLAG3_RENDER_STATES = 0x20000;
 	/** Used in the third flags value, whether a palette entries object is defined. */
 	private static final int FLAG3_PALETTE_ENTRIES = 0x100000;
-	/** Used in the third flags value, whether texture slots are defined. */
+	/** Used in the third flags value, which texture slots are used. */
 	// Spore checks for 0xDFFFF, using this should be enough
-	private static final int FLAG3_TEXTURE_SLOTS = 0x1;
+	private static final int FLAG3_TEXTURE_SLOTS = 0xDFFFF;
 	
 	// Should only be used inside this package
 	byte[] data;
@@ -103,7 +103,7 @@ public class MaterialStateCompiler {
 	public int field_14;
 	
 	/** Only read if flags1 & 0x3FC0; each bit tells whether data is available for that 
-	 * position or not. */
+	 * position or not. */  // it's baked lighting data?
 	private Float[] unkData2;
 	/** Only read if flags1 & FLAG_USE_BOOLEANS; it's 17 booleans. */
 	private boolean[] unkData3;

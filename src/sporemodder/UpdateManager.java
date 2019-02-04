@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -67,7 +68,7 @@ public class UpdateManager {
     
     private static final String GITHUB_URL = "https://api.github.com";
     
-    public final VersionInfo versionInfo = new VersionInfo(2, 0, 1, null);
+    public final VersionInfo versionInfo = new VersionInfo(2, 0, 2, null);
     
     public static UpdateManager get() {
     	return MainApp.get().getUpdateManager();
@@ -143,7 +144,16 @@ public class UpdateManager {
     	AtomicBoolean closeProgram = new AtomicBoolean(false);
     	
     	if (UIManager.get().showDialog(dialog, false).orElse(ButtonType.NO) == ButtonType.YES) {
-    		JSONObject asset = release.getJSONArray("assets").getJSONObject(0);
+    		JSONArray assets = release.getJSONArray("assets");
+    		JSONObject asset = null;
+    		int count = assets.length();
+    		for (int i = 0; i < count; ++i) {
+    			JSONObject object = assets.getJSONObject(i);
+    			if ("SporeModderFX.Updater.jar".equals(object.getString("name"))) {
+    				asset = object;
+    				break;
+    			}
+    		}
     		
     		try {
 				DownloadTask task = new DownloadTask(new URL(asset.getString("browser_download_url")));

@@ -77582,3 +77582,40 @@ weaponCharging
 weaponElectro
 weaponPoison
 wing
+
+materials_compiled_states_link~	0x40212000
+materials_compiled_states~	0x40212001
+materials_uncompiled_shader_fragments~	0x40212002
+materials_compiled_shaders~	0x40212004
+
+GenericStatic
+Generic2D
+Particles_Decal
+Particles_DecalInvertDepth
+Particles_DecalIgnoreDepth
+Particles_DepthDecal
+Particles_Additive
+Particles_AdditiveInvertDepth
+Particles_AdditiveIgnoreDepth
+Particles_Modulate
+Particles_NormalMap
+Particles_DepthNormalMap
+Particles_AlphaTestDissolve
+ParticlesLightFog_Decal
+ParticlesLightFog_DecalInvertDepth
+ParticlesLightFog_DecalIgnoreDepth
+ParticlesLightFog_DepthDecal
+ScreenAdditive
+ScreenBlend
+ScreenTint
+ScreenBrighten
+ScreenSkyBox
+ScreenBackground
+ScreenAdditiveTexture
+ScreenBlendTexture
+ScreenTintTexture
+ScreenBrightenTexture
+BuildBasis_0_0
+BuildBasis_0_1
+BuildBasis_1_0
+BuildBasis_1_1

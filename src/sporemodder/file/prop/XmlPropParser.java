@@ -65,6 +65,8 @@ public class XmlPropParser extends DefaultHandler {
 	private MemoryStream stream;  // temporary stream
 	
 	private final Map<Integer, PropertyData> propertiesData;
+	
+	private final StringBuilder content = new StringBuilder();
 
 	private int nTotalSize = 4;
 	
@@ -110,6 +112,8 @@ public class XmlPropParser extends DefaultHandler {
 		
 		this.attributes = attributes;
 		this.lastQName = qName;
+		
+		content.setLength(0);
 		
 		if (qName.equalsIgnoreCase("properties")) {
 			bInsideProperties = true;
@@ -238,6 +242,23 @@ public class XmlPropParser extends DefaultHandler {
 			return;
 		}
 		
+		// Apply characters now
+		if (nCurrentType != -1 && (requiresContent(nCurrentType) || (bIsComplexProperty && bIsInComplexComponent))) {
+			if (bIsComplexProperty) {
+				if (bIsInComplexComponent) {
+					parseComplexComponent(content.toString());
+				}
+				else if (content.length() != 0) {
+					throw new SAXException("PROP File: Data in the " + lastQName + " property '" + lastPropertyName + "' must be contained inside component tags (<x></x> etc).");
+				}
+			}
+			else {
+				if ((bIsArray && !lastQName.endsWith("s") && bIsInArrayData) || !bIsArray) {
+					convert(stream, attributes, content.toString());
+				}
+			}
+		}
+		
 		// We finish the property ONLY if the closed tag was actually a property, and not a component like 'x'
 		if (!bIsInComplexComponent) {
 			
@@ -312,11 +333,11 @@ public class XmlPropParser extends DefaultHandler {
 		if (nCurrentType == -1) {
 			// a comment
 			if (text.startsWith("#")) return;
-			throw new SAXException("PROP File: Data must be inside a property.");
+			else if (!text.isEmpty()) throw new SAXException("PROP File: Data must be inside a property.");
 		}
 		else {
 			if (bIsArray) {
-				if (!bIsInArrayData && !bIsInComplexComponent) {
+				if (!bIsInArrayData && !bIsInComplexComponent && !text.isEmpty()) {
 					if (requiresContent(nCurrentType)) {
 						throw new SAXException("PROP File: Data in the array property '" + lastPropertyName + "' must be contained inside properties."
 								+ "Are you missing the <" + lastQName + "></" + lastQName + "> tags?");
@@ -327,17 +348,7 @@ public class XmlPropParser extends DefaultHandler {
 				}
 			}
 			
-			if (bIsComplexProperty) {
-				if (bIsInComplexComponent) {
-					parseComplexComponent(text);
-				}
-				else {
-					throw new SAXException("PROP File: Data in the " + lastQName + " property '" + lastPropertyName + "' must be contained inside component tags (<x></x> etc).");
-				}
-			}
-			else {
-				convert(stream, attributes, text);
-			}
+			content.append(ch, start, length);
 		}
 	}
 	

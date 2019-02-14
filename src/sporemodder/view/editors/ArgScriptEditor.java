@@ -92,6 +92,8 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 				syntax.addExtras(streamSyntax, false);
 				
 				setErrorInfo(streamSyntax);
+				
+				afterStreamParse();
 			}
 		});
 		
@@ -268,19 +270,25 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 			}
 		});
 		
-		if (documentErrors.isEmpty()) {
-			UIManager.get().getUserInterface().setStatusInfo(null);
-			UIManager.get().getUserInterface().getStatusBar().setStatus(Status.DEFAULT);
-		} else {
-			Label label = new Label("The file contains " + documentErrors.size() + " error" + (documentErrors.size() == 1 ? "" : "s") + ", cannot be compiled.");
-			label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
-			
-			UIManager.get().getUserInterface().setStatusInfo(label);
-			UIManager.get().getUserInterface().getStatusBar().setStatus(Status.ERROR);
+		if (item != null) {
+			if (documentErrors.isEmpty()) {
+				UIManager.get().getUserInterface().setStatusInfo(null);
+				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.DEFAULT);
+			} else {
+				Label label = new Label("The file contains " + documentErrors.size() + " error" + (documentErrors.size() == 1 ? "" : "s") + ", cannot be compiled.");
+				label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+				
+				UIManager.get().getUserInterface().setStatusInfo(label);
+				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.ERROR);
+			}
 		}
 	}
 	
 	protected void onStreamParse() {
+		
+	}
+	
+	protected void afterStreamParse() {
 		
 	}
 	

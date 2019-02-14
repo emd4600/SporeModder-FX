@@ -28,9 +28,6 @@ import java.util.Properties;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -49,10 +46,12 @@ import sporemodder.view.editors.PfxEditorFactory;
 import sporemodder.view.editors.PropEditorFactory;
 import sporemodder.view.editors.RWModelViewer;
 import sporemodder.view.editors.SearchableEditor;
+import sporemodder.view.editors.SmtTextEditorFactory;
 import sporemodder.view.editors.SpuiEditorFactory;
 import sporemodder.view.editors.TextEditorFactory;
 import sporemodder.view.editors.TlsaEditorFactory;
 import sporemodder.view.editors.XmlEditorFactory;
+import sporemodder.view.syntax.HlslSyntax;
 import sporemodder.view.syntax.SyntaxFormatFactory;
 import sporemodder.view.syntax.XmlSyntax;
 
@@ -114,6 +113,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new SmtTextEditorFactory());
 		editorFactories.add(new XmlEditorFactory());
 		editorFactories.add(new PctpEditorFactory());
 		editorFactories.add(new TlsaEditorFactory());
@@ -126,6 +126,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default syntax highlighting
 		//TODO add more here!
 		syntaxHighlighters.add(new XmlSyntax());
+		syntaxHighlighters.add(new HlslSyntax());
 		
 		
 		// Load the icons for the project tree

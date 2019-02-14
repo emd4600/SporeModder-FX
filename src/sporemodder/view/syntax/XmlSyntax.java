@@ -78,13 +78,13 @@ public class XmlSyntax implements SyntaxFormatFactory {
 	
 	private static final String TAG_CDATA = "(?<CData><\\!\\[CDATA\\[.*\\]\\]>)";
 	
-	private static final String TAG_PATTERN_END = "(>)?";
-	private static final String TAG_CLOSING_PATTERN = "(/>)";
-	private static final String TAG_ATTRIBUTE_PATTERN = "\\s(\\w*)\\=";
-	//private static final String TAG_ATTRIBUTE_VALUE = "[a-z-]*\\=(\"[^\"]*\")"; // [a-z-]
-    //private static final String TAG_COMMENT = "(<!--.*-->)";
-    private static final String TAG_CDATA_START = "(\\<!\\[CDATA\\[).*";
-    private static final String TAG_CDATA_END = ".*(]]>)";
+//	private static final String TAG_PATTERN_END = "(>)?";
+//	private static final String TAG_CLOSING_PATTERN = "(/>)";
+//	private static final String TAG_ATTRIBUTE_PATTERN = "\\s(\\w*)\\=";
+//	//private static final String TAG_ATTRIBUTE_VALUE = "[a-z-]*\\=(\"[^\"]*\")"; // [a-z-]
+//    //private static final String TAG_COMMENT = "(<!--.*-->)";
+//    private static final String TAG_CDATA_START = "(\\<!\\[CDATA\\[).*";
+//    private static final String TAG_CDATA_END = ".*(]]>)";
     
 	private static final Pattern PATTERN = Pattern.compile(
 			"(" + TAG_PATTERN + ")" + 

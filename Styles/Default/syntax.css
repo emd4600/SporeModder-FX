@@ -58,3 +58,26 @@
 	-fx-font-weight: bold;
 	-fx-fill: #CE81D6;
 }
+
+/** -- HLSL -- */
+
+.hlsl-comments {
+	-fx-fill: green;
+}
+.hlsl-enums {
+	-fx-fill: rgb(186, 85, 211);
+}
+.hlsl-numbers {
+	-fx-fill: #e5af25;
+}
+.hlsl-types {
+	-fx-fill: #008b8b;
+}
+.hlsl-keywords {
+	-fx-fill: rgb(0, 0, 255);
+	-fx-font-weight: bold;
+}
+.hlsl-functions {
+	-fx-fill: #e57402;
+	-fx-font-weight: bold;
+}

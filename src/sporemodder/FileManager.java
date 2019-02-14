@@ -59,7 +59,7 @@ public class FileManager extends AbstractManager {
 	
 	@Override public void initialize(Properties properties) {
 
-		searchableExtensions.addAll(Arrays.asList("prop_t", "xml", "locale", "txt", "trigger", "tlsa_t", "pctp_t", "pfx"));
+		searchableExtensions.addAll(Arrays.asList("prop_t", "xml", "locale", "txt", "trigger", "tlsa_t", "pctp_t", "pfx", "smt_t", "hlsl"));
 		
 		protectedPackages.addAll(Arrays.asList("patchdata.package", "spore_audio1.package", "spore_audio2.package", 
 				"spore_content.package", "spore_game.package", "spore_graphics.package", "spore_pack_03.package", 

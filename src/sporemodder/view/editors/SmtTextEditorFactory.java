@@ -16,32 +16,25 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-package sporemodder.view.syntax;
+package sporemodder.view.editors;
 
-import java.util.Collection;
+import javafx.scene.Node;
+import sporemodder.util.ProjectItem;
 
-import org.fxmisc.richtext.model.StyleSpans;
+public class SmtTextEditorFactory implements EditorFactory {
 
-public abstract class StandardSyntaxFormat implements SyntaxFormatFactory {
-	
-	private SyntaxHighlighter highlighter;
-
-	public SyntaxHighlighter getHighlighter() {
-		return highlighter;
-	}
-
-	public void setHighlighter(SyntaxHighlighter highlighter) {
-		this.highlighter = highlighter;
+	@Override
+	public ItemEditor createInstance() {
+		return new SmtTextEditor();
 	}
 
 	@Override
-	public StyleSpans<Collection<String>> generateStyle(String text) {
-		if (highlighter != null) {
-			highlighter.setText(text, null);
-			return highlighter.generateStyleSpans();
-		}
-		else {
-			return null;
-		}
+	public boolean isSupportedFile(ProjectItem item) {
+		return !item.isFolder() && item.getName().endsWith(".smt_t");
+	}
+	
+	@Override
+	public Node getIcon(ProjectItem item) {
+		return null;
 	}
 }

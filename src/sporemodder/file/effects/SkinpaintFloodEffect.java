@@ -61,6 +61,9 @@ public class SkinpaintFloodEffect extends EffectComponent {
 	public static final List<String> OPERATION_TYPES = Arrays.asList("set", "add", "mult", "div");
 	public static final List<String> MODIFIER_FLAG = Arrays.asList(null, "open", "clamp", "wrap", "mirror", "clamp2", "wrap2", "mirror2");
 	
+	public static final int COMPARE_NORMAL_MODIFIER = -3;
+	public static final int COMPARE_POSITION_MODIFIER = -2;
+	
 	public static final ArgScriptEnum ENUM_BLEND = new ArgScriptEnum();
 	static {
 		ENUM_BLEND.add(1, "alpha");
@@ -169,6 +172,8 @@ public class SkinpaintFloodEffect extends EffectComponent {
 				effect.varModifiers.add(varMod);
 			}
 			
+			modifierIndex = -1;
+			
 			return effect;
 		}
 
@@ -191,7 +196,7 @@ public class SkinpaintFloodEffect extends EffectComponent {
 					
 					if (arg.startsWith("color")) {
 						try {
-							effect.diffuseColorIndex = Byte.parseByte(arg.substring("color".length()));
+							effect.diffuseColorIndex = Byte.parseByte(arg.substring("color".length())) + 1;
 							effect.diffuseColor[0] = 0.0f;
 							effect.diffuseColor[1] = 0.0f;
 							effect.diffuseColor[2] = 1.0f;
@@ -632,12 +637,31 @@ public class SkinpaintFloodEffect extends EffectComponent {
 			}
 		}
 		
+		VarModifier compareNormal = null;
+		VarModifier comparePosition = null;
+		
 		// process the modifiers
 		for (int i = 0; i < varModifiers.size(); ++i) {
-			if (varModifiers.get(i).valueCount == 19) {
+			VarModifier vm = varModifiers.get(i);
+			if (vm.valueCount == 19) {
 				writeModifierArgScript(writer, i);
 				writer.blankLine();
 			}
+			else if (vm.modifierType == COMPARE_NORMAL_MODIFIER) {
+				compareNormal = vm;
+			}
+			else if (vm.modifierType == COMPARE_POSITION_MODIFIER) {
+				comparePosition = vm;
+			}
+		}
+		
+		if (compareNormal != null) {
+			writer.command("compareNormal").vector(compareNormal.value_0, compareNormal.value_1, compareNormal.value_2);
+			writer.floats(variableValues.get(compareNormal.valueIndex), variableValues.get(compareNormal.valueIndex + 1));
+		}
+		if (comparePosition != null) {
+			writer.command("comparePosition").vector(compareNormal.value_0, compareNormal.value_1, compareNormal.value_2);
+			writer.vector(variableValues.get(compareNormal.valueIndex), variableValues.get(compareNormal.valueIndex + 1), variableValues.get(compareNormal.valueIndex + 2));
 		}
 		
 		writer.endBlock().commandEND();

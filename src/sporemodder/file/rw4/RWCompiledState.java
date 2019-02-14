@@ -28,7 +28,7 @@ public class RWCompiledState extends RWObject {
 	public static final int TYPE_CODE = 0x2000b;
 	public static final int ALIGNMENT = 16;
 	
-	public final MaterialStateCompiler data;
+	public MaterialStateCompiler data;
 
 	public RWCompiledState(RenderWare renderWare) {
 		super(renderWare);

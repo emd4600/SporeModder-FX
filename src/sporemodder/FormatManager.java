@@ -31,6 +31,7 @@ import sporemodder.file.pctp.PCTPConverter;
 import sporemodder.file.prop.PropConverter;
 import sporemodder.file.raster.RasterConverter;
 import sporemodder.file.rw4.RenderWareConverter;
+import sporemodder.file.shaders.SmtConverter;
 import sporemodder.file.tlsa.TLSAConverter;
 
 public class FormatManager extends AbstractManager {
@@ -39,6 +40,7 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new SmtConverter());
 		converters.add(new RasterConverter());
 		converters.add(new PCTPConverter());
 		converters.add(new TLSAConverter());

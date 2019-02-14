@@ -21,14 +21,17 @@ package sporemodder.file.rw4;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import sporemodder.HashManager;
+import sporemodder.util.ColorRGBA;
+
 public class Direct3DEnums {
 	public static interface D3DStateEnum {
 		public int getId();
 	}
 	
-	public static D3DStateEnum getStateEnumById(int id, Class<? extends Enum<? extends D3DStateEnum>> stateEnum) {
+	public static D3DStateEnum getStateEnumById(int id, Class<?> stateEnum) {
 		try {
-			if (stateEnum == null) return null;
+			if (stateEnum == null || !stateEnum.isEnum()) return null;
 			Method valuesMethod = stateEnum.getDeclaredMethod("values");
 			D3DStateEnum[] states = (D3DStateEnum[]) valuesMethod.invoke(null);
 			for (D3DStateEnum state : states) {
@@ -42,6 +45,37 @@ public class Direct3DEnums {
 		}
 
 		return null;
+	}
+	
+	public static Integer getStateValue(String text, Class<?> stateEnum) {
+		try {
+			if (stateEnum == null || !stateEnum.isEnum()) return null;
+			Method valuesMethod = stateEnum.getDeclaredMethod("values");
+			D3DStateEnum[] states = (D3DStateEnum[]) valuesMethod.invoke(null);
+			for (D3DStateEnum state : states) {
+				if (state.toString().equals(text)) {
+					return state.getId();
+				}
+			}
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	public static String getValueToString(Class<?> typeClass, int value) {
+		if (typeClass == int.class) return Integer.toString(value);
+		else if (typeClass == float.class) return HashManager.get().floatToString(Float.intBitsToFloat(value));
+		else if (typeClass == ColorRGBA.class) return new ColorRGBA(value).toString();
+		else {
+			D3DStateEnum stateEnum = getStateEnumById(value, typeClass);
+			if (stateEnum == null) {
+				return Integer.toString(value);
+			} else {
+				return stateEnum.toString();
+			}
+		}
 	}
 	
 	public static final int D3DUSAGE_RENDERTARGET = 0x00000001;
@@ -81,26 +115,30 @@ public class Direct3DEnums {
 	}
 	
 	public static enum D3DDECLTYPE implements D3DStateEnum {
-		D3DDECLTYPE_FLOAT1(0),
-		D3DDECLTYPE_FLOAT2(1),
-		D3DDECLTYPE_FLOAT3(2),
-		D3DDECLTYPE_FLOAT4(3),
-		D3DDECLTYPE_D3DCOLOR(4),
-		D3DDECLTYPE_UBYTE4(5),
-		D3DDECLTYPE_SHORT2(6),
-		D3DDECLTYPE_SHORT4(7),
-		D3DDECLTYPE_UBYTE4N(8),
-		D3DDECLTYPE_SHORT2N(9),
-		D3DDECLTYPE_SHORT4N(10),
-		D3DDECLTYPE_USHORT2N(11),
-		D3DDECLTYPE_USHORT4N(12),
-		D3DDECLTYPE_UDEC3(13),
-		D3DDECLTYPE_DEC3N(14),
-		D3DDECLTYPE_FLOAT16_2(15),
-		D3DDECLTYPE_FLOAT16_4(16),
-		D3DDECLTYPE_UNUSED(17);
+		D3DDECLTYPE_FLOAT1(0, 4*1),
+		D3DDECLTYPE_FLOAT2(1, 4*2),
+		D3DDECLTYPE_FLOAT3(2, 4*3),
+		D3DDECLTYPE_FLOAT4(3, 4*4),
+		D3DDECLTYPE_D3DCOLOR(4, 4),
+		D3DDECLTYPE_UBYTE4(5, 4),
+		D3DDECLTYPE_SHORT2(6, 4),
+		D3DDECLTYPE_SHORT4(7, 8),
+		D3DDECLTYPE_UBYTE4N(8, 4),
+		D3DDECLTYPE_SHORT2N(9, 4),
+		D3DDECLTYPE_SHORT4N(10, 8),
+		D3DDECLTYPE_USHORT2N(11, 4),
+		D3DDECLTYPE_USHORT4N(12, 8),
+		D3DDECLTYPE_UDEC3(13, 4),
+		D3DDECLTYPE_DEC3N(14, 4),
+		D3DDECLTYPE_FLOAT16_2(15, 4),
+		D3DDECLTYPE_FLOAT16_4(16, 8),
+		D3DDECLTYPE_UNUSED(17, 0);
 		int id;
-		private D3DDECLTYPE(int id) { this.id = id; }
+		public int size;
+		private D3DDECLTYPE(int id, int size) { 
+			this.id = id; 
+			this.size = size;
+		}
 		public static D3DDECLTYPE getById(int id) { for (D3DDECLTYPE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
@@ -129,10 +167,22 @@ public class Direct3DEnums {
 	public static enum RWDECLUSAGE implements D3DStateEnum {
 		POSITION(0),
 		NORMAL(2),
-		TEXCOORD(6),
-		BONEINDICES(14),
-		BONEWEIGHTS(15),
-		TANGENT(19);
+		COLOR0(3),
+		COLOR1(5),
+		TEXCOORD0(6),
+		TEXCOORD1(7),
+		TEXCOORD2(8),
+		TEXCOORD3(9),
+		BLENDINDICES(14),
+		BLENDWEIGHTS(15),
+		POINTSIZE(16),
+		POSITION2(17),
+		NORMAL2(18),
+		TANGENT(19),
+		BINORMAL(20),
+		FOG(21),
+		BLENDINDICES2(22),
+		BLENDWEIGHTS2(23);
 		int id;
 		private RWDECLUSAGE(int id) { this.id = id; }
 		public static RWDECLUSAGE getById(int id) { for (RWDECLUSAGE state : values())  if (state.id == id) return state; return null; }
@@ -352,6 +402,7 @@ public class Direct3DEnums {
 		public static D3DDEGREETYPE getById(int id) { for (D3DDEGREETYPE state : values())  if (state.id == id) return state; return null; }
 		public int getId() { return id; }
 	}
+	
 	public static enum D3DRenderStateType {
 		D3DRS_ZENABLE                     (7, D3DZBUFFERTYPE.class),
 		D3DRS_FILLMODE                    (8, D3DFILLMODE.class),
@@ -363,27 +414,27 @@ public class Direct3DEnums {
 		D3DRS_DESTBLEND                   (20, D3DBLEND.class),
 		D3DRS_CULLMODE                    (22, D3DCULL.class),
 		D3DRS_ZFUNC                       (23, D3DCMPFUNC.class),
-		D3DRS_ALPHAREF                    (24), //int from 0 to 0xff
+		D3DRS_ALPHAREF                    (24, int.class),  // from 0 to 0xff
 		D3DRS_ALPHAFUNC                   (25, D3DCMPFUNC.class),
 		D3DRS_DITHERENABLE                (26, D3DBOOLEAN.class),
 		D3DRS_ALPHABLENDENABLE            (27, D3DBOOLEAN.class),
 		D3DRS_FOGENABLE                   (28, D3DBOOLEAN.class),
 		D3DRS_SPECULARENABLE              (29, D3DBOOLEAN.class),
-		D3DRS_FOGCOLOR                    (34), //color
+		D3DRS_FOGCOLOR                    (34, ColorRGBA.class),
 		D3DRS_FOGTABLEMODE                (35, D3DFOGMODE.class),
-		D3DRS_FOGSTART                    (36), //float from 0 to 1
-		D3DRS_FOGEND                      (37), //float from 0 to 1
-		D3DRS_FOGDENSITY                  (38), //float from 0 to 1
+		D3DRS_FOGSTART                    (36, float.class),  // from 0 to 1
+		D3DRS_FOGEND                      (37, float.class),  // from 0 to 1
+		D3DRS_FOGDENSITY                  (38, float.class),  // from 0 to 1
 		D3DRS_RANGEFOGENABLE              (48, D3DBOOLEAN.class),
 		D3DRS_STENCILENABLE               (52, D3DBOOLEAN.class),
 		D3DRS_STENCILFAIL                 (53, D3DSTENCILOP.class),
 		D3DRS_STENCILZFAIL                (54, D3DSTENCILOP.class),
 		D3DRS_STENCILPASS                 (55, D3DSTENCILOP.class),
 		D3DRS_STENCILFUNC                 (56, D3DCMPFUNC.class),
-		D3DRS_STENCILREF                  (57), //int
-		D3DRS_STENCILMASK                 (58), //int
-		D3DRS_STENCILWRITEMASK            (59), //int
-		D3DRS_TEXTUREFACTOR               (60), //color
+		D3DRS_STENCILREF                  (57, int.class),
+		D3DRS_STENCILMASK                 (58, int.class),
+		D3DRS_STENCILWRITEMASK            (59, int.class),
+		D3DRS_TEXTUREFACTOR               (60, ColorRGBA.class),
 		D3DRS_WRAP0                       (128, D3DWRAPCOORD.class),
 		D3DRS_WRAP1                       (129, D3DWRAPCOORD.class),
 		D3DRS_WRAP2                       (130, D3DWRAPCOORD.class),
@@ -394,7 +445,7 @@ public class Direct3DEnums {
 		D3DRS_WRAP7                       (135, D3DWRAPCOORD.class),
 		D3DRS_CLIPPING                    (136, D3DBOOLEAN.class),
 		D3DRS_LIGHTING                    (137, D3DBOOLEAN.class),
-		D3DRS_AMBIENT                     (139), //color
+		D3DRS_AMBIENT                     (139, ColorRGBA.class),
 		D3DRS_FOGVERTEXMODE               (140, D3DFOGMODE.class),
 		D3DRS_COLORVERTEX                 (141, D3DBOOLEAN.class),
 		D3DRS_LOCALVIEWER                 (142, D3DBOOLEAN.class),
@@ -404,46 +455,46 @@ public class Direct3DEnums {
 		D3DRS_AMBIENTMATERIALSOURCE       (147, D3DMATERIALCOLORSOURCE.class),
 		D3DRS_EMISSIVEMATERIALSOURCE      (148, D3DMATERIALCOLORSOURCE.class),
 		D3DRS_VERTEXBLEND                 (151, D3DVERTEXBLENDFLAGS.class),
-		D3DRS_CLIPPLANEENABLE             (152), //int, bit mask
-		D3DRS_POINTSIZE                   (154), //float
-		D3DRS_POINTSIZE_MIN               (155), //float
+		D3DRS_CLIPPLANEENABLE             (152, int.class),  // bit mask
+		D3DRS_POINTSIZE                   (154, float.class),
+		D3DRS_POINTSIZE_MIN               (155, float.class),
 		D3DRS_POINTSPRITEENABLE           (156, D3DBOOLEAN.class),
 		D3DRS_POINTSCALEENABLE            (157, D3DBOOLEAN.class),
-		D3DRS_POINTSCALE_A                (158), //float
-		D3DRS_POINTSCALE_B                (159), //float
-		D3DRS_POINTSCALE_C                (160), //float
+		D3DRS_POINTSCALE_A                (158, float.class),
+		D3DRS_POINTSCALE_B                (159, float.class),
+		D3DRS_POINTSCALE_C                (160, float.class),
 		D3DRS_MULTISAMPLEANTIALIAS        (161, D3DBOOLEAN.class),
-		D3DRS_MULTISAMPLEMASK             (162), //int
+		D3DRS_MULTISAMPLEMASK             (162, int.class),
 		D3DRS_PATCHEDGESTYLE              (163, D3DPATCHEDGESTYLE.class),
 		D3DRS_DEBUGMONITORTOKEN           (165, D3DDEBUGMONITORTOKENS.class),
-		D3DRS_POINTSIZE_MAX               (166), //float
+		D3DRS_POINTSIZE_MAX               (166, float.class),
 		D3DRS_INDEXEDVERTEXBLENDENABLE    (167, D3DBOOLEAN.class),
-		D3DRS_COLORWRITEENABLE            (168), //int
-		D3DRS_TWEENFACTOR                 (170), //float
+		D3DRS_COLORWRITEENABLE            (168, int.class),
+		D3DRS_TWEENFACTOR                 (170, float.class),
 		D3DRS_BLENDOP                     (171, D3DBLENDOP.class),
 		D3DRS_POSITIONDEGREE              (172, D3DDEGREETYPE.class),
 		D3DRS_NORMALDEGREE                (173, D3DDEGREETYPE.class),
 		D3DRS_SCISSORTESTENABLE           (174, D3DBOOLEAN.class),
-		D3DRS_SLOPESCALEDEPTHBIAS         (175), //float
+		D3DRS_SLOPESCALEDEPTHBIAS         (175, float.class),
 		D3DRS_ANTIALIASEDLINEENABLE       (176, D3DBOOLEAN.class),
-		D3DRS_MINTESSELLATIONLEVEL        (178), //float
-		D3DRS_MAXTESSELLATIONLEVEL        (179), //float
-		D3DRS_ADAPTIVETESS_X              (180), //float
-		D3DRS_ADAPTIVETESS_Y              (181), //float
-		D3DRS_ADAPTIVETESS_Z              (182), //float
-		D3DRS_ADAPTIVETESS_W              (183), //float
+		D3DRS_MINTESSELLATIONLEVEL        (178, float.class),
+		D3DRS_MAXTESSELLATIONLEVEL        (179, float.class),
+		D3DRS_ADAPTIVETESS_X              (180, float.class),
+		D3DRS_ADAPTIVETESS_Y              (181, float.class),
+		D3DRS_ADAPTIVETESS_Z              (182, float.class),
+		D3DRS_ADAPTIVETESS_W              (183, float.class),
 		D3DRS_ENABLEADAPTIVETESSELLATION  (184, D3DBOOLEAN.class),
 		D3DRS_TWOSIDEDSTENCILMODE         (185, D3DBOOLEAN.class),
 		D3DRS_CCW_STENCILFAIL             (186, D3DSTENCILOP.class),
 		D3DRS_CCW_STENCILZFAIL            (187, D3DSTENCILOP.class),
 		D3DRS_CCW_STENCILPASS             (188, D3DSTENCILOP.class),
 		D3DRS_CCW_STENCILFUNC             (189, D3DCMPFUNC.class),
-		D3DRS_COLORWRITEENABLE1           (190), //int
-		D3DRS_COLORWRITEENABLE2           (191), //int
-		D3DRS_COLORWRITEENABLE3           (192), //int
-		D3DRS_BLENDFACTOR                 (193), //color
-		D3DRS_SRGBWRITEENABLE             (194), //int
-		D3DRS_DEPTHBIAS                   (195), //float
+		D3DRS_COLORWRITEENABLE1           (190, int.class),
+		D3DRS_COLORWRITEENABLE2           (191, int.class),
+		D3DRS_COLORWRITEENABLE3           (192, int.class),
+		D3DRS_BLENDFACTOR                 (193, ColorRGBA.class),
+		D3DRS_SRGBWRITEENABLE             (194, int.class),
+		D3DRS_DEPTHBIAS                   (195, float.class),
 		D3DRS_WRAP8                       (198, D3DWRAPCOORD.class),
 		D3DRS_WRAP9                       (199, D3DWRAPCOORD.class),
 		D3DRS_WRAP10                      (200, D3DWRAPCOORD.class),
@@ -456,24 +507,14 @@ public class Direct3DEnums {
 		D3DRS_SRCBLENDALPHA               (207, D3DBLEND.class),
 		D3DRS_DESTBLENDALPHA              (208, D3DBLEND.class),
 		D3DRS_BLENDOPALPHA                (209, D3DBLENDOP.class),
-		D3DRS_FORCE_DWORD                 (0x7fffffff);
+		D3DRS_FORCE_DWORD                 (0x7fffffff, int.class);
 
 		public int id;
-		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
-		private D3DRenderStateType(int id) {
+		public Class<?> typeClass;
+		
+		private D3DRenderStateType(int id, Class<?> typeClass) {
 			this.id = id;
-		}
-		private D3DRenderStateType(int id, Class<? extends Enum<? extends D3DStateEnum>> enumClass) {
-			this.id = id;
-			this.enumClass = enumClass;
-		}
-		public String getValueToString(int value) {
-			D3DStateEnum stateEnum = getStateEnumById(value, enumClass);
-			if (stateEnum == null) {
-				return Integer.toString(value);
-			} else {
-				return stateEnum.toString();
-			}
+			this.typeClass = typeClass;
 		}
 		public static D3DRenderStateType getById(int id) {
 			for (D3DRenderStateType state : values()) {
@@ -571,36 +612,26 @@ public class Direct3DEnums {
 		D3DTSS_ALPHAOP                (4, D3DTEXTUREOP.class),
 		D3DTSS_ALPHAARG1              (5, D3DTA.class),
 		D3DTSS_ALPHAARG2              (6, D3DTA.class),
-		D3DTSS_BUMPENVMAT00           (7), //float
-		D3DTSS_BUMPENVMAT01           (8), //float
-		D3DTSS_BUMPENVMAT10           (9), //float
-		D3DTSS_BUMPENVMAT11           (10), //float
-		D3DTSS_TEXCOORDINDEX          (11), //int
-		D3DTSS_BUMPENVLSCALE          (22), //float
-		D3DTSS_BUMPENVLOFFSET         (23), //float
+		D3DTSS_BUMPENVMAT00           (7, float.class), //float
+		D3DTSS_BUMPENVMAT01           (8, float.class), //float
+		D3DTSS_BUMPENVMAT10           (9, float.class), //float
+		D3DTSS_BUMPENVMAT11           (10, float.class), //float
+		D3DTSS_TEXCOORDINDEX          (11, int.class), //int
+		D3DTSS_BUMPENVLSCALE          (22, float.class), //float
+		D3DTSS_BUMPENVLOFFSET         (23, float.class), //float
 		D3DTSS_TEXTURETRANSFORMFLAGS  (24, D3DTEXTURETRANSFORMFLAGS.class),
 		D3DTSS_COLORARG0              (26, D3DTA.class),
 		D3DTSS_ALPHAARG0              (27, D3DTA.class),
 		D3DTSS_RESULTARG              (28, D3DTA.class),
 		D3DTSS_CONSTANT               (32, D3DTA.class),
-		D3DTSS_FORCE_DWORD            (0x7fffffff);
+		D3DTSS_FORCE_DWORD            (0x7fffffff, int.class);
 
 		public int id;
-		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
-		private D3DTextureStageStateType(int id) {
+		public Class<?> typeClass;
+
+		private D3DTextureStageStateType(int id, Class<?> typeClass) {
 			this.id = id;
-		}
-		private D3DTextureStageStateType(int id, Class<? extends Enum<? extends D3DStateEnum>> enumClass) {
-			this.id = id;
-			this.enumClass = enumClass;
-		}
-		public String getValueToString(int value) {
-			D3DStateEnum stateEnum = getStateEnumById(value, enumClass);
-			if (stateEnum == null) {
-				return Integer.toString(value);
-			} else {
-				return stateEnum.toString();
-			}
+			this.typeClass = typeClass;
 		}
 		public static D3DTextureStageStateType getById(int id) {
 			for (D3DTextureStageStateType state : values()) {
@@ -646,34 +677,24 @@ public class Direct3DEnums {
 		D3DSAMP_ADDRESSU       (1, D3DTEXTUREADDRESS.class),
 		D3DSAMP_ADDRESSV       (2, D3DTEXTUREADDRESS.class),
 		D3DSAMP_ADDRESSW       (3, D3DTEXTUREADDRESS.class),
-		D3DSAMP_BORDERCOLOR    (4), //color
+		D3DSAMP_BORDERCOLOR    (4, ColorRGBA.class), //color
 		D3DSAMP_MAGFILTER      (5, D3DTEXTUREFILTERTYPE.class),
 		D3DSAMP_MINFILTER      (6, D3DTEXTUREFILTERTYPE.class),
 		D3DSAMP_MIPFILTER      (7, D3DTEXTUREFILTERTYPE.class),
-		D3DSAMP_MIPMAPLODBIAS  (8), //int
-		D3DSAMP_MAXMIPLEVEL    (9), //int
-		D3DSAMP_MAXANISOTROPY  (10), //int
-		D3DSAMP_SRGBTEXTURE    (11), //int
-		D3DSAMP_ELEMENTINDEX   (12), //int
-		D3DSAMP_DMAPOFFSET     (13), //int
-		D3DSAMP_FORCE_DWORD    (0x7fffffff);
+		D3DSAMP_MIPMAPLODBIAS  (8, int.class), //int
+		D3DSAMP_MAXMIPLEVEL    (9, int.class), //int
+		D3DSAMP_MAXANISOTROPY  (10, int.class), //int
+		D3DSAMP_SRGBTEXTURE    (11, int.class), //int
+		D3DSAMP_ELEMENTINDEX   (12, int.class), //int
+		D3DSAMP_DMAPOFFSET     (13, int.class), //int
+		D3DSAMP_FORCE_DWORD    (0x7fffffff, int.class);
 
 		public int id;
-		Class<? extends Enum<? extends D3DStateEnum>> enumClass;
-		private D3DSamplerStateType(int id) {
+		public Class<?> typeClass;
+
+		private D3DSamplerStateType(int id, Class<?> typeClass) {
 			this.id = id;
-		}
-		private D3DSamplerStateType(int id, Class<? extends Enum<? extends D3DStateEnum>> enumClass) {
-			this.id = id;
-			this.enumClass = enumClass;
-		}
-		public String getValueToString(int value) {
-			D3DStateEnum stateEnum = getStateEnumById(value, enumClass);
-			if (stateEnum == null) {
-				return Integer.toString(value);
-			} else {
-				return stateEnum.toString();
-			}
+			this.typeClass = typeClass;
 		}
 		public static D3DSamplerStateType getById(int id) {
 			for (D3DSamplerStateType state : values()) {

@@ -293,6 +293,11 @@ public class PCTPUnit {
 				object.name = args.get(0);
 				object.identifier = args.get(1);
 				stream.getData().capabilityNames.add(object);
+				
+				CapabilityMapping mapping = new CapabilityMapping();
+				mapping.identifier = args.get(1);
+				mapping.index = stream.getData().capabilityNames.size() - 1;
+				stream.getData().capabilitiesMap.put(HashManager.get().getFileHash(object.name), mapping);
 			}
 		}));
 		
@@ -312,7 +317,12 @@ public class PCTPUnit {
 			if (line.getArguments(args, 2)) {
 				int hash = stream.parseFileID(args, 0);
 
-				stream.getData().capabilitiesMap.put(hash, stream.getData().capabilitiesMap.get(HashManager.get().fnvHash(args.get(1))));
+				CapabilityMapping object = stream.getData().capabilitiesMap.get(HashManager.get().fnvHash(args.get(1)));
+				if (object == null) {
+					stream.addError(line.createErrorForArgument(args.get(1) + " is not a defined capability", 1));
+				} else {
+					stream.getData().capabilitiesMap.put(hash, object);
+				}
 			}
 		}));
 		

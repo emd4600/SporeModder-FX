@@ -52,6 +52,13 @@ public class ColorRGBA {
 		this.a = (float) color.getOpacity();
 	}
 	
+	public ColorRGBA(int code) {
+		a = ((code & 0xFF000000) >> 24) / 255.0f;
+		r = ((code & 0x00FF0000) >> 16) / 255.0f;
+		g = ((code & 0x0000FF00) >> 8) / 255.0f;
+		b = ((code & 0x000000FF) >> 0) / 255.0f;
+	}
+	
 	public ColorRGBA(ColorRGBA color) {
 		copy(color);
 	}

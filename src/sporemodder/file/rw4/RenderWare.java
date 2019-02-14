@@ -61,15 +61,10 @@ public class RenderWare {
 			else {
 				System.err.println("Unrecognised RW section type: 0x" + Integer.toHexString(info.typeCode));
 			}
-			
-			System.out.println("0x" + Integer.toHexString(info.typeCode) + "\t" + info.pData);
 		}
 		
 		// Now that all objects have been created, read the sub references
 		header.sectionManifest.subReferences.readReferences(stream);
-		for (SubReference r : header.sectionManifest.subReferences.references) {
-			System.out.println("SubReference: " + r.offset);
-		}
 		
 		// Read the objects
 		for (RWObject object : objects) {

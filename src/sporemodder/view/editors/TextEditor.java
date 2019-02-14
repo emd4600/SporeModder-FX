@@ -34,18 +34,24 @@ import java.util.TreeSet;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Skin;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Popup;
 import sporemodder.EditorManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentFragment;
 import sporemodder.file.DocumentStructure;
+import sporemodder.file.TextUtils;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.syntax.SyntaxFormat;
 import sporemodder.view.syntax.SyntaxHighlighter;
@@ -107,7 +113,22 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 				codeArea.requestFollowCaret();
 			}
 		});
-	
+		
+		Nodes.addInputMap(codeArea, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB), event -> {
+			if (codeArea.getSelection().getLength() != 0) {
+				tabulateSelection();
+			} else {
+				codeArea.replaceSelection("\t");
+			}
+		}));
+		
+		Nodes.addInputMap(codeArea, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB, KeyCombination.SHIFT_DOWN), event -> {
+			if (codeArea.getSelection().getLength() != 0) {
+				untabulateSelection();
+			} else {
+				codeArea.replaceSelection("\t");
+			}
+		}));
 		
 		// -- Tooltips -- //
 		popupMsg.getStyleClass().add("tooltip");
@@ -145,6 +166,47 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		codeArea.caretPositionProperty().addListener((obs, oldText, newText) -> {
 			UIManager.get().notifyUIUpdate(false);
 		});
+	}
+	
+	private void tabulateSelection() {
+		int selectionStart = codeArea.getSelection().getStart();
+		int selectionEnd = codeArea.getSelection().getEnd();
+		String text = codeArea.getText();
+		
+		List<Integer> indices = new ArrayList<>();
+		int lineStart = TextUtils.scanLineStart(text, selectionStart);
+		while (lineStart < selectionEnd) {
+			indices.add(lineStart);
+			lineStart = TextUtils.scanLineStart(text, TextUtils.scanLineEnd(text, lineStart) + 1);
+		}
+		
+		for (int i = 0; i < indices.size(); ++i) {
+			// Add i because there are i \t characters now
+			codeArea.insertText(indices.get(i) + i, "\t");
+		}
+	}
+	
+	private void untabulateSelection() {
+		int selectionStart = codeArea.getSelection().getStart();
+		int selectionEnd = codeArea.getSelection().getEnd();
+		String text = codeArea.getText();
+		
+		List<Integer> indices = new ArrayList<>();
+		int lineStart = TextUtils.scanLineStart(text, selectionStart);
+		while (lineStart < selectionEnd) {
+			indices.add(lineStart);
+			lineStart = TextUtils.scanLineStart(text, TextUtils.scanLineEnd(text, lineStart) + 1);
+		}
+		
+		int subtract = 0;
+		for (int i = 0; i < indices.size(); ++i) {
+			int index = indices.get(i) - subtract;
+			if (text.charAt(index) == '\t') {
+				codeArea.replaceText(index, index + 1, "");
+				text = codeArea.getText();
+				++subtract;
+			}
+		}
 	}
 	
 	public void loadFile(ProjectItem item) throws IOException {
@@ -189,16 +251,10 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		
 		// Set the text
 		byte[] bytes = Files.readAllBytes(file.toPath());
-		originalContents = new String(bytes);
-		codeArea.replaceText(originalContents);
-		
-		codeArea.moveTo(0);
-		codeArea.scrollToPixel(0, 0);
 		
 		// Always returns null, does not work fine
 //		String type = Files.probeContentType(file.toPath());
 //		isValidText = "text/plain".equals(type);
-		
 		try {  
 			Charset.availableCharsets().get("UTF-8").newDecoder()
 				.decode(ByteBuffer.wrap(bytes));  
@@ -206,6 +262,16 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		} catch (CharacterCodingException e) {  
 			isValidText = false;
 		}  
+		
+		loadContents(new String(bytes));
+	}
+	
+	public void loadContents(String contents) throws IOException {
+		originalContents = contents;
+		codeArea.replaceText(originalContents);
+		
+		codeArea.moveTo(0);
+		codeArea.scrollToPixel(0, 0);
 		
 		if (item != null && item.isMod() && ProjectManager.get().getActive().isReadOnly()) {
 			codeArea.setEditable(false);
@@ -216,6 +282,8 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		setIsSaved(true);
 		
 		updateSyntaxHighlighting();
+		
+		codeArea.getUndoManager().forgetHistory();
 	}
 	
 	
@@ -295,7 +363,7 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		try {
 			codeArea.setStyleSpans(0, syntax.generateStyleSpans());
 		} catch (Exception e) {
-			
+			e.printStackTrace();
 		}
 	}
 	
@@ -366,7 +434,7 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 	public void setActive(boolean isActive) {
 		super.setActive(isActive);
 		
-		if (isActive && !isValidText) {
+		if (isActive && !isValidText && item != null) {
 			Label label = new Label("This format is not supported by SporeModder and it cannot be read as text, therefore it cannot be edited.");
 			label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
 			

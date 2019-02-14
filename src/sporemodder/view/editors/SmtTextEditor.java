@@ -16,14 +16,20 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-package sporemodder.view.syntax;
+package sporemodder.view.editors;
 
-public abstract class ArgScriptSyntax extends StandardSyntaxFormat {
+import sporemodder.file.shaders.MaterialStateLink;
 
-	@Override
-	public String getStylesheetPath() {
-		//TODO first try to get from 'SporeModder\Syntax\', otherwise get a failsafe from inside the .jar
-    	return XmlSyntax.class.getResource("/sporemodder/resources/styles/ArgScriptSyntax.css").toExternalForm();
+public class SmtTextEditor extends ArgScriptEditor<MaterialStateLink> {
+	
+	public SmtTextEditor() {
+		super();
+		
+		MaterialStateLink unit = new MaterialStateLink();
+		stream = unit.generateStream(false);
 	}
-
+	
+	@Override protected void onStreamParse() {
+		stream.getData().reset();
+	}
 }

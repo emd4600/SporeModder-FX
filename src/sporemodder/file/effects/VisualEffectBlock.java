@@ -369,14 +369,18 @@ public class VisualEffectBlock {
 	}
 	
 	public void toArgScript(ArgScriptWriter writer) {
-		if (component.getFactory() == null) {
-			// imports are used as effects
-			writer.command(VisualEffect.KEYWORD).arguments(component.name);
-		}
-		else if (component.getFactory().onlySupportsInline()) {
-			component.toArgScript(writer);
+		if (component != null) {
+			if (component.getFactory() == null) {
+				// imports are used as effects
+				writer.command(VisualEffect.KEYWORD).arguments(component.name);
+			}
+			else if (component.getFactory().onlySupportsInline()) {
+				component.toArgScript(writer);
+			} else {
+				writer.command(component.getFactory().getKeyword()).arguments(component.getName());
+			}
 		} else {
-			writer.command(component.getFactory().getKeyword()).arguments(component.getName());
+			writer.command("UNSUPPORTED_COMPONENT");
 		}
 		
 		transform.toArgScriptNoDefault(writer, false);

@@ -161,7 +161,7 @@ public class DBPFPackingTask extends Task<Void> {
 					boolean bUsesConverter = false;
 					
 					String name = file.getName();
-					file = getNestedFile(file, name);
+					file = getNestedFile(file, name, converters);
 					
 					// Skip if there was a problem
 					if (file == null) continue;
@@ -285,20 +285,17 @@ public class DBPFPackingTask extends Task<Void> {
 	}
 	
 	//TODO consider changing how nested files work
-	private File getNestedFile(File file, String name) {
+	private File getNestedFile(File file, String name, List<Converter> converters) {
 		if (!file.isFile()) {
-			if (name.contains(".") && !name.endsWith(".effdir.unpacked")) {
-				File newFile = new File(file, name);
-				if (!newFile.exists()) {
-					failedFiles.put(file, new UnsupportedOperationException("Couldn't find file " + name + " inside subfolder " + name));
-					return null;
-				}
-				file = newFile;
+			for (Converter converter : converters) {
+				if (converter.isEncoder(file)) return file;
 			}
-			else if (!name.endsWith(".effdir.unpacked")) {
-				failedFiles.put(file, new UnsupportedOperationException("Nested subfolders are not supported. File: " + name));
+			File newFile = new File(file, name);
+			if (!newFile.exists()) {
+				failedFiles.put(file, new UnsupportedOperationException("Couldn't find file " + name + " inside subfolder " + name));
 				return null;
 			}
+			file = newFile;
 		}
 		
 		return file;

@@ -81,6 +81,8 @@ public class LightEffect extends EffectComponent {
 	
 	@Override public void read(StreamReader in) throws IOException {
 		
+		System.out.println(in.getFilePointer());
+		
 		flags = in.readInt();  // & 0xF ?
 		type = in.readByte();
 		
@@ -110,8 +112,10 @@ public class LightEffect extends EffectComponent {
 		out.writeInt(flags);
 		out.writeByte(type);
 		
-		out.writeFloat(life);
-		out.writeShort(loop);
+		if (version > 1) {
+			out.writeFloat(life);
+			out.writeShort(loop);
+		}
 		
 		out.writeInt(color.size());
 		for (ColorRGB f : color) f.writeLE(out);

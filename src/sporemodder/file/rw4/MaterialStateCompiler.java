@@ -20,40 +20,48 @@ package sporemodder.file.rw4;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
+import sporemodder.HashManager;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.rw4.Direct3DEnums.D3DPRIMITIVETYPE;
 import sporemodder.file.rw4.Direct3DEnums.D3DRenderStateType;
 import sporemodder.file.rw4.Direct3DEnums.D3DSamplerStateType;
 import sporemodder.file.rw4.Direct3DEnums.D3DTextureStageStateType;
+import sporemodder.file.shaders.ShaderData;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.ColorRGBA;
 
 public class MaterialStateCompiler {
 	
-	public static class ShaderConstant {
+	public static class ShaderDataEntry {
 		public short index;
 		public short offset;
-		public byte[] data;
+		public int[] data;
 	}
 	
 	public static class TextureSlot {
+		
 		public final LinkedHashMap<D3DTextureStageStateType, Integer> textureStageStates = new LinkedHashMap<D3DTextureStageStateType, Integer>();
 		public final LinkedHashMap<D3DSamplerStateType, Integer> samplerStates = new LinkedHashMap<D3DSamplerStateType, Integer>();
 		// Usually a RWRaster, but might be a RWCompiledState too
 		public RWObject raster;
-		public int unkStageStates = 0x3F;
-		public int unkSamplerStates = 0x73;
+		public int stageStatesMask;
+		public int samplerStatesMask;
 		public int samplerIndex;
 	}
 	
+	public static final String KEYWORD = "compiledState";
+	
 	/** Used in the first flags value, whether shader constants are defined. */
-	private static final int FLAG_SHADER_CONSTANTS = 0x8;
+	private static final int FLAG_SHADER_DATA = 0x8;
 	/** Used in the first flags value, whether the material color is defined. */
 	private static final int FLAG_MATERIAL_COLOR = 0x10;
 	/** Used in the first flags value, whether the ambient color is defined. */
@@ -73,15 +81,19 @@ public class MaterialStateCompiler {
 	private static final int FLAG3_PALETTE_ENTRIES = 0x100000;
 	/** Used in the third flags value, which texture slots are used. */
 	// Spore checks for 0xDFFFF, using this should be enough
-	private static final int FLAG3_TEXTURE_SLOTS = 0xDFFFF;
+	private static final int FLAG3_TEXTURE_SLOTS = 0x1FFFF;
+	
+	// 0x10803B
+	private static final int FLAG_MASK = FLAG_SHADER_DATA | FLAG_MATERIAL_COLOR | FLAG_AMBIENT_COLOR |
+			FLAG_VERTEX_DESCRIPTION | FLAG_USE_BOOLEANS | FLAG_MODELTOWORLD | FLAG_MODELTOWORLD_OBJECT;
+	
+	private static final int FLAG3_MASK = FLAG3_RENDER_STATES | FLAG3_PALETTE_ENTRIES | FLAG3_TEXTURE_SLOTS;
 	
 	// Should only be used inside this package
 	byte[] data;
 	
 	private RenderWare renderWare;
 	private boolean isDecompiled;
-	
-	private boolean automaticFlags;
 
 	public ColorRGBA materialColor;
 	public ColorRGB ambientColor;
@@ -89,59 +101,95 @@ public class MaterialStateCompiler {
 	public int rendererID;
 	public D3DPRIMITIVETYPE primitiveType = D3DPRIMITIVETYPE.D3DPT_TRIANGLELIST;
 	public final List<TextureSlot> textureSlots = new ArrayList<TextureSlot>(); 
-	public final List<ShaderConstant> shaderConstants = new ArrayList<ShaderConstant>();
+	public final List<ShaderDataEntry> shaderData = new ArrayList<ShaderDataEntry>();
 	
-	public final LinkedHashMap<D3DRenderStateType, Integer> renderStates = new LinkedHashMap<D3DRenderStateType, Integer>();
+	public final Map<Integer, Map<D3DRenderStateType, Integer>> renderStates = new LinkedHashMap<>();
 	
 	/** Either a RWObject or a float[4][4], representing the 4x4 modelToWorld matrix. */
 	public Object modelToWorld;
 	
-	private int flags1;
-	private int flags2;
-	private int flags3;
+	public int extraFlags1;
+	public int extraFlags2;
+	public int extraFlags3;
 	
 	public int field_14;
 	
 	/** Only read if flags1 & 0x3FC0; each bit tells whether data is available for that 
 	 * position or not. */  // it's baked lighting data?
-	private Float[] unkData2;
+	public Float[] unkData2;
 	/** Only read if flags1 & FLAG_USE_BOOLEANS; it's 17 booleans. */
-	private boolean[] unkData3;
+	public boolean[] unkData3;
 	
 	/** Only read if flags1 & 0x10000. */
-	private Integer unkData4;
+	public Integer unkData4;
 	/** Only read if flags1 & 0x20000; 3 floats. */
-	private float[] unkData5;
+	public float[] unkData5;
 	/** Only read if flags1 & 0x40000. */
-	private Float unkData6;
+	public Float unkData6;
 	/** Only read if flags1 & 0x80000. */
-	private Float unkData7;
+	public Float unkData7;
 	/** Only read if field_14 & 0x20000; 7 integers, apparently flags. */
-	private int[] unkData8;
+	public int[] unkData8;
 	/** Only read if field_14 & 0x40000; 11 integers. */
-	private int[] unkData9;
+	public int[] unkData9;
 	/** Only read if field_14 & 0x80000; 11 integers. */
-	private int[] unkData10;
+	public int[] unkData10;
 	/** Only read if flags3 & 0x100000. This object must contain 256 palette entries,
 	 * with each palette entry being a 4-byte color. */
-	private RWObject paletteEntries;
+	public RWObject paletteEntries;
 	
 	public MaterialStateCompiler(RenderWare renderWare) {
 		super();
 		this.renderWare = renderWare;
 	}
+	
+	public void reset() {
+		isDecompiled = false;
+		materialColor = null;
+		ambientColor = null;
+		vertexDescription = null;
+		primitiveType = D3DPRIMITIVETYPE.D3DPT_TRIANGLELIST;
+		rendererID = 0;
+		textureSlots.clear();
+		shaderData.clear();
+		renderStates.clear();
+		modelToWorld = null;
+		extraFlags1 = 0;
+		extraFlags2 = 0;
+		extraFlags3 = 0;
+		field_14 = 0;
+		unkData2 = null;
+		unkData3 = null;
+		unkData4 = null;
+		unkData5 = null;
+		unkData6 = null;
+		unkData7 = null;
+		unkData8 = null;
+		unkData9 = null;
+		unkData10 = null;
+		paletteEntries = null;
+	}
+	
+	public byte[] getData() {
+		return data;
+	}
+	
+	public void setData(byte[] data) {
+		this.data = data;
+	}
 
 	public void decompile() throws IOException {
 		try (MemoryStream stream = new MemoryStream(data)) {
+			reset();
 			
 			// Size
 			stream.skip(4);
 			
 			primitiveType = D3DPRIMITIVETYPE.getById(stream.readLEInt());
 			
-			flags1 = stream.readLEInt();
-			flags2 = stream.readLEInt();
-			flags3 = stream.readLEInt();
+			int flags1 = stream.readLEInt();
+			int flags2 = stream.readLEInt();
+			int flags3 = stream.readLEInt();
 			field_14 = stream.readLEInt();
 			rendererID = stream.readLEInt();
 			
@@ -165,17 +213,23 @@ public class MaterialStateCompiler {
 				vertexDescription.read(stream);
 			}
 			
-			if ((flags1 & FLAG_SHADER_CONSTANTS) != 0) {
+			if ((flags1 & FLAG_SHADER_DATA) != 0) {
 				short index = stream.readLEShort();
 				
 				while (index != 0) {
 					if (index > 0) {
-						ShaderConstant sc = new ShaderConstant();
+						ShaderDataEntry sc = new ShaderDataEntry();
+						shaderData.add(sc);
 						sc.index = index;
 						sc.offset = stream.readLEShort();
-						sc.data = new byte[stream.readLEInt()];
+						int length = stream.readLEInt();
+						if (length % 4 != 0) throw new IOException("Unexpected ShaderData length " + length);
+						sc.data = new int[length / 4];
 						stream.skip(sc.offset);  // ?
-						stream.read(sc.data);
+						stream.readLEInts(sc.data);
+						
+						// Spore uses it as a render ware index
+						if (sc.data.length == 0) stream.skip(4);
 					}
 					
 					index = stream.readLEShort();
@@ -240,17 +294,19 @@ public class MaterialStateCompiler {
 			}
 			
 			if ((flags3 & FLAG3_RENDER_STATES) != 0) {
-				stream.skip(4);
+				int group = stream.readLEInt();
 				
-				while (true) {
-					int state = stream.readLEInt();
-					int value = stream.readLEInt();
+				while (group != -1) {
+					Map<D3DRenderStateType, Integer> states = new LinkedHashMap<>();
 					
-					if (state == -1 && value == -1) {
-						break;
+					int state = stream.readLEInt();
+					while (state != -1) {
+						states.put(D3DRenderStateType.getById(state), stream.readLEInt());
+						state = stream.readLEInt();
 					}
 					
-					renderStates.put(D3DRenderStateType.getById(state), value);
+					renderStates.put(group, states);
+					group = stream.readLEInt();
 				}
 			}
 			
@@ -272,8 +328,8 @@ public class MaterialStateCompiler {
 					slot.samplerIndex = samplerIndex;
 					slot.raster = renderWare.get(stream.readLEInt());
 					
-					slot.unkStageStates = stream.readLEInt();
-					if (slot.unkStageStates != 0) {
+					slot.stageStatesMask = stream.readLEInt();
+					if (slot.stageStatesMask != 0) {
 						int state;
 						
 						while ((state = stream.readLEInt()) != -1) {
@@ -281,8 +337,8 @@ public class MaterialStateCompiler {
 						}
 					}
 					
-					slot.unkSamplerStates = stream.readLEInt();
-					if (slot.unkSamplerStates != 0) {
+					slot.samplerStatesMask = stream.readLEInt();
+					if (slot.samplerStatesMask != 0) {
 						int state;
 						
 						while ((state = stream.readLEInt()) != -1) {
@@ -292,20 +348,27 @@ public class MaterialStateCompiler {
 				}
 			}
 			
+			extraFlags1 = flags1 & ~FLAG_MASK;
+			extraFlags2 = ~flags1 & flags2;
+			extraFlags3 = flags3 & ~FLAG3_MASK;
+			
 			isDecompiled = true;
 		}
 	}
 	
 	public void compile() throws IOException {
-		if (automaticFlags) {
-			flags1 = 0;
-			flags2 = 0;
-			flags3 = 0;
-			
-			// Always used? Don't really know what it does
-			flags1 |= 4;
-			flags2 |= 0x8000;
-		}
+		
+		int flags1 = 0;
+		int flags2 = 0;
+		int flags3 = 0;
+		
+//		// Always used? Don't really know what it does
+//		flags1 |= 4;
+//		flags2 |= 0x8000;
+		
+		flags1 |= extraFlags1;
+		flags2 |= extraFlags2;
+		flags3 |= extraFlags3;
 		
 		if (materialColor != null) flags1 |= FLAG_MATERIAL_COLOR;
 		else flags1 &= ~FLAG_MATERIAL_COLOR;
@@ -313,32 +376,32 @@ public class MaterialStateCompiler {
 		if (ambientColor != null) flags1 |= FLAG_AMBIENT_COLOR;
 		else flags1 &= ~FLAG_AMBIENT_COLOR;
 		
-		if (unkData3 != null) flags1 |= FLAG_USE_BOOLEANS;
-		else flags1 &= ~FLAG_USE_BOOLEANS;
+		flags1 |= FLAG_USE_BOOLEANS;
+//		if (unkData3 != null) flags1 |= FLAG_USE_BOOLEANS;
+//		else flags1 &= ~FLAG_USE_BOOLEANS;
 		
-		if (!shaderConstants.isEmpty()) {
-			flags1 |= FLAG_SHADER_CONSTANTS;
-			flags2 |= FLAG_SHADER_CONSTANTS;
+		if (!shaderData.isEmpty()) {
+			flags1 |= FLAG_SHADER_DATA;
 		}
 		else {
-			flags2 &= ~FLAG_SHADER_CONSTANTS;
-			flags2 &= ~FLAG_SHADER_CONSTANTS;
+			flags2 &= ~FLAG_SHADER_DATA;
 		}
 		
 		if (vertexDescription != null) {
 			flags1 |= FLAG_VERTEX_DESCRIPTION;
-			flags2 |= FLAG_VERTEX_DESCRIPTION;
 		}
 		else {
-			flags2 &= ~FLAG_VERTEX_DESCRIPTION;
 			flags2 &= ~FLAG_VERTEX_DESCRIPTION;
 		}
 		
 		if (!renderStates.isEmpty()) flags3 |= FLAG3_RENDER_STATES;
 		else flags3 &= ~FLAG3_RENDER_STATES;
 		
-		if (!textureSlots.isEmpty()) flags3 |= FLAG3_TEXTURE_SLOTS;
-		else flags3 &= ~FLAG3_TEXTURE_SLOTS;
+		for (TextureSlot slot : textureSlots) {
+			flags3 |= 1 << slot.samplerIndex;
+		}
+//		if (!textureSlots.isEmpty()) flags3 |= FLAG3_TEXTURE_SLOTS;
+//		else flags3 &= ~FLAG3_TEXTURE_SLOTS;
 		
 		if (paletteEntries != null) flags3 |= FLAG3_PALETTE_ENTRIES;
 		else flags3 &= ~FLAG3_PALETTE_ENTRIES;
@@ -386,6 +449,9 @@ public class MaterialStateCompiler {
 		if (unkData10 != null) field_14 |= 0x80000;
 		else field_14 &= ~0x80000;
 		
+		System.out.println("0x" + Integer.toHexString(flags2));
+		flags2 |= (0xFFFF & flags1);
+		
 		
 		try (MemoryStream stream = new MemoryStream()) {
 			
@@ -413,15 +479,19 @@ public class MaterialStateCompiler {
 				vertexDescription.write(stream);
 			}
 			
-			if (!shaderConstants.isEmpty()) {
-				for (ShaderConstant sc : shaderConstants) {
+			if (!shaderData.isEmpty()) {
+				for (ShaderDataEntry sc : shaderData) {
 					stream.writeLEShort(sc.index);
 					stream.writeLEShort(sc.offset);
-					stream.writeLEInt(sc.data.length);
+					stream.writeLEInt(sc.data.length * 4);
 					
 					if (sc.offset > 0) stream.writePadding(sc.offset);
-					stream.write(sc.data);
+					stream.writeLEInts(sc.data);
+					
+					if (sc.data.length == 0) stream.writeInt(0);
 				}
+				
+				stream.writePadding(8);
 			}
 			
 			if (materialColor != null) {
@@ -437,9 +507,14 @@ public class MaterialStateCompiler {
 				}
 			}
 			
-			if (unkData3 != null) {
-				stream.writeBooleans(unkData3);
+			if (unkData3 == null) {
+				unkData3 = new boolean[17];
+				for (TextureSlot slot : textureSlots) {
+					unkData3[slot.samplerIndex] = true;
+				}
 			}
+			// This is not an option anymore. Setting all to false has the same effect as not having them?
+			stream.writeBooleans(unkData3);
 			
 			if (unkData4 != null) stream.writeLEInt(unkData4);
 			if (unkData5 != null) stream.writeLEFloats(unkData5);
@@ -450,14 +525,14 @@ public class MaterialStateCompiler {
 			if (unkData10 != null) stream.writeLEInts(unkData10);
 			
 			if (!renderStates.isEmpty()) {
-				stream.writeLEInt(0);
-				
-				for (Map.Entry<D3DRenderStateType, Integer> entry : renderStates.entrySet()) {
-					stream.writeLEInt(entry.getKey().id);
-					stream.writeLEInt(entry.getValue());
+				for (int group : renderStates.keySet()) {
+					stream.writeLEInt(group);
+					for (Map.Entry<D3DRenderStateType, Integer> entry : renderStates.get(group).entrySet()) {
+						stream.writeLEInt(entry.getKey().id);
+						stream.writeLEInt(entry.getValue());
+					}
+					stream.writeLEInt(-1);
 				}
-				
-				stream.writeLEInt(-1);
 				stream.writeLEInt(-1);
 			}
 			
@@ -470,10 +545,10 @@ public class MaterialStateCompiler {
 				
 				for (TextureSlot slot : textureSlots) {
 					stream.writeLEInt(slot.samplerIndex);
-					stream.writeLEInt(renderWare.indexOf(slot.raster));
+					stream.writeLEInt(slot.raster == null ? -1 : renderWare.indexOf(slot.raster));
 					
-					stream.writeLEInt(slot.unkStageStates);
-					if (slot.unkStageStates != 0) {
+					stream.writeLEInt(slot.stageStatesMask);
+					if (slot.stageStatesMask != 0) {
 						for (Map.Entry<D3DTextureStageStateType, Integer> entry : slot.textureStageStates.entrySet()) {
 							stream.writeLEInt(entry.getKey().id);
 							stream.writeLEInt(entry.getValue());
@@ -481,9 +556,9 @@ public class MaterialStateCompiler {
 						stream.writeLEInt(-1);
 					}
 					
-					stream.writeLEInt(slot.unkStageStates);
-					if (slot.unkStageStates != 0) {
-						for (Map.Entry<D3DTextureStageStateType, Integer> entry : slot.textureStageStates.entrySet()) {
+					stream.writeLEInt(slot.samplerStatesMask);
+					if (slot.samplerStatesMask != 0) {
+						for (Map.Entry<D3DSamplerStateType, Integer> entry : slot.samplerStates.entrySet()) {
 							stream.writeLEInt(entry.getKey().id);
 							stream.writeLEInt(entry.getValue());
 						}
@@ -496,20 +571,18 @@ public class MaterialStateCompiler {
 			
 			stream.seek(0);
 			stream.writeLEUInt(stream.length());
+			
+			data = stream.toByteArray();
 		}
 	}
 	
-	public boolean isAutomaticFlags() {
-		return automaticFlags;
-	}
-
-	/**
-	 * If true, the flags value will be reseted and will be set depending on the existing 
-	 * parameters.
-	 * @param automaticFlags
-	 */
-	public void setAutomaticFlags(boolean automaticFlags) {
-		this.automaticFlags = automaticFlags;
+	private boolean compareUnkData3() {
+		for (int i = 0; i < 17; ++i) {
+			if (i < textureSlots.size()) {
+				if (!unkData3[i]) return true;
+			} else if (unkData3[i]) return false;
+		}
+		return true;
 	}
 
 	/**
@@ -520,13 +593,165 @@ public class MaterialStateCompiler {
 	public boolean isDecompiled() {
 		return isDecompiled;
 	}
+	
+	public static int calculateStageStateMask(TextureSlot slot) {
+		int mask = 0;
+		for (D3DTextureStageStateType key : slot.textureStageStates.keySet()) {
+			mask |= 1 << (key.id-1);
+		}
+		return mask;
+	}
+	
+	public static int calculateSamplerStateMask(TextureSlot slot) {
+		int mask = 0;
+		for (D3DSamplerStateType key : slot.samplerStates.keySet()) {
+			mask |= 1 << (key.id-1);
+		}
+		return mask;
+	}
+	
+	public String toArgScript(String name) {
+		ArgScriptWriter writer = new ArgScriptWriter();
+		toArgScript(name, writer);
+		return writer.toString();
+	}
+	
+	public void toArgScript(String name, ArgScriptWriter writer) {
+		writer.command(KEYWORD).arguments(name).startBlock();
+		
+		writer.command("shaderID").arguments(HashManager.get().getFileName(rendererID));
+		if (primitiveType != D3DPRIMITIVETYPE.D3DPT_TRIANGLELIST) {
+			writer.command("primitiveType").arguments(primitiveType.toString());
+		}
+		
+		if (materialColor != null) writer.command("materialColor").colorsRGBA(materialColor);
+		if (ambientColor != null) writer.command("ambientColor").color(ambientColor);
+		
+		if (extraFlags1 != 0 || extraFlags3 != 0) {
+			writer.blankLine();
+			if (extraFlags1 != 0) writer.command("flags1").arguments("0x" + Integer.toHexString(extraFlags1));
+			if (extraFlags3 != 0) writer.command("flags3").arguments("0x" + Integer.toHexString(extraFlags3));
+		}
+		
+		if (!shaderData.isEmpty()) {
+			writer.blankLine();
+			for (ShaderDataEntry sd : shaderData) {
+				writer.command("shaderData").arguments(ShaderData.getName(sd.index));
+				for (int i : sd.data) {
+					writer.arguments(HashManager.get().formatInt32(i));
+				}
+				if (sd.offset != 0) writer.option("offset").ints(sd.offset);
+			}
+		}
+		
+		if (unkData3 != null) {
+			if (!compareUnkData3()) {
+				writer.blankLine();
+				writer.command("unkData3");
+				for (int i = 0; i < unkData3.length; ++i) {
+					writer.arguments(unkData3[i]);
+				}
+			}
+		} else {
+			writer.blankLine();
+			// No unkData3 command means assigning it automatically, so this is to disable it
+			writer.command("unkData3");
+			for (int i = 0; i < 17; ++i) writer.ints(0);
+		}
+		
+		if (vertexDescription != null) {
+			writer.blankLine();
+			writer.command("vertexDescription");
+			
+			if (vertexDescription.field_0 != 0) writer.option("field_0").arguments("0x" + Integer.toHexString(vertexDescription.field_0));
+			if (vertexDescription.field_4 != 0) writer.option("field_4").arguments("0x" + Integer.toHexString(vertexDescription.field_4));
+			if (vertexDescription.field_0E != 0) writer.option("field_0E").arguments("0x" + Integer.toHexString(vertexDescription.field_0E));
+			if (vertexDescription.field_10 != 0) writer.option("field_10").arguments("0x" + Integer.toHexString(vertexDescription.field_10));
+			if (vertexDescription.field_14 != 0) writer.option("field_14").arguments("0x" + Integer.toHexString(vertexDescription.field_14));
+			
+			writer.startBlock();
+			for (RWVertexElement element : vertexDescription.elements) {
+				element.toArgScript(writer);
+			}
+			writer.endBlock().commandEND();
+		}
+		
+		if (!renderStates.isEmpty()) {
+			writer.blankLine();
+			Set<Integer> groups = renderStates.keySet();
+			if (groups.size() == 1 && groups.contains(0)) {
+				for (Map.Entry<D3DRenderStateType, Integer> entry : renderStates.get(0).entrySet()) {
+					writer.command("renderState").arguments(entry.getKey(), Direct3DEnums.getValueToString(entry.getKey().typeClass, entry.getValue()));
+				}
+			}
+			else {
+				for (int group : renderStates.keySet()) {
+					writer.command("statesGroup").ints(group).startBlock();
+					for (Map.Entry<D3DRenderStateType, Integer> entry : renderStates.get(group).entrySet()) {
+						writer.command("renderState").arguments(entry.getKey(), Direct3DEnums.getValueToString(entry.getKey().typeClass, entry.getValue()));
+					}
+					writer.endBlock().commandEND();
+				}
+			}
+		}
+		
+		for (TextureSlot slot : textureSlots) {
+			writer.blankLine();
+			writer.command("textureSlot").ints(slot.samplerIndex).startBlock();
+			
+			boolean first = true;
+			if (slot.raster != null) {
+				first = false;
+				writer.command("raster").ints(renderWare.indexOf(slot.raster));
+			}
+			
+			if (!slot.textureStageStates.isEmpty()) {
+				if (!first) writer.blankLine();
+				first = false;
+				for (Map.Entry<D3DTextureStageStateType, Integer> entry : slot.textureStageStates.entrySet()) {
+					writer.command("stageState").arguments(entry.getKey(), Direct3DEnums.getValueToString(entry.getKey().typeClass, entry.getValue()));
+				}
+			}
+			
+			if (!slot.samplerStates.isEmpty()) {
+				if (!first) writer.blankLine();
+				first = false;
+				for (Map.Entry<D3DSamplerStateType, Integer> entry : slot.samplerStates.entrySet()) {
+					writer.command("samplerState").arguments(entry.getKey(), Direct3DEnums.getValueToString(entry.getKey().typeClass, entry.getValue()));
+				}
+			}
+			
+			writer.endBlock().commandEND();
+		}
+		
+		writer.endBlock().commandEND();
+	}
 
 	public static void main(String[] args) throws IOException {
+		
+		//File file = new File("E:\\Eric\\SporeModder\\Projects\\Spore_Graphics.package.unpacked\\#40212001\\#00000003.rw4");
+		File file = new File("C:\\Users\\Eric\\Desktop\\test.rw4");
+		
+		MaterialStateCompiler state = new MaterialStateCompiler(new RenderWare());
+		state.data = Files.readAllBytes(file.toPath());
+		state.decompile();
+		
+		try (FileStream stream = new FileStream(file, "r")) {
+//			RenderWare renderWare = new RenderWare();
+//			renderWare.read(stream);
+//			List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
+//			for (RWCompiledState state : compiledStates) {
+//				state.data.decompile();
+//				
+//			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 //		File folder = new File("E:\\Eric\\SporeModder\\Projects\\Spore_Graphics.package.unpacked\\animations~");
 //		for (File file : folder.listFiles()) {
 //			if (file.getName().endsWith(".rw4")) {
-//				
 //				try (FileStream stream = new FileStream(file, "r")) {
 //					RenderWare renderWare = new RenderWare();
 //					renderWare.read(stream);
@@ -534,53 +759,10 @@ public class MaterialStateCompiler {
 //					for (RWCompiledState state : compiledStates) {
 //						state.data.decompile();
 //						
-//						if (state.data.unkData1 != null) {
-//							System.out.println("1: " + file.getName());
-//						}
-//						
-//						if (state.data.unkData2 != null) {
-//							System.out.println("2: " + file.getName());
-//						}
-//						
-//						if (state.data.unkData4 != null) System.out.println("4: " + file.getName());
-//						if (state.data.unkData5 != null) System.out.println("5: " + file.getName());
-//						if (state.data.unkData6 != null) System.out.println("6: " + file.getName());
-//						if (state.data.unkData7 != null) System.out.println("7: " + file.getName());
-//						if (state.data.unkData8 != null) System.out.println("8: " + file.getName());
-//						if (state.data.unkData9 != null) System.out.println("9: " + file.getName());
-//						if (state.data.unkData10 != null) System.out.println("10: " + file.getName());
-//						if (state.data.paletteEntries != null) System.out.println("paletteEntries: " + file.getName());
+//						//if (state.data.extraFlags != null && !state.data.compareUnkData3()) System.out.println("Wrong data 3");
 //					}
-//				}
-//				catch (Exception e) {
-//					e.printStackTrace();
-//					continue;
 //				}
 //			}
 //		}
-		
-		File file = new File("E:\\Eric\\SporeModder\\Projects\\Spore_Graphics.package.unpacked\\#40212001\\#00000003.rw4");
-		
-		try (FileStream stream = new FileStream(file, "r")) {
-			RenderWare renderWare = new RenderWare();
-			renderWare.read(stream);
-			List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
-			for (RWCompiledState state : compiledStates) {
-				state.data.decompile();
-				
-				if (state.data.unkData2 != null) System.out.println("2: " + state.sectionInfo.pData);
-				if (state.data.unkData4 != null) System.out.println("4: " + state.sectionInfo.pData);
-				if (state.data.unkData5 != null) System.out.println("5: " + state.sectionInfo.pData);
-				if (state.data.unkData6 != null) System.out.println("6: " + state.sectionInfo.pData);
-				if (state.data.unkData7 != null) System.out.println("7: " + state.sectionInfo.pData);
-				if (state.data.unkData8 != null) System.out.println("8: " + state.sectionInfo.pData);
-				if (state.data.unkData9 != null) System.out.println("9: " + state.sectionInfo.pData);
-				if (state.data.unkData10 != null) System.out.println("10: " + state.sectionInfo.pData);
-				if (state.data.paletteEntries != null) System.out.println("paletteEntries: " + state.sectionInfo.pData);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -23,7 +23,7 @@ import org.fxmisc.richtext.CodeArea;
 
 import javafx.scene.control.SkinBase;
 
-public class TextEditorSkin extends SkinBase<TextEditor> {
+class TextEditorSkin extends SkinBase<TextEditor> {
 	
 	private VirtualizedScrollPane<CodeArea> scrollPane;
 	

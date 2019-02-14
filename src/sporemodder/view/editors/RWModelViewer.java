@@ -22,7 +22,10 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,8 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -74,9 +79,12 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import sporemodder.FileManager;
+import sporemodder.HashManager;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.BoundingBox;
 import sporemodder.file.dds.DDSTexture;
+import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
 import sporemodder.file.rw4.MaterialStateCompiler;
 import sporemodder.file.rw4.RWBBox;
@@ -91,6 +99,7 @@ import sporemodder.file.rw4.RWRaster;
 import sporemodder.file.rw4.RWVertexBuffer;
 import sporemodder.file.rw4.RWVertexElement;
 import sporemodder.file.rw4.RenderWare;
+import sporemodder.file.shaders.MaterialStateLink;
 import sporemodder.util.ProjectItem;
 
 /**
@@ -212,6 +221,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private TreeView<String> treeView = new TreeView<>();
 	
 	private TreeItem<String> tiTextures = new TreeItem<String>("Textures");
+	private TreeItem<String> tiCompiledStates = new TreeItem<String>("Compiled States");
 	
 	private final Map<String, RWObject> nameMap = new HashMap<>();
 	private final Map<String, TreeItem<String>> itemsMap = new HashMap<>();
@@ -238,7 +248,9 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     	treeView.setMaxHeight(TREE_VIEW_HEIGHT);
     	
     	rootItem.getChildren().add(tiTextures);
+    	//rootItem.getChildren().add(tiCompiledStates);
     	tiTextures.setExpanded(true);
+    	tiCompiledStates.setExpanded(true);
     	
     	treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
     		if (newValue != null) {
@@ -267,13 +279,13 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			RWVertexElement normalElement = null;
 			
 			for (RWVertexElement element : buffer.vertexDescription.elements) {
-				if (element.typeCode == RWDECLUSAGE.POSITION) {
+				if (element.typeCode == RWDECLUSAGE.POSITION.getId()) {
 					positionElement = element;
 				}
-				else if (element.typeCode == RWDECLUSAGE.TEXCOORD) {
+				else if (element.typeCode == RWDECLUSAGE.TEXCOORD0.getId()) {
 					texcoordElement = element;
 				}
-				else if (element.typeCode == RWDECLUSAGE.NORMAL) {
+				else if (element.typeCode == RWDECLUSAGE.NORMAL.getId()) {
 					normalElement = element;
 				}
 			}
@@ -448,6 +460,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	}
 	
 	private void loadMaterial(RWCompiledState compiledState, MeshView meshView) throws IOException {
+		
 		MaterialStateCompiler state = compiledState.data;
 		state.decompile();
 		
@@ -637,9 +650,20 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			for (RWRaster raster : rasters) {
 				String name = renderWare.getName(raster);
 				nameMap.put(name, raster);
+				
 				TreeItem<String> item = new TreeItem<String>(name);
 				itemsMap.put(name, item);
 				tiTextures.getChildren().add(item);
+			}
+			
+			List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
+			for (RWCompiledState compiledState : compiledStates) {
+				String name = renderWare.getName(compiledState);
+				nameMap.put(name, compiledState);
+				
+				TreeItem<String> item = new TreeItem<String>(name);
+				itemsMap.put(name, item);
+				tiCompiledStates.getChildren().add(item);
 			}
 		}
 	}
@@ -811,7 +835,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private void showInspector(boolean show) {
 		if (show) {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle("Effects Editor");
+			UIManager.get().getUserInterface().getInspectorPane().setTitle("Model Viewer");
 			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
 		} else {
 			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
@@ -872,15 +896,19 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private void fillPropertiesPane(String selectedName) {
 		RWObject object = nameMap.get(selectedName);
-		if (object == null) {
-			propertiesContainer.setContent(null);
-		} 
-		else if (object instanceof RWRaster) {
+		
+		if (object instanceof RWRaster) {
 			fillTexturePane(selectedName, (RWRaster) object);
+			return;
 		}
-		else {
-			propertiesContainer.setContent(null);
+		else if (object instanceof RWCompiledState) {
+			UIManager.get().tryAction(() -> {
+				showCompiledStateEditor(selectedName);
+			}, "Error with compiled state.");
+			// We don't return because we want to empty the properties container
 		}
+		
+		propertiesContainer.setContent(null);
 	}
 	
 	private void fillTexturePane(String name, RWRaster raster) {
@@ -985,7 +1013,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			}
 		}
 		
-		if (undoRedoIndex == 1 && editHistory.get(0) == ORIGINAL_ACTION) {
+		if (undoRedoIndex == 0 && editHistory.get(0) == ORIGINAL_ACTION) {
 			setIsSaved(true);
 		} else {
 			setIsSaved(false);
@@ -1065,5 +1093,93 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	@Override
 	protected void restoreContents() throws Exception {
 		loadModel(getItem());
+	}
+	
+	public void showCompiledStateEditor(String name) throws IOException {
+		HashManager.get().setUpdateProjectRegistry(true);
+		
+		RWCompiledState state = (RWCompiledState) nameMap.get(name);
+		
+		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
+		CompiledStateEditor editor = new CompiledStateEditor(dialog);
+		if (!state.data.isDecompiled()) {
+			state.data.decompile();
+		}
+		editor.loadContents(state.data.toArgScript(name));
+		
+		dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.APPLY);
+		dialog.getDialogPane().setContent(editor);
+		dialog.setTitle(name);
+		
+		editor.setPrefWidth(800);
+		editor.setPrefHeight(600);
+		
+		dialog.setResizable(true);
+		
+		if (UIManager.get().showDialog(dialog).orElse(ButtonType.CANCEL) != ButtonType.CANCEL) {
+			HashManager.get().setUpdateProjectRegistry(false);
+			ProjectManager.get().saveNamesRegistry();
+			
+			byte[] oldData = state.data.getData();
+			
+			MaterialStateCompiler compiler = editor.stream.getData().states.get(0);
+			compiler.vertexDescription = state.data.vertexDescription;
+			compiler.compile();
+			byte[] newData = compiler.getData();
+			
+			if (!Arrays.equals(oldData, newData)) {
+				state.data = compiler;
+				
+				addEditAction(new RWUndoableAction(name) {
+
+					@Override public void undo() {
+						state.data.setData(oldData);
+						try {
+							state.data.decompile();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+
+					@Override public void redo() {
+						state.data.setData(newData);
+						try {
+							state.data.decompile();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		}
+	}
+	
+	private class CompiledStateEditor extends ArgScriptEditor<MaterialStateLink> {
+		private final MaterialStateLink stateLink = new MaterialStateLink();
+		private final Dialog<ButtonType> dialog;
+		
+		public CompiledStateEditor(Dialog<ButtonType> dialog) {
+			super();
+			this.dialog = dialog;
+			
+			stateLink.renderWare = renderWare;
+			stream = stateLink.generateStream(false);
+		}
+		
+		@Override protected void onStreamParse() {
+			super.onStreamParse();
+			
+			stateLink.reset();
+		}
+		
+		@Override protected void afterStreamParse() {
+			super.afterStreamParse();
+			
+			Node button = dialog.getDialogPane().lookupButton(ButtonType.APPLY);
+			if (button != null && stream != null) {
+				boolean disable = !stream.getErrors().isEmpty() || stream.getData().states.isEmpty();
+				button.setDisable(disable);
+			}
+		}
 	}
 }

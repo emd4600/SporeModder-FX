@@ -39,6 +39,7 @@ import sporemodder.util.ProjectItem;
 
 public class RenderWareConverter implements Converter {
 	
+	public static final int TYPE_ID = 0x2F4E681B;
 	private static String extension = null;
 	
 	private boolean decode(StreamReader stream, File outputFile) throws IOException {
@@ -99,7 +100,7 @@ public class RenderWareConverter implements Converter {
 				DBPFItem item = packer.getTemporaryItem();
 				item.name.setGroupID(groupID);
 				item.name.setInstanceID(input.getName().split("\\.", 2)[0]);
-				item.name.setTypeID(0x2F4E681B);  // rw4
+				item.name.setTypeID(TYPE_ID);  // rw4
 				packer.writeFileData(item, outputStream.getRawData(), (int) outputStream.length());
 				packer.addFile(item);
 				

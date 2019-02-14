@@ -30,6 +30,7 @@ import java.util.Properties;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import sporemodder.file.shaders.FXCompiler;
 
 /**
  * The main class of the program.
@@ -48,6 +49,7 @@ public class MainApp extends Application {
 	private FormatManager formatManager;
 	private FileManager fileManager;
 	private UpdateManager updateManager;
+	private FXCompiler fxCompiler;
 	
 	private Properties settings;
 	
@@ -135,6 +137,10 @@ public class MainApp extends Application {
 		return updateManager;
 	}
 	
+	public FXCompiler getFXCompiler() {
+		return fxCompiler;
+	}
+	
 	/**
 	 * Returns the current instance of the MainApp class.
 	 */
@@ -160,6 +166,7 @@ public class MainApp extends Application {
 		formatManager = new FormatManager();
 		fileManager = new FileManager();
 		updateManager = new UpdateManager();
+		fxCompiler = new FXCompiler();
 		
 		// Initialize it first, otherwise we can't get the settings
 		pathManager.initialize(null);
@@ -185,6 +192,7 @@ public class MainApp extends Application {
 		projectManager.initialize(settings);
 		if (!testInit) documentationManager.initialize(settings);
 		formatManager.initialize(settings);
+		fxCompiler.initialize(settings);
 		
 		// The plugin must go last, as plugins will use the other managers
 		pluginManager.initialize(settings);
@@ -201,6 +209,7 @@ public class MainApp extends Application {
 		documentationManager.saveSettings(settings);
 		formatManager.saveSettings(settings);
 		fileManager.saveSettings(settings);
+		fxCompiler.saveSettings(settings);
 		
 		try (OutputStream stream = new FileOutputStream(pathManager.getProgramFile("config.properties"))) {
 			settings.store(stream, null);
@@ -219,6 +228,7 @@ public class MainApp extends Application {
 		// The plugin must go first, as plugins will use the other managers
 		pluginManager.dispose();
 		
+		fxCompiler.dispose();
 		documentationManager.dispose();
 		formatManager.dispose();
 		editorManager.dispose();

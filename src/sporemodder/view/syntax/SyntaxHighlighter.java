@@ -130,6 +130,7 @@ public class SyntaxHighlighter {
 		// Invariant: ceilEntry.start >= start
 		while (ceilEntry != null && ceilEntry.getEnd() <= end) {
 			entries.remove(ceilEntry.start);
+			ceilEntry = higherEntry(ceilEntry.start);
 		}
 		
 		// Now that the boundaries are cleared, just add the new style

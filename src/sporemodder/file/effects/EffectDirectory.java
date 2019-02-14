@@ -340,15 +340,18 @@ public class EffectDirectory {
 			
 			componentOffsets[type] = offset + 4;
 			
-			List<EffectComponent> list = new ArrayList<EffectComponent>(count);
-			components.set(type, list);
-			
-			String keyword = factories[type].getKeyword();
-			
-			for (int i = 0; i < count; ++i) {
-				EffectComponent component = factories[type].create(this, version);
-				component.setName(keyword + '-' + Integer.toString(i));
-				list.add(component);
+			if (type < factories.length && factories[type] != null &&
+					version >= factories[type].getMinVersion() && version <= factories[type].getMaxVersion()) {
+				List<EffectComponent> list = new ArrayList<EffectComponent>(count);
+				components.set(type, list);
+				
+				String keyword = factories[type].getKeyword();
+				
+				for (int i = 0; i < count; ++i) {
+					EffectComponent component = factories[type].create(this, version);
+					component.setName(keyword + '-' + Integer.toString(i));
+					list.add(component);
+				}
 			}
 			
 			stream.seek(offset + size);
@@ -762,8 +765,11 @@ public class EffectDirectory {
 	public static void main(String[] args) throws IOException {
 		MainApp.testInit();
 		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\games.effdir";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\games.effdir.unpacked";
+//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir";
+//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir.unpacked";
+		
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\base.effdir";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\base.effdir.unpacked";
 		
 		long time = System.currentTimeMillis();
 		

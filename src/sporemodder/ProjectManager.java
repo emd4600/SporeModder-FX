@@ -1750,6 +1750,7 @@ public class ProjectManager extends AbstractManager {
 				
 				MemoryStream stream = XmlPropParser.xmlToProp(in);
 				stream.seek(0);
+				//stream.writeToFile(new File(destFolder, name + ".prop"));
 				
 				PropertyList list = new PropertyList();
 				list.read(stream);
@@ -1919,6 +1920,7 @@ public class ProjectManager extends AbstractManager {
 		ImportProjectTask task = new ImportProjectTask(project, sourceFolder, fileRegistry, propRegistry, typeRegistry);
 		task.showProgressDialog();
 		
+		hasher.replaceRegistries(null, null, null);
 		hasher.setUpdateProjectRegistry(false);
 		saveNamesRegistry(project);
 		hasher.getProjectRegistry().clear();
@@ -1977,5 +1979,14 @@ public class ProjectManager extends AbstractManager {
 		} else {
 			return false;
 		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		MainApp.testInit();
+		
+		File file = new File("C:\\Users\\Eric\\Downloads\\DI_ItemDrop.prop.xml");
+		File destFolder = new File("C:\\Users\\Eric\\Desktop");
+		
+		ProjectManager.get().importFile(file, destFolder);
 	}
 }

@@ -543,6 +543,7 @@ public class UIManager extends AbstractManager {
 			return true;
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			showErrorDialog(e, errorText, true);
 			return false;
 		}

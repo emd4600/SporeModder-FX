@@ -65,6 +65,22 @@ public class ArgScriptWriter {
 		return this;
 	}
 	
+	public ArgScriptWriter tabulatedText(String text, boolean newLine) {
+		String[] lines = text.split("\n");
+		for (String line : lines) {
+			if (sb.length() != 0 && newLine) {
+				sb.append('\n');
+			}
+			if (newLine) for (int i = 0; i < indentationLevel; i++) {
+				sb.append('\t');
+			}
+			newLine = true;
+			sb.append(line);
+		}
+		
+		return this;
+	}
+	
 	public ArgScriptWriter command(String name) {
 		if (sb.length() != 0) {
 			sb.append('\n');

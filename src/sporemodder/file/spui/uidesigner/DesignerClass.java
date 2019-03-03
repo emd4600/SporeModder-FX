@@ -161,6 +161,10 @@ public class DesignerClass implements DesignerNode {
 			name = attributes.getValue("name");
 			description = attributes.getValue("description");
 			
+			if ("FrameStyle".equals(name)) {
+				System.out.print("");
+			}
+			
 			String proxyStr = attributes.getValue("proxy");
 			
 			if (proxyStr != null) {
@@ -182,7 +186,10 @@ public class DesignerClass implements DesignerNode {
 			className = attributes.getValue("classname");
 			if (className != null) {
 				javaClass = getClass(className);
+			} else if (name != null) {
+				javaClass = getClass(name);
 			}
+			
 			if (javaClass == null) {
 				// First try with parent
 				if (baseClass != null && baseClass.javaClass != null) {

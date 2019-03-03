@@ -7,6 +7,7 @@ import java.util.List;
 
 import emord.filestructures.Stream.StringEncoding;
 import emord.filestructures.StreamReader;
+import sporemodder.file.argscript.ArgScriptWriter;
 
 public class ShaderFragment {
 	public static class ShaderVariable {
@@ -77,9 +78,9 @@ public class ShaderFragment {
 	
 	public int input;
 	public int output;
-	public byte numRegisters;
-	public byte numOutputTexcoords;  // only for vertex shader
-	public byte type;  // only for vertex shader, 4, sometimes 3?
+	public byte numRegisters;  // 28h
+	public byte numOutputTexcoords;  // only for vertex shader  // 29h
+	public byte type;  // only for vertex shader, 4, sometimes 3?  // 2Ah
 	public int flags;  // -18h
 	
 	public String shaderName;
@@ -107,6 +108,43 @@ public class ShaderFragment {
 		if ((flags & 0x2) != 0) {
 			shaderName = in.readString(StringEncoding.ASCII, in.readInt());
 		}
+	}
+	
+	public void toArgScript(ArgScriptWriter writer) {
+		writer.command("fragment").arguments(shaderName).startBlock();
+		
+		writer.command("input").arguments("0x" + Integer.toHexString(input));
+		writer.command("output").arguments("0x" + Integer.toHexString(output));
+		writer.command("numOutputTexcoords").ints(numOutputTexcoords);
+		writer.command("type").ints(type);
+		writer.command("numRegisters").ints(numRegisters);
+		
+		if (!declareCode.isEmpty() || !variables.isEmpty()) {
+			writer.blankLine();
+			writer.command("declareCode").startBlock();
+			int startRegister = 0;
+			for (ShaderVariable variable : variables) {
+				writer.command("extern").arguments("uniform");
+				writer.tabulatedText(variable.name, false);
+				writer.arguments(":", "register(c" + startRegister + ");");
+				startRegister += variable.registerSize;
+			}
+			if (!variables.isEmpty()) {
+				writer.blankLine();
+			}
+			if (!declareCode.trim().isEmpty()) {
+				writer.tabulatedText(declareCode, true);
+			}
+			writer.endBlock().command("endCode");
+		}
+		
+		if (!mainCode.isEmpty()) {
+			writer.blankLine();
+			writer.command("code").startBlock();
+			writer.tabulatedText(mainCode, true);
+			writer.endBlock().command("endCode");
+		}
+		writer.endBlock().commandEND();
 	}
 	
 	public void writeHLSL(BufferedWriter out) throws IOException {

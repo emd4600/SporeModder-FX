@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
 
@@ -49,17 +47,19 @@ public class FXCompiler extends AbstractManager {
 			String path = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\Microsoft\\Windows Kits\\Installed Roots", "KitsRoot10");
 			
 			File versionFolder = new File(path, "bin");
-			for (File folder : versionFolder.listFiles()) {
-				File file = new File(folder, "x86\\fxc.exe");
-				if (file.exists()) {
-					fxcFile = file;
-					isAutoPath = true;
-					return true;
+			if (versionFolder.exists()) {
+				for (File folder : versionFolder.listFiles()) {
+					File file = new File(folder, "x86\\fxc.exe");
+					if (file.exists()) {
+						fxcFile = file;
+						isAutoPath = true;
+						return true;
+					}
 				}
 			}
 			
 			return false;
-		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException | IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}

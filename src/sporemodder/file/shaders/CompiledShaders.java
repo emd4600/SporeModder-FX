@@ -16,6 +16,7 @@ import emord.filestructures.StreamWriter;
 import sporemodder.FileManager;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.shaders.StandardShader.StandardShaderEntry;
 
 public class CompiledShaders {
@@ -86,6 +87,11 @@ public class CompiledShaders {
 		String name = this.name == null ? "" : this.name;
 		out.writeInt(name.length());
 		out.writeString(name, StringEncoding.ASCII);
+	}
+	
+	public ShaderSelector getSelector(int id) {
+		for (ShaderSelector shader : shaderSelectors) if (shader.id == id) return shader;
+		return null;
 	}
 	
 	public void unpack(File outputFolder) throws IOException {
@@ -162,18 +168,17 @@ public class CompiledShaders {
 		try (StreamReader stream = new FileStream(file, "r")) {
 			CompiledShaders shaders = new CompiledShaders();
 			shaders.read(stream);
-			//shaders.unpack(outputFolder);
 			
 			ShaderFragments fragments = ShaderFragments.readShaderFragments(fragmentsFile);
-			for (int i = 0; i < shaders.vertexShaders.size(); ++i) {
-				CompiledShader entry = shaders.vertexShaders.get(i);
-				
-				for (int index : entry.fragmentIndices) {
-					if (index == 0) break;
-					System.out.print(fragments.getFragment(index).getName() + "   ");
-				}
-				System.out.println();
-			}
+			List<String> fragmentNames = new ArrayList<String>();
+			fragmentNames.add(null);  // index 0 is never used
+			for (ShaderFragment fragment : fragments.shaders) fragmentNames.add(fragment.getName());
+			
+			ArgScriptWriter writer = new ArgScriptWriter();
+			
+			shaders.getSelector(0x80000004).toArgScript(writer, fragmentNames);
+			
+			System.out.print(writer.toString());
 			
 //			for (int i = 0; i < shaders.vertexShaders.size(); ++i) {
 //				CompiledShader entry = shaders.vertexShaders.get(i);

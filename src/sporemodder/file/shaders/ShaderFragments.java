@@ -2,6 +2,7 @@ package sporemodder.file.shaders;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
+import sporemodder.file.argscript.ArgScriptWriter;
 
 public class ShaderFragments {
 private static final int SHADER_COUNT = 255;  // 255 ?
@@ -45,6 +47,19 @@ private static final int SHADER_COUNT = 255;  // 255 ?
 		}
 	}
 	
+	public void toArgScript(File outputFolder) throws FileNotFoundException {
+		outputFolder.mkdir();
+		for (int i = 0; i < shaders.size(); ++i) {
+			ShaderFragment shader = shaders.get(i);
+			if (shader.getName() == null || shader.getName().isEmpty()) return;
+			File file = new File(outputFolder, i + "(" + shader.getName() + ").fragment");
+			
+			ArgScriptWriter writer = new ArgScriptWriter();
+			shader.toArgScript(writer);
+			writer.write(file);
+		}
+	}
+	
 	public static ShaderFragments readShaderFragments(File file) throws IOException {
 		try (FileStream stream = new FileStream(file, "r")) {
 			ShaderFragments shaders = new ShaderFragments();
@@ -54,6 +69,9 @@ private static final int SHADER_COUNT = 255;  // 255 ?
 	}
 	
 	public static void main(String[] args) throws IOException {
+//		File file = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CompiledMaterials\\materials_uncompiled_shader_fragments~\\0x00000003.smt");
+//		File output = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CompiledMaterials\\materials_uncompiled_shader_fragments~\\0x00000003.smt.unpacked");
+		
 		File file = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_uncompiled_shader_fragments~\\0x00000003.smt");
 		File output = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_uncompiled_shader_fragments~\\0x00000003.smt.unpacked");
 		
@@ -61,6 +79,7 @@ private static final int SHADER_COUNT = 255;  // 255 ?
 			ShaderFragments shaders = new ShaderFragments();
 			shaders.read(stream);
 //			shaders.writeHLSL(output);
+			shaders.toArgScript(output);
 			
 //			for (UncompiledShader shader : shaders.shaders) {
 //				if (shader.flags != 3 && shader.shaderName != null) {
@@ -68,15 +87,15 @@ private static final int SHADER_COUNT = 255;  // 255 ?
 //				}
 //			}
 			
-			for (int i = 0; i < shaders.shaders.size(); ++i) {
-				ShaderFragment shader = shaders.shaders.get(i);
-				if (shader.shaderName != null && (shader.flags & 1) != 0) {
-					System.out.println((i+1) + ":\t" + shader.shaderName);
-				}
-				else {
-					break;
-				}
-			}
+//			for (int i = 0; i < shaders.shaders.size(); ++i) {
+//				ShaderFragment shader = shaders.shaders.get(i);
+//				if (shader.shaderName != null && (shader.flags & 1) != 0) {
+//					System.out.println((i+1) + ":\t" + shader.shaderName);
+//				}
+//				else {
+//					break;
+//				}
+//			}
 		}
 	}
 }

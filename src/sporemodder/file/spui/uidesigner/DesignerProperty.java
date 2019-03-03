@@ -286,7 +286,7 @@ public class DesignerProperty extends DesignerElement {
 		}
 		
 		if (typeCode == SpuiPropertyType.TYPE_STRUCT) {
-			readStruct(spui, stream, element);
+			readStruct(spui, stream, element, count);
 		} 
 		else {
 			Object object = SpuiPropertyType.read(stream, typeCode, count);
@@ -339,27 +339,60 @@ public class DesignerProperty extends DesignerElement {
 		data.getDesignerClass().write(writer, stream, data);
 	}
 	
-	private void readStruct(SporeUserInterface spui, StreamReader stream, SpuiElement parentElement) throws IOException {
-		SpuiElement structElement;
+	private void readStruct(DesignerClass structureClass, SporeUserInterface spui, StreamReader stream,  SpuiElement structElement) throws IOException {
+		int structCount = stream.readLEShort();
+		structureClass.read(spui, stream, structElement, structCount);
+	}
+	
+	private void readStruct(SporeUserInterface spui, StreamReader stream, SpuiElement parentElement, int count) throws IOException {
 		DesignerClass structureClass = parentClass.getDesigner().getClass(type.getTypeName());
 		
-		if (javaField != null) {
-			// Structures must be declared as final, so they already exist
-			try {
-				structElement = (SpuiElement) javaField.get(parentElement);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-				structElement = new SpuiElement();
+		stream.readLEInt();  // unknown
+		
+		if (type.isArray()) {
+			if (isList()) {
+				@SuppressWarnings("unchecked")
+				List<SpuiElement> list = (List<SpuiElement>) getValue(parentElement);
+				if (list == null) {
+					list = new ArrayList<SpuiElement>();
+					parentElement.setProperty(proxyID, list);
+				}
+				for (int i = 0; i < count; ++i) {
+					SpuiElement structElement = structureClass.createInstance();
+					readStruct(structureClass, spui, stream, structElement);
+					list.add(structElement);
+				}
+			} 
+			else {
+				Object array = getValue(parentElement);
+				if (array == null) {
+					array = new SpuiElement[type.getArrayCount()];
+					parentElement.setProperty(proxyID, array);
+				}
+				for (int i = 0; i < type.getArrayCount(); ++i) {
+					SpuiElement structElement = structureClass.createInstance();
+					readStruct(structureClass, spui, stream, structElement);
+					Array.set(array, i, structElement);
+				}
 			}
 		}
 		else {
-			structElement = structureClass.createInstance();
-			parentElement.setProperty(proxyID, structElement);
+			SpuiElement structElement;
+			if (javaField != null) {
+				// Structures must be declared as final, so they already exist
+				try {
+					structElement = (SpuiElement) javaField.get(parentElement);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+					structElement = new SpuiElement();
+				}
+			}
+			else {
+				structElement = structureClass.createInstance();
+				parentElement.setProperty(proxyID, structElement);
+			}
+			readStruct(structureClass, spui, stream, structElement);
 		}
-		
-		stream.readLEInt();  // unknown
-		int structCount = stream.readLEShort();
-		structureClass.read(spui, stream, structElement, structCount);
 	}
 	
 	private void fillInspectorList(SpuiEditor editor, SpuiElement element, List<Object> values) {

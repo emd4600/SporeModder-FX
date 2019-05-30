@@ -101,6 +101,7 @@ public class AtlasImage extends SpuiElement implements ISporeImage {
 
 	@Override public void addComponents(SpuiWriter writer) {
 		writer.addAtlasImage(this);
+		writer.addElement(this);
 	}
 	
 	private void showImage() {

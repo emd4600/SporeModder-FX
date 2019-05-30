@@ -91,7 +91,7 @@
             </VBox>
          </content>
       </TitledPane>
-      <TitledPane animated="false" collapsible="false" prefHeight="200.0" prefWidth="200.0" text="User Interface Settings">
+      <TitledPane animated="false" collapsible="false" prefHeight="50.0" prefWidth="200.0" text="User Interface Settings">
          <content>
             <VBox prefWidth="465.0">
                <children>
@@ -105,6 +105,36 @@
                         <ChoiceBox fx:id="stylesBox" prefWidth="150.0" />
                      </children>
                   </HBox>
+               </children>
+            </VBox>
+         </content>
+      </TitledPane>
+      <TitledPane animated="false" collapsible="false" prefHeight="50.0" prefWidth="200.0" text="Shader Settings">
+         <content>
+            <VBox prefWidth="465.0">
+               <children>
+               	  <BorderPane layoutX="20.0" layoutY="80.0">
+               	  	<left>
+                        <Label fx:id="fxcLabel" text="FXC Path:">
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </Label>
+                     </left>
+                     <right>
+                        <Button fx:id="findFXCButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <TextField fx:id="fxcPathField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </TextField>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                  </BorderPane>
                </children>
             </VBox>
          </content>

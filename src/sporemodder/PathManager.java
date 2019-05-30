@@ -85,6 +85,6 @@ public class PathManager extends AbstractManager {
 	 * @return
 	 */
 	public File getStyleFile(String name) {
-		return getProgramFile("Styles\\" + UIManager.get().getCurrentStyle() + "\\" + name);
+		return getProgramFile("Styles" + File.separatorChar + UIManager.get().getCurrentStyle() + File.separatorChar + name);
 	}
 }

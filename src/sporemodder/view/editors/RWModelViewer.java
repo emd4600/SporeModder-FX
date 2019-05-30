@@ -22,8 +22,6 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -84,7 +82,6 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.BoundingBox;
 import sporemodder.file.dds.DDSTexture;
-import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
 import sporemodder.file.rw4.MaterialStateCompiler;
 import sporemodder.file.rw4.RWBBox;
@@ -94,6 +91,7 @@ import sporemodder.file.rw4.RWHeader.RenderWareType;
 import sporemodder.file.rw4.RWIndexBuffer;
 import sporemodder.file.rw4.RWMesh;
 import sporemodder.file.rw4.RWMeshCompiledStateLink;
+import sporemodder.file.rw4.RWMorphHandle;
 import sporemodder.file.rw4.RWObject;
 import sporemodder.file.rw4.RWRaster;
 import sporemodder.file.rw4.RWVertexBuffer;
@@ -101,6 +99,11 @@ import sporemodder.file.rw4.RWVertexElement;
 import sporemodder.file.rw4.RenderWare;
 import sporemodder.file.shaders.MaterialStateLink;
 import sporemodder.util.ProjectItem;
+import sporemodder.util.Vector3;
+import sporemodder.view.inspector.InspectorFloatSpinner;
+import sporemodder.view.inspector.InspectorString;
+import sporemodder.view.inspector.InspectorVector3;
+import sporemodder.view.inspector.PropertyPane;
 
 /**
  * An editor used for visualizing RenderWare models. This has a built-in texture patcher. It is called 'viewer' instead of 'editor' because
@@ -220,6 +223,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private final ScrollPane propertiesContainer = new ScrollPane();
 	private TreeView<String> treeView = new TreeView<>();
 	
+	private TreeItem<String> tiMorphs = new TreeItem<String>("Morph Handles");
 	private TreeItem<String> tiTextures = new TreeItem<String>("Textures");
 	private TreeItem<String> tiCompiledStates = new TreeItem<String>("Compiled States");
 	
@@ -247,14 +251,16 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     	treeView.setShowRoot(false);
     	treeView.setMaxHeight(TREE_VIEW_HEIGHT);
     	
+    	rootItem.getChildren().add(tiMorphs);
     	rootItem.getChildren().add(tiTextures);
-    	//rootItem.getChildren().add(tiCompiledStates);
+    	rootItem.getChildren().add(tiCompiledStates);
+    	tiMorphs.setExpanded(true);
     	tiTextures.setExpanded(true);
     	tiCompiledStates.setExpanded(true);
     	
     	treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
     		if (newValue != null) {
-    			fillPropertiesPane(newValue.getValue());
+    			fillPropertiesPane(newValue, newValue.getValue());
     		} else {
     			propertiesContainer.setContent(null);
     		}
@@ -665,6 +671,16 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				itemsMap.put(name, item);
 				tiCompiledStates.getChildren().add(item);
 			}
+			
+			List<RWMorphHandle> morphs = renderWare.getObjects(RWMorphHandle.class);
+			for (RWMorphHandle morph : morphs) {
+				String name = HashManager.get().getFileName(morph.handleID);
+				nameMap.put(name, morph);
+				
+				TreeItem<String> item = new TreeItem<String>(name);
+				itemsMap.put(name, item);
+				tiMorphs.getChildren().add(item);
+			}
 		}
 	}
 	
@@ -894,10 +910,14 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		return true;
 	}
 	
-	private void fillPropertiesPane(String selectedName) {
+	private void fillPropertiesPane(TreeItem<String> item, String selectedName) {
 		RWObject object = nameMap.get(selectedName);
 		
-		if (object instanceof RWRaster) {
+		if (object instanceof RWMorphHandle) {
+			fillMorphPane(item, selectedName, (RWMorphHandle) object);
+			return;
+		}
+		else if (object instanceof RWRaster) {
 			fillTexturePane(selectedName, (RWRaster) object);
 			return;
 		}
@@ -909,6 +929,100 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		}
 		
 		propertiesContainer.setContent(null);
+	}
+	
+	private void fillMorphPane(TreeItem<String> item, String name, RWMorphHandle morph) {
+		PropertyPane pane = new PropertyPane();
+		
+		InspectorString nameField = new InspectorString();
+		nameField.setText(HashManager.get().getFileName(morph.handleID));
+		
+		InspectorFloatSpinner initialTime = new InspectorFloatSpinner(0);
+		initialTime.setValue((double)morph.defaultTime);
+		
+		InspectorVector3 startPos = new InspectorVector3(new Vector3(morph.startPos));
+		InspectorVector3 endPos = new InspectorVector3(new Vector3(morph.endPos));
+		
+		pane.add("Handle ID", "The ID of the handle, it determines the type.", nameField);
+		pane.add("Default Time (s)", "The time of animation, in seconds (24 frames = 1s), where the morph is by default.", initialTime);
+		pane.add(PropertyPane.createTitled("Start Position", "The start position of the handle", startPos.getNode()));
+		pane.add(PropertyPane.createTitled("End Position", "The start position of the handle", endPos.getNode()));
+		
+		propertiesContainer.setContent(pane.getNode());
+		
+		nameField.addValueListener((obs, oldValue, newValue) -> {
+			morph.handleID = HashManager.get().getFileHash(newValue);
+			item.setValue(newValue);
+			
+			addEditAction(new RWUndoableAction(name + ": Handle ID") {
+
+				@Override public void undo() {
+					morph.handleID = HashManager.get().getFileHash(oldValue);
+					item.setValue(oldValue);
+				}
+
+				@Override public void redo() {
+					morph.handleID = HashManager.get().getFileHash(newValue);
+					item.setValue(newValue);
+				}
+			});
+		});
+		
+		initialTime.addValueListener((obs, oldValue, newValue) -> {
+			morph.defaultTime = newValue.floatValue();
+			
+			addEditAction(new RWUndoableAction(name + ": Default Time") {
+
+				@Override public void undo() {
+					morph.defaultTime = oldValue.floatValue();
+				}
+
+				@Override public void redo() {
+					morph.defaultTime = newValue.floatValue();
+				}
+			});
+		});
+		
+		startPos.addValueListener((obs, oldValue, newValue) -> {
+			morph.startPos[0] = newValue.getX();
+			morph.startPos[1] = newValue.getY();
+			morph.startPos[2] = newValue.getZ();
+			
+			addEditAction(new RWUndoableAction(name + ": Start Position") {
+
+				@Override public void undo() {
+					morph.startPos[0] = oldValue.getX();
+					morph.startPos[1] = oldValue.getY();
+					morph.startPos[2] = oldValue.getZ();
+				}
+
+				@Override public void redo() {
+					morph.startPos[0] = newValue.getX();
+					morph.startPos[1] = newValue.getY();
+					morph.startPos[2] = newValue.getZ();
+				}
+			});
+		});
+		endPos.addValueListener((obs, oldValue, newValue) -> {
+			morph.endPos[0] = newValue.getX();
+			morph.endPos[1] = newValue.getY();
+			morph.endPos[2] = newValue.getZ();
+			
+			addEditAction(new RWUndoableAction(name + ": End Position") {
+
+				@Override public void undo() {
+					morph.endPos[0] = oldValue.getX();
+					morph.endPos[1] = oldValue.getY();
+					morph.endPos[2] = oldValue.getZ();
+				}
+
+				@Override public void redo() {
+					morph.endPos[0] = newValue.getX();
+					morph.endPos[1] = newValue.getY();
+					morph.endPos[2] = newValue.getZ();
+				}
+			});
+		});
 	}
 	
 	private void fillTexturePane(String name, RWRaster raster) {
@@ -1007,7 +1121,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		
 		if (action.selectedObject != null) {
 			if (getSelectedName().equals(action.selectedObject)) {
-				fillPropertiesPane(action.selectedObject);
+				fillPropertiesPane(treeView.getSelectionModel().getSelectedItem(), action.selectedObject);
 			} else {
 				treeView.getSelectionModel().select(itemsMap.get(action.selectedObject));
 			}
@@ -1035,7 +1149,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		
 		if (action.selectedObject != null) {
 			if (action.selectedObject.equals(getSelectedName())) {
-				fillPropertiesPane(action.selectedObject);
+				fillPropertiesPane(treeView.getSelectionModel().getSelectedItem(), action.selectedObject);
 			} else {
 				treeView.getSelectionModel().select(itemsMap.get(action.selectedObject));
 			}
@@ -1122,7 +1236,8 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			
 			byte[] oldData = state.data.getData();
 			
-			MaterialStateCompiler compiler = editor.stream.getData().states.get(0);
+			editor.processStream();
+			MaterialStateCompiler compiler = editor.stream.getData().definedStates.get(0);
 			compiler.vertexDescription = state.data.vertexDescription;
 			compiler.compile();
 			byte[] newData = compiler.getData();
@@ -1177,9 +1292,14 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			
 			Node button = dialog.getDialogPane().lookupButton(ButtonType.APPLY);
 			if (button != null && stream != null) {
-				boolean disable = !stream.getErrors().isEmpty() || stream.getData().states.isEmpty();
+				boolean disable = !stream.getErrors().isEmpty() || stream.getData().definedStates.isEmpty();
 				button.setDisable(disable);
 			}
+		}
+		
+		public void processStream() {
+			stream.getData().reset();
+			stream.process(getText());
 		}
 	}
 }

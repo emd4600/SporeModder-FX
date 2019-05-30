@@ -306,7 +306,7 @@ public class ProjectSearcher {
 									tasks.add(new FileSearchRecursive(null, file, foundWords, searchFinished));
 								}
 								else {
-									tasks.add(new FileSearchRecursive(relativePath + "\\" + name, null, foundWords, searchFinished));
+									tasks.add(new FileSearchRecursive(relativePath + File.separatorChar + name, null, foundWords, searchFinished));
 								}
 							}
 						}

@@ -166,7 +166,7 @@ public class ArgScriptStream<T> {
 	private boolean isFastParsing;
 	
 	// Used internally
-	private OriginalPositionTracker commentTracker;
+	private TextPositionMap commentTracker;
 	
 	/** A method used to generate descriptions for structure fragments. By default it shows the full line on 
 	 * first-level commands/blocks and only the keyword on everything else, but the user can override this functionality. */
@@ -213,6 +213,10 @@ public class ArgScriptStream<T> {
 		this.lineHighlighter = lineHighlighter;
 	}
 	
+	public boolean isFastParsing() {
+		return isFastParsing;
+	}
+	
 	public void setFastParsing(boolean isFastParsing) {
 		this.isFastParsing = isFastParsing;
 	}
@@ -221,14 +225,14 @@ public class ArgScriptStream<T> {
 	
 	
 	public ArgScriptLine toLine(String text) {
-		commentTracker = new OriginalPositionTracker();
+		commentTracker = new TextPositionMap();
 		text = removeComments(text, commentTracker);
 		
 		if (text.isEmpty()) {
 			return null;
 		}
 		
-		OriginalPositionTracker positionTracker = new OriginalPositionTracker();
+		TextPositionMap positionTracker = new TextPositionMap();
 		positionTracker.addAll(commentTracker);
 		StringBuilder dst = new StringBuilder();
 		if (!replaceVariables(text.toCharArray(), dst, commentTracker, positionTracker)) {
@@ -246,7 +250,7 @@ public class ArgScriptStream<T> {
 		}
 	}
 	
-	private String removeComments(String line, OriginalPositionTracker tracker) {
+	private String removeComments(String line, TextPositionMap tracker) {
 		
 		/** The index of the # character. */
 		int index = -1;
@@ -450,7 +454,7 @@ public class ArgScriptStream<T> {
 	public List<DocumentError> protectedParsing(ParsingRunnable runnable) throws Exception {
 		boolean oldIncluding = isIncluding;
 		isIncluding = true;
-		OriginalPositionTracker oldCommentTracker = commentTracker;
+		TextPositionMap oldCommentTracker = commentTracker;
 		int oldErrorsSize = errors.size();
 		int oldWarningsSize = warnings.size();
 		ArgScriptLine oldLine = line;
@@ -477,13 +481,13 @@ public class ArgScriptStream<T> {
 	}
 	
 	// Used internally to get the positions of comments
-	OriginalPositionTracker getCommentTracker() {
+	TextPositionMap getCommentTracker() {
 		return commentTracker;
 	}
 	
 	public boolean processLine(String text) {
 		
-		commentTracker = new OriginalPositionTracker();
+		commentTracker = new TextPositionMap();
 		text = removeComments(text, commentTracker);
 		
 		// We don't save the trimmed text for syntax highlighting reasons
@@ -530,7 +534,7 @@ public class ArgScriptStream<T> {
 			}
 		}
 		
-		OriginalPositionTracker positionTracker = new OriginalPositionTracker();
+		TextPositionMap positionTracker = new TextPositionMap();
 		positionTracker.addAll(commentTracker);
 		StringBuilder dst = new StringBuilder();
 		if (!replaceVariables(text.toCharArray(), dst, commentTracker, positionTracker)) {
@@ -604,7 +608,7 @@ public class ArgScriptStream<T> {
 	 */
 	public ArgScriptLine generateLine(String text) {
 		
-		OriginalPositionTracker commentTracker = new OriginalPositionTracker();
+		TextPositionMap commentTracker = new TextPositionMap();
 		text = removeComments(text, commentTracker);
 		
 		if (text.trim().isEmpty()) {
@@ -612,7 +616,7 @@ public class ArgScriptStream<T> {
 		}
 		
 		
-		OriginalPositionTracker positionTracker = new OriginalPositionTracker();
+		TextPositionMap positionTracker = new TextPositionMap();
 		positionTracker.addAll(commentTracker);
 		StringBuilder dst = new StringBuilder();
 		if (!replaceVariables(text.toCharArray(), dst, commentTracker, positionTracker)) {
@@ -1960,7 +1964,7 @@ public class ArgScriptStream<T> {
 	 * @param dstTracker The position changes will be added here.
 	 * @return Whether the operation succeeded (true) or there were any errors (false).
 	 */
-	protected boolean replaceVariables(char[] text, StringBuilder dst, OriginalPositionTracker sourceTracker, OriginalPositionTracker dstTracker) {
+	protected boolean replaceVariables(char[] text, StringBuilder dst, TextPositionMap sourceTracker, TextPositionMap dstTracker) {
 		int startIndex = 0;
 		
 		// Are we inside a brace?

@@ -34,6 +34,7 @@ import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.dbpf.DBPFPacker;
 
 public class EffectDirectory {
 	
@@ -290,9 +291,11 @@ public class EffectDirectory {
 		return findIndex(resources.get(resourceType), resource);
 	}
 	
-	public void process(File folder) throws IOException {
+	public void process(File folder, DBPFPacker packer) throws IOException {
 		for (File file : folder.listFiles()) {
 			if (file.getName().endsWith(".pfx")) {
+				if (packer != null) packer.setCurrentFile(file);
+				
 				processUnit(file);
 			}
 		}

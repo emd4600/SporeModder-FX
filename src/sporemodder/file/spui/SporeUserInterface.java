@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 import emord.filestructures.StreamReader;
-import javafx.scene.effect.ColorInput;
-import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import sporemodder.HashManager;
 import sporemodder.ProjectManager;
@@ -184,6 +182,7 @@ public class SporeUserInterface {
 				throw new IOException("Undefined designer class with proxyID=" + HashManager.get().hexToString(proxyIDs[i]));
 			}
 			elements.add(classes[i].createInstance());
+			classes[i].fillDefaults(null, elements.get(elements.size() - 1));
 		}
 		
 		int otherResourcesCount = imageResources.size() + atlasResources.size() + hitMasks.size();
@@ -312,7 +311,7 @@ public class SporeUserInterface {
 	
 	private Image loadImage(ResourceKey key) {
 		HashManager hasher = HashManager.get();
-		String path = hasher.getFileName(key.getGroupID()) + '\\' + hasher.getFileName(key.getInstanceID()) + '.' + hasher.getTypeName(key.getTypeID());
+		String path = hasher.getFileName(key.getGroupID()) + File.separatorChar + hasher.getFileName(key.getInstanceID()) + '.' + hasher.getTypeName(key.getTypeID());
 		
 		String uri = null;
 		if (projectFolder != null) {

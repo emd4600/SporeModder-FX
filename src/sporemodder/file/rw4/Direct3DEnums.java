@@ -25,6 +25,7 @@ import sporemodder.HashManager;
 import sporemodder.util.ColorRGBA;
 
 public class Direct3DEnums {
+	
 	public static interface D3DStateEnum {
 		public int getId();
 	}
@@ -40,7 +41,6 @@ public class Direct3DEnums {
 				}
 			}
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -575,7 +575,6 @@ public class Direct3DEnums {
 		D3DTA_ALPHAREPLICATE    (0x00000020);  // replicate alpha to color components (read modifier)
 		int id;
 		private D3DTA(int id) { this.id = id; }
-		//TODO add support for modifiers
 		public static D3DTA getById(int id) { for (D3DTA state : values())  if ((state.id & D3DTA_SELECTMASK.id) == id) return state; return null; }
 		public int getId() { return id; }
 	}

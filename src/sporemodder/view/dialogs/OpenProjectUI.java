@@ -21,6 +21,7 @@ package sporemodder.view.dialogs;
 import java.util.Collection;
 import java.util.function.Consumer;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -103,6 +104,8 @@ public class OpenProjectUI implements Controller {
 				filteredData.setPredicate(p -> p.getName().toLowerCase().contains(newValue.toLowerCase()));
 			}
 		});
+		
+		Platform.runLater(()->searchField.requestFocus());
 	}
 	
 	public ListView<Project> getList() {

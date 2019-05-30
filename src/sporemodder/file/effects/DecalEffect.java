@@ -154,7 +154,7 @@ public class DecalEffect extends EffectComponent {
 			
 			this.addParser("alpha", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
-				if (line.getArguments(args, 1)) {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.alpha.clear();
 					stream.parseFloats(args, effect.alpha);
 				}
@@ -165,7 +165,7 @@ public class DecalEffect extends EffectComponent {
 			
 			this.addParser("alpha255", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
-				if (line.getArguments(args, 1)) {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.alpha.clear();
 					stream.parseFloat255s(args, effect.alpha);
 				}
@@ -176,7 +176,7 @@ public class DecalEffect extends EffectComponent {
 			
 			this.addParser("size", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
-				if (line.getArguments(args, 1)) {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.size.clear();
 					stream.parseFloats(args, effect.size);
 				}
@@ -187,7 +187,7 @@ public class DecalEffect extends EffectComponent {
 			
 			this.addParser("rotate", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
-				if (line.getArguments(args, 1)) {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.rotation.clear();
 					stream.parseFloats(args, effect.rotation);
 				}

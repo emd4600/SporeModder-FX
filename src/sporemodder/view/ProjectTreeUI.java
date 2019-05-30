@@ -34,20 +34,17 @@ import sporemodder.util.ProjectItem;
 
 public class ProjectTreeUI implements Controller {
 	
-	@FXML
-	private Node mainNode;
+	@FXML private Node mainNode;
 
-	@FXML
-	private TextField tfSearch;
+	@FXML private TextField tfSearch;
 	
-	@FXML
-	private CheckBox cbShowModded;
+	@FXML private CheckBox cbShowModded;
 	
-	@FXML
-	private TreeView<ProjectItem> tvProjectTree;
+	@FXML private TreeView<ProjectItem> tvProjectTree;
 	
-	@FXML
-	private Button searchButton;
+	@FXML private Button searchButton;
+	
+	@FXML private TreeView<ProjectItem> tvSpecialItems;
 	
 	private MultipleSelectionModel<TreeItem<ProjectItem>> selectionModel;
 	
@@ -62,6 +59,13 @@ public class ProjectTreeUI implements Controller {
 		selectionModel = tvProjectTree.getSelectionModel();
 		selectionModel.setSelectionMode(SelectionMode.SINGLE);
 		
+		tvSpecialItems.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		tvSpecialItems.setShowRoot(false);
+		tvSpecialItems.setRoot(new TreeItem<ProjectItem>());
+		
+		tvSpecialItems.setCellFactory(c -> new ProjectTreeCell(true));
+		tvSpecialItems.setEditable(true);
+		
 		tvProjectTree.setCellFactory(c -> new ProjectTreeCell(true));
 		tvProjectTree.setEditable(true);
 		
@@ -72,6 +76,10 @@ public class ProjectTreeUI implements Controller {
 	
 	public TreeView<ProjectItem> getTreeView() {
 		return tvProjectTree;
+	}
+	
+	public TreeView<ProjectItem> getSpecialItems() {
+		return tvSpecialItems;
 	}
 
 	public TreeItem<ProjectItem> getSelectedNode() {

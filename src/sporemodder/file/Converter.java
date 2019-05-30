@@ -24,7 +24,7 @@ import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
 import sporemodder.HashManager;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.util.ProjectItem;
 
 public interface Converter {
@@ -53,7 +53,7 @@ public interface Converter {
 	 */
 	public boolean encode(File input, StreamWriter output) throws Exception;
 	
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception;
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception;
 	
 	/**
 	 * Whether this converter is a valid decoder (converting FROM the format) for the given package resource.
@@ -97,4 +97,8 @@ public interface Converter {
 	}
 
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item);
+	
+	default void reset() {
+		
+	}
 }

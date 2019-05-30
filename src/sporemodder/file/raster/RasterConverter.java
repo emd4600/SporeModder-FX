@@ -21,7 +21,6 @@ package sporemodder.file.raster;
 import java.io.File;
 
 import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
@@ -31,8 +30,7 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
-import sporemodder.file.dbpf.DBPFItem;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.util.ProjectItem;
 
@@ -67,27 +65,24 @@ public class RasterConverter implements Converter {
 	}
 
 	@Override
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		if (isEncoder(input)) {
-			try (MemoryStream output = new MemoryStream()) {
-				DDSTexture texture = new DDSTexture();
-				texture.read(input);
-				
-				RasterTexture raster = new RasterTexture();
-				raster.fromDDSTexture(texture);
-				raster.write(output);
-				
-				String[] splits = input.getName().split("\\.", 2);
-				
-				DBPFItem item = packer.getTemporaryItem();
-				item.name.setInstanceID(HashManager.get().getFileHash(splits[0]));
-				item.name.setGroupID(groupID);
-				item.name.setTypeID(TYPE_ID);
-				packer.writeFileData(item, output.getRawData(), (int) output.length());
-				packer.addFile(item);
-				
-				return true;
-			}
+			DDSTexture texture = new DDSTexture();
+			texture.read(input);
+			
+			RasterTexture raster = new RasterTexture();
+			raster.fromDDSTexture(texture);
+			
+			String[] splits = input.getName().split("\\.", 2);
+			
+			ResourceKey name = packer.getTemporaryName();
+			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
+			name.setGroupID(groupID);
+			name.setTypeID(TYPE_ID);
+			
+			packer.writeFile(name, stream -> raster.write(stream));
+			
+			return true;
 		}
 		else {
 			return false;

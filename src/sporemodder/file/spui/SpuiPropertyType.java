@@ -467,6 +467,8 @@ public class SpuiPropertyType {
 			}
 		} else {
 			if (type == TYPE_UINT) data = processIntTypeForWriting(data, format);
+			else if (type == TYPE_INT) data = ((Number)data).intValue();
+			else if (type == TYPE_FLOAT) data = ((Number)data).floatValue();
 			else if (type == TYPE_REFERENCE) data = processReferenceTypeForWriting(data, writer);
 			
 			Object array = createArray(1);

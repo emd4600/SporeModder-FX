@@ -30,18 +30,8 @@ public class RWMorphHandle extends RWObject {
 	
 	public int handleID;
 	public int field_4;
-	public int field_8;
-	public float field_C;
-	public int field_10;
-	public float field_14;
-	public int field_18;
-	public float field_1C;
-	public int field_20;
-	public float field_24;
-	public int field_28;
-	public float field_2C;
-	public int field_30;
-	public float field_34;
+	public double[] startPos = new double[3];
+	public double[] endPos = new double[3];
 	/** The progress of the morph animation when no handles have been modified. */
 	public float defaultTime;
 	public RWKeyframeAnim animation;
@@ -54,18 +44,8 @@ public class RWMorphHandle extends RWObject {
 	public void read(StreamReader stream) throws IOException {
 		handleID = stream.readLEInt();
 		field_4 = stream.readLEInt();
-		field_8 = stream.readLEInt();
-		field_C = stream.readLEFloat();
-		field_10 = stream.readLEInt();
-		field_14 = stream.readLEFloat();
-		field_18 = stream.readLEInt();
-		field_1C = stream.readLEFloat();
-		field_20 = stream.readLEInt();
-		field_24 = stream.readLEFloat();
-		field_28 = stream.readLEInt();
-		field_2C = stream.readLEFloat();
-		field_30 = stream.readLEInt();
-		field_34 = stream.readLEFloat();
+		stream.readLEDoubles(startPos);
+		stream.readLEDoubles(endPos);
 		defaultTime = stream.readLEFloat();
 		animation = (RWKeyframeAnim) renderWare.get(stream.readLEInt());
 	}
@@ -74,18 +54,8 @@ public class RWMorphHandle extends RWObject {
 	public void write(StreamWriter stream) throws IOException {
 		stream.writeLEInt(handleID);
 		stream.writeLEInt(field_4);
-		stream.writeLEInt(field_8);
-		stream.writeLEFloat(field_C);
-		stream.writeLEInt(field_10);
-		stream.writeLEFloat(field_14);
-		stream.writeLEInt(field_18);
-		stream.writeLEFloat(field_1C);
-		stream.writeLEInt(field_20);
-		stream.writeLEFloat(field_24);
-		stream.writeLEInt(field_28);
-		stream.writeLEFloat(field_2C);
-		stream.writeLEInt(field_30);
-		stream.writeLEFloat(field_34);
+		stream.writeLEDoubles(startPos);
+		stream.writeLEDoubles(endPos);
 		stream.writeLEFloat(defaultTime);
 		stream.writeLEInt(renderWare.indexOf(animation));
 	}

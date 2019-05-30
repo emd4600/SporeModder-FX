@@ -83,7 +83,7 @@ public class DocumentationManager extends AbstractManager {
 		Properties result = loadedFiles.get(fileName);
 		
 		if (result == null) {
-			File file = PathManager.get().getProgramFile("Documentation\\" + fileName + ".txt");
+			File file = new File(PathManager.get().getProgramFile("Documentation"), fileName + ".txt");
 			
 			result = new Properties();
 			

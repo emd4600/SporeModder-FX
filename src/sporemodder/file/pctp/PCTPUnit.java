@@ -86,6 +86,14 @@ public class PCTPUnit {
 			else out.writeByte(array[i]);
 		}
 	}
+	
+	public void clear() {
+		priority = 0;
+		capabilityNames.clear();
+		capabilitiesMap.clear();
+		aggregates.clear();
+		deformSpecs.clear();
+	}
 
 	public void read(StreamReader stream) throws IOException {
 		
@@ -239,6 +247,8 @@ public class PCTPUnit {
 		for (Map.Entry<String, List<DeformSpec>> entry : deformSpecs.entrySet()) {
 			writer.command("deformSpec").arguments(entry.getKey()).startBlock();
 			for (DeformSpec spec : entry.getValue()) {
+				// deform longname default_value default_weight rendered wrap
+				// not actually range
 				writer.command("deform").arguments(HashManager.get().getFileName(spec.deformID));
 				if (version > 3) {
 					writer.floats(spec.range);
@@ -246,6 +256,8 @@ public class PCTPUnit {
 					writer.floats(spec.range[0]);
 				}
 				
+				// rendered - 0 for helper deforms, 1 for deforms sent to animation channels
+				// wrap - 0 for regular curves, 1 for curves that wrap mod 1
 				if ((spec.flags & 1) != 0) writer.ints(0);
 				else writer.ints(1);
 				

@@ -134,6 +134,9 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 			boolean hide = true;
 			char c = event.getCharacter().charAt(0);
 			
+			// We don't want to show it when user is using Ctrl+C, Ctrl+V, etc
+			if (event.isControlDown()) return;
+			
 			if (!Character.isWhitespace(c) && !TextUtils.isNewLine(event.getCharacter(), 0)) {
 				
 				String text = codeArea.getText();

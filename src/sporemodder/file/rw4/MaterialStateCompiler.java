@@ -18,16 +18,13 @@
 ****************************************************************************/
 package sporemodder.file.rw4;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptWriter;
@@ -400,8 +397,6 @@ public class MaterialStateCompiler {
 		for (TextureSlot slot : textureSlots) {
 			flags3 |= 1 << slot.samplerIndex;
 		}
-//		if (!textureSlots.isEmpty()) flags3 |= FLAG3_TEXTURE_SLOTS;
-//		else flags3 &= ~FLAG3_TEXTURE_SLOTS;
 		
 		if (paletteEntries != null) flags3 |= FLAG3_PALETTE_ENTRIES;
 		else flags3 &= ~FLAG3_PALETTE_ENTRIES;
@@ -449,7 +444,6 @@ public class MaterialStateCompiler {
 		if (unkData10 != null) field_14 |= 0x80000;
 		else field_14 &= ~0x80000;
 		
-		System.out.println("0x" + Integer.toHexString(flags2));
 		flags2 |= (0xFFFF & flags1);
 		
 		
@@ -536,16 +530,22 @@ public class MaterialStateCompiler {
 				stream.writeLEInt(-1);
 			}
 			
+			if (paletteEntries != null) {
+				stream.writeLEInt(renderWare.indexOf(paletteEntries));
+			} else {
+				stream.writeLEInt(-1);
+			}
+			
 			if (!textureSlots.isEmpty()) {
-				if (paletteEntries != null) {
-					stream.writeLEInt(renderWare.indexOf(paletteEntries));
-				} else {
-					stream.writeLEInt(-1);
-				}
 				
 				for (TextureSlot slot : textureSlots) {
 					stream.writeLEInt(slot.samplerIndex);
-					stream.writeLEInt(slot.raster == null ? -1 : renderWare.indexOf(slot.raster));
+					// -1 won't let us use CompiledState::SetRaster()
+					if (renderWare != null) {
+						stream.writeLEInt(slot.raster == null ? -1 : renderWare.indexOf(slot.raster));
+					} else {
+						stream.writeLEInt(1 << 22);
+					}
 					
 					stream.writeLEInt(slot.stageStatesMask);
 					if (slot.stageStatesMask != 0) {
@@ -666,8 +666,8 @@ public class MaterialStateCompiler {
 			if (vertexDescription.field_0 != 0) writer.option("field_0").arguments("0x" + Integer.toHexString(vertexDescription.field_0));
 			if (vertexDescription.field_4 != 0) writer.option("field_4").arguments("0x" + Integer.toHexString(vertexDescription.field_4));
 			if (vertexDescription.field_0E != 0) writer.option("field_0E").arguments("0x" + Integer.toHexString(vertexDescription.field_0E));
-			if (vertexDescription.field_10 != 0) writer.option("field_10").arguments("0x" + Integer.toHexString(vertexDescription.field_10));
-			if (vertexDescription.field_14 != 0) writer.option("field_14").arguments("0x" + Integer.toHexString(vertexDescription.field_14));
+			//if (vertexDescription.elementFlags != 0) writer.option("field_10").arguments("0x" + Integer.toHexString(vertexDescription.elementFlags));
+			//if (vertexDescription.field_14 != 0) writer.option("field_14").arguments("0x" + Integer.toHexString(vertexDescription.field_14));
 			
 			writer.startBlock();
 			for (RWVertexElement element : vertexDescription.elements) {
@@ -725,44 +725,5 @@ public class MaterialStateCompiler {
 		}
 		
 		writer.endBlock().commandEND();
-	}
-
-	public static void main(String[] args) throws IOException {
-		
-		//File file = new File("E:\\Eric\\SporeModder\\Projects\\Spore_Graphics.package.unpacked\\#40212001\\#00000003.rw4");
-		File file = new File("C:\\Users\\Eric\\Desktop\\test.rw4");
-		
-		MaterialStateCompiler state = new MaterialStateCompiler(new RenderWare());
-		state.data = Files.readAllBytes(file.toPath());
-		state.decompile();
-		
-		try (FileStream stream = new FileStream(file, "r")) {
-//			RenderWare renderWare = new RenderWare();
-//			renderWare.read(stream);
-//			List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
-//			for (RWCompiledState state : compiledStates) {
-//				state.data.decompile();
-//				
-//			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-//		File folder = new File("E:\\Eric\\SporeModder\\Projects\\Spore_Graphics.package.unpacked\\animations~");
-//		for (File file : folder.listFiles()) {
-//			if (file.getName().endsWith(".rw4")) {
-//				try (FileStream stream = new FileStream(file, "r")) {
-//					RenderWare renderWare = new RenderWare();
-//					renderWare.read(stream);
-//					List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
-//					for (RWCompiledState state : compiledStates) {
-//						state.data.decompile();
-//						
-//						//if (state.data.extraFlags != null && !state.data.compareUnkData3()) System.out.println("Wrong data 3");
-//					}
-//				}
-//			}
-//		}
 	}
 }

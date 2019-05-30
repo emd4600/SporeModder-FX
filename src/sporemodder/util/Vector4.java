@@ -63,6 +63,14 @@ public class Vector4 {
         w = vector.w;
         return this;
 	}
+	
+	public Vector4 set(float x, float y, float z, float w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+		return this;
+	}
 
 	public Vector4 add(Vector4 vector) {
 		x += vector.x;
@@ -70,6 +78,10 @@ public class Vector4 {
         z += vector.z;
         w += vector.w;
         return this; // method chaining would be very useful
+	}
+	
+	public float getSquaredLength() {
+		return x*x + y*y + z*z + w*w;
 	}
 	
 	public void readBE(StreamReader stream) throws IOException {

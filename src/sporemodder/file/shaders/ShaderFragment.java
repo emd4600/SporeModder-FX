@@ -1,469 +1,430 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
+import sporemodder.HashManager;
+import sporemodder.file.DocumentError;
+import sporemodder.file.DocumentException;
+import sporemodder.file.argscript.ArgScriptLine;
+import sporemodder.file.argscript.ArgScriptSpecialBlock;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.argscript.TextPositionMap;
+import sporemodder.file.argscript.WordSplitLexer;
+import sporemodder.view.syntax.HlslSyntax;
+import sporemodder.view.syntax.SyntaxHighlighter;
 
-public class ShaderFragment {
-	public static class ShaderVariable {
-		public String name;
-		/* 10h */	public short dataIndex;
-		/* 12h */	public short field_12;
-		/* 14h */	public short registerSize;
-		/* 16h */	public short field_16;  // always 0
-		/* 18h */	public int flags;
-		
-		public void read(StreamReader in) throws IOException {
-			name = in.readString(StringEncoding.ASCII, in.readInt());
-			dataIndex = in.readShort();  // dataIndex again
-			field_12 = in.readShort();
-			registerSize = in.readShort();
-			field_16 = in.readShort();
-			flags = in.readInt();
-		}
-		
-		public void writeHLSL(BufferedWriter out, int startRegister) throws IOException {
-			out.write("extern uniform " + name + " : register(c" + startRegister + ");");
-			/* Only for testing */ 
-			out.write("  // 0x" + Integer.toHexString(dataIndex) + " 0x" + Integer.toHexString(field_12) + " 0x" + Integer.toHexString(flags));
-		}
-	}
+public abstract class ShaderFragment {
+	
+	private static final HlslSyntax HLSL_SYNTAX = new HlslSyntax();
 	
 	public static final int FLAG_DEFINED = 1;
-	
-	// 1 << RWDECLUSAGE
-	public static final int VS_INPUT_NORMAL = 0x4;
-	public static final int VS_INPUT_COLOR = 0x8;
-	public static final int VS_INPUT_COLOR1 = 0x20;
-	public static final int VS_INPUT_INDICES = 0x4000;
-	public static final int VS_INPUT_WEIGHTS = 0x8000;
-	public static final int VS_INPUT_POINTSIZE = 0x10000;
-	public static final int VS_INPUT_POSITION2 = 0x20000;
-	public static final int VS_INPUT_NORMAL2 = 0x40000;
-	public static final int VS_INPUT_TANGENT = 0x80000;
-	public static final int VS_INPUT_BINORMAL = 0x100000;
-	public static final int VS_INPUT_FOG = 0x200000;
-	public static final int VS_INPUT_INDICES2 = 0x400000;
-	public static final int VS_INPUT_WEIGHTS2 = 0x800000;
-	public static final int VS_INPUT_SHL = 6;
-	
-	public static final int VS_OUTPUT_COLOR = 0x8;
-	public static final int VS_OUTPUT_COLOR1 = 0x20;
-	public static final int VS_OUTPUT_FOG = 0x200000;
-	public static final int VS_OUTPUT_POINTSIZE = 0x10000;
+	public static final int FLAG_NAME = 2;
 
-	// ???
-	public static final int PS_INPUT_POSITION = 0x2;
-	public static final int PS_INPUT_NORMAL = 0x4;
-	public static final int PS_INPUT_TANGENT = 0x8;
-	public static final int PS_INPUT_BINORMAL = 0x10;
-	public static final int PS_INPUT_COLOR = 0x20;
-	public static final int PS_INPUT_COLOR1 = 0x140;
-	public static final int PS_INPUT_INDICES = 0x80;
-	
-	public static final int PS_OUTPUT_COLOR = 0x2;
-	public static final int PS_OUTPUT_COLOR1 = 0x4;
-	public static final int PS_OUTPUT_COLOR2 = 0x8;
-	public static final int PS_OUTPUT_COLOR3 = 0x10;
-	public static final int PS_OUTPUT_DEPTH = 0x20;
-	
 	public String mainCode;
 	public String declareCode;
-	public final List<ShaderVariable> variables = new ArrayList<>();
+	public final List<ShaderDataUniform> shaderData = new ArrayList<>();
 	
-	public int input;
-	public int output;
-	public byte numRegisters;  // 28h
-	public byte numOutputTexcoords;  // only for vertex shader  // 29h
-	public byte type;  // only for vertex shader, 4, sometimes 3?  // 2Ah
+	public int input;  // 20h
+	public int output;  // 24h
 	public int flags;  // -18h
-	
 	public String shaderName;
 	
-	public void read(StreamReader in) throws IOException {
-		
-		input = in.readInt();
-		output = in.readInt();
-		numOutputTexcoords = in.readByte();
-		type = in.readByte();
-		numRegisters = in.readByte();
-		flags = in.readInt();
-		
-		mainCode = in.readString(StringEncoding.ASCII, in.readInt());
-		declareCode = in.readString(StringEncoding.ASCII, in.readInt());
-		
-		int variableCount = in.readInt();
-		
-		for (int i = 0; i < variableCount; i++) {
-			ShaderVariable variable = new ShaderVariable();
-			variable.read(in);
-			variables.add(variable);
-		}
-		
-		if ((flags & 0x2) != 0) {
-			shaderName = in.readString(StringEncoding.ASCII, in.readInt());
-		}
+	public short numRegisters;  // 28h, 29h in pixel shaders
+	
+	public String getName() {
+		return shaderName;
 	}
 	
-	public void toArgScript(ArgScriptWriter writer) {
-		writer.command("fragment").arguments(shaderName).startBlock();
-		
-		writer.command("input").arguments("0x" + Integer.toHexString(input));
-		writer.command("output").arguments("0x" + Integer.toHexString(output));
-		writer.command("numOutputTexcoords").ints(numOutputTexcoords);
-		writer.command("type").ints(type);
-		writer.command("numRegisters").ints(numRegisters);
-		
-		if (!declareCode.isEmpty() || !variables.isEmpty()) {
-			writer.blankLine();
+	// Writes the declare (including shader data) and main code
+	protected void codeToArgScript(ArgScriptWriter writer) {
+		boolean needsBlankLine = false;
+		if (!declareCode.isEmpty() || !shaderData.isEmpty()) {
 			writer.command("declareCode").startBlock();
-			int startRegister = 0;
-			for (ShaderVariable variable : variables) {
-				writer.command("extern").arguments("uniform");
-				writer.tabulatedText(variable.name, false);
-				writer.arguments(":", "register(c" + startRegister + ");");
-				startRegister += variable.registerSize;
-			}
-			if (!variables.isEmpty()) {
-				writer.blankLine();
+			for (ShaderDataUniform variable : shaderData) {
+				
+				writer.command("extern").arguments("uniform ");
+				writer.tabulatedText(variable.name + ";", false);
+				//writer.arguments(":", "register(c" + startRegister + ");");
 			}
 			if (!declareCode.trim().isEmpty()) {
+				if (!shaderData.isEmpty()) {
+					writer.blankLine();
+				}
 				writer.tabulatedText(declareCode, true);
 			}
 			writer.endBlock().command("endCode");
+			needsBlankLine = true;
 		}
 		
 		if (!mainCode.isEmpty()) {
-			writer.blankLine();
+			if (needsBlankLine) writer.blankLine();
 			writer.command("code").startBlock();
 			writer.tabulatedText(mainCode, true);
 			writer.endBlock().command("endCode");
 		}
-		writer.endBlock().commandEND();
 	}
 	
-	public void writeHLSL(BufferedWriter out) throws IOException {
+	protected static class CodeParser extends ArgScriptSpecialBlock<ShaderFragmentUnit> {
+		final StringBuilder sb = new StringBuilder();
+		final TextPositionMap posMap = new TextPositionMap();
+		int lastLineNumber;
+		int startLineNumber;
+		public ShaderFragment fragment;
+		public boolean isDeclareCode;
 		
-		if (type == 0) {
-//			out.write("// input: 0x" + Integer.toHexString(input)); out.newLine();
-//			out.write("// output: 0x" + Integer.toHexString(output)); out.newLine();
-//			out.write("// numRegisters: 0x" + Integer.toHexString(numRegisters)); out.newLine();
-//			out.write("// numOutputTexcoords: 0x" + Integer.toHexString(numOutputTexcoords)); out.newLine();
-			//writePSInputStruct(out);  //TODO
-			out.newLine();
-			writePSOutputStruct(out, "cFragCurrent");
-			out.newLine();
-			writePSOutputStruct(out, "cFragOut");
-			out.newLine();
-		} else {
-			writeVSInputStruct(out);
-			out.newLine();
-			writeVSOutputStruct(out);
-			out.newLine();
+		public CodeParser(boolean isDeclareCode) {
+			this.isDeclareCode = isDeclareCode;
+		}
+
+		@Override public void parse(ArgScriptLine line) {
+			sb.setLength(0);
+			posMap.clear();
+			if (isDeclareCode && fragment.declareCode != null) {
+				stream.addError(line.createError("Only one declareCode block per fragment is supported"));
+			}
+			else if (!isDeclareCode && fragment.mainCode != null) {
+				stream.addError(line.createError("Only one main code block per fragment is supported"));
+			}
+			stream.startSpecialBlock(this, "endCode");
+			lastLineNumber = stream.getCurrentLine();
+			startLineNumber = lastLineNumber + 1;
 		}
 		
-		int startRegister = 0;
-		for (ShaderVariable var : variables) {
-			var.writeHLSL(out, startRegister);
-			out.newLine();
+		@Override public void onBlockEnd() {
+			String code = sb.toString();
+			if (isDeclareCode) fragment.declareCode = code;
+			else fragment.mainCode = code;
+			stream.endSpecialBlock();
 			
-			startRegister += var.registerSize;
-		}
-		
-		out.newLine();
-		
-		if (declareCode != null && declareCode.length() > 0) {
-			out.write(declareCode);
-			out.newLine();
-			out.newLine();
-		}
-		
-		if (type == 0) {
-			out.write("cFragOut main( cFragIn In )");
-			out.newLine();
-			out.write("{");
-			out.newLine();
-			out.write("cFragCurrent Current;");
-			out.newLine();
-			out.write("cFragOut Out;");
-			out.newLine();
-			out.newLine();
-			//writePSInput(out);
-		} else {
-			out.write("cVertOut main( cVertIn In )");
-			out.newLine();
-			out.write("{");
-			out.newLine();
-			out.write("cVertCurrent Current;");
-			out.newLine();
-			out.write("cVertOut Out;");
-			out.newLine();
-			out.newLine();
-			writeVSInput(out);
-		}
-		
-		out.newLine();
-		
-		out.write(mainCode);
-		
-		out.newLine();
-		if (type == 0) {
-			writePSOutput(out);
-		} else {
-			writeVSOutput(out);
-		}
-		out.write("return Out;");
-		out.newLine();
-		out.write("}");
-		out.newLine();
-	}
-	
-	private void writeVSInputStruct(BufferedWriter out) throws IOException {
-		out.write("struct cVertCurrent");
-		out.newLine();
-		out.write("{");
-		out.newLine();
-		out.write("float4 position;");
-		out.newLine();
-		if ((input & VS_INPUT_NORMAL) != 0) {
-			out.write("float4 normal;");
-			out.newLine();
-		}
-		if ((input & (10|VS_INPUT_COLOR)) != 0) {
-			out.write("float4 color;");
-			out.newLine();
-		}
-		for (int i = 0; i < 8; ++i) {
-			if ((input & (1 << (VS_INPUT_SHL+i))) != 0) {
-				out.write("float2 texcoord" + i + ";");
-				out.newLine();
+			if (!stream.isFastParsing()) {
+				SyntaxHighlighter syntax = new SyntaxHighlighter();
+				HLSL_SYNTAX.generateStyle(code, syntax);
+				stream.getSyntaxHighlighter().addExtras(syntax, posMap, false);
+			}
+			
+			if (isDeclareCode) {
+				try {
+					processUniforms();
+				} catch (DocumentException e) {
+					stream.addError(e.getError());
+				}
 			}
 		}
-		if ((input & VS_INPUT_INDICES) != 0) {
-			out.write("int4 indices;");
-			out.newLine();
+		
+		private void processUniforms() throws DocumentException {
+			// 1st: remove comments
+			String text = fragment.declareCode;
+			StringBuilder realText = new StringBuilder();
+			
+			// Process block comments
+			int endIndex = 0;
+			int indexOf = text.indexOf("/*");
+			while (indexOf != -1) {
+				realText.append(text.substring(endIndex, indexOf));
+				endIndex = text.indexOf("*/", indexOf + 2);
+				
+				if (endIndex == -1) {
+					break;
+				}
+				endIndex += 2;
+				
+				indexOf = text.indexOf("/*", endIndex);
+			}
+			// Add remaining text
+			realText.append(text.substring(endIndex));
+			
+			// Process line comments
+			text = realText.toString();
+			realText.setLength(0);
+			endIndex = 0;
+			indexOf = text.indexOf("//");
+			while (indexOf != -1) {
+				realText.append(text.substring(endIndex, indexOf));
+				endIndex = text.indexOf("\n", indexOf + 2);
+				
+				if (endIndex == -1) {
+					break;
+				}
+				// Don't increase endIndex because we actually want to include the line break
+				
+				indexOf = text.indexOf("//", endIndex + 1);
+			}
+			// Add remaining text
+			realText.append(text.substring(endIndex));
+			text = realText.toString();
+			
+			WordSplitLexer lexer = new WordSplitLexer(text);
+			StringBuilder sbText = new StringBuilder();
+			int pos = lexer.getPosition();
+			
+			while (!lexer.isEOF()) {
+				lexer.skipUnreadable();
+				
+				int tempPos = lexer.getPosition();
+				String word = lexer.nextReadableWord();
+				
+				if ("extern".equals(word) && "uniform".equals(lexer.nextReadableWord())) {
+					sbText.append(text.substring(pos, tempPos));
+					
+					// Two possiblities: type is struct (complex) or simple
+					String type = lexer.nextReadableWord();
+					if (type == null) {
+						stream.addError(new DocumentError("Expected a type after 'extern uniform'", getPos(lexer.getPosition() - 10), getPos(lexer.getPosition()), startLineNumber));
+						break;
+					}
+					
+					StringBuilder sbUniform = new StringBuilder();
+					
+					int registerSize = 0;
+					
+					sbUniform.append(type);
+					if ("struct".equals(type)) {
+						lexer.skipWhitespaces();
+						if (lexer.isEOF() || lexer.nextChar() != '{') {
+							stream.addError(new DocumentError("Expected a '{' after struct declaration", getPos(lexer.getPosition() - 6), getPos(lexer.getPosition()), startLineNumber));
+							break;
+						}
+						sbUniform.append(" {\n");
+						
+						// We must calculate the register size
+						String structType;
+						while ((structType = lexer.nextReadableWord()) != null) {
+							// The member name
+							sbUniform.append(structType);
+							sbUniform.append(' ');
+							sbUniform.append(lexer.nextReadableWord());
+							
+							int startPos = lexer.getPosition();
+							
+							int arrayLength = parseArray(lexer);
+							if (arrayLength == -1) return;
+							if (arrayLength == 0) arrayLength = 1;
+							registerSize += ShaderDataUniform.calculateRegisterSize(structType) * arrayLength;
+							
+							sbUniform.append(text.substring(startPos, lexer.getPosition()));
+							
+							sbUniform.append(";\n");
+							
+							if (lexer.isEOF() || lexer.peekChar() != ';') {
+								stream.addError(new DocumentError("Missing ; after struct member declaration", 
+										getPos(lexer.getPosition() - 1), getPos(lexer.getPosition()), startLineNumber));
+								return;
+							} else {
+								// Eat the ;
+								lexer.nextChar();
+							}
+						}
+						
+						sbUniform.append('}');
+						if (lexer.isEOF() || lexer.peekChar() != '}') {
+							stream.addError(new DocumentError("Missing '}' closing struct declaration", getPos(lexer.getPosition() - 6), getPos(lexer.getPosition()), startLineNumber));
+							return;
+						}
+						// Eat the }
+						lexer.nextChar();
+					} else {
+						if (type.startsWith("sampler")) {
+							pos = tempPos;
+							break;
+						}
+						registerSize = ShaderDataUniform.calculateRegisterSize(type);
+					}
+					sbUniform.append(' ');
+					
+					word = lexer.nextReadableWord();
+					if (word == null) {
+						stream.addError(new DocumentError("Missing shader data name", getPos(lexer.getPosition() - 5), getPos(lexer.getPosition()-1), startLineNumber));
+						return;
+					}
+					else if (!ShaderData.hasIndex(word)) {
+						stream.addError(new DocumentError("'" + word + "' is not a recognized shader data name",
+								getPos(lexer.getPosition() - word.length()), getPos(lexer.getPosition()), startLineNumber));
+						return;
+					}
+					else {
+						sbUniform.append(word);
+						
+						ShaderDataUniform uniform = new ShaderDataUniform();
+						fragment.shaderData.add(uniform);
+						
+						int startPos = lexer.getPosition();
+						int arrayLength = parseArray(lexer);
+						if (arrayLength == -1) return;
+						uniform.dataIndex = uniform.field_2 = ShaderData.getIndex(word, arrayLength != 0);
+						uniform.flags = ShaderData.getFlags(uniform.dataIndex);
+						
+						sbUniform.append(text.substring(startPos, lexer.getPosition()));
+						uniform.name = sbUniform.toString();
+						
+						if (arrayLength == 0) arrayLength = 1;
+						uniform.registerSize = registerSize * arrayLength;
+						
+						fragment.numRegisters += uniform.registerSize;
+						
+						lexer.skipWhitespaces();
+						if (lexer.isEOF() || lexer.peekChar() != ';') {
+							stream.addError(new DocumentError("Missing ; after uniform declaration", 
+									getPos(lexer.getPosition() - 1), getPos(lexer.getPosition()), startLineNumber));
+							return;
+						} else {
+							// Eat the ;
+							lexer.nextChar();
+						}
+					}
+					
+					pos = lexer.getPosition();
+				}
+			}
+			
+			sbText.append(text.substring(pos, text.length()));
+			
+			// Don't need to include initial blank lines
+			int i = 0;
+			while (i < sbText.length() && (sbText.charAt(i) == '\n' || sbText.charAt(i) == '\r')) ++i;
+			fragment.declareCode = sbText.toString().substring(i);
 		}
-		if ((input & VS_INPUT_WEIGHTS) != 0) {
-			out.write("float4 weights;");
-			out.newLine();
+		
+		private int parseArray(WordSplitLexer lexer) {
+			lexer.skipWhitespaces();
+			if (!lexer.isEOF() && lexer.peekChar() == '[') {
+				// An array
+				lexer.nextChar();
+				lexer.skipWhitespaces();
+
+				StringBuilder sbNumber = new StringBuilder();
+				int numberStart = lexer.getPosition();
+				while (!lexer.isEOF() && lexer.peekChar() != ']') sbNumber.append(lexer.nextChar());
+				
+				String errorStr = sbNumber.toString().trim();
+				if (errorStr.isEmpty()) {
+					stream.addError(new DocumentError("Array length not specified", getPos(numberStart-1), getPos(lexer.getPosition()+1), startLineNumber));
+					return -1;
+				}
+				
+				// Eat the ]
+				lexer.nextChar();
+				
+				try {
+					return HashManager.get().int32(sbNumber.toString().trim());
+				} 
+				catch (Exception e) {
+					stream.addError(new DocumentError("Wrong number: " + e.getLocalizedMessage(), getPos(numberStart), getPos(lexer.getPosition() - 1), startLineNumber));
+					return -1;
+				}
+			}
+			
+			return 0;
 		}
-		if ((input & VS_INPUT_POSITION2) != 0) {
-			out.write("float4 position2;");
-			out.newLine();
+		
+		private int getPos(int i) {
+			return posMap.getRealPosition(i) - stream.getLinePositions().get(startLineNumber);
 		}
-		if ((input & VS_INPUT_NORMAL2) != 0) {
-			out.write("float4 normal2;");
-			out.newLine();
+		
+		@Override public boolean processLine(String line) {
+			// Try to keep empty lines for readability
+			int lineNumber = stream.getCurrentLine();
+			for (int i = lastLineNumber+1; i < lineNumber; ++i) sb.append('\n');
+			lastLineNumber = lineNumber;
+			
+			int removedTabs = 0;
+			while (removedTabs < 2 && removedTabs < line.length() && 
+					Character.isWhitespace(line.charAt(removedTabs))) ++removedTabs;
+			line = line.substring(removedTabs);
+			
+			if (!stream.isFastParsing()) {
+				// For syntax highlighting
+				posMap.addEntry(sb.length(), stream.getLinePositions().get(lineNumber) + removedTabs);
+			}
+			
+			sb.append(line);
+			sb.append('\n');
+			
+			return true;
 		}
-		if ((input & VS_INPUT_INDICES2) != 0) {
-			out.write("int4 indices2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_WEIGHTS2) != 0) {
-			out.write("float4 weights2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_TANGENT) != 0) {
-			out.write("float4 tangent;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_BINORMAL) != 0) {
-			out.write("float4 binormal;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_COLOR1) != 0) {
-			out.write("float4 color1;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_FOG) != 0) {
-			out.write("float fog;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_POINTSIZE) != 0) {
-			out.write("float pointSize;");
-			out.newLine();
-		}
-		out.write("};");
-		out.newLine();
 	}
 	
-	private void writeVSInput(BufferedWriter out) throws IOException {
-		out.write("Current.position = In.position;");
-		out.newLine();
-		if ((input & VS_INPUT_NORMAL) != 0) {
-			out.write("Current.normal = In.normal;");
-			out.newLine();
-		}
-		if ((input & (10|VS_INPUT_COLOR)) != 0) {
-			out.write("Current.color = In.color;");
-			out.newLine();
-		}
-		for (int i = 0; i < 8; ++i) {
-			if ((input & (1 << (VS_INPUT_SHL+i))) != 0) {
-				out.write("Current.texcoord" + i + " = In.texcoord" + i + ";");
-				out.newLine();
+	protected static void replaceCodeIndices(BufferedWriter out, String code, int texcoordIndex, int samplerIndex) throws IOException {
+		int indexOf;
+		int lastIndex = 0;
+		while ((indexOf = code.indexOf("<", lastIndex)) != -1) {
+			out.write(code.substring(lastIndex, indexOf));
+			
+			if (code.charAt(indexOf + 3) == '>' 
+					&& Character.isAlphabetic(code.charAt(indexOf + 1))
+					&& Character.isDigit(code.charAt(indexOf + 2))) {
+				
+				int index = Character.getNumericValue(code.charAt(indexOf + 2));
+				
+				switch (code.charAt(indexOf + 2)) {
+				case 's':
+					index += samplerIndex;
+					break;
+				case 't':
+					index += texcoordIndex;
+					break;
+				}
+				
+				out.write(Integer.toString(index));
+				
+				lastIndex = indexOf+4;
+			}
+			else {
+				// We didn't append the <
+				out.append('<');
+				lastIndex = indexOf+1;
 			}
 		}
-		if ((input & VS_INPUT_INDICES) != 0) {
-			out.write("Current.indices = In.indices;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_WEIGHTS) != 0) {
-			out.write("Current.weights = In.weights;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_POSITION2) != 0) {
-			out.write("Current.position2 = In.position2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_NORMAL2) != 0) {
-			out.write("Current.normal2 = In.normal2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_INDICES2) != 0) {
-			out.write("Current.indices2 = In.indices2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_WEIGHTS2) != 0) {
-			out.write("Current.weights2 = In.weights2;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_TANGENT) != 0) {
-			out.write("Current.tangent = In.tangent;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_BINORMAL) != 0) {
-			out.write("Current.binormal = In.binormal;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_COLOR1) != 0) {
-			out.write("Current.color1 = In.color1;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_FOG) != 0) {
-			out.write("Current.fog = In.fog;");
-			out.newLine();
-		}
-		if ((input & VS_INPUT_POINTSIZE) != 0) {
-			out.write("Current.pointSize = In.pointSize;");
-			out.newLine();
-		}
+		
+		out.write(code.substring(lastIndex));
 	}
 	
-	private void writeVSOutputStruct(BufferedWriter out) throws IOException {
-		out.write("struct cVertOut");
-		out.newLine();
-		out.write("{");
-		out.newLine();
-		out.write("float4 position : POSITION;");
-		out.newLine();
-		if ((output & (10|VS_OUTPUT_COLOR)) != 0) {
-			out.write("float4 diffuse : COLOR0;");
-			out.newLine();
+	protected static List<ShaderDataUniform> generateDeclareCode(BufferedWriter out, List<? extends ShaderFragment> fragments) throws IOException {
+		final List<ShaderDataUniform> uniforms = new ArrayList<>();
+		
+		int register = 0;
+		Set<Integer> setData = new HashSet<>();
+		for (ShaderFragment frag : fragments) {
+			for (ShaderDataUniform uniform : frag.shaderData) {
+				if (! setData.contains(uniform.dataIndex)) {
+					out.write("extern uniform " + uniform.name + " : register(c" + register + ");");
+					out.newLine();
+					register += uniform.registerSize;
+					setData.add(uniform.dataIndex);
+					uniforms.add(uniform);
+				}
+			}
 		}
-		for (int i = 0; i < numOutputTexcoords; ++i) {
-			out.write("float2 texcoord" + i + " : TEXCOORD" + i + ";");
-			out.newLine();
+		
+		for (ShaderFragment frag : fragments) {
+			if (frag.declareCode != null && !frag.declareCode.isEmpty()) {
+				out.newLine();
+				out.write(frag.declareCode);
+			}
 		}
-		if ((output & VS_OUTPUT_COLOR1) != 0) {
-			out.write("float4 color1 : COLOR1;");
-			out.newLine();
-		}
-		if ((output & VS_OUTPUT_FOG) != 0) {
-			out.write("float fog : FOG;");
-			out.newLine();
-		}
-		if ((output & VS_OUTPUT_POINTSIZE) != 0) {
-			out.write("float pointSize : PSIZE;");
-			out.newLine();
-		}
-		out.write("};");
-		out.newLine();
-	}
-	
-	private void writeVSOutput(BufferedWriter out) throws IOException {
-		out.write("Out.position = Current.position;");
-		out.newLine();
-		if ((output & (10|VS_OUTPUT_COLOR)) != 0) {
-			out.write("Out.diffuse = Current.color;");
-			out.newLine();
-		}
-		for (int i = 0; i < numOutputTexcoords; ++i) {
-			out.write("Out.texcoord" + i + " = Current.texcoord" + i + ";");
-			out.newLine();
-		}
-		if ((output & VS_OUTPUT_COLOR1) != 0) {
-			out.write("Out.color1 = Current.color1;");
-			out.newLine();
-		}
-		if ((output & VS_OUTPUT_FOG) != 0) {
-			out.write("Out.fog = Current.fog;");
-			out.newLine();
-		}
-		if ((output & VS_OUTPUT_POINTSIZE) != 0) {
-			out.write("Out.pointSize = Current.pointSize;");
-			out.newLine();
-		}
-	}
-	
-	private void writePSOutputStruct(BufferedWriter out, String name) throws IOException {
-		out.write("struct " + name);
-		out.newLine();
-		out.write("{");
-		out.newLine();
-		if ((output & PS_OUTPUT_COLOR) != 0) {
-			out.write("float4 color : COLOR0;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR1) != 0) {
-			out.write("float4 color1 : COLOR1;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR2) != 0) {
-			out.write("float4 color2 : COLOR2;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR3) != 0) {
-			out.write("float4 color3 : COLOR3;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_DEPTH) != 0) {
-			out.write("float depth : DEPTH;");
-			out.newLine();
-		}
-		out.write("};");
-		out.newLine();
-	}
-	
-	private void writePSOutput(BufferedWriter out) throws IOException {
-		if ((output & PS_OUTPUT_COLOR) != 0) {
-			out.write("Out.color = Current.color;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR1) != 0) {
-			out.write("Out.color1 = Current.color1;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR2) != 0) {
-			out.write("Out.color2 = Current.color2;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_COLOR3) != 0) {
-			out.write("Out.color3 = Current.color3;");
-			out.newLine();
-		}
-		if ((output & PS_OUTPUT_DEPTH) != 0) {
-			out.write("Out.depth = Current.depth;");
-			out.newLine();
-		}
-	}
-	
-	public String getName() {
-		return shaderName;
+		
+		return uniforms;
 	}
 }

@@ -36,25 +36,18 @@ import javafx.concurrent.Task;
 import sporemodder.FormatManager;
 import sporemodder.HashManager;
 import sporemodder.file.Converter;
+import sporemodder.file.ResourceKey;
 import sporemodder.util.NameRegistry;
 import sporemodder.util.Project;
 import sporemodder.util.Project.PackageSignature;
 
 public class DBPFPackingTask extends Task<Void> {
 	
-	/** The estimated progress (in [0, 1]) that writing the index takes. */ 
-	private static final double INDEX_PROGRESS = 0.10;
-	
 	/** The folder with the contents that are being packed. */
 	private File inputFolder;
 	
 	private File outputFile;
-	
-	/** The output stream where the DBPF file will be written. */
-	private StreamWriter stream;
-	
-	/** The fast memory stream used to write the DBPF index. */
-	private MemoryStream indexStream;
+
 	
 	/** The total progress (in [0, 1]). */
 	private double progress = 0;
@@ -65,22 +58,11 @@ public class DBPFPackingTask extends Task<Void> {
 	/** An object that holds information to be used by the ModAPI; it is optional. */
 	private DebugInformation debugInfo;
 	
-	private final DBPFItem item = new DBPFItem();
-	
-	/** The total amount of items that have been written. */
-	private int nItemsCount = 0;
-	
-	/** If a file is bigger (in bytes) than this number, it will get compressed. If the value is -1, it is ignored. */
-	private int nCompressThreshold = -1;
-	
 	private final PackageSignature packageSignature;
 	
-	private final RefPackCompression.CompressorOutput compressOut = new RefPackCompression.CompressorOutput();
-	
-	/** The current file being processed. This is used when diagnosing errors. */
-	private File currentFile;
 	private Exception failException;
 	
+	private DBPFPacker packer;
 	
 	private final AtomicBoolean running = new AtomicBoolean(true);
 	
@@ -101,10 +83,9 @@ public class DBPFPackingTask extends Task<Void> {
 		
 		final HashManager hasher = HashManager.get();
 		
-		try (StreamWriter stream = new FileStream(outputFile, "rw");
-				MemoryStream indexStream = new MemoryStream()) {
-			this.stream = stream;
-			this.indexStream = indexStream;
+		try (DBPFPacker packer = new DBPFPacker(outputFile)) {
+			this.packer = packer;
+			
 			//TODO support DBBF maybe?
 			
 			// Doesn't really make sense to let the user disable converters.
@@ -121,18 +102,8 @@ public class DBPFPackingTask extends Task<Void> {
 				
 			});
 			
-			// The header will be written after, now we just write padding
-			stream.writePadding(96);
-			
-			// Write the default index information
-			indexStream.writeLEInt(4);
-			indexStream.writeInt(0);
-			
-			
-			DatabasePackedFile header = new DatabasePackedFile();
-			
 			/** How much we increment the progress (in %) after every folder is completed. */
-			double inc = (1.0 - INDEX_PROGRESS) / folders.length;
+			double inc = 1.0 / folders.length;
 			
 			boolean alreadyHasPackageSignature = false;
 			
@@ -169,7 +140,7 @@ public class DBPFPackingTask extends Task<Void> {
 					setCurrentFile(file);
 					
 					for (Converter converter : converters) {
-						if (converter.encode(file, this, currentGroupID)) {
+						if (converter.encode(file, packer, currentGroupID)) {
 							bUsesConverter = true;
 							break;
 						}
@@ -185,14 +156,10 @@ public class DBPFPackingTask extends Task<Void> {
 						int currentInstanceID = hasher.getFileHash(splits[0]);
 						int currentTypeID = hasher.getTypeHash(currentExtension);
 						
-						item.name.setGroupID(currentGroupID);
-						item.name.setInstanceID(currentInstanceID);
-						item.name.setTypeID(currentTypeID);
-						
 						byte[] currentInputData = Files.readAllBytes(file.toPath());
 						
-						writeFileData(item, currentInputData, currentInputData.length);
-						addFile(item);
+						packer.writeFile(new ResourceKey(currentGroupID, currentInstanceID, currentTypeID),
+								currentInputData, currentInputData.length);
 						
 						// Add debug information
 						// We only do it here because we cannot get the files from disk in Spore if they needed to be converted
@@ -214,26 +181,11 @@ public class DBPFPackingTask extends Task<Void> {
 			
 			// Save debug information
 			if (debugInfo != null) {
-				debugInfo.saveInformation(this);
+				debugInfo.saveInformation(packer);
 			}
-			
-			// Write header and index
-			// First ensure we have no offset base
-			stream.setBaseOffset(0);
-			header.indexOffset = stream.getFilePointer();
-			header.indexCount = nItemsCount;
-			header.indexSize = (int) indexStream.length();
-			
-			indexStream.writeInto(stream);
-			stream.write(indexStream.toByteArray());
-			
-			incProgress(INDEX_PROGRESS);
-			
-			// Go back and write header
-			stream.seek(0);
-			header.writeHeader(stream);
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			failException = e;
 		}
 		
@@ -249,39 +201,6 @@ public class DBPFPackingTask extends Task<Void> {
 	private void incProgress(double increment) {
 		progress += increment;
 		updateProgress(progress, 1.0);
-	}
-	
-	public void addFile(DBPFItem item) throws IOException {
-		item.write(indexStream, false, true, true);
-		nItemsCount++;
-	}
-	
-	public boolean writeFileData(DBPFItem item, byte[] data, int length) throws IOException {
-		
-		item.chunkOffset = stream.getFilePointer();
-		
-		if (nCompressThreshold != -1 && length > nCompressThreshold) {
-			
-			RefPackCompression.compress(data, length, compressOut);
-
-			stream.write(compressOut.data, 0, compressOut.lengthInBytes);
-			item.isCompressed = true;
-			item.memSize = length;
-			item.compressedSize = compressOut.lengthInBytes;
-		}
-		else {
-			stream.write(data, 0, length);
-			item.isCompressed = false;
-			item.memSize = length;
-			item.compressedSize = item.memSize;
-		}
-		
-
-		return item.isCompressed;
-	}
-	
-	public DBPFItem getTemporaryItem() {
-		return item;
 	}
 	
 	//TODO consider changing how nested files work
@@ -304,17 +223,8 @@ public class DBPFPackingTask extends Task<Void> {
 	private void writeNamesList() throws IOException {
 		NameRegistry reg = HashManager.get().getProjectRegistry();
 		if (!reg.isEmpty()) {
-			
-			try (MemoryStream output = new MemoryStream()) {
-				reg.write(output);
-				
-				item.name.setGroupID(0x9C9059AE);  // sporemaster
-				item.name.setInstanceID(0xCC2F616F);  // names
-				item.name.setTypeID(0x2B6CAB5F);  // txt
-				
-				writeFileData(item, output.getRawData(), (int) output.length());
-				addFile(item);
-			}
+			packer.writeFile(new ResourceKey(0x9C9059AE, 0xCC2F616F, 0x2B6CAB5F),
+					stream -> reg.write(stream));
 		}
 	}
 	final static int BUFFER_SIZE = 8192;
@@ -322,6 +232,9 @@ public class DBPFPackingTask extends Task<Void> {
 	private void writePackageSignature(boolean alreadyHasPackageSignature) throws IOException {
 		
 		if (packageSignature != PackageSignature.NONE && !alreadyHasPackageSignature) {
+			
+			DBPFItem item = packer.getTemporaryItem();
+			StreamWriter stream = packer.getStream();
 			
 			item.name.setGroupID(0x40404000);
 			item.name.setTypeID(0x00B1B104);
@@ -342,7 +255,7 @@ public class DBPFPackingTask extends Task<Void> {
 			item.memSize = (int) (stream.getFilePointer() - item.chunkOffset);
 			item.compressedSize = item.memSize;
 			
-			addFile(item);
+			packer.addFile(item);
 		}
 	}
 
@@ -351,7 +264,7 @@ public class DBPFPackingTask extends Task<Void> {
 	 * @returns The file that was being processed when the error happened.
 	 */
 	public File getCurrentFile() {
-		return currentFile;
+		return packer.getCurrentFile();
 	}
 	
 	public Exception getFailException() {
@@ -363,7 +276,7 @@ public class DBPFPackingTask extends Task<Void> {
 	 * @param currentFile
 	 */
 	public void setCurrentFile(File currentFile) {
-		this.currentFile = currentFile;
+		packer.setCurrentFile(currentFile);
 	}
 	
 	public void pause() {

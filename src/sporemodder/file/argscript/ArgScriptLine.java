@@ -69,7 +69,7 @@ public final class ArgScriptLine {
 	
 	/** This class allows us to correctly store text positions even if there are variable replacements or comment removals. */
 	// Not private, default parsers might need it
-	final OriginalPositionTracker positionTracker = new OriginalPositionTracker();
+	final TextPositionMap positionTracker = new TextPositionMap();
 	
 	/** A list that keeps track of the position in the text of all the words in the 'splits' list. */
 	private final List<Integer> splitPositions = new ArrayList<Integer>();
@@ -181,7 +181,7 @@ public final class ArgScriptLine {
 	 * @param positions
 	 * @return
 	 */
-	public boolean fromLine(String line, OriginalPositionTracker positions) {
+	public boolean fromLine(String line, TextPositionMap positions) {
 		
 		// Reset everything
 		text = line;
@@ -218,6 +218,10 @@ public final class ArgScriptLine {
 	 */
 	public boolean hasKeyword() {
 		return hasKeyword;
+	}
+	
+	public void setHasKeyword(boolean value) {
+		this.hasKeyword = value;
 	}
 	
 	/**

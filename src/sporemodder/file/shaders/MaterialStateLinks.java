@@ -1,3 +1,21 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.io.File;
@@ -9,7 +27,6 @@ import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import sporemodder.HashManager;
-import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.effects.ResourceID;
 import sporemodder.file.rw4.MaterialStateCompiler;
@@ -139,6 +156,18 @@ public class MaterialStateLinks {
 		}
 	}
 	
+	public static MaterialStateLinks read(StreamReader renderWareStream, StreamReader linkStream) throws IOException {
+			
+		RenderWare renderWare = new RenderWare();
+		renderWare.read(renderWareStream);
+		List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
+		
+		MaterialStateLinks links = new MaterialStateLinks();
+		links.read(linkStream, compiledStates);
+		
+		return links;
+	}
+	
 	public void loadFolder(File folder) throws IOException {
 		for (File file : folder.listFiles()) {
 			if (file.getName().endsWith(".smt_t")) {
@@ -147,15 +176,5 @@ public class MaterialStateLinks {
 				materials.add(link);
 			}
 		}
-	}
-	
-	public static void main(String[] args) throws IOException {
-		MainApp.testInit();
-		
-		File linkFile = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_compiled_states_link~\\0x00000003.smt");
-		File renderWareFile = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_compiled_states~\\0x00000003.rw4");
-		File outputFolder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_compiled_states_link~\\0x00000003.smt.unpacked\\");
-		
-		read(renderWareFile, linkFile).toArgScript(outputFolder);
 	}
 }

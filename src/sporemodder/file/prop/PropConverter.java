@@ -44,8 +44,7 @@ import sporemodder.file.Converter;
 import sporemodder.file.DocumentException;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.dbpf.DBPFItem;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.util.ProjectItem;
 
 public class PropConverter implements Converter {
@@ -88,25 +87,23 @@ public class PropConverter implements Converter {
 		}
 	}
 	
-	private void addAutoLocale(String autoLocale, int tableID, DBPFPackingTask packer) throws IOException {
+	private void addAutoLocale(String autoLocale, int tableID, DBPFPacker packer) throws IOException {
 		if (autoLocale != null) {
 			byte[] data = autoLocale.getBytes("US-ASCII");
-			DBPFItem item = new DBPFItem();
-			item.name.setInstanceID(tableID);
-			item.name.setGroupID(0x02FABF01);  // locale~
-			item.name.setTypeID(0x02FAC0B6);  // .locale
-			packer.writeFileData(item, data, data.length);
-			packer.addFile(item);
+			ResourceKey name = new ResourceKey();
+			name.setInstanceID(tableID);
+			name.setGroupID(0x02FABF01);  // locale~
+			name.setTypeID(0x02FAC0B6);  // .locale
+			packer.writeFile(name, data, data.length);
 		}
 	}
 	
-	private void addPropItem(String name, String extension, int groupID, DBPFPackingTask packer, byte[] data, int length) throws IOException {
-		DBPFItem item = packer.getTemporaryItem();
-		item.name.setInstanceID(HashManager.get().getFileHash(name));
-		item.name.setGroupID(groupID);
-		item.name.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // soundProp or prop
-		packer.writeFileData(item, data, length);
-		packer.addFile(item);
+	private void addPropItem(String name, String extension, int groupID, DBPFPacker packer, byte[] data, int length) throws IOException {
+		ResourceKey key = packer.getTemporaryName();
+		key.setInstanceID(HashManager.get().getFileHash(name));
+		key.setGroupID(groupID);
+		key.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // soundProp or prop
+		packer.writeFile(key, data, length);
 	}
 	
 	private String getTableIDString(File input, String[] splits) {
@@ -118,7 +115,7 @@ public class PropConverter implements Converter {
 	}
 	
 	@Override
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		checkExtensions();
 		
 		String[] splits = input.getName().split("\\.", 2);
@@ -151,6 +148,7 @@ public class PropConverter implements Converter {
 				
 				PropertyList list = new PropertyList();
 				ArgScriptStream<PropertyList> stream = list.generateStream();
+				stream.setFastParsing(true);
 				stream.process(input);
 				
 				if (!stream.getErrors().isEmpty()) {

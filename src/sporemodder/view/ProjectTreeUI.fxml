@@ -19,7 +19,7 @@
             </TextField>
          </center>
          <right>
-            <Button contentDisplay="GRAPHIC_ONLY" fx:id="searchButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0" styleClass="button-no-background" text="Button" BorderPane.alignment="CENTER">
+            <Button fx:id="searchButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0" styleClass="button-no-background" text="Button" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets right="5.0" />
                </BorderPane.margin>
@@ -44,4 +44,14 @@
          </BorderPane.margin>
       </ScrollPane>
    </center>
+   <bottom>
+      <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" BorderPane.alignment="CENTER">
+         <content>
+            <TreeView fx:id="tvSpecialItems" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
+         </content>
+         <BorderPane.margin>
+            <Insets bottom="5.0" left="5.0" right="2.0" />
+         </BorderPane.margin>
+      </ScrollPane>
+   </bottom>
 </BorderPane>

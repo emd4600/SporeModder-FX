@@ -37,6 +37,7 @@ import javafx.stage.FileChooser;
 import sporemodder.FileManager;
 import sporemodder.GameManager;
 import sporemodder.GameManager.GameType;
+import sporemodder.file.shaders.FXCompiler;
 import sporemodder.MainApp;
 import sporemodder.UIManager;
 import sporemodder.util.GamePathConfiguration.GamePathType;
@@ -62,11 +63,15 @@ public class ProgramSettingsUI implements Controller {
 	
 	@FXML private TextField commandLineField;
 	
+	@FXML private TextField fxcPathField;
+	@FXML private Button findFXCButton;
+	
 	// To set tooltips
 	@FXML private Node gameSettingsPanel;
 	@FXML private Control commandLineLabel;
 	@FXML private Control gameTypeLabel;
 	@FXML private Control styleLabel;
+	@FXML private Control fxcLabel;
 	
 	private Dialog<ButtonType> dialog;
 
@@ -76,6 +81,23 @@ public class ProgramSettingsUI implements Controller {
 	}
 
 	@FXML private void initialize() {
+		
+		fxcLabel.setTooltip(new Tooltip("The path to fxc.exe, usually inside DirectX SDK or Microsoft SDK."));
+		
+		findFXCButton.setOnAction(event -> {
+			FileChooser chooser = new FileChooser();
+			chooser.getExtensionFilters().add(FileManager.FILEFILTER_EXE);
+			chooser.getExtensionFilters().add(FileManager.FILEFILTER_ALL);
+			if (!fxcPathField.getText().isEmpty()) chooser.setInitialDirectory(new File(fxcPathField.getText()).getParentFile());
+			
+			UIManager.get().setOverlay(true);
+			File result = chooser.showOpenDialog(UIManager.get().getScene().getWindow());
+			UIManager.get().setOverlay(false);
+			
+			if (result != null) {
+				fxcPathField.setText(result.getAbsolutePath());
+			}
+		});
 		
 		// -- Game Settings -- //
 		
@@ -182,6 +204,11 @@ public class ProgramSettingsUI implements Controller {
 		
 		stylesBox.getItems().setAll(UIManager.get().getAvailableStyles());
 		stylesBox.getSelectionModel().select(UIManager.get().getSelectedStyle());
+		
+		
+		if (FXCompiler.get().getFXCFile() != null) {
+			fxcPathField.setText(FXCompiler.get().getFXCFile().getAbsolutePath());
+		}
 	}
 	
 	private void applyChanges() {
@@ -233,6 +260,18 @@ public class ProgramSettingsUI implements Controller {
 		
 		UIManager.get().setSelectedStyle(stylesBox.getSelectionModel().getSelectedItem());
 		
+		
+		
+		// -- Shaders -- //
+		
+		path = fxcPathField.getText();
+		if (path.isEmpty()) {
+			FXCompiler.get().setFXCFile(null);
+		} else {
+			FXCompiler.get().setFXCFile(new File(path));
+		}
+		
+		
 		MainApp.get().saveSettings();
 	}
 	
@@ -245,6 +284,10 @@ public class ProgramSettingsUI implements Controller {
 		
 		if (map.containsKey(GameType.GA)) {
 			gaField.setText(map.get(GameType.GA).getInstallFolder().getAbsolutePath());
+		}
+		
+		if (FXCompiler.get().autoDetectPath()) {
+			fxcPathField.setText(FXCompiler.get().getFXCFile().getAbsolutePath());
 		}
 	}
 	

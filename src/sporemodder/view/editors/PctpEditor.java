@@ -28,4 +28,8 @@ public class PctpEditor extends ArgScriptEditor<PCTPUnit> {
 		PCTPUnit unit = new PCTPUnit();
 		stream = unit.generateStream();
 	}
+	
+	@Override protected void onStreamParse() {
+		stream.getData().clear();
+	}
 }

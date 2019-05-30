@@ -32,7 +32,7 @@ public class ArgScriptArguments {
 	List<Integer> endPositions;
 	int numArguments;
 	ArgScriptStream<?> stream;
-	OriginalPositionTracker tracker;
+	TextPositionMap tracker;
 	TreeMap<Integer, Integer> originalToText;
 	
 	public ArgScriptStream<?> getStream() {

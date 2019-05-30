@@ -31,13 +31,12 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
-import sporemodder.file.dbpf.DBPFItem;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.util.ProjectItem;
 
 public class EffectsConverter implements Converter {
 
-	private static final int TYPE_ID = 0xEA5118B0;
+	public static final int TYPE_ID = 0xEA5118B0;
 	private static String extension = null;
 	
 	private static boolean isHighestQuality(int groupID) {
@@ -72,7 +71,7 @@ public class EffectsConverter implements Converter {
 		if (input.isFile()) {
 			effectDirectory.processUnit(input);
 		} else {
-			effectDirectory.process(input);
+			effectDirectory.process(input, null);
 		}
 		effectDirectory.write(output);
 		
@@ -80,21 +79,20 @@ public class EffectsConverter implements Converter {
 	}
 
 	@Override
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		if (isEncoder(input)) {
 			try (MemoryStream output = new MemoryStream()) {
 				EffectDirectory effectDirectory = new EffectDirectory();
-				effectDirectory.process(input);
+				effectDirectory.process(input, packer);
 				effectDirectory.write(output);
 				
 				String[] splits = input.getName().split("\\.", 2);
 				
-				DBPFItem item = packer.getTemporaryItem();
-				item.name.setInstanceID(HashManager.get().getFileHash(splits[0]));
-				item.name.setGroupID(groupID);
-				item.name.setTypeID(TYPE_ID);
-				packer.writeFileData(item, output.getRawData(), (int) output.length());
-				packer.addFile(item);
+				ResourceKey name = new ResourceKey();
+				name.setInstanceID(HashManager.get().getFileHash(splits[0]));
+				name.setGroupID(groupID);
+				name.setTypeID(TYPE_ID);
+				packer.writeFile(name, output.getRawData(), (int) output.length());
 				
 				File parentFolder = input.getParentFile();
 				// Now check if other qualities exist
@@ -104,9 +102,8 @@ public class EffectsConverter implements Converter {
 					if (!new File(parentFolder, splits[0] + '.' + HashManager.get().getTypeName(TYPE_ID)).exists() ||
 							!new File(parentFolder, splits[0] + '.' + HashManager.get().getTypeName(TYPE_ID) + ".unpacked").exists()) {
 						
-						item.name.setGroupID(groupID);
-						packer.writeFileData(item, output.getRawData(), (int) output.length());
-						packer.addFile(item);
+						name.setGroupID(groupID);
+						packer.writeFile(name, output.getRawData(), (int) output.length());
 					}
 				}
 				

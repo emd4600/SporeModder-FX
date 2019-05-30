@@ -84,6 +84,7 @@ import sporemodder.view.ProjectTreeUI;
 import sporemodder.view.dialogs.PackProgressUI;
 import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
 
 /**
@@ -107,13 +108,16 @@ public class ProjectManager extends AbstractManager {
 	
 	/** Project presets: lists of commonly used projects that can be used as sources. 
 	 * We save a String array instead of Projects because they don't necessarily exist. */
-	private final List<ProjectPreset> presets = new ArrayList<ProjectPreset>();
+	private final List<ProjectPreset> presets = new ArrayList<>();
 
 	/** All the factories that can be used to parse files and create project items. */
-	private final List<ProjectItemFactory> itemFactories = new ArrayList<ProjectItemFactory>();
+	private final List<ProjectItemFactory> itemFactories = new ArrayList<>();
 	/** A map that assigns the project name (in lowercase) to the project itself. */
-	private final HashMap<String, Project> projects = new HashMap<String, Project>();
+	private final Map<String, Project> projects = new TreeMap<>();
 	private Project activeProject;
+	
+	/** Special items that are always displayed in the bottom part of the project tree. */
+	private final List<ProjectItem> specialItems = new ArrayList<>(); 
 	
 	private ProjectTreeItem rootItem;
 	
@@ -147,8 +151,12 @@ public class ProjectManager extends AbstractManager {
 		itemFactories.add(new OmitProjectItemFactory());
 		
 		
+		specialItems.add(new EffectEditorItem());
+		
 		// Load all projects
 		File projectsFolder = PathManager.get().getProjectsFolder();
+		if (!projectsFolder.exists()) projectsFolder.mkdir();
+		
 		File[] children = projectsFolder.listFiles();
 		
 		for (File folder : children) {
@@ -332,6 +340,14 @@ public class ProjectManager extends AbstractManager {
 	public void setUI(ProjectTreeUI treeUI) {
 		this.treeUI = treeUI;
 		
+		// We add the special items to the UI
+		List<TreeItem<ProjectItem>> items = treeUI.getSpecialItems().getRoot().getChildren();
+		for (ProjectItem item : specialItems) {
+			items.add(new ProjectTreeItem(item));
+		}
+		
+		treeUI.getSpecialItems().setPrefHeight(30);
+		
 		projectSearcher.isSearchingProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue) {
 				this.treeUI.getTreeView().setDisable(true);
@@ -352,9 +368,21 @@ public class ProjectManager extends AbstractManager {
 		});
 		
 		treeUI.getTreeView().getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-			lastSelectedItem = (ProjectTreeItem) newValue;
-
 			if (!disableTreeEvents && newValue != null) {
+				lastSelectedItem = (ProjectTreeItem) newValue;
+				
+				treeUI.getSpecialItems().getSelectionModel().select(null);
+				
+				UIManager.get().tryAction(() -> EditorManager.get().loadFile(newValue.getValue()), "Cannot load file \"" + newValue.getValue().getName() + "\".");
+			}
+		});
+		
+		treeUI.getSpecialItems().getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+			if (!disableTreeEvents && newValue != null) {
+				lastSelectedItem = (ProjectTreeItem) newValue;
+				
+				// If the new selected item is null, it means he user selected something in the tree view
+				treeUI.getTreeView().getSelectionModel().select(null);
 				
 				UIManager.get().tryAction(() -> EditorManager.get().loadFile(newValue.getValue()), "Cannot load file \"" + newValue.getValue().getName() + "\".");
 			}
@@ -421,7 +449,7 @@ public class ProjectManager extends AbstractManager {
 						// If the item was source, we must restore that source item again
 						if (item.isSource()) {
 							// We can't use item.getRelativePath() because it would point to the renamed file!
-							sourceItem = new ProjectItem(getSourceFile(parentItem.getRelativePath() + "\\" + item.getFile().getName()), item.getProject());
+							sourceItem = new ProjectItem(getSourceFile(parentItem.getRelativePath() + File.separatorChar + item.getFile().getName()), item.getProject());
 							sourceItem.setIsSource(true);
 							sourceItem.setTreeItem(new ProjectTreeItem(sourceItem));
 							
@@ -847,7 +875,7 @@ public class ProjectManager extends AbstractManager {
 						item.setTreeItem(treeItem);
 						
 						// We use the real file name here because when loading the mod ones we still don't know the name
-						loadedItems.put(relativePath + "\\" + fileName, treeItem);
+						loadedItems.put(relativePath + File.separatorChar + fileName, treeItem);
 					}
 				}
 			}
@@ -858,7 +886,7 @@ public class ProjectManager extends AbstractManager {
 			String[] fileNames = folder.list();
 			if (fileNames != null) {
 				for (String fileName : fileNames) {
-					ProjectTreeItem treeItem = loadedItems.get(relativePath + "\\" + fileName);
+					ProjectTreeItem treeItem = loadedItems.get(relativePath + File.separatorChar + fileName);
 					File file = new File(folder, fileName);
 					
 					if (treeItem == null) {
@@ -871,7 +899,7 @@ public class ProjectManager extends AbstractManager {
 						item.setTreeItem(treeItem);
 						
 						// We use the real file name here because when loading the mod ones we still don't know the name
-						loadedItems.put(relativePath + "\\" + fileName, treeItem);
+						loadedItems.put(relativePath + File.separatorChar + fileName, treeItem);
 					}
 					
 					treeItem.getValue().setFile(file);
@@ -903,7 +931,7 @@ public class ProjectManager extends AbstractManager {
 			String relativePath = parent.getValue().getRelativePath();
 			
 			for (ProjectTreeItem child : parent.getInternalChildren()) {
-				loadedItems.put(relativePath + "\\" + child.getValue().getFile().getName(), child);
+				loadedItems.put(relativePath + File.separatorChar + child.getValue().getFile().getName(), child);
 			}
 		}
 		
@@ -1010,7 +1038,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {
-		int indexOf = relativePath.indexOf("\\");
+		int indexOf = relativePath.indexOf(File.separatorChar);
 		
 		String name = indexOf == -1 ? relativePath : relativePath.substring(0, indexOf);
 		ProjectTreeItem result = null;
@@ -1064,7 +1092,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public String keyToRelativePath(ResourceKey key) {
-		return key.toString().replace('!', '\\');
+		return key.toString().replace('!', File.separatorChar);
 	}
 	
 	/**
@@ -1078,7 +1106,7 @@ public class ProjectManager extends AbstractManager {
 	public ProjectItem getSiblingItem(ProjectItem item, String name) throws Exception {
 		TreeItem<ProjectItem> parent = item.getTreeItem().getParent();
 		parent.getValue().refreshItem();
-		return ProjectManager.get().getItem(parent.getValue().getRelativePath() + "\\" + name);
+		return ProjectManager.get().getItem(parent.getValue().getRelativePath() + File.separatorChar + name);
 	}
 	
 	public ResourceKey getResourceKey(ProjectItem item) {
@@ -1170,7 +1198,7 @@ public class ProjectManager extends AbstractManager {
 	}
  	
  	public File getFile(ProjectItem directory, String name) {
- 		String relativePath = directory.getRelativePath() + "\\" + name;
+ 		String relativePath = directory.getRelativePath() + File.separatorChar + name;
  		
  		return getFile(relativePath);
 	}
@@ -1286,7 +1314,7 @@ public class ProjectManager extends AbstractManager {
 		File modFile = getModFile(relativePath);
 		
 		Runtime.getRuntime().exec(new String[] {
-				PathManager.get().getProgramFile("WinMerge\\WinMergeU.exe").getAbsolutePath(),
+				PathManager.get().getProgramFile("WinMerge" + File.separatorChar + "WinMergeU.exe").getAbsolutePath(),
 				sourceFile.getAbsolutePath(),
 				modFile.getAbsolutePath()});
 		
@@ -1981,12 +2009,12 @@ public class ProjectManager extends AbstractManager {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		MainApp.testInit();
-		
-		File file = new File("C:\\Users\\Eric\\Downloads\\DI_ItemDrop.prop.xml");
-		File destFolder = new File("C:\\Users\\Eric\\Desktop");
-		
-		ProjectManager.get().importFile(file, destFolder);
-	}
+//	public static void main(String[] args) throws IOException {
+//		MainApp.testInit();
+//		
+//		File file = new File("C:\\Users\\Eric\\Downloads\\DI_ItemDrop.prop.xml");
+//		File destFolder = new File("C:\\Users\\Eric\\Desktop");
+//		
+//		ProjectManager.get().importFile(file, destFolder);
+//	}
 }

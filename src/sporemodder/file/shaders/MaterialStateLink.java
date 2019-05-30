@@ -1,3 +1,21 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.io.IOException;
@@ -19,12 +37,10 @@ import sporemodder.file.effects.ResourceID;
 import sporemodder.file.rw4.Direct3DEnums;
 import sporemodder.file.rw4.Direct3DEnums.D3DDECLMETHOD;
 import sporemodder.file.rw4.Direct3DEnums.D3DDECLTYPE;
-import sporemodder.file.rw4.Direct3DEnums.D3DDECLUSAGE;
 import sporemodder.file.rw4.Direct3DEnums.D3DPRIMITIVETYPE;
 import sporemodder.file.rw4.Direct3DEnums.D3DRenderStateType;
 import sporemodder.file.rw4.Direct3DEnums.D3DSamplerStateType;
 import sporemodder.file.rw4.Direct3DEnums.D3DTextureStageStateType;
-import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
 import sporemodder.file.rw4.MaterialStateCompiler;
 import sporemodder.file.rw4.MaterialStateCompiler.ShaderDataEntry;
 import sporemodder.file.rw4.MaterialStateCompiler.TextureSlot;
@@ -40,6 +56,8 @@ public class MaterialStateLink {
 	public RenderWare renderWare;
 	
 	public int materialID;
+	// We need this to parse RW4 materials: states that are defined but not used in a 'material' instruction
+	public final List<MaterialStateCompiler> definedStates = new ArrayList<>();
 	public final List<MaterialStateCompiler> states = new ArrayList<>();
 	public final List<ResourceID> textures = new ArrayList<>();
 	
@@ -80,6 +98,7 @@ public class MaterialStateLink {
 	
 	public void reset() {
 		materialID = 0;
+		definedStates.clear();
 		states.clear();
 		textures.clear();
 		textureUnks1.clear();
@@ -137,6 +156,7 @@ public class MaterialStateLink {
 					if (line.getArguments(args, 1)) {
 						nameToState.put(args.get(0), currentState);
 					}
+					definedStates.add(currentState);
 				}
 				
 				stream.startBlock(this);
@@ -177,7 +197,7 @@ public class MaterialStateLink {
 						ShaderDataEntry entry = new ShaderDataEntry();
 						
 						try {
-							entry.index = (short) ShaderData.getIndex(args.get(0));
+							entry.index = ShaderData.getIndex(args.get(0), false).shortValue();
 						} catch (Exception e) {
 							stream.addError(line.createErrorForArgument(e.getMessage(), 0));
 						}
@@ -262,12 +282,9 @@ public class MaterialStateLink {
 						if (line.getOptionArguments(args, "field_0E", 1) && (value = stream.parseUByte(args, 0)) != null) {
 							currentState.vertexDescription.field_0E = value.byteValue();
 						}
-						if (line.getOptionArguments(args, "field_10", 1) && (value = stream.parseInt(args, 0)) != null) {
-							currentState.vertexDescription.field_10 = value;
-						}
-						if (line.getOptionArguments(args, "field_14", 1) && (value = stream.parseInt(args, 0)) != null) {
-							currentState.vertexDescription.field_14 = value;
-						}
+//						if (line.getOptionArguments(args, "field_14", 1) && (value = stream.parseInt(args, 0)) != null) {
+//							currentState.vertexDescription.field_14 = value;
+//						}
 						stream.startBlock(this);
 					}
 					
@@ -280,21 +297,15 @@ public class MaterialStateLink {
 							
 							Number value = null;
 							
-							if (line.getArguments(args, 3)) {
-								element.type = parseEnum(D3DDECLTYPE.class, stream, line, args, 0);
-								element.usage = parseEnum(D3DDECLUSAGE.class, stream, line, args, 1);
-								
-								try {
-									element.typeCode = RWDECLUSAGE.valueOf(args.get(2)).getId();
-								} catch (Exception e) {
-									value = stream.parseInt(args, 2);
-									if (value != null) element.typeCode = value.intValue();
+							if (line.getArguments(args, 2)) {
+								int usage = RWVertexElement.VertexInputEnum.get(args, 0);
+								if (usage != -1) {
+									element.setUsage(usage);
 								}
+								
+								element.type = parseEnum(D3DDECLTYPE.class, stream, line, args, 1);
 							}
 							
-							if (line.getOptionArguments(args, "usageIndex", 1) && (value = stream.parseByte(args, 0)) != null) {
-								element.usageIndex = value.byteValue();
-							}
 							if (line.getOptionArguments(args, "stream", 1) && (value = stream.parseInt(args, 0)) != null) {
 								element.stream = value.intValue();
 							}
@@ -311,6 +322,9 @@ public class MaterialStateLink {
 						for (RWVertexElement element : currentState.vertexDescription.elements) {
 							element.offset = offset;
 							offset += element.type.size;
+							
+							currentState.vertexDescription.elementFlags |= 1 << element.typeCode;
+							currentState.vertexDescription.elementFlags |= element.getFlags2();
 						}
 						currentState.vertexDescription.vertexSize = (byte) offset;
 					}

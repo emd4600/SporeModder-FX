@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 
 import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
@@ -32,8 +31,7 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
-import sporemodder.file.dbpf.DBPFItem;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.util.ProjectItem;
 
@@ -86,26 +84,24 @@ public class RenderWareConverter implements Converter {
 	}
 	
 	@Override
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		if (isEncoder(input)) {
 			packer.setCurrentFile(input);
 			
-			try (FileStream inputStream = new FileStream(input, "r");
-					MemoryStream outputStream = new MemoryStream()) {
-				
-				DDSTexture texture = new DDSTexture();
+			DDSTexture texture = new DDSTexture();
+			
+			try (FileStream inputStream = new FileStream(input, "r")) {
 				texture.read(inputStream);
-				RenderWare.fromTexture(texture).write(outputStream);
-				
-				DBPFItem item = packer.getTemporaryItem();
-				item.name.setGroupID(groupID);
-				item.name.setInstanceID(input.getName().split("\\.", 2)[0]);
-				item.name.setTypeID(TYPE_ID);  // rw4
-				packer.writeFileData(item, outputStream.getRawData(), (int) outputStream.length());
-				packer.addFile(item);
-				
-				return true;
 			}
+			
+			ResourceKey name = packer.getTemporaryName();
+			name.setGroupID(groupID);
+			name.setInstanceID(input.getName().split("\\.", 2)[0]);
+			name.setTypeID(TYPE_ID);  // rw4
+			
+			packer.writeFile(name, stream -> RenderWare.fromTexture(texture).write(stream));
+			
+			return true;
 		} else {
 			return false;
 		}

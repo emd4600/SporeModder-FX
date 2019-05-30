@@ -1,14 +1,33 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import sporemodder.HashManager;
 
 public class ShaderData {
 
 	private static final Map<Integer, String> indexToName = new HashMap<>();
-	private static final Map<String, Integer> nameToIndex = new HashMap<>();
+	private static final Map<String, Integer> nameToIndex = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	private static final Map<Integer, Integer> flags = new HashMap<>();
 
@@ -38,6 +57,7 @@ public class ShaderData {
 		flags.put(0x213, FLAG_MODEL_SHADER_DATA);
 		flags.put(0x219, FLAG_MODEL_SHADER_DATA);
 		flags.put(0x21A, FLAG_MODEL_SHADER_DATA);
+		flags.put(0x21C, FLAG_MODEL_SHADER_DATA);
 		flags.put(0x21E, FLAG_MODEL_SHADER_DATA);
 		flags.put(0x220, FLAG_MODEL_SHADER_DATA);
 		flags.put(0x223, FLAG_MODEL_SHADER_DATA);
@@ -158,8 +178,9 @@ public class ShaderData {
 		
 		nameToIndex.put("sunDirAndCelStrength", 0x219);  // 0x219 to display buildings and creatures?
 		nameToIndex.put("shCoeffs", 0x21A);
+		nameToIndex.put("lightingInfoCoeffs", 0x21A);  // 0x21A, 0x219
 		nameToIndex.put("cameraDistance", 0x21B);   // float
-		
+		nameToIndex.put("bakedPaint", 0x21C);  // float4 bakedPaint[2]
 		
 		nameToIndex.put("uvSubRect", 0x21E);
 		nameToIndex.put("mousePosition", 0x21F);
@@ -167,6 +188,7 @@ public class ShaderData {
 		
 		nameToIndex.put("cameraParams", 0x222);  // cameraParams[1]
 		nameToIndex.put("shadowMapInfo", 0x223);
+		nameToIndex.put("rangeAndStrength", 0x223);  // the first member of the shadowMapInfo struct
 		// 224 related to per-vertex fogging
 		nameToIndex.put("foggingCPU", 0x225);
 		nameToIndex.put("patchLocation", 0x226);
@@ -189,7 +211,7 @@ public class ShaderData {
 		nameToIndex.put("terraformValues", 0x23D);
 		nameToIndex.put("worldToPatch", 0x23E);
 		
-		nameToIndex.put("terrainBrushCubeMatRot", 0x241);
+		nameToIndex.put("terrainBrushCubeMapRot", 0x241);
 		nameToIndex.put("terrainSynthParams", 0x242);
 		
 		nameToIndex.put("debugPSColor", 0x246);
@@ -237,8 +259,10 @@ public class ShaderData {
 		return name;
 	}
 	
-	public static int getIndex(String name) {
-		Integer result = nameToIndex.get(name);
+	public static Integer getIndex(String name, boolean isArray) {
+		Integer result = null;
+		if (isArray) result = nameToIndex.get(name + "[]");
+		if (result == null) result = nameToIndex.get(name);
 		if (result == null) return HashManager.get().int32(name);
 		else return result;
 	}

@@ -24,6 +24,7 @@ import java.util.List;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import sporemodder.HashManager;
 
 public class RWSkeleton extends RWObject {
 	
@@ -43,7 +44,11 @@ public class RWSkeleton extends RWObject {
 			this.flags = flags;
 			this.parent = parent;
 		}
-		
+
+		@Override
+		public String toString() {
+			return "Bone [name=" + HashManager.get().getFileName(name) + ", flags=" + flags + ", parent=" + parent + "]";
+		}
 	}
 	
 	public int skeletonID;

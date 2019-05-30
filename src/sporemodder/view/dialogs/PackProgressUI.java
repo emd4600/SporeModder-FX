@@ -145,9 +145,16 @@ public class PackProgressUI implements Controller {
 	private void showErrorDialog(Project project, DBPFPackingTask task) {
 		Alert alert = new Alert(AlertType.ERROR, "The project was not packed", ButtonType.OK);
 		
-		String relativePath = task.getCurrentFile().getAbsolutePath().substring(project.getFolder().getAbsolutePath().length());
+		String errorText;
+		if (task.getCurrentFile() != null) {
+			String relativePath = task.getCurrentFile().getAbsolutePath().substring(project.getFolder().getAbsolutePath().length());
+			errorText = "The project was not packed due to an error in file " + relativePath;
+		}
+		else {
+			errorText = "The project was not packed";
+		}
 		
-		alert.setContentText("The project was not packed due to an error in file " + relativePath + ":\n" + task.getFailException().getLocalizedMessage());
+		alert.setContentText(errorText + ":\n" + task.getFailException().getLocalizedMessage());
 		alert.getDialogPane().setExpandableContent(UIManager.get().createExceptionArea(task.getFailException()));
 		
 		UIManager.get().showDialog(alert, false);

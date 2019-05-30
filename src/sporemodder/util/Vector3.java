@@ -40,6 +40,10 @@ public class Vector3 {
 	float z;
 	
 	public Vector3() {}
+	
+	public Vector3(Vector3 other) {
+		set(other);
+	}
 
 	public Vector3(float x, float y, float z) {
 		this.x = x;
@@ -51,6 +55,24 @@ public class Vector3 {
 		this.x = array[0];
 		this.y = array[1];
 		this.z = array[2];
+	}
+	
+	public Vector3(double[] array) {
+		this.x = (float) array[0];
+		this.y = (float) array[1];
+		this.z = (float) array[2];
+	}
+	
+	public void set(int i, float value) {
+		if (i == 0) x = value;
+		else if (i == 1) y = value;
+		else z = value;
+	}
+	
+	public float get(int i) {
+		if (i == 0) return x;
+		else if (i == 1) return y;
+		else return z;
 	}
 	
 	public Vector3 set(Vector3 vector) {

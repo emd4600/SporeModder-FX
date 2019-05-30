@@ -110,7 +110,7 @@ public class StyleSheet {
 			if (line.startsWith("@font")) {
 				String fontFileName = line.substring(7, line.indexOf(";") - 2);
 				
-				File file = PathManager.get().getProgramFile(SpuiDesigner.FOLDER_NAME + "\\" + fontFileName);
+				File file = PathManager.get().getProgramFile(SpuiDesigner.FOLDER_NAME + File.separatorChar + fontFileName);
 				if (file != null && file.exists()) {
 					try (InputStream is = new FileInputStream(file)) {
 						Font font = Font.loadFont(is, 12);

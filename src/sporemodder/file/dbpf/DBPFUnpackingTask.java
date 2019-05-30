@@ -123,6 +123,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				continue;
 			}
 			
+			for (Converter converter : converters) converter.reset();
+			
 			try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
 				
 				updateMessage("Reading file index...");
@@ -213,6 +215,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 									}
 								}
 							} catch (Exception e) {
+								e.printStackTrace();
 								exceptions.put(item, e);
 								// Handling the exception here will make it write the unconverted file
 							}

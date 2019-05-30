@@ -1314,7 +1314,7 @@ public class DesignerProperty extends DesignerElement {
 				}
 				
 			case SpuiPropertyType.TYPE_REFERENCE:
-				if (defaultValue != null) {
+				if (defaultValue != null && !"null".equals(defaultValue)) {
 					DesignerClass clazz = parentClass.getDesigner().getClass(defaultValue);
 					SpuiElement instance = clazz.createInstance();
 					clazz.fillDefaults(editor, instance);

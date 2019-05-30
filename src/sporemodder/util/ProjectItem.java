@@ -168,7 +168,7 @@ public class ProjectItem {
 		
 		if (parent != null) {
 			if (parent.getValue().getRelativePath_impl(sb)) {
-				sb.append('\\');
+				sb.append(File.separatorChar);
 			}
 			sb.append(name);
 			return true;

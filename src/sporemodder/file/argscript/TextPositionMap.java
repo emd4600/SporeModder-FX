@@ -25,24 +25,24 @@ import java.util.TreeMap;
  * A class used to keep track of the original text positions so we can replace variables, remove comments, etc
  * and still be able to correctly show errors.
  */
-class OriginalPositionTracker {
+public class TextPositionMap {
 
 	/** Maps the position to the original position before doing any changes to the text. */
 	private final TreeMap<Integer, Integer> map = new TreeMap<Integer, Integer>();
 	
-	void addAll(OriginalPositionTracker other) {
+	public void addAll(TextPositionMap other) {
 		map.putAll(other.map);
 	}
 	
-	void clear() {
+	public void clear() {
 		map.clear();
 	}
 	
-	void addEntry(int position, int realPosition) {
+	public void addEntry(int position, int realPosition) {
 		map.put(position, realPosition);
 	}
 	
-	int getRealPosition(int position) {
+	public int getRealPosition(int position) {
 		Map.Entry<Integer, Integer> entry = map.floorEntry(position);
 		
 		// If there are no entries until our position, just return what the user gave

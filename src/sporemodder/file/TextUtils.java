@@ -47,6 +47,8 @@ public class TextUtils {
 	 * @return
 	 */
 	public static int scanWordStart(String text, int charIndex) {
+		if (charIndex <= 0) return 0;
+		
 		int startIndex = charIndex;
 		
 		while (startIndex >= 0 && !Character.isWhitespace(text.charAt(startIndex)) && !isNewLine(text, charIndex)) {

@@ -107,6 +107,9 @@ public class EditorPaneUI implements Controller {
 	 * @param fileName The relative path of the file inside the project.
 	 */
 	public void setFileLabel(String projectName, String fileName) {
-		nameLabel.setText(projectName + " - " + fileName);
+		if (projectName != null) {
+			fileName = projectName + " - " + fileName;
+		}
+		nameLabel.setText(fileName);
 	}
 }

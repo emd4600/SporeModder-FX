@@ -58,7 +58,7 @@ public abstract class ArgScriptSpecialBlock<T> extends ArgScriptParser<T> {
 	 */
 	public ArgScriptLine preprocess(String text) {
 		StringBuilder dst = new StringBuilder();
-		OriginalPositionTracker tracker = new OriginalPositionTracker();
+		TextPositionMap tracker = new TextPositionMap();
 		tracker.addAll(stream.getCommentTracker());
 		
 		if (!stream.replaceVariables(text.toCharArray(), dst, stream.getCommentTracker(), tracker)) {

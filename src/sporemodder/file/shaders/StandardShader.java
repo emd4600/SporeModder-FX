@@ -1,3 +1,21 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.io.File;
@@ -48,14 +66,14 @@ public class StandardShader extends MaterialShader {
 			int count = in.readInt();
 			for (int i = 0; i < count; i++) {
 				ShaderDataUniform uniform = new ShaderDataUniform();
-				uniform.readCompiled(in);
+				uniform.read(in, false);
 				entry.vertexShaderData.add(uniform);
 			}
 			
 			count = in.readInt();
 			for (int i = 0; i < count; i++) {
 				ShaderDataUniform uniform = new ShaderDataUniform();
-				uniform.readCompiled(in);
+				uniform.read(in, false);
 				entry.pixelShaderData.add(uniform);
 			}
 			
@@ -79,12 +97,12 @@ public class StandardShader extends MaterialShader {
 			
 			out.writeInt(shader.vertexShaderData.size());
 			for (ShaderDataUniform uniform : shader.vertexShaderData) {
-				uniform.write(out);
+				uniform.write(out, false);
 			}
 			
 			out.writeInt(shader.pixelShaderData.size());
 			for (ShaderDataUniform uniform : shader.pixelShaderData) {
-				uniform.write(out);
+				uniform.write(out, false);
 			}
 		}
 		out.writeUByte(0xFF);
@@ -92,8 +110,8 @@ public class StandardShader extends MaterialShader {
 	
 	public void compile(StandardShaderEntry entry, File sourceVertexFile, File sourcePixelFile, File includeFolder) throws IOException, InterruptedException {
 		FXCompiler fxc = FXCompiler.get();
-		File compiledVShader = fxc.compile("vs_3_0", sourceVertexFile, includeFolder);
-		File compiledPShader = fxc.compile("ps_3_0", sourcePixelFile, includeFolder);
+		File compiledVShader = fxc.compile(FXCompiler.VS_PROFILE, sourceVertexFile, includeFolder);
+		File compiledPShader = fxc.compile(FXCompiler.PS_PROFILE, sourcePixelFile, includeFolder);
 		
 		entry.vertexShader = Files.readAllBytes(compiledVShader.toPath());
 		entry.pixelShader = Files.readAllBytes(compiledPShader.toPath());

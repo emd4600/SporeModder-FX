@@ -68,6 +68,7 @@ public class SpuiWriter {
 	}
 	
 	public int getIndex(Object data) {
+		if (data == null) return -1;
 		return indexableElements.indexOf(data);
 	}
 	
@@ -79,7 +80,10 @@ public class SpuiWriter {
 		}
 		
 		indexableElements.addAll(images);
-		indexableElements.addAll(atlasImages);
+		// do not add the atlas objects themselves, they are in elements!
+		for (AtlasImage atlas : atlasImages) {
+			indexableElements.add(atlas.getAtlas());
+		}
 		indexableElements.addAll(hitMasks);
 		indexableElements.addAll(elements);
 		

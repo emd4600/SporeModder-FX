@@ -59,12 +59,20 @@ public class FileManager extends AbstractManager {
 	
 	@Override public void initialize(Properties properties) {
 
-		searchableExtensions.addAll(Arrays.asList("prop_t", "xml", "locale", "txt", "trigger", "tlsa_t", "pctp_t", "pfx", "smt_t", "hlsl"));
+		searchableExtensions.addAll(Arrays.asList(
+				"prop_t", "xml", "locale", "txt", "trigger", "tlsa_t", 
+				"pctp_t", "pfx", "smt_t", "hlsl", "shader_builder", 
+				"vertex_fragment", "pixel_fragment"));
 		
 		protectedPackages.addAll(Arrays.asList("patchdata.package", "spore_audio1.package", "spore_audio2.package", 
 				"spore_content.package", "spore_game.package", "spore_graphics.package", "spore_pack_03.package", 
 				"bp2_data.package", "ep1_patchdata.package", "spore_ep1_content_01.package", "spore_ep1_content_02.package", 
 				"spore_ep1_data.package", "spore_ep1_locale_01.package", "spore_ep1_locale_02.package"));
+	}
+	
+	public static String removeExtension(String name) {
+		int indexOf = name.indexOf(".");
+		return indexOf == -1 ? name : name.substring(0, indexOf);
 	}
 
 	/**

@@ -37,7 +37,7 @@ public class RWVertexDescription extends RWObject {
 	public final List<RWVertexElement> elements = new ArrayList<RWVertexElement>();
 	public byte field_0E;
 	public byte vertexSize;
-	public int field_10;
+	public int elementFlags;
 	public int field_14;
 
 	public RWVertexDescription(RenderWare renderWare) {
@@ -53,7 +53,7 @@ public class RWVertexDescription extends RWObject {
 		int count = stream.readLEShort();
 		field_0E = stream.readByte();
 		vertexSize = stream.readByte();
-		field_10 = stream.readLEInt();
+		elementFlags = stream.readLEInt();
 		field_14 = stream.readLEInt();
 		
 		for (int i = 0; i < count; i++) {
@@ -71,7 +71,7 @@ public class RWVertexDescription extends RWObject {
 		stream.writeLEShort(elements.size());
 		stream.writeByte(field_0E);
 		stream.writeByte(vertexSize);
-		stream.writeLEInt(field_10);
+		stream.writeLEInt(elementFlags);
 		stream.writeLEInt(field_14);
 		
 		for (RWVertexElement element : elements) {

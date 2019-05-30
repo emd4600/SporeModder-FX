@@ -41,6 +41,17 @@ public class WordSplitLexer {
 		}
 	}
 	
+	public boolean isEOF() {
+		return index >= chars.length;
+	}
+	
+	public char peekChar() {
+		return chars[index];
+	}
+	public char nextChar() {
+		return chars[index++];
+	}
+	
 	public String nextParameter() throws DocumentException {
 		skipWhitespaces();
 		
@@ -81,6 +92,17 @@ public class WordSplitLexer {
 		return sb.toString();
 	}
 	
+	public void skipUnreadable() {
+		while (index < chars.length && !isReadableWord(chars[index])) {
+			++index;
+		}
+	}
+	
+	public static boolean isReadableWord(char c) {
+		return !Character.isWhitespace(c) && 
+		(Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == '-' || c == '~');
+	}
+	
 	public String nextReadableWord() throws DocumentException {
 		skipWhitespaces();
 		
@@ -91,13 +113,12 @@ public class WordSplitLexer {
 		
 		StringBuilder sb = new StringBuilder();
 		
-		while (index < chars.length && !Character.isWhitespace(chars[index]) && 
-				(Character.isAlphabetic(chars[index]) || Character.isDigit(chars[index]) || chars[index] == '_' || chars[index] == '-' || chars[index] == '~')) {
+		while (index < chars.length && isReadableWord(chars[index])) {
 			sb.append(chars[index]);
 			index++;
 		}
 		
-		return sb.toString();
+		return sb.length() == 0 ? null : sb.toString();
 	}
 	
 	private boolean parseBasic(StringBuilder sb, boolean keepParenthesis, int parenthesisLevel, boolean isParameter) throws DocumentException {

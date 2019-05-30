@@ -145,6 +145,16 @@ public class GameManager extends AbstractManager {
 	public void setGameToExecute(GamePathType gameToExecute) {
 		this.gameToExecute = gameToExecute;
 	}
+	
+	/**
+	 * If Galactic Adventures is installed and detected, returns that.
+	 * Otherwise, returns Spore if it is installed and detected, or null.
+	 * @return
+	 */
+	public SporeGame getGame() {
+		if (ga != null) return ga;
+		else return spore;
+	}
 
 	@Override
 	public void initialize(Properties properties) {
@@ -167,15 +177,15 @@ public class GameManager extends AbstractManager {
 		
 		// Read paths from settings
 		String path = properties.getProperty(PROPERTY_pathSpore, "AUTO");
-		if (!path.equals("AUTO")) {
+		if (!path.equals("AUTO") && !path.isEmpty()) {
 			spore = createSpore(path);
-			isSporeAuto = false;
+			isSporeAuto = spore != null;
 		}
 		
 		path = properties.getProperty(PROPERTY_pathGA, "AUTO");
-		if (!path.equals("AUTO")) {
+		if (!path.equals("AUTO") && !path.isEmpty()) {
 			ga = createGA(path);
-			isGAAuto = false;
+			isGAAuto = ga != null;
 		}
 		
 		path = properties.getProperty(PROPERTY_pathCustom);
@@ -185,9 +195,12 @@ public class GameManager extends AbstractManager {
 	}
 	
 	public SporeGame createSpore(String path) {
+		path = moveToSporebin(SPORE_SPOREBIN, path, true);
+		if (path == null) return null;
+		
 		SporeGame spore = new SporeGame();
 		
-		spore.setSporebinFolder(new File(moveToSporebin(SPORE_SPOREBIN, path, true)));
+		spore.setSporebinFolder(new File(path));
 		spore.setInstallFolder(spore.getSporebinFolder().getParentFile());
 		spore.setDataFolder(moveToData(GameType.SPORE, spore.getInstallFolder()));
 		
@@ -195,9 +208,12 @@ public class GameManager extends AbstractManager {
 	}
 	
 	public SporeGame createGA(String path) {
+		path = moveToSporebin(GA_SPOREBIN, path, true);
+		if (path == null) return null;
+		
 		SporeGame ga = new SporeGame();
 		
-		ga.setSporebinFolder(new File(moveToSporebin(GA_SPOREBIN, path, true)));
+		ga.setSporebinFolder(new File(path));
 		ga.setInstallFolder(ga.getSporebinFolder().getParentFile());
 		ga.setDataFolder(moveToData(GameType.GA, ga.getInstallFolder()));
 		

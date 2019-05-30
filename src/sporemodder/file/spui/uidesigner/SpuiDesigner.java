@@ -174,16 +174,16 @@ public class SpuiDesigner {
 	
 	public void load() {
 		UIManager.get().tryAction(() -> {
-			File file = PathManager.get().getProgramFile(FOLDER_NAME + "\\" + "SporeUIDesignerProjectCommon.xml");
+			File file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCommon.xml");
 			try (InputStream is = new FileInputStream(file)) {
 				parse(is);
 			}
-			file = PathManager.get().getProgramFile(FOLDER_NAME + "\\" + "SporeUIDesignerProjectCustom.xml");
+			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCustom.xml");
 			try (InputStream is = new FileInputStream(file)) {
 				parse(is);
 			}
 			
-			file = PathManager.get().getProgramFile(FOLDER_NAME + "\\" + "sporeuitextstyles.css");
+			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "sporeuitextstyles.css");
 			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 				StyleSheet.setActiveStyleSheet(StyleSheet.readStyleSheet(reader));
 			}

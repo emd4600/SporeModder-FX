@@ -54,4 +54,13 @@ public class RWSectionInfo {
 		stream.writeLEInt(typeCodeIndex);
 		stream.writeLEInt(typeCode);
 	}
+	
+	public void print() {
+		System.out.println("pData: " + pData);
+		System.out.println("field_04: " + field_04);
+		System.out.println("size: " + size);
+		System.out.println("alignment: " + alignment);
+		System.out.println("typeCodeIndex: " + typeCodeIndex);
+		System.out.println("typeCode: 0x" + Integer.toHexString(typeCode));
+	}
 }

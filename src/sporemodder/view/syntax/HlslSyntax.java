@@ -1,3 +1,21 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.view.syntax;
 
 import java.io.File;
@@ -74,10 +92,8 @@ public class HlslSyntax implements SyntaxFormatFactory {
 			"vs", "vs_1_1", "vs_2_0", "vs_2_a", "ps", "ps_1_1", "ps_1_2", "ps_1_3", "ps_1_4", "ps_2_0", "ps_2_a", 
 			"__FILE__", "__LINE__", "asm", "asm_fragment", "compile", "compile_fragment", "discard", "decl", 
 			"do", "else", "false", "for", "if", "in", "inline", "inout", "out", 
-			"pass", "pixelfragment", "return", "register", "sampler_state", "shared", "stateblock", "stateblock_state", 
-			"technique", "true", "typedef", "uniform", "vertexfragment", "void", "volatile", "while",
-			// Methods used by ModAPI's custom shaders
-			"VS_main", "PS_main"
+			"pass", /*"pixelfragment",*/ "return", "register", "sampler_state", "shared", "stateblock", "stateblock_state", 
+			"technique", "true", "typedef", "uniform", /*"vertexfragment",*/ "void", "volatile", "while"
 	};
 	
 	private static final String[] TAGS_FUNCTIONS = new String[] {

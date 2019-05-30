@@ -29,6 +29,8 @@ import java.util.TreeMap;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import sporemodder.file.argscript.TextPositionMap;
+
 public class SyntaxHighlighter {
 
 	private class StyleEntry {
@@ -210,6 +212,23 @@ public class SyntaxHighlighter {
 		} else {
 			for (Map.Entry<Integer, StyleEntry> entry : other.entries.entrySet()) {
 				addExtra(entry.getValue().start, entry.getValue().size, entry.getValue().styles, removeOld);
+			}
+		}
+	}
+	
+	public void addExtras(SyntaxHighlighter other, TextPositionMap positionMap, boolean removeOld) {
+		if (entries.isEmpty()) {
+			// No need for complicated calculations, just add them all
+			for (Map.Entry<Integer, StyleEntry> entry : other.entries.entrySet()) {
+				int start = positionMap.getRealPosition(entry.getValue().start);
+				int end = positionMap.getRealPosition(entry.getValue().getEnd());
+				add(start, end-start, entry.getValue().styles);
+			}
+		} else {
+			for (Map.Entry<Integer, StyleEntry> entry : other.entries.entrySet()) {
+				int start = positionMap.getRealPosition(entry.getValue().start);
+				int end = positionMap.getRealPosition(entry.getValue().getEnd());
+				addExtra(start, end-start, entry.getValue().styles, removeOld);
 			}
 		}
 	}

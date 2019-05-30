@@ -37,6 +37,8 @@ import sporemodder.view.EditorPaneUI.EditorTab;
 import sporemodder.view.StatusBar.Status;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
+import sporemodder.view.editors.AnimTextEditorFactory;
+import sporemodder.view.editors.CompiledShaderViewerFactory;
 import sporemodder.view.editors.EditHistoryEditor;
 import sporemodder.view.editors.EditorFactory;
 import sporemodder.view.editors.ImageViewer;
@@ -46,6 +48,8 @@ import sporemodder.view.editors.PfxEditorFactory;
 import sporemodder.view.editors.PropEditorFactory;
 import sporemodder.view.editors.RWModelViewer;
 import sporemodder.view.editors.SearchableEditor;
+import sporemodder.view.editors.ShaderBuilderEditorFactory;
+import sporemodder.view.editors.ShaderFragmentEditorFactory;
 import sporemodder.view.editors.SmtTextEditorFactory;
 import sporemodder.view.editors.SpuiEditorFactory;
 import sporemodder.view.editors.TextEditorFactory;
@@ -113,8 +117,12 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new CompiledShaderViewerFactory());
+		editorFactories.add(new ShaderBuilderEditorFactory());
+		editorFactories.add(new ShaderFragmentEditorFactory());
 		editorFactories.add(new SmtTextEditorFactory());
 		editorFactories.add(new XmlEditorFactory());
+		editorFactories.add(new AnimTextEditorFactory());
 		editorFactories.add(new PctpEditorFactory());
 		editorFactories.add(new TlsaEditorFactory());
 		editorFactories.add(new SpuiEditorFactory());
@@ -395,7 +403,12 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	
 	private void updateFileLabel(String relativePath) {
 		if (relativePath != null) {
-			paneUI.setFileLabel(ProjectManager.get().getProjectByFile(relativePath).getName(), relativePath);
+			if (relativePath.startsWith("..")) {
+				paneUI.setFileLabel(null, relativePath);
+			}
+			else {
+				paneUI.setFileLabel(ProjectManager.get().getProjectByFile(relativePath).getName(), relativePath);
+			}
 		}
 	}
 	

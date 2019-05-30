@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
@@ -31,10 +30,10 @@ import sporemodder.HashManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.Converter;
+import sporemodder.file.DocumentException;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.dbpf.DBPFItem;
-import sporemodder.file.dbpf.DBPFPackingTask;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.util.ProjectItem;
 
 public class TLSAConverter implements Converter {
@@ -69,24 +68,27 @@ public class TLSAConverter implements Converter {
 	}
 
 	@Override
-	public boolean encode(File input, DBPFPackingTask packer, int groupID) throws Exception {
+	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		if (isEncoder(input)) {
-			try (MemoryStream output = new MemoryStream()) {
-				TLSAUnit unit = new TLSAUnit();
-				unit.generateStream().process(input);
-				unit.write(output);
-				
-				String[] splits = input.getName().split("\\.", 2);
-				
-				DBPFItem item = packer.getTemporaryItem();
-				item.name.setInstanceID(HashManager.get().getFileHash(splits[0]));
-				item.name.setGroupID(groupID);
-				item.name.setTypeID(TYPE_ID);
-				packer.writeFileData(item, output.getRawData(), (int) output.length());
-				packer.addFile(item);
-				
-				return true;
+			TLSAUnit unit = new TLSAUnit();
+			ArgScriptStream<TLSAUnit> stream = unit.generateStream();
+			stream.setFastParsing(true);
+			stream.process(input);
+			
+			if (!stream.getErrors().isEmpty()) {
+				throw new DocumentException(stream.getErrors().get(0));
 			}
+			
+			String[] splits = input.getName().split("\\.", 2);
+			
+			ResourceKey name = packer.getTemporaryName();
+			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
+			name.setGroupID(groupID);
+			name.setTypeID(TYPE_ID);
+			
+			packer.writeFile(name, output -> unit.write(output));
+			
+			return true;
 		}
 		else {
 			return false;

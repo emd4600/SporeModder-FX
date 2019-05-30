@@ -22,17 +22,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import sporemodder.HashManager;
+import sporemodder.MainApp;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
 import sporemodder.file.rw4.RWSectionSubReferences.SubReference;
+import sporemodder.file.rw4.RWSkeleton.Bone;
 
 public class RenderWare {
 	
@@ -76,6 +79,14 @@ public class RenderWare {
 		}
 	}
 	
+	public void printInfo() {
+		for (int i = 0; i < objects.size(); ++i) {
+			System.out.println("##- " + i + "\t- " + objects.get(i).getClass().getSimpleName());
+			objects.get(i).sectionInfo.print();
+			System.out.println();
+		}
+	}
+	
 	private void writeAlignment(StreamWriter stream, int alignment) throws IOException {
 		long offset = stream.getFilePointer();
 		stream.writePadding((int) (((offset + alignment-1) & ~(alignment-1)) - offset));
@@ -111,19 +122,21 @@ public class RenderWare {
 		// Write all objects, creating section info for every one
 		// We do not write base resources because they are special
 		for (RWObject object : objects) {
-			object.sectionInfo = new RWSectionInfo();
-			object.sectionInfo.alignment = object.getAlignment();
-			object.sectionInfo.typeCode = object.getTypeCode();
-			object.sectionInfo.typeCodeIndex = typeCodes.indexOf(object.sectionInfo.typeCode);
-			
-			// Before getting the position, write the correct alignment
-			writeAlignment(stream, object.sectionInfo.alignment);
-			
-			object.sectionInfo.pData = stream.getFilePointer();
-			
-			object.write(stream);
-			
-			object.sectionInfo.size = (int) (stream.getFilePointer() - object.sectionInfo.pData);
+			if (object.getTypeCode() != RWBaseResource.TYPE_CODE) {
+				object.sectionInfo = new RWSectionInfo();
+				object.sectionInfo.alignment = object.getAlignment();
+				object.sectionInfo.typeCode = object.getTypeCode();
+				object.sectionInfo.typeCodeIndex = typeCodes.indexOf(object.sectionInfo.typeCode);
+				
+				// Before getting the position, write the correct alignment
+				writeAlignment(stream, object.sectionInfo.alignment);
+				
+				object.sectionInfo.pData = stream.getFilePointer();
+				
+				object.write(stream);
+				
+				object.sectionInfo.size = (int) (stream.getFilePointer() - object.sectionInfo.pData);
+			}
 		}
 		
 		long pSectionInfo = stream.getFilePointer();
@@ -397,5 +410,27 @@ public class RenderWare {
 
 	public String getName(RWObject object) {
 		return object.getClass().getSimpleName() + '-' + sectionInfos.indexOf(object.sectionInfo);
+	}
+	
+	public static void main(String[] args) throws IOException {
+		MainApp.testInit();
+		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_03.rw4";
+		//String path = "C:\\Users\\Eric\\Desktop\\be_classic_01.rw4";
+		String path = "C:\\Users\\Eric\\Desktop\\untitled.rw4";
+		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
+		
+		RenderWare renderWare = RenderWare.fromFile(new File(path));
+		renderWare.printInfo();
+
+//		List<RWSkeleton> list = renderWare.getObjects(RWSkeleton.class);
+//		if (!list.isEmpty()) {
+//			for (RWSkeleton sk : list) {
+//				System.out.println("## SKELETON: " + HashManager.get().getFileName(sk.skeletonID));
+//				for (Bone bone : sk.bones) {
+//					System.out.println(bone);
+//				}
+//				System.out.println();
+//			}
+//		}
 	}
 }

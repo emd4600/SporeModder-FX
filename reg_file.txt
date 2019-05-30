@@ -77585,8 +77585,8 @@ wing
 
 materials_compiled_states_link~	0x40212000
 materials_compiled_states~	0x40212001
-materials_uncompiled_shader_fragments~	0x40212002
-materials_compiled_shaders~	0x40212004
+materials_shader_fragments~	0x40212002
+materials_shaders~	0x40212004
 
 GenericStatic
 Generic2D
@@ -77619,3 +77619,41 @@ BuildBasis_0_0
 BuildBasis_0_1
 BuildBasis_1_0
 BuildBasis_1_1
+
+ClsdOpen
+Point
+TurnOn
+SmileFrown
+LickAir
+Unique
+MadSad
+Scared
+Tuck
+Bend
+DroopRaise
+Scale
+Data1
+Data2
+Data3
+Data4
+Data5
+Breathe
+Stun
+Impact
+Idle
+Move
+Stun
+Stop
+Attack
+ChargeUp
+ChargeHold
+ChargeRelease
+joint4
+joint5
+joint6
+joint7
+joint8
+joint9
+DeformBoneBaseJoint
+DeformBoneEndJoint
+DeformBoneMiddle

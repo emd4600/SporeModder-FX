@@ -1,3 +1,21 @@
+/****************************************************************************
+* Copyright (C) 2019 Eric Mor
+*
+* This file is part of SporeModder FX.
+*
+* SporeModder FX is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+****************************************************************************/
 package sporemodder.file.shaders;
 
 import java.io.BufferedReader;
@@ -18,6 +36,9 @@ public class FXCompiler extends AbstractManager {
 	public static FXCompiler get() {
 		return MainApp.get().getFXCompiler();
 	}
+	
+	public static final String VS_PROFILE = "vs_3_0";
+	public static final String PS_PROFILE = "ps_3_0";
 	
 	private static final String PROPERTY_fxcFile = "fxcFile";
 
@@ -40,6 +61,10 @@ public class FXCompiler extends AbstractManager {
 	
 	public File getFXCFile() {
 		return fxcFile;
+	}
+	
+	public void setFXCFile(File fxcFile) {
+		this.fxcFile = fxcFile;
 	}
 	
 	public boolean autoDetectPath() {
@@ -65,21 +90,8 @@ public class FXCompiler extends AbstractManager {
 		}
 	}
 	
-	public File compile(String targetProfile, File sourceHLSL, File includePath, File outputFile) throws IOException, InterruptedException {
-		
-		String command = String.format("\"%s\" /T %s /Fo \"%s\" /I \"%s\" \"%s\"", 
-				fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), includePath.getAbsolutePath(), sourceHLSL.getAbsolutePath());
-		
-//		System.out.println(command);
-//		Process p = Runtime.getRuntime().exec(command);
-//		System.out.println(p.waitFor());
-//		
-//		ProcessBuilder builder = new ProcessBuilder(command);
-//		builder.redirectOutput(Redirect.INHERIT);
-//		builder.redirectError(Redirect.INHERIT);
-//		
-//		int result = builder.start().waitFor();
-		
+	// Returns the error, if any
+	private static String fxcCommand(String command) throws IOException, InterruptedException {
 		String line;
 		Process p = Runtime.getRuntime().exec(command);
 		int result = p.waitFor();
@@ -92,7 +104,43 @@ public class FXCompiler extends AbstractManager {
 				  sb.append('\n');
 			}
 			input.close();
-			throw new IOException("Cannot compile " + sourceHLSL.getName() + ": " + sb.toString());
+			return sb.toString();
+		} else {
+			return null;
+		}
+	}
+	
+	public File decompile(String targetProfile, File inputFile) throws IOException, InterruptedException {
+		return decompile(targetProfile, inputFile, File.createTempFile("SporeModderFX-decompiled-shader", ".asm.tmp"));
+	}
+	
+	public File decompile(String targetProfile, File inputFile, File outputFile) throws IOException, InterruptedException {
+		
+		String command = String.format("\"%s\" /dumpbin /T %s /Fc \"%s\" \"%s\"", 
+				fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), inputFile.getAbsolutePath());
+		
+		String error = fxcCommand(command);
+		if (error != null) {
+			throw new IOException("Cannot decompile " + inputFile.getName() + ": " + error);
+		}
+		
+		return outputFile;
+	}
+	
+	public File compile(String targetProfile, File sourceHLSL, File includePath, File outputFile) throws IOException, InterruptedException {
+		
+		String command;
+		if (includePath != null) {
+			command = String.format("\"%s\" /T %s /Fo \"%s\" /I \"%s\" \"%s\"", 
+					fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), includePath.getAbsolutePath(), sourceHLSL.getAbsolutePath());
+		} else {
+			command = String.format("\"%s\" /T %s /Fo \"%s\" \"%s\"", 
+					fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), sourceHLSL.getAbsolutePath());
+		}
+		
+		String error = fxcCommand(command);
+		if (error != null) {
+			throw new IOException("Cannot compile " + sourceHLSL.getName() + ": " + error);
 		}
 		
 		return outputFile;
@@ -116,12 +164,14 @@ public class FXCompiler extends AbstractManager {
 				stream.seek(constOffset + 12 + i*20);
 				
 				ShaderDataUniform uniform = new ShaderDataUniform();
-				dst.add(uniform);
 				
 				int nameOffset = stream.readLEInt();
-				stream.readShort();  // D3DXREGISTER_SET
-				uniform.register = stream.readShort();
-				uniform.registerSize = stream.readShort();
+				int registerSet = stream.readLEShort();  // D3DXREGISTER_SET
+				if (registerSet == 3) continue; // sampler
+				uniform.register = stream.readLEUShort();
+				uniform.registerSize = stream.readLEUShort();
+				stream.skip(8);
+				int elements = stream.readLEShort();
 				
 				stream.seek(12 + nameOffset);
 				String name = stream.readCString(StringEncoding.ASCII);
@@ -129,10 +179,16 @@ public class FXCompiler extends AbstractManager {
 					throw new IOException(name + " is not a recognized shader data uniform.");
 				}
 				
-				uniform.dataIndex = ShaderData.getIndex(name);
+				uniform.dataIndex = ShaderData.getIndex(name, elements != 1);
 				uniform.field_2 = uniform.dataIndex;  //TODO not always like this!
 				uniform.flags = ShaderData.getFlags(uniform.dataIndex);
+				
+				dst.add(uniform);
 			}
 		}
+	}
+
+	public boolean isAvailable() {
+		return fxcFile != null && fxcFile.isFile();
 	}
 }

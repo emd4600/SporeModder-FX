@@ -143,9 +143,9 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 		String path = null;
 		
 		if (names[0] != null) {
-			path = names[0] + "\\" + names[1];
+			path = names[0] + File.separatorChar + names[1];
 		} else {
-			path = HashManager.get().getFileName(0) + "\\" + names[1];
+			path = HashManager.get().getFileName(0) + File.separatorChar + names[1];
 		}
 		
 		// By default, try .prop/.soundProp files

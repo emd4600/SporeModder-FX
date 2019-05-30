@@ -101,7 +101,7 @@ public class GameEffect extends EffectComponent {
 				effect.messageString = args.get(0);
 			}
 			
-			if (line.getOptionArguments(args, "data", 1)) 
+			if (line.getOptionArguments(args, "data", 1, 4)) 
 			{
 				stream.parseInts(args, effect.messageData);
 			}

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.prop.PropertyKey;
 import sporemodder.file.prop.PropertyList;
@@ -45,36 +44,33 @@ public class DebugInformation {
 	}
 	
 	public void addFile(String folderName, String fileName, int groupID, int instanceID, int typeID) {
-		fileNames.add(folderName + "\\" + fileName);
-		fileKeys.add(new ResourceKey(groupID, instanceID, typeID));
+		addFile(folderName, fileName, new ResourceKey(groupID, instanceID, typeID));
 	}
 	
 	public void addFile(String folderName, String fileName, ResourceKey name) {
-		fileNames.add(folderName + "\\" + fileName);
+		fileNames.add(folderName + '\\' + fileName);
 		fileKeys.add(name);
 	}
 	
-	public void saveInformation(DBPFPackingTask dbpfTask) throws IOException {
+	public void addFile(String text, ResourceKey name) {
+		fileNames.add(text);
+		fileKeys.add(name);
+	}
+	
+	public void saveInformation(DBPFPacker packer) throws IOException {
 		
-		DBPFItem item = new DBPFItem();
+		ResourceKey name = new ResourceKey();
+		name.setGroupID(FOLDER_NAME);
+		name.setInstanceID(projectName);
+		name.setTypeID("prop");
 		
-		item.name.setGroupID(FOLDER_NAME);
-		item.name.setInstanceID(projectName);
-		item.name.setTypeID("prop");
+		PropertyList prop = new PropertyList();
+		prop.add("modDebugPath", new PropertyString16(inputPath));
 		
-		try (MemoryStream stream = new MemoryStream()) {
-			
-			PropertyList prop = new PropertyList();
-			prop.add("modDebugPath", new PropertyString16(inputPath));
-			
-			prop.add("modFilePaths", new PropertyString16(fileNames.toArray(new String[0])));
-			prop.add("modFileKeys", new PropertyKey(fileKeys.toArray(new ResourceKey[0])));
-			
-			prop.write(stream);
-			
-			dbpfTask.writeFileData(item, stream.getRawData(), (int) stream.length());
-			dbpfTask.addFile(item);
-		}	
+		prop.add("modFilePaths", new PropertyString16(fileNames.toArray(new String[0])));
+		prop.add("modFileKeys", new PropertyKey(fileKeys.toArray(new ResourceKey[0])));
+		
+		packer.writeFile(name, stream -> prop.write(stream));
 	}
 	
 	public static void main(String[] args) throws IOException {

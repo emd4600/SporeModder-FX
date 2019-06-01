@@ -1,6 +1,6 @@
 .prop.prop_t=Property List
 .prop.xml=XML Property List
-.prop=Unconverted Property List
+.prop=Property List (Unconverted)
 .gmdl=Creation Game Model
 .gmsh=Game Mesh
 .trigger=Text File/Script
@@ -8,7 +8,8 @@
 .locale=Localization Table
 .pollen_metadata=Creation Pollination Metadata
 .spui=Spore User Interface
-.effdir=Effect Directory
+.effdir=Effect Directory (Unconverted)
+.effdir.unpacked=Unpacked Effect Directory
 .pfx=Effect Script
 .dds=DDS Texture
 .png=PNG Image
@@ -25,3 +26,18 @@
 .ufo=UFO Creation
 .flr=Flora Creation
 .pctp=Part Capabilities PCTP
+.smt=Spore Materials (Unconverted)
+.smt.unpacked=Unpacked Spore Materials
+.tlsa=Spore Animation List (Unconverted)
+.tlsa.tlsa_t=Spore Animation List
+.pctp=Part Capabilities Table (Unconverted)
+.pctp.pctp_t=Part Capabilities Table
+.animation=Spore Animation (Unconverted)
+.animation.anim_t=Spore Animation
+.hlsl=HLSL Shader File
+.shader_builder=Shader Builder
+.shader=Compiled Shader Unit
+.vshader.hlsl=HLSL Vertex Shader File
+.pshader.hlsl=HLSL Pixel Shader File
+.vertex_fragment=Vertex Shader Fragment
+.pixel_fragment=Pixel Shader Fragment

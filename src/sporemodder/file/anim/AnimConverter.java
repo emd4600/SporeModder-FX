@@ -55,7 +55,7 @@ public class AnimConverter implements Converter {
 	
 	@Override
 	public boolean decode(StreamReader stream, File outputFolder, ResourceKey key) throws Exception {
-		return decode(stream, Converter.getOutputFile(key, outputFolder, "pctp_t"));
+		return decode(stream, Converter.getOutputFile(key, outputFolder, "anim_t"));
 	}
 
 	@Override

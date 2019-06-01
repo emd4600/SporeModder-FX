@@ -172,7 +172,21 @@ public class SPAnimation {
 		for (long offset : offsets) stream.writeLEUInt(offset);
 		
 		long vfxOffset = stream.getFilePointer();
-		//TODO
+		offsets.add(vfxOffset);
+		
+		if (!vfxList.isEmpty()) {
+			long vfxNamesOffset = vfxOffset + vfxList.size()*0x60;
+			
+			for (AnimationVFX vfx : vfxList) {
+				offsets.add(vfxNamesOffset);
+				vfx.write(stream, offsets, vfxNamesOffset);
+				vfxNamesOffset += vfx.name.length() + 1;
+			}
+			
+			for (AnimationVFX vfx : vfxList) {
+				stream.writeCString(vfx.name, StringEncoding.ASCII);
+			}
+		}
 		
 		// Fix size
 		stream.seek(4);
@@ -266,10 +280,11 @@ public class SPAnimation {
 	public static void unpackTest() throws IOException {
 		//String path = "C:\\Users\\Eric\\Desktop\\0x30EF4216.animation";
 		//String path = "C:\\Users\\Eric\\Desktop\\tree_idle.animation";
-		String path = "C:\\Users\\Eric\\Desktop\\com_punch.animation";
+		//String path = "C:\\Users\\Eric\\Desktop\\com_punch.animation";
 		//String path = "C:\\Users\\Eric\\Desktop\\ep1_trader_jumpjet_land.animation";
 		//String path = "E:\\Eric\\SporeModder\\Projects\\Spore_Game.package.unpacked\\animations~\\csa_actn_jumphit.animation";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~\\0x30EF4216.animation";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomAnimations\\animations~\\csa_actn_jumphit_COPY.animation";
 		MainApp.testInit();
 		
 		try (MemoryStream stream = new MemoryStream(Files.readAllBytes(new File(path).toPath()))) {

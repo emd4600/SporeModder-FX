@@ -19,8 +19,10 @@
 package sporemodder.file.anim;
 
 import java.io.IOException;
+import java.util.List;
 
 import emord.filestructures.Stream.StringEncoding;
+import emord.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
@@ -75,6 +77,31 @@ public class AnimationVFX {
 		
 		stream.getStream().seek(offset);
 		name = stream.getStream().readCString(StringEncoding.ASCII);
+	}
+	
+	public void write(StreamWriter stream, List<Long> pointers, long namePtr) throws IOException {
+		stream.writeLEInt(flags);
+		
+		for (int i = 0; i < 4; ++i) {
+			stream.writeLEInt(selectors[i].field_0);
+			stream.writeLEInt(selectors[i].field_4);
+			stream.writeLEInt(selectors[i].field_8);
+		}
+		
+		if (field_34 == null) {
+			stream.writePadding(4);
+		} else {
+			stream.writeString(field_34, StringEncoding.ASCII);
+			stream.writePadding(4 - field_34.length());
+		}
+		
+		stream.writeLEInt(0);  // ?
+		stream.writeLEInt(id);
+		stream.writeLEUInt(namePtr);
+		stream.writeLEFloat(field_44);
+		
+		// from 48h to 60h, unknown
+		stream.writePadding(0x60 - 0x48);
 	}
 	
 	public void toArgScript(ArgScriptWriter writer, String internal_name) {

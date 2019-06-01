@@ -68,7 +68,7 @@ public class UpdateManager {
     
     private static final String GITHUB_URL = "https://api.github.com";
     
-    public final VersionInfo versionInfo = new VersionInfo(2, 1, 0, null);
+    public final VersionInfo versionInfo = new VersionInfo(2, 1, 1, null);
     
     public static UpdateManager get() {
     	return MainApp.get().getUpdateManager();

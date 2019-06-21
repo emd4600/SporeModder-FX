@@ -255,6 +255,10 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
+	public static double scaleByDpi(double inValue) {
+		return (inValue / 12) * javafx.scene.text.Font.getDefault().getSize();
+	}
+	
 	/**
 	 * Loads the image with the given name and returns an ImageView capable of displaying it, using the specified fit width/height.
 	 * Setting a value of 0 for those will use the image's width/height.
@@ -266,8 +270,8 @@ public class UIManager extends AbstractManager {
 		
 		ImageView imageView = new ImageView();
 		imageView.setImage(image);
-		imageView.setFitWidth(fitWidth);
-		imageView.setFitHeight(fitHeight);
+		imageView.setFitWidth(scaleByDpi(fitWidth));
+		imageView.setFitHeight(scaleByDpi(fitHeight));
 		imageView.setPreserveRatio(preserveRatio);
 		
 		return imageView;

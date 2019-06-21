@@ -225,8 +225,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		overlayCanvas = new Canvas();
 		overlayCanvas.widthProperty().bind(widthProperty());
 		overlayCanvas.heightProperty().bind(heightProperty());
-		overlayCanvas.translateXProperty().bind(viewer.translateXProperty());
-		overlayCanvas.translateYProperty().bind(viewer.translateYProperty());
+		//overlayCanvas.translateXProperty().bind(viewer.contentTranslateXProperty());
+		//overlayCanvas.translateYProperty().bind(viewer.contentTranslateYProperty());
 		// We want the events go to the viewer and not this layer
 		overlayCanvas.setMouseTransparent(true);
     	
@@ -347,8 +347,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	
     	viewer.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
     		if (event.getClickCount() >= 2 && event.getButton() == MouseButton.MIDDLE) {
-    			viewer.setTranslateX(0);
-    			viewer.setTranslateY(0);
+    			viewer.setContentTranslateX(0);
+    			viewer.setContentTranslateY(0);
     		}
     		
     		if (event.getButton() == MouseButton.PRIMARY) {
@@ -441,8 +441,9 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     			}
     		}
     		else if (event.isMiddleButtonDown()) {
-    			viewer.setTranslateX(mouseX + viewer.getTranslateX() - mouseClickX);
-    			viewer.setTranslateY(mouseY + viewer.getTranslateY() - mouseClickY);
+    			viewer.setContentTranslateX(viewer.getContentTranslateX() + deltaMouseX); //mouseX + viewer.getContentTranslateX() - mouseClickX
+    			viewer.setContentTranslateY(viewer.getContentTranslateY() + deltaMouseY); //mouseY + viewer.getContentTranslateY() - mouseClickY
+    			repaint();
     		}
     	});
     	
@@ -629,7 +630,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	GraphicsContext g = overlayCanvas.getGraphicsContext2D();
 		g.clearRect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
 		
-		if (selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
+    	if (selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
 			SPUIRectangle rect = selectedWindow.get().getRealArea();
 			
 			g.setStroke(ACTIVE_COLOR);
@@ -1197,7 +1198,19 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		
 		Group group = new Group();
 		group.getChildren().add(preview);
-		Scene scene = new Scene(group, area.getWidth(), area.getHeight());
+		
+		double width = 10;
+		double height = 10;
+		
+		for (IWindow window : preview.getLayoutWindow().getChildren()) {
+			if (window.getArea().getWidth() > width)
+				width = window.getArea().getWidth();
+			
+			if (window.getArea().getHeight() > height)
+				height = window.getArea().getHeight();
+		}
+		
+		Scene scene = new Scene(group, width, height/*, area.getWidth(), area.getHeight()*/);
 		
 		preview.setIsPreview(true);
 		preview.widthProperty().bind(scene.widthProperty());

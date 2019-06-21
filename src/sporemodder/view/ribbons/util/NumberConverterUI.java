@@ -123,7 +123,7 @@ public class NumberConverterUI implements Controller {
 			}
 		});
 		
-		menuButton.setGraphic(UIManager.get().loadIcon("number-converter-type.png", 48, 48, true));
+		menuButton.setGraphic(UIManager.get().loadIcon("number-converter-type.png", 32, 32, true));
 	}
 	
 	private static String convertToHex(String input, String mode) {

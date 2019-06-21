@@ -26,6 +26,8 @@ import javafx.event.Event;
 import javafx.event.EventType;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import sporemodder.file.spui.components.IWindow;
 import sporemodder.view.editors.SpuiEditor;
 import sporemodder.view.editors.spui.SpuiLayoutWindow;
@@ -64,6 +66,38 @@ public class SpuiViewer extends Canvas {
 	// In preview we have to resize the root node, we should restore it when closing
 	private final SPUIRectangle originalRootArea = new SPUIRectangle();
 	
+private DoubleProperty contentTranslateX;
+    
+    public final DoubleProperty contentTranslateXProperty() {
+    	if (contentTranslateX == null) {
+    		contentTranslateX = new SimpleDoubleProperty(this, "contentTranslateX", 0);
+    	}
+    	return contentTranslateX;
+    }
+    public final double getContentTranslateX() {
+    	return contentTranslateX.get();
+    }
+    
+    public final void setContentTranslateX(double value) {
+    	contentTranslateX.set(value);
+    }
+    
+	private DoubleProperty contentTranslateY;
+    
+    public final DoubleProperty contentTranslateYProperty() {
+    	if (contentTranslateY == null) {
+    		contentTranslateY = new SimpleDoubleProperty(this, "contentTranslateY", 0);
+    	}
+    	return contentTranslateY;
+    }
+    public final double getContentTranslateY() {
+    	return contentTranslateY.get();
+    }
+    
+    public final void setContentTranslateY(double value) {
+    	contentTranslateY.set(value);
+    }
+	
 	public SpuiViewer(SpuiEditor editor) {
 		this(editor, new SpuiLayoutWindow());
 	}
@@ -81,6 +115,17 @@ public class SpuiViewer extends Canvas {
 			resizeForPreview();
 			repaint();
 		});
+		
+
+		contentTranslateXProperty().addListener((obs, oldValue, newValue) -> {
+			resizeForPreview();
+			repaint();
+		});
+		contentTranslateYProperty().addListener((obs, oldValue, newValue) -> {
+			resizeForPreview();
+			repaint();
+		});
+		
 		showInvisible.addListener((obs, oldValue, newValue) -> repaint());
 		isPreview.addListener((obs, oldValue, newValue) -> repaint());
 		
@@ -294,8 +339,10 @@ public class SpuiViewer extends Canvas {
 	
 	private void resizeForPreview() {
 		if (isPreview()) {
-			float width = (float) getWidth();
-			float height = (float) getHeight();
+			float width = (float)getWidth();
+			float height = (float)getHeight();
+			layoutWindow.getArea().x1 = 0;
+			layoutWindow.getArea().y1 = 0;
 			layoutWindow.getArea().setWidth(width);
 			layoutWindow.getArea().setHeight(height);
 			
@@ -307,6 +354,10 @@ public class SpuiViewer extends Canvas {
 			}
 			
 			relayout();
+		}
+		else {
+			layoutWindow.getArea().x1 = (float)getContentTranslateX();
+			layoutWindow.getArea().y1 = (float)getContentTranslateY();
 		}
 	}
 }

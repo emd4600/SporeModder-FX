@@ -157,7 +157,7 @@ public class UserInterface extends RibbonWindow {
 		Ribbon ribbon = getRibbon();
 		//ribbon.setContentHeight(130);
 		
-		ribbon.setContentHeight(UIManager.scaleByDpi(86));
+		ribbon.setContentHeight(UIManager.scaleByDpi(92));
 		
 		ProjectRibbonTab.addTab(ribbon);
 		EditRibbonTab.addTab(ribbon);

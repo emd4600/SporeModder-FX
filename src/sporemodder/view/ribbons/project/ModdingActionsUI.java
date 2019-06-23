@@ -50,9 +50,9 @@ public class ModdingActionsUI implements Controller, UIUpdateListener {
 		
 		UIManager ui = UIManager.get();
 		
-		btnCompare.setGraphic(ui.loadIcon("compare.png", 0, 32, true));
-		btnExploreSource.setGraphic(ui.loadIcon("explore-source.png", 0, 32, true));
-		btnExploreMod.setGraphic(ui.loadIcon("explore-mod.png", 0, 32, true));
+		btnCompare.setGraphic(ui.loadIcon("compare.png", 0, 38, true));
+		btnExploreSource.setGraphic(ui.loadIcon("explore-source.png", 0, 38, true));
+		btnExploreMod.setGraphic(ui.loadIcon("explore-mod.png", 0, 38, true));
 		
 		btnCompare.setDisable(true);
 		btnExploreSource.setDisable(true);

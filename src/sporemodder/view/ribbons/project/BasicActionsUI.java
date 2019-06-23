@@ -66,14 +66,14 @@ public class BasicActionsUI implements Controller, UIUpdateListener {
 		
 		UIManager ui = UIManager.get();
 		
-		btnNewFile.setGraphic(ui.loadIcon("new-file.png", 0, 32, true));
-		btnNewFolder.setGraphic(ui.loadIcon("new-folder.png", 0, 32, true));
-		btnRename.setGraphic(ui.loadIcon("rename-item.png", 0, 32, true));
-		btnRefresh.setGraphic(ui.loadIcon("refresh.png", 0, 32, true));
-		btnImportExternal.setGraphic(ui.loadIcon("import-external.png", 0, 32, true));
-		btnRemove.setGraphic(ui.loadIcon("remove-item.png", 0, 32, true));
-		btnModify.setGraphic(ui.loadIcon("modify-item.png", 0, 32, true));
-		btnDuplicate.setGraphic(ui.loadIcon("duplicate-item.png", 0, 32, true));
+		btnNewFile.setGraphic(ui.loadIcon("new-file.png", 0, 38, true));
+		btnNewFolder.setGraphic(ui.loadIcon("new-folder.png", 0, 38, true));
+		btnRename.setGraphic(ui.loadIcon("rename-item.png", 0, 38, true));
+		btnRefresh.setGraphic(ui.loadIcon("refresh.png", 0, 38, true));
+		btnImportExternal.setGraphic(ui.loadIcon("import-external.png", 0, 38, true));
+		btnRemove.setGraphic(ui.loadIcon("remove-item.png", 0, 38, true));
+		btnModify.setGraphic(ui.loadIcon("modify-item.png", 0, 38, true));
+		btnDuplicate.setGraphic(ui.loadIcon("duplicate-item.png", 0, 38, true));
 		
 		btnNewFile.setTooltip(new Tooltip("Create a new file in the selected folder (Ctrl+N)"));
 		btnNewFolder.setTooltip(new Tooltip("Create a new folder inside the selected folder (Ctrl+Shift+N)"));

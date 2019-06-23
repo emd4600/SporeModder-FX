@@ -72,7 +72,7 @@
 .ribbon-tab:selected,
 .ribbon-tab:selected:focused,
 .ribbon-tab:selected:hover {
-    -fx-background-color: transparent, #cccccc, linear-gradient(#f1f1f1, derive(#f1f1f1, +2%));
+    -fx-background-color: transparent, #cccccc, linear-gradient(derive(#f3f3f3, +2%), #f3f3f3);
     -fx-background-radius: 2px 2px 0 0;
     
     /** Use border everywhere except bottom */

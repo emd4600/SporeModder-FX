@@ -51,7 +51,7 @@ public class RotComponent implements AbstractComponentKeyframe {
 		
 		// ?? unused?
 		stream.skip(8);
-		// from 0 to 2
+		// from 0 to 3
 		nextMode = stream.readUByte();
 		previousMode = stream.readUByte();
 		
@@ -150,10 +150,10 @@ public class RotComponent implements AbstractComponentKeyframe {
 				
 				if (l.getOptionArguments(args, "rot", 2)) {
 					Number value;
-					if ((value = stream.parseInt(args, 1, 0, 2)) != null) {
+					if ((value = stream.parseInt(args, 1, 0, 3)) != null) {
 						c.previousMode = value.intValue();
 					}
-					if ((value = stream.parseFloat(args, 1, 0, 2)) != null) {
+					if ((value = stream.parseFloat(args, 1, 0, 3)) != null) {
 						c.nextMode = value.intValue();
 					}
 				}

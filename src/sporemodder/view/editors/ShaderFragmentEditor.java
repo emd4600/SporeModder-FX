@@ -24,6 +24,7 @@ import sporemodder.file.shaders.PixelShaderFragment;
 import sporemodder.file.shaders.ShaderFragmentUnit;
 import sporemodder.file.shaders.VertexShaderFragment;
 import sporemodder.util.ProjectItem;
+import sporemodder.view.UserInterface;
 
 public class ShaderFragmentEditor extends ArgScriptEditor<ShaderFragmentUnit> {
 	
@@ -49,5 +50,18 @@ public class ShaderFragmentEditor extends ArgScriptEditor<ShaderFragmentUnit> {
 	@Override protected void onStreamParse() {
 		stream.getData().setFragment(null);
 		stream.getData().setAlreadyParsed(false);
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Shader Fragment", "smt", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 }

@@ -38,6 +38,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import sporemodder.GameManager;
@@ -51,6 +52,17 @@ import sporemodder.view.dialogs.ProgramSettingsUI;
 import sporemodder.view.dialogs.UnpackPackageUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
 
+/**
+ * The main program menu, which is the first tab of the ribbon. This program menu shows a dropdown panel with a vertical division:
+ * on the left, there are buttons for the main program utilities; on the right, there are buttons for the most recent projects.
+ * <p>
+ * For technical this is not really a menu, so menu items cannot be used. Instead, you can use style classes such as <code>artificial-menu-item</code>
+ * to give buttons a menu item appearance. Tehre's also the {@link #createButton(String, String, Node)}, that will do it for you and ensure all buttons
+ * have the same style and layout.
+ * <p>
+ * Clicking outside the menu when it is opened will close it. Developers can programmatically open/close this
+ * menu by using the appropriate methods on the underlying menu returned by {@link #getMenu()}. 
+ */
 public class ProgramMenu implements UIUpdateListener {
 
 	/** How many projects are displayed on the "Recent projects" list. */
@@ -74,9 +86,33 @@ public class ProgramMenu implements UIUpdateListener {
 	private Button settingsButton;
 	
 	private VBox recentProjectsList;
+	private VBox vbox;
 	
+	/**
+	 * Returns the {@link RibbonCustomMenu} instance this menu is built on.
+	 * @return
+	 */
 	public RibbonCustomMenu getMenu() {
 		return ribbonMenu;
+	}
+	
+	/**
+	 * Returns the pane that shows the most recent projects. The children of this pane
+	 * should be clickable nodes that open the project when clicked.
+	 * @return
+	 */
+	public Pane getRecentProjectsPane() {
+		return recentProjectsList;
+	}
+	
+	/**
+	 * Returns the pane that contains the menu items. Those items are usually <code>Separator</code>
+	 * nodes (only used for aesthetic reasons) and buttons with the appropriate styling (<code>artificial-menu-item</code>).
+	 * Those buttons can be generated with {@link #createButton(String, String, Node)}.
+	 * @return
+	 */
+	public Pane getItemsPane() {
+		return vbox;
 	}
 	
 	private ImageView createIcon(String name) {
@@ -94,7 +130,18 @@ public class ProgramMenu implements UIUpdateListener {
 		return createButton(text, accelerator, null);
 	}
 	
-	private Button createButton(String text, String accelerator, Node graphic) {
+	/**
+	 * Creates a button node that behaves like a menu item. The item must have text, and optional accelerator string and icon (graphic).
+	 * Even if the accelerator string is specified (for example, "Ctrl+I") it's only shown in the item, but not assigned to trigger any action.
+	 * When the button is actioned, the menu will be closed. 
+	 * <p>
+	 * The generated button will have the <code>artificial-menu-item</code> style class so that it resembles a menu item.
+	 * @param text The text of the item.
+	 * @param accelerator Optional, accelerator string shown on the right side of the item.
+	 * @param graphic Optional, icon shown before the text.
+	 * @return
+	 */
+	public Button createButton(String text, String accelerator, Node graphic) {
 		if (accelerator == null) {
 			Button button = new Button(text, graphic);
 			button.getStyleClass().add("artificial-menu-item");
@@ -135,7 +182,7 @@ public class ProgramMenu implements UIUpdateListener {
 		
 		recentProjectsList = new VBox(5);
 		
-		VBox vbox = new VBox(5);
+		vbox = new VBox(5);
 		
 		Separator separator = new Separator(Orientation.VERTICAL);
 		separator.setPrefHeight(height - 10);

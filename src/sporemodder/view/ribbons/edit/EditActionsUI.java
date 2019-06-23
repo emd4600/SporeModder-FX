@@ -59,9 +59,13 @@ public class EditActionsUI implements Controller, UIUpdateListener {
 	@FXML private void initialize() {
 		UIManager ui = UIManager.get();
 		
-		btnSave.setGraphic(ui.loadIcon("save.png", 0, 48, true));
-		btnUndo.setGraphic(ui.loadIcon("undo.png", 0, 48, true));
-		btnRedo.setGraphic(ui.loadIcon("redo.png", 0, 48, true));
+//		btnSave.setGraphic(ui.loadIcon("save.png", 0, 48, true));
+//		btnUndo.setGraphic(ui.loadIcon("undo.png", 0, 48, true));
+//		btnRedo.setGraphic(ui.loadIcon("redo.png", 0, 48, true));
+		
+		btnSave.setGraphic(ui.loadIcon("save.png", 0, 38, true));
+		btnUndo.setGraphic(ui.loadIcon("undo.png", 0, 38, true));
+		btnRedo.setGraphic(ui.loadIcon("redo.png", 0, 38, true));
 		
 		BorderPane historyIcon = new BorderPane();
 		historyIcon.setCenter(ui.loadIcon("arrow-down.png", 0, 16, true));

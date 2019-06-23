@@ -100,6 +100,7 @@ import sporemodder.file.rw4.RenderWare;
 import sporemodder.file.shaders.MaterialStateLink;
 import sporemodder.util.ProjectItem;
 import sporemodder.util.Vector3;
+import sporemodder.view.UserInterface;
 import sporemodder.view.inspector.InspectorFloatSpinner;
 import sporemodder.view.inspector.InspectorString;
 import sporemodder.view.inspector.InspectorVector3;
@@ -851,11 +852,9 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private void showInspector(boolean show) {
 		if (show) {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle("Model Viewer");
-			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+			UserInterface.get().getInspectorPane().configureDefault("Model Viewer", "rw4", inspectorPane);
 		} else {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
-			UIManager.get().getUserInterface().setInspectorContent(null);
+			UserInterface.get().getInspectorPane().reset();
 		}
 	}
 

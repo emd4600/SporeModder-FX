@@ -24,27 +24,29 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import sporemodder.DocumentationManager;
 import sporemodder.UIManager;
 
 public class InspectorPaneUI implements Controller {
 	
-	private static final double PREF_WIDTH = 340.0;
+	public static final double PREF_WIDTH = 340.0;
 	
-	@FXML
-	private BorderPane mainNode;
+	/** The standard name used for the tab that shows the documentation for the current editor. */
+	public static final String DOCS_TAB_NAME = "Documentation";
+	/** The standard name used for the tab that has buttons to edit the current file. */
+	public static final String INSPECTOR_TAB_NAME = "Inspector";
 	
-	@FXML
-	private Pane topPane;
-	
-	@FXML
-	private Button expandButton;
-	
-	@FXML
-	private Label titleLabel;
+	@FXML private BorderPane mainNode;
+	@FXML private Pane topPane;
+	@FXML private Button expandButton;
+	@FXML private Label titleLabel;
+	@FXML private TabPane tabPane;
 	
 	/** Whether the window was maximized before expanding the inspector. */
 	private boolean previouslyMaximized;
@@ -57,10 +59,14 @@ public class InspectorPaneUI implements Controller {
 	
 	private boolean maximizingProgramatically = false;
 	
-	@FXML
-	private void initialize() {
+	@FXML private void initialize() {
 		
 		titleLabel.setText(null);
+		titleLabel.getStyleClass().add("inspector-pane-title");
+		
+		// It doesn't work correctly and never needs to be used anyways
+		// We will disable it temporarily
+		expandButton.setVisible(false);
 		
 		widthListener = (obs, oldValue, newValue) -> {
 			mainNode.setPrefWidth(newValue.doubleValue());
@@ -149,21 +155,61 @@ public class InspectorPaneUI implements Controller {
 		UIManager.get().getScene().heightProperty().addListener(heightListener);
 	}
 
-	@Override
-	public Pane getMainNode() {
+	@Override public Pane getMainNode() {
 		return mainNode;
 	}
-
-	public void setContent(Node content) {
-		mainNode.setCenter(content);
-		
-		if (content == null) {
-			topPane.setVisible(false);
-		} else {
-			topPane.setVisible(true);
+	
+	/**
+	 * Configures the inspector pane to show the default appearance used in most editors: a title, one tab for documentation and
+	 * another for the inspector. All these 3 elements are optional, if their value is null they will be ignored.
+	 * @param title The title of the inspector pane.
+	 * @param docsEntry The documentation entry ID; if not null, the generated pane will be added to the "Documentation" tab.
+	 * @param inspectorContent If not null, it will be added to the "Inspector" tab.
+	 */
+	public void configureDefault(String title, String docsEntry, Node inspectorContent) {
+		reset();
+		if (title != null) {
+			setTitle(title);
+		}
+		if (docsEntry != null) {
+			Pane pane = DocumentationManager.get().createDocumentationPane(docsEntry);
+			if (pane != null) setContent(DOCS_TAB_NAME, pane);
+		}
+		if (inspectorContent != null) {
+			setContent(INSPECTOR_TAB_NAME, inspectorContent);
 		}
 	}
+
+	/**
+	 * Changes the content of a certain tab. After this method is called, the title and tab pane will be visible.
+	 * @param tab The title of the new tab.
+	 * @param content The content to add to the tab.
+	 */
+	public void setContent(String tab, Node content) {
+		tabPane.setVisible(true);
+		topPane.setVisible(true);
+		
+		Tab t = new Tab();
+		t.setText(tab);
+		t.setContent(content);
+		tabPane.getTabs().add(t);
+	}
 	
+	/**
+	 * Resets the inspector pane so no title and tabs are shown. The title and tab pane won't be shown
+	 * again until content is added with the {@link #setContent(String, Node)} method.
+	 */
+	public void reset() {
+		tabPane.getTabs().clear();
+		tabPane.setVisible(false);
+		titleLabel.setText(null);
+		topPane.setVisible(false);
+	}
+	
+	/**
+	 * Sets the title text shown in the top part of the pane.
+	 * @param title
+	 */
 	public void setTitle(String title) {
 		titleLabel.setText(title);
 	}

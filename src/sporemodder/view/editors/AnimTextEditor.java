@@ -19,6 +19,7 @@
 package sporemodder.view.editors;
 
 import sporemodder.file.anim.SPAnimation;
+import sporemodder.view.UserInterface;
 
 public class AnimTextEditor extends ArgScriptEditor<SPAnimation> {
 	
@@ -33,4 +34,16 @@ public class AnimTextEditor extends ArgScriptEditor<SPAnimation> {
 		stream.getData().clear();
 	}
 	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Animation", "anim", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
+	}
 }

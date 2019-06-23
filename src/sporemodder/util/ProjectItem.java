@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TreeItem;
 import sporemodder.EditorManager;
 import sporemodder.ProjectManager;
@@ -31,7 +32,7 @@ import sporemodder.view.editors.EditorFactory;
 import sporemodder.view.editors.ItemEditor;
 
 /**
- * A project item, which represents a file in the project in a hierarchized way. Project items are always wrapped in
+ * A project item, which represents a file in the project in a hierarchical way. Project items are always wrapped in
  * a JavaFX TreeItem. Methods in the program never rely on the file, but on the project item instead; this means that subclasses
  * of ProjectItem can be used to give special behavior to certain files (check {@link ProjectItemFactory}). For example, a subclass
  * could override the {@link #isFolder()} method to make a folder appear as a leaf item on the tree. Similarly, you can use
@@ -425,6 +426,15 @@ public class ProjectItem {
 	 */
 	public boolean refreshItem() throws Exception {
 		return ProjectManager.get().refreshItem(this);
+	}
+	
+	/**
+	 * This method is called when the user right-clicks on the item, so a context menu must be generated.
+	 * This is called after all default buttons have been added to the menu, and by default it does nothing.
+	 * @param menu
+	 */
+	public void generateContextMenu(ContextMenu menu) {
+		
 	}
 	
 	/** Only for debugging purposes. */

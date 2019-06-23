@@ -20,6 +20,7 @@ package sporemodder.view.editors;
 
 import sporemodder.file.shaders.ShaderBuilder;
 import sporemodder.file.shaders.ShaderBuilder.ShaderBuilderEntry;
+import sporemodder.view.UserInterface;
 
 public class ShaderBuilderEditor extends ArgScriptEditor<ShaderBuilderEntry> {
 	
@@ -33,5 +34,18 @@ public class ShaderBuilderEditor extends ArgScriptEditor<ShaderBuilderEntry> {
 	@Override protected void onStreamParse() {
 		stream.getData().vertexShaderSelectors.clear();
 		stream.getData().pixelShaderSelectors.clear();
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Shader Builder (.shader_builder)", "smt", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 }

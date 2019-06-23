@@ -24,7 +24,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import sporemodder.DocumentationManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.Project;
@@ -39,6 +41,7 @@ public class IntroUI implements Controller {
 	private static final int RECENT_COUNT = 10;
 	
 	@FXML private Node mainNode;
+	@FXML private BorderPane documentationPane;
 	
 	@FXML private VBox recentProjectsList;
 	
@@ -97,5 +100,7 @@ public class IntroUI implements Controller {
 			});
 			recentProjectsList.getChildren().add(button);
 		}
+		
+		documentationPane.setCenter(DocumentationManager.get().createDocumentationPane("main"));
 	}
 }

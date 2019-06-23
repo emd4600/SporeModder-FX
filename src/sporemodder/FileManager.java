@@ -70,9 +70,19 @@ public class FileManager extends AbstractManager {
 				"spore_ep1_data.package", "spore_ep1_locale_01.package", "spore_ep1_locale_02.package"));
 	}
 	
+	/**
+	 * Returns the substring of the name without containing any extensions. Specifically, everything after a '.' (included) gets removed.
+	 * @param name
+	 * @return
+	 */
 	public static String removeExtension(String name) {
 		int indexOf = name.indexOf(".");
 		return indexOf == -1 ? name : name.substring(0, indexOf);
+	}
+	
+	public static String getExtension(String name) {
+		int indexOf = name.lastIndexOf(".");
+		return indexOf == -1 ? null : name.substring(indexOf + 1);
 	}
 
 	/**
@@ -121,6 +131,11 @@ public class FileManager extends AbstractManager {
 		}
 	}
 	
+	/**
+	 * Returns true if the given file name has a format that is supported by text searching.
+	 * @param fileName
+	 * @return
+	 */
 	public boolean isSearchable(String fileName) {
 		 int indexOf = fileName.lastIndexOf(".");
 		 if (indexOf != -1) {
@@ -130,14 +145,27 @@ public class FileManager extends AbstractManager {
 		 }
 	}
 	
+	/**
+	 * Returns true if the given file belongs to a protected package (a package from the game that should not be repacked)
+	 * @param file
+	 * @return
+	 */
 	public boolean isProtectedPackage(File file) {
 		return protectedPackages.contains(file.getName().toLowerCase());
 	}
 	
+	/**
+	 * Returns the set of all file extensions that support text searching.
+	 * @return
+	 */
 	public Set<String> getSearchableExtensions() {
 		return searchableExtensions;
 	}
 	
+	/**
+	 * Returns the set of protected package names (packages from the game that should not be repacked)
+	 * @return
+	 */
 	public Set<String> getProtectedPackageNames() {
 		return protectedPackages;
 	}

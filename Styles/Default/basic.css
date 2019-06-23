@@ -31,6 +31,11 @@
 
 /** ------------------- */
 
+.introUI-title {
+	-fx-font-size: 1.5em;
+	-fx-font-weight: bold;
+}
+
 
 /**
  * -- The text editor. -- 
@@ -303,6 +308,22 @@
 /** ------------------------- */
 
 /** -- INSPECTOR -- **/
+
+.inspector-pane-title {
+	-fx-font-size: 1.4em;
+	-fx-font-weight: bold;
+}
+
+.inspector-docs-title {
+	-fx-font-size: 1.3em;
+	-fx-font-weight: bold;
+}
+
+.inspector-docs-link {
+	-fx-font-size: 1.2em;
+	-fx-padding-left: 5px;
+}
+
 
 .inspector-list {
 	-fx-spacing: 5px;

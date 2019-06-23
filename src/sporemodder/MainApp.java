@@ -30,6 +30,7 @@ import java.util.Properties;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.file.shaders.FXCompiler;
 
 /**
@@ -39,6 +40,7 @@ public class MainApp extends Application {
 	
 	private static MainApp instance;
 	private UIManager uiManager;
+	private MessageManager messageManager;
 	private EditorManager editorManager;
 	private PathManager pathManager;
 	private HashManager hashManager;
@@ -59,6 +61,14 @@ public class MainApp extends Application {
 	 */
 	public UIManager getUIManager() {
 		return uiManager;
+	}
+	
+	/**
+	 * Returns the class that manages internal messages and events.
+	 * @return The message manager.
+	 */
+	public MessageManager getMessageManager() {
+		return messageManager;
 	}
 	
 	/**
@@ -155,6 +165,7 @@ public class MainApp extends Application {
 	private void init(boolean testInit) {
 		MainApp.instance = this;
 		
+		messageManager = new MessageManager();
 		gameManager = new GameManager();
 		pluginManager = new PluginManager();
 		pathManager = new PathManager();
@@ -183,6 +194,7 @@ public class MainApp extends Application {
 		
 		// The path managers might be used in other manager initialization methods,
 		// so we ensure we initialize them first.
+		messageManager.initialize(settings);
 		gameManager.initialize(settings);
 		fileManager.initialize(settings);
 		
@@ -196,9 +208,12 @@ public class MainApp extends Application {
 		
 		// The plugin must go last, as plugins will use the other managers
 		pluginManager.initialize(settings);
+		
+		messageManager.postMessage(MessageType.OnSettingsLoad, settings);
 	}
 	
 	public void saveSettings() {
+		messageManager.saveSettings(settings);
 		gameManager.saveSettings(settings);
 		pluginManager.saveSettings(settings);
 		pathManager.saveSettings(settings);
@@ -210,6 +225,8 @@ public class MainApp extends Application {
 		formatManager.saveSettings(settings);
 		fileManager.saveSettings(settings);
 		fxCompiler.saveSettings(settings);
+		
+		messageManager.postMessage(MessageType.OnSettingsSave, settings);
 		
 		try (OutputStream stream = new FileOutputStream(pathManager.getProgramFile("config.properties"))) {
 			settings.store(stream, null);

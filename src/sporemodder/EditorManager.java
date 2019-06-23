@@ -31,6 +31,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.EditorPaneUI;
 import sporemodder.view.EditorPaneUI.EditorTab;
@@ -143,10 +144,21 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		UIManager.get().addListener(this);
 	}
 	
+	
+	/**
+	 * Returns the list used to find and generate editors. Add {@link EditorFactory} objects into the list
+	 * to generate custom editors capable of editing project items.
+	 * @return
+	 */
 	public List<EditorFactory> getEditorFactories() {
 		return editorFactories;
 	}
 	
+	/**
+	 * Returns the list used to find syntax highlighting factories. Add factory objects here
+	 * to provide custom syntax highlighting to new text formats.
+	 * @return
+	 */
 	public List<SyntaxFormatFactory> getSyntaxHighlighters() {
 		return syntaxHighlighters;
 	}
@@ -165,13 +177,21 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	}
 	
 	/**
-	 * Returns the ProjectItem that is being currently edited.
+	 * Returns the ProjectItem that is currently being edited. Will return null if no editor is active.
 	 * @return
 	 */
 	public ProjectItem getActiveItem() {
 		return activeEditorTab == null ? null : activeEditorTab.item;
 	}
 	
+	/**
+	 * Loads the given item into the main editor tab, making it visible if it was closed. 
+	 * This will choose the appropriate editor and edit this file with it.
+	 * <p>
+	 * This generates a {@link MessageType.OnFileLoad} message.
+	 * @param item
+	 * @throws IOException
+	 */
 	public void loadFile(ProjectItem item) throws IOException {
 		UIManager ui = UIManager.get();
 		
@@ -186,6 +206,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 			// autosave for old tab
 			if (activeEditorTab != null && activeEditorTab.editor != null) {
 				activeEditorTab.editor.setActive(false);
+				MessageManager.get().postMessage(MessageType.OnEditorUnsetAsActive, activeEditorTab.editor);
 			}
 			
 			// Always create a new main tab, because we don't want to modify the previous one
@@ -219,6 +240,8 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		updateFileLabel(relativePath);
 		
 		ui.notifyUIUpdate(false);
+		
+		MessageManager.get().postMessage(MessageType.OnFileLoad, item);
 	}
 	
 	private void loadFile(EditorTab tab, ProjectItem item) throws IOException {
@@ -269,6 +292,12 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		return true;
 	}
 	
+	/**
+	 * Returns the first editor that is loaded for the given relative path. If that relative path isn't loaded in any of the
+	 * currently loaded editors, it will return null.
+	 * @param relativePath
+	 * @return
+	 */
 	public ItemEditor getEditor(String relativePath) {
 		for (Tab tab : paneUI.getTabPane().getTabs()) {
 			EditorTab t = (EditorTab) tab;
@@ -279,6 +308,12 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		return null;
 	}
 	
+	/**
+	 * Removes the first editor that is editing the given relative path from the editor tabs.
+	 * Returns whether such editor existed and was removed, or not.
+	 * @param relativePath
+	 * @return
+	 */
 	public boolean removeEditor(String relativePath) {
 		for (Tab tab : paneUI.getTabPane().getTabs()) {
 			if (relativePath.equals(((EditorTab) tab).relativePath)) {
@@ -289,6 +324,14 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		return false;
 	}
 	
+	/**
+	 * Reloads the first editor that is editing the given relative path (if any). If the project item belongs to the mod,
+	 * the editor changes will be saved. Then the item will be reloaded into the editor.
+	 * If the relative path does not point to a valid item anymore, the tab with its editor(s) will be removed.
+	 * @param relativePath
+	 * @return
+	 * @throws IOException
+	 */
 	public boolean reloadEditor(String relativePath) throws IOException {
 		List<Tab> tabsToRemove = new ArrayList<>();
 		for (Tab tab : paneUI.getTabPane().getTabs()) {
@@ -330,10 +373,19 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	}
 	
 	
+	/**
+	 * Returns the editor that is currently being used by the user. Returns null if no editor is being used.
+	 * @return
+	 */
 	public ItemEditor getActiveEditor() {
 		return activeEditorTab == null ? null : activeEditorTab.editor;
 	}
 	
+	/**
+	 * Sets the editor at the tab with the given index to be the active one, the one that is displayed to the user.
+	 * This is just like selecting the editor tab at that index.
+	 * @param index
+	 */
 	public void setActiveEditor(int index) {
 		paneUI.getTabPane().getSelectionModel().select(index);
 	}
@@ -366,11 +418,13 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 				updateStatusLabel();
 				if (activeEditorTab.editor != null) {
 					activeEditorTab.editor.setActive(true);
+					MessageManager.get().postMessage(MessageType.OnEditorSetAsActive, activeEditorTab.editor);
 				}
 				return;
 			}
 			else if (activeEditorTab.editor != null) {
 				activeEditorTab.editor.setActive(false);
+				MessageManager.get().postMessage(MessageType.OnEditorUnsetAsActive, activeEditorTab.editor);
 			}
 		}
 		
@@ -387,6 +441,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 
 		if (activeEditorTab != null && activeEditorTab.editor != null) {
 			activeEditorTab.editor.setActive(true);
+			MessageManager.get().postMessage(MessageType.OnEditorSetAsActive, activeEditorTab.editor);
 		}
 		
 		updateSearchableEditor();
@@ -440,6 +495,9 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		}
 	}
 	
+	/**
+	 * Removes all editor tabs.
+	 */
 	public void clearTabs() {
 		paneUI.getTabPane().getTabs().clear();
 		mainEditorTab = null;
@@ -447,6 +505,10 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		previousMainEditorTab = null;
 	}
 	
+	/**
+	 * Only for internal use.
+	 * @param ui
+	 */
 	public void setUI(EditorPaneUI ui) {
 		paneUI = ui;
 		
@@ -464,6 +526,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 					if (editor != null) {
 						//This will save the file or ask for confirmation
 						editor.setActive(false);
+						MessageManager.get().postMessage(MessageType.OnEditorUnsetAsActive, activeEditorTab.editor);
 					}
 					
 					if (tab == mainEditorTab) {
@@ -529,6 +592,11 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	}
 
 	
+	/**
+	 * Changes the title of the editor tab that has the given editor.
+	 * @param editor The editor whose tab name must be changed.
+	 * @param title The new title for the tab.
+	 */
 	public void setTitle(ItemEditor editor, String title) {
 		// This method might be called when an editor is closed (and therefore saved), so the editor might not exist anymore
 		Tab tab = paneUI.getTab(editor);
@@ -540,6 +608,9 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	 * <li>If the item is the root folder, no icon is returned.
 	 * <li>If the item is a folder, the folder icon will be returned.
 	 * <li>For the rest of items, all supported editors are checked until one returns an icon; otherwise no icon will be used.
+	 * <p>
+	 * This method is only a default implementation for the {@link ProjectItem.getIcon()} method. This way,
+	 * custom items can provide custom icons.
 	 * @param item
 	 * @return
 	 */
@@ -561,10 +632,17 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		}
 	}
 	
+	/**
+	 * Returns true if a 'save' action can be applied to the active editor.
+	 * @return
+	 */
 	public boolean canSave() {
 		return activeEditorTab != null && activeEditorTab.editor != null && activeEditorTab.editor.isEditable();
 	}
 	
+	/**
+	 * Saves the active editor. This will only happen if {@link #canSave()} returns true.
+	 */
 	public void saveActive() {
 		if (canSave()) {
 			activeEditorTab.editor.save();
@@ -589,19 +667,38 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		return false;
 	}
 
+	/**
+	 * Returns the current editor that has support for searching text, or null if the current editor does not support that.
+	 * This is the editor that must be used when the user searches text in the "Find" ribbon group.
+	 * @return
+	 */
 	public SearchableEditor getSearchableEditor() {
 		return searchableEditor;
 	}
 
-	public void setSearchableEditor(SearchableEditor searchableEditor) {
+	/**
+	 * Sets the current searchable editor. 
+	 * This is the editor that must be used when the user searches text in the "Find" ribbon group.
+	 * @param searchableEditor
+	 */
+	// private, it is set automatically, users don't need this
+	private void setSearchableEditor(SearchableEditor searchableEditor) {
 		this.searchableEditor = searchableEditor;
 	}
 
+	/**
+	 * Returns the current editor that has support for undo/redo history, or null if the current editor does not support that
+	 */
 	public EditHistoryEditor getEditHistoryEditor() {
 		return editHistoryEditor;
 	}
 
-	public void setEditHistoryEditor(EditHistoryEditor editHistoryEditor) {
+	/**
+	 * Sets the editor that has support for undo/redo history, or null if the current editor does not support that
+	 * @param editHistoryEditor
+	 */
+	// private, it is set automatically, users don't need this
+	private void setEditHistoryEditor(EditHistoryEditor editHistoryEditor) {
 		this.editHistoryEditor = editHistoryEditor;
 	}
 

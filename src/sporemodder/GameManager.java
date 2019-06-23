@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import sporemodder.MessageManager.MessageType;
 import sporemodder.util.GamePathConfiguration.GamePathType;
 import sporemodder.view.dialogs.GamePathsUI;
 import sporemodder.util.SporeGame;
@@ -284,6 +285,16 @@ public class GameManager extends AbstractManager {
 		}
 	}
 	
+	/**
+	 * Executes the game that the user has configured as default, and returns its process.
+	 * <p>
+	 * This will generate a {@link MessageType.BeforeGameRun} message before the game is executed; if any listener returns false, 
+	 * the operation will be aborted and the method returns null.
+	 * This will generate a {@link MessageType.OnGameRun} message when the game has executed.
+	 * @return
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
 	public Process runGame() throws IOException, URISyntaxException {
 		String path = null;
 		
@@ -305,8 +316,16 @@ public class GameManager extends AbstractManager {
 		
 		if (path == null) return null;
 		else {
-			if (commandLineArgs == null) return execute(path);
-			else return execute(path, commandLineArgs);
+			Object result = MessageManager.get().postMessage(MessageType.BeforeGameRun, path);
+			if (result == Boolean.FALSE) return null;
+			
+			Process process;
+			if (commandLineArgs == null) process = execute(path);
+			else process = execute(path, commandLineArgs);
+			
+			MessageManager.get().postMessage(MessageType.OnGameRun, process);
+			
+			return process;
 		}
 	}
 	

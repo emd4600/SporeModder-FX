@@ -32,15 +32,16 @@ import org.fxmisc.richtext.CodeArea;
 import emord.filestructures.FileStream;
 import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import sporemodder.UIManager;
 import sporemodder.file.shaders.FXCompiler;
 import sporemodder.file.shaders.StandardShader;
 import sporemodder.util.ProjectItem;
+import sporemodder.view.UserInterface;
 
 public class CompiledShaderViewer implements ItemEditor {
 	
@@ -96,11 +97,9 @@ public class CompiledShaderViewer implements ItemEditor {
 	
 	private void showInspector(boolean show) {
 		if (show) {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle("Compiled Shader");
-			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+			UserInterface.get().getInspectorPane().configureDefault("Compiled Shader", "smt", inspectorPane);
 		} else {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
-			UIManager.get().getUserInterface().setInspectorContent(null);
+			UserInterface.get().getInspectorPane().reset();
 		}
 	}
 	

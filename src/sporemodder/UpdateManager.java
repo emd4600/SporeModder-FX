@@ -66,9 +66,7 @@ public class UpdateManager {
      */
     public static final TimeZone TIMEZONE = TimeZone.getTimeZone("UTC");
     
-    private static final String GITHUB_URL = "https://api.github.com";
-    
-    public final VersionInfo versionInfo = new VersionInfo(2, 1, 1, null);
+    public final VersionInfo versionInfo = new VersionInfo(2, 1, 2, null);
     
     public static UpdateManager get() {
     	return MainApp.get().getUpdateManager();
@@ -190,7 +188,7 @@ public class UpdateManager {
 		
 		try
 		{
-			URL url = new URL(GITHUB_URL + request);
+			URL url = new URL(NetworkUtils.GITHUB_API_URL + request);
 			
 			connection = (HttpsURLConnection) url.openConnection();
 			// github api uses HTTPS

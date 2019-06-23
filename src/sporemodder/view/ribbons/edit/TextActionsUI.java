@@ -56,8 +56,11 @@ public class TextActionsUI implements Controller, UIUpdateListener {
 		
 		UIManager ui = UIManager.get();
 		
-		btnFindUp.setGraphic(ui.loadIcon("find-up.png", 26, 26, true));
-		btnFindDown.setGraphic(ui.loadIcon("find-down.png", 26, 26, true));
+//		btnFindUp.setGraphic(ui.loadIcon("find-up.png", 26, 26, true));
+//		btnFindDown.setGraphic(ui.loadIcon("find-down.png", 26, 26, true));
+		
+		btnFindUp.setGraphic(ui.loadIcon("find-up.png", 20, 20, true));
+		btnFindDown.setGraphic(ui.loadIcon("find-down.png", 20, 20, true));
 		
 		btnFindUp.setOnAction(event -> {
 			SearchableEditor editor = EditorManager.get().getSearchableEditor();

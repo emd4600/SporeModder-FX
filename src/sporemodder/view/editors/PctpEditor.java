@@ -19,6 +19,7 @@
 package sporemodder.view.editors;
 
 import sporemodder.file.pctp.PCTPUnit;
+import sporemodder.view.UserInterface;
 
 public class PctpEditor extends ArgScriptEditor<PCTPUnit> {
 	
@@ -31,5 +32,18 @@ public class PctpEditor extends ArgScriptEditor<PCTPUnit> {
 	
 	@Override protected void onStreamParse() {
 		stream.getData().clear();
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Part Capabilities (PCTP)", "PCTP", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 }

@@ -37,13 +37,23 @@ import sporemodder.DocumentationManager;
 import sporemodder.PathManager;
 import sporemodder.UIManager;
 import sporemodder.util.ProjectItem;
-import sporemodder.view.DragResizer.DragSide;
 import sporemodder.view.HideablePane.HideSide;
 import sporemodder.view.ribbons.EditRibbonTab;
 import sporemodder.view.ribbons.ProgramMenu;
 import sporemodder.view.ribbons.ProjectRibbonTab;
 import sporemodder.view.ribbons.UtilRibbonTab;
 
+/**
+ * The class that contains the main user interface. The SporeModderFX UI is basically a window with a ribbon, and the following objects:
+ * <li>{@link ProjectTreeUI}: On the left side, this panel contains the Project tree view and file search.</li>
+ * <li>{@link EditorPaneUI}: On the center, this panel contains the tab panes that show the editors.</li>
+ * <li>{@link InspectorPaneUI}: On the right side, this panel contains links to documentation and useful tools for certain editors. </li>
+ * <li>{@link StatusBar}: On the bottom, a small panel that contains information about the current file, error, etc</li>
+ * <p>
+ * This class also allows access to the {@link Ribbon}, to the {@link ProgramMenu} and to the {@link IntroUI}
+ * <p>
+ * Use {@code UserInterface.get()} to get the active (and only) object of this class.
+ */
 public class UserInterface extends RibbonWindow {
 	
 	private IntroUI introUI;
@@ -76,14 +86,21 @@ public class UserInterface extends RibbonWindow {
 		return PathManager.get().getStyleFile("ribbonstyle.css").toURI().toString();
 	}
 	
-	@Override
-	public InputStream getResource(String fileName) {
+	@Override public InputStream getResource(String fileName) {
 		try {
 			return new FileInputStream(PathManager.get().getStyleFile(fileName));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	/**
+	 * Returns the only object of this class.
+	 * @return
+	 */
+	public static UserInterface get() {
+		return UIManager.get().getUserInterface();
 	}
 	
 	/**
@@ -104,20 +121,12 @@ public class UserInterface extends RibbonWindow {
 		
 		/* --- Project Tree --- */
 		// We load the project tree and insert it to the LEFT region.
-//		projectTree = UIManager.get().loadUI("ProjectTreeUI");
-//		DragResizer.makeResizable((Region) projectTree.getMainNode(), DragSide.RIGHT);
-//		rootPane.setLeft(projectTree.getMainNode());
-		
 		projectTree = UIManager.get().loadUI("ProjectTreeUI");
 		rootPane.setLeft(new HideablePane((Region) projectTree.getMainNode(), HideSide.RIGHT).getNode());
 		
 		
 		/* --- Inspector Pane --- */
 		// We load the inspector pane and insert it to the RIGHT region.
-//		inspectorPane = UIManager.get().loadUI("InspectorPaneUI");
-//		DragResizer.makeResizable((Pane) inspectorPane.getMainNode(), DragSide.LEFT);
-//		rootPane.setRight(inspectorPane.getMainNode());
-		
 		inspectorPane = UIManager.get().loadUI("InspectorPaneUI");
 		rootPane.setRight(new HideablePane(inspectorPane.getMainNode(), HideSide.LEFT).getNode());
 		
@@ -136,16 +145,25 @@ public class UserInterface extends RibbonWindow {
 		statusBar.getLeftNodes().add(statusNameLabel);
 		statusBar.getRightNodes().add(statusTypeLabel);
 
-		setInspectorContent(null);
+		inspectorPane.reset();
 
 		/* --- Ribbon --- */
 		loadRibbon();
 
 	}
 	
+	/**
+	 * Shows the main user interface, the one that contains the project view, editors, etc
+	 */
 	public void showMainUI() {
-
 		setContent(rootPane);
+	}
+	
+	/**
+	 * Shows the introduction user interface, the one that is shown by default when the user opens the program.
+	 */
+	public void showIntroUI() {
+		setContent(introUI.getMainNode());
 	}
 	
 	/** 
@@ -155,9 +173,9 @@ public class UserInterface extends RibbonWindow {
 	private void loadRibbon() {
 		
 		Ribbon ribbon = getRibbon();
-		//ribbon.setContentHeight(130);
 		
-		ribbon.setContentHeight(UIManager.scaleByDpi(92));
+		//ribbon.setContentHeight(115);
+		ribbon.setContentHeight(UIManager.get().scaleByDpi(92));
 		
 		ProjectRibbonTab.addTab(ribbon);
 		EditRibbonTab.addTab(ribbon);
@@ -174,34 +192,7 @@ public class UserInterface extends RibbonWindow {
 
 	
 	/**
-	 * Returns the panel that contains the project tree and the search bar.
-	 */
-	public ProjectTreeUI getProjectTree() {
-		return projectTree;
-	}
-
-	/**
-	 * Sets the inspector pane content, which provides extra tools for editing files.
-	 */
-	public void setInspectorContent(Pane pane) {
-		inspectorPane.setContent(pane);
-	}
-	
-	/**
-	 * Returns the panel that contains the inspector, which provides extra tools for editing files.
-	 * @return
-	 */
-	public InspectorPaneUI getInspectorPane() {
-		return inspectorPane;
-	}
-	
-	public void removeInspector() {
-		inspectorPane.setContent(null);
-		inspectorPane.setTitle(null);
-	}
-	
-	/**
-	 * This method can be used to isolate the inspector, making everything not visible except the inspector panel.
+	 * This method can be used to isolate the inspector, making everything invisible except the inspector panel.
 	 * It can also be used to restore the visibility of the rest of elements.
 	 * @param inspectorOnly
 	 */
@@ -221,26 +212,13 @@ public class UserInterface extends RibbonWindow {
 		}
 	}
 	
-	/**
-	 * Returns the main panel, the one that contains the text editor/texture viewer/etc.
-	 * * @return
-	 */
-	public EditorPaneUI getEditorPane() {
-		return editorPane;
-	}
-
-	/**
-	 * Returns the pane that overlays the user interface when a dialog is shown.
-	 * @return
-	 */
-	public Pane getDialogOverlay() {
-		return dialogOverlay;
-	}
 	
-	public StatusBar getStatusBar() {
-		return statusBar;
-	}
-	
+	/**
+	 * Sets the current project item, so that the status bar text is updated properly.
+	 * This will change both the file name (shown on the left) and type information (shown on the right). The type information
+	 * is taken from the "type_names.txt" documentation file.
+	 * @param item The current item, or null.
+	 */
 	public void setStatusFile(ProjectItem item) {
 		if (item == null) {
 			statusNameLabel.setText("");
@@ -287,5 +265,61 @@ public class UserInterface extends RibbonWindow {
 				statusBar.getLeftNodes().set(1, node);
 			}
 		}
+	}
+
+	/**
+	 * Returns the main menu that is shown in the first tab of the ribbon.
+	 * @return
+	 */
+	public ProgramMenu getProgramMenu() {
+		return programMenu;
+	}
+	
+	/**
+	 * Returns the editor panel, the one that contains the tabs with the text editor/texture viewer/etc.
+	 * * @return
+	 */
+	public EditorPaneUI getEditorPane() {
+		return editorPane;
+	}
+	
+	/**
+	 * Returns the panel that contains the project tree view and the search bar.
+	 * @returns
+	 */
+	public ProjectTreeUI getProjectTree() {
+		return projectTree;
+	}
+	
+	/**
+	 * Returns the panel that contains the inspector, which provides extra tools for editing files.
+	 * @return
+	 */
+	public InspectorPaneUI getInspectorPane() {
+		return inspectorPane;
+	}
+	
+	/**
+	 * Returns the status bar that is shown on the bottom part of the program, and that contains information about the current file, error, etc..
+	 * @return
+	 */
+	public StatusBar getStatusBar() {
+		return statusBar;
+	}
+
+	/**
+	 * Returns the pane that overlays the user interface when a dialog is shown.
+	 * @return
+	 */
+	public Pane getDialogOverlay() {
+		return dialogOverlay;
+	}
+	
+	/**
+	 * Returns the panel that is shown when the program is opened.
+	 * @return
+	 */
+	public IntroUI getIntroUI() {
+		return introUI;
 	}
 }

@@ -29,12 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamWriter;
 import javafx.concurrent.Task;
 import sporemodder.FormatManager;
 import sporemodder.HashManager;
+import sporemodder.MessageManager;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.util.NameRegistry;
@@ -45,15 +45,11 @@ public class DBPFPackingTask extends Task<Void> {
 	
 	/** The folder with the contents that are being packed. */
 	private File inputFolder;
-	
 	private File outputFile;
-
+	private Project project;
 	
 	/** The total progress (in [0, 1]). */
 	private double progress = 0;
-	
-	/** A map with all the files that couldn't be packed. */
-	private final HashMap<File, Exception> failedFiles = new HashMap<File, Exception>();
 	
 	/** An object that holds information to be used by the ModAPI; it is optional. */
 	private DebugInformation debugInfo;
@@ -67,12 +63,89 @@ public class DBPFPackingTask extends Task<Void> {
 	private final AtomicBoolean running = new AtomicBoolean(true);
 	
 	public DBPFPackingTask(Project project, boolean storeDebugInformation) {
+		this.project = project;
 		this.inputFolder = project.getFolder();
 		this.outputFile = project.getOutputPackage();
 		this.packageSignature = project.getPackageSignature();
 		
 		if (storeDebugInformation) {
 			debugInfo = new DebugInformation(project.getName(), inputFolder.getAbsolutePath());
+		}
+	}
+	
+	/**
+	 * Returns the project that is being packed.
+	 * @return
+	 */
+	public Project getProject() {
+		return project;
+	}
+	
+	/**
+	 * Returns the input folder that contains the files that will be packed.
+	 * @return
+	 */
+	public File getInputFolder() {
+		return inputFolder;
+	}
+	
+	/**
+	 * Returns the output file where the package will be written.
+	 * @return
+	 */
+	public File getOutputFile() {
+		return outputFile;
+	}
+	
+	/**
+	 * If this packing task is being executed to save debug information, this returns the object that contains it.
+	 * @return
+	 */
+	public DebugInformation getDebugInformation() {
+		return debugInfo;
+	}
+	
+	/**
+	 * Returns the package signature that is being embedded into this package, if any.
+	 * @return
+	 */
+	public PackageSignature getPackageSignature() {
+		return packageSignature;
+	}
+	
+	/**
+	 * Gets the current file being processed; if there was an error, this is the file that caused it.
+	 * @returns The file that was being processed when the error happened.
+	 */
+	public File getCurrentFile() {
+		return packer.getCurrentFile();
+	}
+	
+	/**
+	 * Returns the exception that made this packing task fail.
+	 * @return
+	 */
+	public Exception getFailException() {
+		return failException;
+	}
+
+	/**
+	 * Sets the current file being processed. This is used when diagnosing errors.
+	 * @param currentFile
+	 */
+	public void setCurrentFile(File currentFile) {
+		packer.setCurrentFile(currentFile);
+	}
+	
+	public void pause() {
+		running.set(false);
+	}
+	
+	public void resume() {
+		running.set(true);
+		
+		synchronized(running) {
+			running.notify();
 		}
 	}
 
@@ -85,6 +158,8 @@ public class DBPFPackingTask extends Task<Void> {
 		
 		try (DBPFPacker packer = new DBPFPacker(outputFile)) {
 			this.packer = packer;
+			
+			MessageManager.get().postMessage(MessageType.BeforeDbpfPack, this);
 			
 			//TODO support DBBF maybe?
 			
@@ -133,10 +208,6 @@ public class DBPFPackingTask extends Task<Void> {
 					
 					String name = file.getName();
 					file = getNestedFile(file, name, converters);
-					
-					// Skip if there was a problem
-					if (file == null) continue;
-					
 					setCurrentFile(file);
 					
 					for (Converter converter : converters) {
@@ -183,6 +254,8 @@ public class DBPFPackingTask extends Task<Void> {
 			if (debugInfo != null) {
 				debugInfo.saveInformation(packer);
 			}
+			
+			MessageManager.get().postMessage(MessageType.OnDbpfPack, this);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -211,8 +284,9 @@ public class DBPFPackingTask extends Task<Void> {
 			}
 			File newFile = new File(file, name);
 			if (!newFile.exists()) {
-				failedFiles.put(file, new UnsupportedOperationException("Couldn't find file " + name + " inside subfolder " + name));
-				return null;
+				//failedFiles.put(file, new UnsupportedOperationException("Couldn't find file " + name + " inside subfolder " + name));
+				setCurrentFile(file);
+				throw new UnsupportedOperationException("Couldn't find file " + name + " inside subfolder " + name);
 			}
 			file = newFile;
 		}
@@ -259,35 +333,4 @@ public class DBPFPackingTask extends Task<Void> {
 		}
 	}
 
-	/**
-	 * Gets the current file being processed; if there is an error, this is the file that caused.
-	 * @returns The file that was being processed when the error happened.
-	 */
-	public File getCurrentFile() {
-		return packer.getCurrentFile();
-	}
-	
-	public Exception getFailException() {
-		return failException;
-	}
-
-	/**
-	 * Sets the current file being processed. This is used when diagnosing errors.
-	 * @param currentFile
-	 */
-	public void setCurrentFile(File currentFile) {
-		packer.setCurrentFile(currentFile);
-	}
-	
-	public void pause() {
-		running.set(false);
-	}
-	
-	public void resume() {
-		running.set(true);
-		
-		synchronized(running) {
-			running.notify();
-		}
-	}
 }

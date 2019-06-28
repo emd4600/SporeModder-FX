@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -13,9 +15,9 @@
       <Insets bottom="5.0" left="2.0" right="5.0" top="5.0" />
    </padding>
    <top>
-      <BorderPane BorderPane.alignment="CENTER" fx:id="topPane">
+      <BorderPane fx:id="topPane" BorderPane.alignment="CENTER">
          <right>
-            <Button fx:id="expandButton" contentDisplay="GRAPHIC_ONLY" styleClass="button-no-background" graphicTextGap="0.0" mnemonicParsing="false" BorderPane.alignment="CENTER">
+            <Button fx:id="expandButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" styleClass="button-no-background" BorderPane.alignment="CENTER">
                <graphic>
                   <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -37,4 +39,10 @@
          </left>
       </BorderPane>
    </top>
+   <center>
+      <TabPane fx:id="tabPane" prefWidth="+Infinity" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+        </tabs>
+      </TabPane>
+   </center>
 </BorderPane>

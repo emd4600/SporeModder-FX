@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<accessrules>
+			<accessrule kind="accessible" pattern="javafx/**"/>
+			<accessrule kind="accessible" pattern="com/sun/javafx/css/**"/>
+		</accessrules>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
 	<classpathentry kind="lib" path="/JavaFXRibbon/bin" sourcepath="/JavaFXRibbon/src"/>
 	<classpathentry kind="lib" path="C:/Users/Splitwirez/Documents/Important/Spore Modding Tools/SporeModder FX Prerequisites/FileStructures.jar"/>
@@ -21,6 +26,5 @@
 	<classpathentry kind="lib" path="C:/Users/Splitwirez/Documents/Important/Spore Modding Tools/SporeModder FX Prerequisites/undofx-1.4.0.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Splitwirez/Documents/Important/Spore Modding Tools/SporeModder FX Prerequisites/wellbehavedfx-0.3.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Splitwirez/Documents/Important/Spore Modding Tools/SporeModder FX Prerequisites/wellbehavedfx-0.3.1-javadoc.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/JavaFXRibbon"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

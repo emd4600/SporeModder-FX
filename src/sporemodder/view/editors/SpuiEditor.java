@@ -101,6 +101,7 @@ import sporemodder.file.spui.uidesigner.InspectorRectangle;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.FilterableTreeItem;
 import sporemodder.view.FilterableTreeItem.TreeItemPredicate;
+import sporemodder.view.UserInterface;
 import sporemodder.view.editors.spui.SpuiDraggableType;
 import sporemodder.view.editors.spui.SpuiEditorSkin;
 import sporemodder.view.editors.spui.SpuiImageChooser;
@@ -441,8 +442,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     			}
     		}
     		else if (event.isMiddleButtonDown()) {
-    			viewer.setContentTranslateX(viewer.getContentTranslateX() + deltaMouseX); //mouseX + viewer.getContentTranslateX() - mouseClickX
-    			viewer.setContentTranslateY(viewer.getContentTranslateY() + deltaMouseY); //mouseY + viewer.getContentTranslateY() - mouseClickY
+    			viewer.setContentTranslateX(viewer.getContentTranslateX() + deltaMouseX);
+    			viewer.setContentTranslateY(viewer.getContentTranslateY() + deltaMouseY);
     			repaint();
     		}
     	});
@@ -630,7 +631,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
     	GraphicsContext g = overlayCanvas.getGraphicsContext2D();
 		g.clearRect(0, 0, overlayCanvas.getWidth(), overlayCanvas.getHeight());
 		
-    	if (selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
+		if (selectedWindow.get() != null && selectedWindow.get() != viewer.getLayoutWindow()) {
 			SPUIRectangle rect = selectedWindow.get().getRealArea();
 			
 			g.setStroke(ACTIVE_COLOR);
@@ -812,11 +813,9 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	
 	private void showInspector(boolean show) {
 		if (show) {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle("SPUI Editor");
-			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+			UserInterface.get().getInspectorPane().configureDefault("SPUI Editor", "spui", inspectorPane);
 		} else {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
-			UIManager.get().getUserInterface().setInspectorContent(null);
+			UserInterface.get().getInspectorPane().reset();
 		}
 	}
 
@@ -1193,24 +1192,22 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		Stage stage = new Stage();
 		
 		SpuiViewer preview = new SpuiViewer(this, viewer.getLayoutWindow());
-		// We must get it before changing the preview dimensions
-		SPUIRectangle area = preview.getMinimumArea();
 		
 		Group group = new Group();
 		group.getChildren().add(preview);
 		
 		double width = 10;
 		double height = 10;
-		
+
 		for (IWindow window : preview.getLayoutWindow().getChildren()) {
 			if (window.getArea().getWidth() > width)
 				width = window.getArea().getWidth();
-			
+
 			if (window.getArea().getHeight() > height)
 				height = window.getArea().getHeight();
 		}
 		
-		Scene scene = new Scene(group, width, height/*, area.getWidth(), area.getHeight()*/);
+ 		Scene scene = new Scene(group, width, height);
 		
 		preview.setIsPreview(true);
 		preview.widthProperty().bind(scene.widthProperty());

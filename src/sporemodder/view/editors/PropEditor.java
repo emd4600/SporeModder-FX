@@ -33,6 +33,7 @@ import sporemodder.HashManager;
 import sporemodder.file.TextUtils;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.prop.PropertyList;
+import sporemodder.view.UserInterface;
 
 public class PropEditor extends ArgScriptEditor<PropertyList> {
 	
@@ -183,6 +184,19 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 				hideAutocomplete();
 			}
 		});
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Property List (.prop)", "prop", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 	
 	private void hideAutocomplete() {

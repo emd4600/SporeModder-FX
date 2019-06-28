@@ -31,6 +31,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
@@ -39,10 +40,14 @@ import sporemodder.util.Project.PackageSignature;
 import sporemodder.util.GamePathConfiguration.GamePathType;
 import sporemodder.view.Controller;
 
+/**
+ * The UI for the dialog that contains the project settings. If a developer wants to modify this,
+ * it is possible to do so by listening the message <code>OnUILoad</code> message (check {@link MessageManager}).
+ * The UI name is <code>dialogs/ProjectSettingsUI</code> and the controller is an object of this class.
+ */
 public class ProjectSettingsUI implements Controller {
 	
-	@FXML
-	private Node mainNode;
+	@FXML private TabPane mainNode;
 	
 	@FXML private TextField tfName;
 	@FXML private Label nameErrorLabel;
@@ -166,6 +171,14 @@ public class ProjectSettingsUI implements Controller {
 
 	@Override
 	public Node getMainNode() {
+		return mainNode;
+	}
+	
+	/**
+	 * Returns the tab pane node. By default this just contains the main tab.
+	 * @return
+	 */
+	public TabPane getTabPane() {
 		return mainNode;
 	}
 	

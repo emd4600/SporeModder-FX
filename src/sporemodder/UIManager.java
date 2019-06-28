@@ -48,16 +48,24 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.util.SporeModderPlugin;
 import sporemodder.view.Controller;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
 
 /**
- * This class handles the user interface in SporeModder. It contains some utility methods to load images and user interfaces.
+ * This class manages everything related with user interface in SporeModder. It contains some utility methods to load images and user interfaces.
+ * Most important methods are:
+ * <li>{@link #loadUI(String)}: Loads an FXML user interface controller.</li>
+ * <li>{@link #loadImage(String)} and {@link #loadIcon(String)}: Loads an image, depends on the current style.</li>
+ * <li>{@link #getUserInterface()}: Returns the main user interface object.</li>
+ * <li>{@link #addStylesheets(List)}: Loads .css stylesheet files to be used when styling the UI, syntax highlighting, etc </li>
+ * <li>{@link #tryAction(SimpleAction, String)}: Executes an action an shows an error dialog if something fails.</li>
  */
 public class UIManager extends AbstractManager {
 	
@@ -66,6 +74,16 @@ public class UIManager extends AbstractManager {
 	 */
 	public static UIManager get() {
 		return MainApp.get().getUIManager();
+	}
+	
+	/**
+	 * Used by the {@link MessageType.OnUILoad} message. Contains two things:
+	 * <li><b>name</b>: The name of the FXML layout loaded, relative to the <code>sporemodder.view</code> package. For example <i>EditorPaneUI</i>, <i>dialogs/CreateProjectUI</i>,...
+	 * <li><b>controller</b>: The loaded UI class. Cast it to the appropriate type in the <code>sporemodder.view</code> package to use it
+	 */
+	public static class UILoadMessage {
+		public String name;
+		public Controller controller;
 	}
 	
 	private static final String PROPERTY_selectedStyle = "selectedStyle";
@@ -99,6 +117,8 @@ public class UIManager extends AbstractManager {
 	private double programProgress;
 	
 	private Image programIcon;
+	
+	private double dpiScaling;
 	
 
 	/**
@@ -150,6 +170,8 @@ public class UIManager extends AbstractManager {
 	 */
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
+		dpiScaling = Font.getDefault().getSize() / 12.0;
+		
 		restoreTitle();
 		primaryStage.getIcons().setAll( programIcon);
 		
@@ -168,8 +190,12 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
+	public double scaleByDpi(double inValue) {
+		return inValue * dpiScaling;
+	}
+	
 	/**
-	 * Shows the main user interface.
+	 * Shows the main user interface. This should only be used by MainApp.
 	 */
 	public void show() {
 		
@@ -191,12 +217,18 @@ public class UIManager extends AbstractManager {
 	}
 	
 	/**
-	 * Resets the title of the main stage to the original.
+	 * Resets the title of the main stage to the original, which is "SporeModder FX [Version]"
 	 */
 	public void restoreTitle() {
 		primaryStage.setTitle("SporeModder FX " + UpdateManager.get().getVersionInfo());
 	}
 	
+	
+	/**
+	 * Sets the additional info to the program title; this is usually the project name. The resulting title will be "SporeModder FX [Version] - [Info]".
+	 * If you want to remove the additional info text, use {@link #restoreTitle()}
+	 * @param info
+	 */
 	public void setTitleInfo(String info) {
 		primaryStage.setTitle("SporeModder FX " + UpdateManager.get().getVersionInfo() + " - " + info);
 	}
@@ -206,6 +238,8 @@ public class UIManager extends AbstractManager {
 	 * the Controller class is returned so that it's possible to get the main layout node.
 	 * Example names: "ProjectTreeUI", "dialogs/ConvertSPUIDialogUI". 
 	 * If there is an error while loading the user interface, it returns null.
+	 * <p>
+	 * This method generates a {@link MessageType.OnUILoad} message with parameters of type {@link UILoadMessage}.
 	 * @param name The name of the user interface to load, with no extension; it allows subfolders. For example: "ProjectTreeUI", "dialogs/ConvertSPUIDialogUI".
 	 * @return The controller of the user interface, or null if there's an error..
 	 */
@@ -220,9 +254,10 @@ public class UIManager extends AbstractManager {
 			if (controller == null) {
 				controller = new Controller.PlaceholderController(main);
 			}
-			for (SporeModderPlugin plugin : PluginManager.get().getPlugins()) {
-				plugin.onUILoaded(controller, name);
-			}
+			UILoadMessage message = new UILoadMessage();
+			message.name = name;
+			message.controller = controller;
+			MessageManager.get().postMessage(MessageType.OnUILoad, message);
 			return (T) controller;
 			
 		} catch (Exception e) {
@@ -234,6 +269,8 @@ public class UIManager extends AbstractManager {
 	
 	/**
 	 * Same as {@link #loadUI(String)}, but here the URL itself must be specified.
+	 * Returns the loaded class that extends {@link Controller}.
+	 * If the file cannot be loaded, returns null.
 	 * @param url
 	 * @return
 	 */
@@ -255,10 +292,6 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
-	public static double scaleByDpi(double inValue) {
-		return (inValue / 12) * javafx.scene.text.Font.getDefault().getSize();
-	}
-	
 	/**
 	 * Loads the image with the given name and returns an ImageView capable of displaying it, using the specified fit width/height.
 	 * Setting a value of 0 for those will use the image's width/height.
@@ -270,12 +303,26 @@ public class UIManager extends AbstractManager {
 		
 		ImageView imageView = new ImageView();
 		imageView.setImage(image);
+//		imageView.setFitWidth(fitWidth);
+//		imageView.setFitHeight(fitHeight);
 		imageView.setFitWidth(scaleByDpi(fitWidth));
 		imageView.setFitHeight(scaleByDpi(fitHeight));
 		imageView.setPreserveRatio(preserveRatio);
 		
 		return imageView;
 	}
+	
+//	public ImageView loadIconDPI(String name, double fitWidth, double fitHeight, boolean preserveRatio) {
+//		Image image = loadImage(name);
+//		
+//		ImageView imageView = new ImageView();
+//		imageView.setImage(image);
+//		imageView.setFitWidth(scaleByDpi(fitWidth));
+//		imageView.setFitHeight(scaleByDpi(fitHeight));
+//		imageView.setPreserveRatio(preserveRatio);
+//		
+//		return imageView;
+//	}
 	
 	/**
 	 * Loads the image with the given name and returns an ImageView capable of displaying it. 
@@ -316,10 +363,19 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
+	/**
+	 * Adds an object that will be notified whenever a change in the user interface happens.
+	 * @param listener
+	 */
 	public void addListener(UIUpdateListener listener) {
 		updateListeners.add(listener);
 	}
 	
+	/**
+	 * Notifies a change in the user interface: this will call all {@link UIUpdateListener} instances
+	 * that have been added to the manager.
+	 * @param isFirstUpdate Whether this is the first UI update that ever happens in the program.
+	 */
 	public void notifyUIUpdate(boolean isFirstUpdate) {
 		for (UIUpdateListener listener : updateListeners) {
 			listener.onUIUpdate(isFirstUpdate);
@@ -344,14 +400,18 @@ public class UIManager extends AbstractManager {
 	}
 	
 	/**
-	 * Sets the currently selected style. This is no necessarily the stye that is on display; this is the one that will be saved
-	 * into the program configuration, and therefore will be displayed the enxt time the program is started.
+	 * Sets the currently selected style. This is not necessarily the style that is on display; this is the one that will be saved
+	 * into the program configuration, and therefore will be displayed the next time the program is started.
 	 * @return
 	 */
 	public void setSelectedStyle(String style) {
 		selectedStyle = style;
 	}
 	
+	/**
+	 * Returns a list of all the available style names. Those are taken from the "Styles" folder in the program.
+	 * @return
+	 */
 	public List<String> getAvailableStyles() {
 		return Arrays.asList(PathManager.get().getProgramFile("Styles").list());
 	}
@@ -388,6 +448,10 @@ public class UIManager extends AbstractManager {
 		isShowingOverlay = isEnabled;
 	}
 	
+	/**
+	 * Returns whether the gray overlay (blocks the user interface but not dialogs) is being shown.
+	 * @return
+	 */
 	public boolean isShowingOverlay() {
 		return isShowingOverlay;
 	}
@@ -435,7 +499,7 @@ public class UIManager extends AbstractManager {
 		return isShowingTaskbarProgress;
 	}
 	
-	public void setProgramProgress(double progress) {
+	private void setProgramProgress(double progress) {
 		
 		programProgress = progress;
 		
@@ -451,7 +515,7 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
-	public double getTaskbarProgress() {
+	private double getTaskbarProgress() {
 		return taskbarProgress.getProgress();
 	}
 	
@@ -517,7 +581,17 @@ public class UIManager extends AbstractManager {
 		primaryStage.getIcons().setAll(programIcon);
 	}
 	
-	
+	/**
+	 * Returns a node that represents one of the following alert icons:
+	 * <li>CONFIRMATION</li>
+	 * <li>ERROR</li>
+	 * <li>INFORMATION</li>
+	 * <li>WARNING</li>
+	 * @param type
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public Node getAlertIcon(AlertType type, int width, int height) {
 		String typeImage = null;
 		if (type == AlertType.CONFIRMATION) {
@@ -541,6 +615,17 @@ public class UIManager extends AbstractManager {
 		public void doAction() throws Exception;
 	}
 	
+	/**
+	 * Executes an action that might cause an exception: if it does throw an exception, an error
+	 * dialog will be shown to the user. This will be done with the {@link #showErrorDialog(Throwable, String, boolean)}
+	 * method, which shows a dialog with a simple error message and information about the exception.
+	 * <p>
+	 * This method can take a lambda, for example:
+	 * {@code tryAction(() -> ProjectManager.get().removeItem(item), "The item cannot be removed")}
+	 * @param action
+	 * @param errorText
+	 * @return
+	 */
 	public boolean tryAction(SimpleAction action, String errorText) {
 		try {
 			action.doAction();
@@ -553,6 +638,13 @@ public class UIManager extends AbstractManager {
 		}
 	}
 	
+	/**
+	 * Shows an error dialog that displays information about an exception. This method blocks execution until the user closes the dialog.
+	 * @param e The exception, part of its stack trace will be shown.
+	 * @param errorText The basic error text used to inform the user. 
+	 * @param disableOverlay Whether the dialog overlay must be disabled once the dialog is closed 
+	 * (use <code>false</code> if you will show more dialogs after this).
+	 */
 	public void showErrorDialog(Throwable e, String errorText, boolean disableOverlay) {
 		Alert alert = new Alert(AlertType.ERROR, (errorText == null ? "" : (errorText + " ")), ButtonType.OK);
 		if (e.getLocalizedMessage() != null) {
@@ -564,6 +656,11 @@ public class UIManager extends AbstractManager {
 		showDialog(alert, disableOverlay);
 	}
 	
+	/**
+	 * Creates a text area node that shows the stack trace of a throwable exception.
+	 * @param e
+	 * @return
+	 */
 	public Node createExceptionArea(Throwable e) {
 		TextArea infoText = new TextArea(getStackTraceString(e, ""));
 		infoText.setEditable(false);
@@ -611,11 +708,19 @@ public class UIManager extends AbstractManager {
 	    return sb.toString();
 	}
 	
+	/**
+	 * Returns true if it's the first time the program is opened.
+	 * @return
+	 */
 	public boolean isFirstTime() {
 		return isFirstTime;
 	}
 
-
+	/**
+	 * This setting tells whether it's the first time the program is opened. On the first time, some special dialogs
+	 * might be shown to the user.
+	 * @param isFirstTime
+	 */
 	public void setFirstTime(boolean isFirstTime) {
 		this.isFirstTime = isFirstTime;
 	}

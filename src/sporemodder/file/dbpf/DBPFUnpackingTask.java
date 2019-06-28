@@ -32,6 +32,8 @@ import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import sporemodder.HashManager;
+import sporemodder.MessageManager;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.util.Project;
@@ -88,6 +90,43 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		this.project = project;
 	}
 	
+	/**
+	 * Returns a list of all the converters that will be used when unpacking files.
+	 * On every file, if the converter {@link Converter.isDecoder()} method returns true, it will be used to decode the file.
+	 * @return
+	 */
+	public List<Converter> getConverters() {
+		return converters;
+	}
+	
+	/**
+	 * Returns the list of input package files that will be unpacked.
+	 * @return
+	 */
+	public List<File> getInputFiles() {
+		return inputFiles;
+	}
+	
+	/**
+	 * Returns the output folder where the unpacked files will be written.
+	 * @return
+	 */
+	public File getOutputFolder() {
+		return outputFolder;
+	}
+	
+	/**
+	 * Returns the project that is being unpacked. This might be null if a file is being unpacked directly.
+	 * @return
+	 */
+	public Project getProject() {
+		return project;
+	}
+	
+	/**
+	 * Sets a method that decides which items are unpacked and which are ignored.
+	 * @param itemFilter
+	 */
 	public void setItemFilter(DBPFItemFilter itemFilter) {
 		this.itemFilter = itemFilter;
 	}
@@ -109,6 +148,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 
 	@Override
 	protected Exception call() throws Exception {
+		
+		MessageManager.get().postMessage(MessageType.BeforeDbpfUnpack, this);
 		
 		HashManager hasher = HashManager.get();
 		long initialTime = System.currentTimeMillis();
@@ -258,6 +299,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		updateProgress(1.0, 1.0);
 		updateMessage("Finished");
 		
+		MessageManager.get().postMessage(MessageType.OnDbpfUnpack, this);
+		
 		return null;
 	}
 	
@@ -282,6 +325,10 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		updateProgress(progress, 1.0);
 	}
 	
+	/**
+	 * When unpacking multiple packages at once, returns a list of all package files that couldn't be unpacked.
+	 * @return
+	 */
 	public List<File> getFailedDBPFs() {
 		return failedDBPFs;
 	}

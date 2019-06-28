@@ -26,13 +26,36 @@ import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 
+/**
+ * This class is used to generate DatabasePackedFiles, more known as .package files. 
+ * This is an auto-closeable object, so it can (and should) be used inside a <code>try-catch</code> block.
+ * <p>
+ * The basic action is adding a file to the package, which is done by using the {@link #writeFile(ResourceKey, WriteAction)}.
+ * This method will execute the given write action, which can be provided as a lambda (for example 
+ * {@code stream -> propList.write(stream)}), and then will add the specified {@link ResourceKey} to the package index, so that it
+ * references the written data.
+ * <p> 
+ * The package file is not usable until the {@code DBPFPacker} object is closed. If, while executing a write action, there is an exception,
+ * the packer will close abruptly. Whenever you are writing a file into the package you should use the {@link #setCurrentFile(File)};
+ * this way, if an exception is produced, you will be able to tell the user what file caused it.
+ * <p>
+ * A small example of how to use packer: 
+ * <pre>
+ * File file = ...;
+ * try (DBPFPacker packer = new DBPFPacker(file)) {
+ *	PropertyList propList = ...;
+ *	packer.writeFile(new ResourceKey(0, HashManager.get().getFileHash("CreatureEditorSetup"), 0x00B1B104),
+ *	   stream -> propList.write(stream));
+ * }
+ * </pre>
+ */
 public class DBPFPacker implements AutoCloseable {
 	
 	@FunctionalInterface
 	public static interface WriteAction {
 		public void consume(StreamWriter stream) throws Exception;
 	}
-
+	
 	/** The output stream where the DBPF file will be written. */
 	private final StreamWriter stream;
 	/** The fast memory stream used to write the DBPF index. */
@@ -54,6 +77,11 @@ public class DBPFPacker implements AutoCloseable {
 		this(new FileStream(output, "rw"));
 	}
 	
+	/**
+	 * Returns the output stream where the data is being written. Developers should not write any data
+	 * using this method and use the specialized {@link #writeFile(ResourceKey, WriteAction)} method instead.
+	 * @return
+	 */
 	public StreamWriter getStream() {
 		return stream;
 	}

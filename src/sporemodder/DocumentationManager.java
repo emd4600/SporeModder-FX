@@ -21,15 +21,57 @@ package sporemodder;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import javafx.geometry.Insets;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 
 public class DocumentationManager extends AbstractManager {
 	
-	private final HashMap<String, Properties> loadedFiles = new HashMap<String, Properties>();
+	public static class DocumentationLink {
+		public String title;
+		public String url;
+	}
+	
+	public static class DocumentationLinkCategory {
+		public String name;
+		public final List<DocumentationLink> links = new ArrayList<>();
+	}
+	
+//	public static class DocumentationLinkPage {
+//		public String name;
+//		public final List<DocumentationLinkCategory> categories = new ArrayList<>();
+//	}
+	
+	private final Map<String, Properties> loadedFiles = new HashMap<>();
+	private final Map<String, List<DocumentationLinkCategory>> docLinks = new HashMap<>();
 
+	/**
+	 * Returns the class that controls the documentation of the program.
+	 * @return The documentation manager
+	 */
 	public static DocumentationManager get() {
 		return MainApp.get().getDocumentationManager();
+	}
+	
+	@Override public void initialize(Properties settings) {
+		try {
+			loadDocLinks(NetworkUtils.getJSON(NetworkUtils.getUrl("http://davoonline.com/sporemodder/emd4600/smfx_docs.json")));
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -79,6 +121,42 @@ public class DocumentationManager extends AbstractManager {
 		}
 	}
 	
+	public List<DocumentationLinkCategory> getDocumentationLinks(String docsEntry) {
+		return docLinks.get(docsEntry);
+	}
+	
+	public Pane createDocumentationPane(String entry) {
+		List<DocumentationLinkCategory> categories = getDocumentationLinks(entry);
+		if (categories == null) return null;
+		
+		Pane pane = new VBox();
+		pane.setPadding(new Insets(5, 0, 0, 0));
+		
+		for (DocumentationLinkCategory category : categories) {
+			if (!category.name.isEmpty()) {
+				Label label = new Label(category.name);
+				label.getStyleClass().add("inspector-docs-title");
+				pane.getChildren().add(label);
+			}
+			for (DocumentationLink link : category.links) {
+				Hyperlink hl = new Hyperlink(link.title);
+				hl.setWrapText(true);
+				hl.getStyleClass().add("inspector-docs-link");
+				if (link.url.isEmpty()) {
+					hl.setDisable(true);
+				} 
+				else {
+					hl.setOnAction(event -> {
+						MainApp.get().getHostServices().showDocument(link.url);
+					});
+				}
+				pane.getChildren().add(hl);
+			}
+		}
+		
+		return pane;
+	}
+	
 	private Properties loadFile(String fileName) {
 		Properties result = loadedFiles.get(fileName);
 		
@@ -99,5 +177,40 @@ public class DocumentationManager extends AbstractManager {
 		}
 		
 		return result;
+	}
+	
+	private void loadDocLinks(JSONObject json) {
+		JSONObject obj = json.getJSONObject("entries");
+		Set<String> keys = obj.keySet();
+		
+		for (String key : keys) {
+			List<DocumentationLinkCategory> categories = new ArrayList<>();
+			
+			JSONArray jsonCategories = obj.getJSONArray(key);
+			for (int i = 0; i < jsonCategories.length(); ++i) {
+				JSONObject jsonCat = jsonCategories.getJSONObject(i);
+				DocumentationLinkCategory cat = new DocumentationLinkCategory();
+				cat.name = jsonCat.getString("name");
+				
+				JSONArray jsonItems = jsonCat.getJSONArray("items");
+				for (int j = 0; j < jsonItems.length(); ++j) {
+					JSONObject jsonItem = jsonItems.getJSONObject(j);
+					DocumentationLink link = new DocumentationLink();
+					link.title = jsonItem.getString("title");
+					link.url = jsonItem.getString("url");
+					cat.links.add(link);
+				}
+				
+				categories.add(cat);
+			}
+
+			docLinks.put(key, categories);
+		}
+		
+		obj = json.getJSONObject("redirections");
+		keys = obj.keySet();
+		for (String key : keys) {
+			docLinks.put(key, docLinks.get(obj.getString(key)));
+		}
 	}
 }

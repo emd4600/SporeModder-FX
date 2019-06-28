@@ -22,7 +22,6 @@ package sporemodder.util;
 import java.util.List;
 
 import net.xeoh.plugins.base.Plugin;
-import sporemodder.view.Controller;
 
 /**
  * The interface that all plugins must implement. It's the base class that defines the plugin functionality.
@@ -43,11 +42,4 @@ public interface SporeModderPlugin extends Plugin {
 	 * Called when the program is closed, all program managers are still available at this time.
 	 */
 	public void dispose();
-	
-	/**
-	 * Called when a JavaFX layout is loaded, you can use this method to add features to that part of the UI. 
-	 * @param controller
-	 * @param name
-	 */
-	public void onUILoaded(Controller controller, String name);
 }

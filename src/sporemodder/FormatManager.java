@@ -35,6 +35,15 @@ import sporemodder.file.rw4.RenderWareConverter;
 import sporemodder.file.shaders.SmtConverter;
 import sporemodder.file.tlsa.TLSAConverter;
 
+/**
+ * A class that manages file format conversions. Some basic concepts managed by this class:
+ * <li><b>Decoding:</b> Transforming a file from a Spore format into a format that can be used by the user. </li>
+ * <li><b>Encoding:</b> Inverse to encoding, transforming a file that can be used by the user into a format Spore understands.</li>
+ * <li>{@link Converter}: A class that manages encoding/decoding for a specific format.
+ * 
+ * This class contains a collections of converters that developers can modify, and that the user will see when packing/unpacking mods and
+ * right clicking files in the Project view.
+ */
 public class FormatManager extends AbstractManager {
 	
 	private final List<Converter> converters = new ArrayList<Converter>();
@@ -51,6 +60,27 @@ public class FormatManager extends AbstractManager {
 		converters.add(new PropConverter());
 	}
 	
+	/**
+	 * Adds the given Converter into the list of supported converters.
+	 * @param converter
+	 */
+	public void addConverter(Converter converter) {
+		converters.add(converter);
+	}
+	
+	/**
+	 * Removes the given Converter from the list of supported converters.
+	 * @param converter
+	 */
+	public void removeConverter(Converter converter) {
+		converters.remove(converter);
+	}
+	
+	/**
+	 * Same as {@link #getDecoder(List,ResourceKey)}, but checks all converters supported by the program.
+	 * @param key
+	 * @return
+	 */
 	public Converter getDecoder(ResourceKey key) {
 		for (Converter converter : converters) {
 			if (converter.isDecoder(key)) {
@@ -60,6 +90,13 @@ public class FormatManager extends AbstractManager {
 		return null;
 	}
 	
+	/**
+	 * Returns the first Converter of the list that is capable of decoding (converting to a readable format) a file with
+	 * the given resource key.
+	 * @param converters The list of possible converters.
+	 * @param key The file name, as a resource key.
+	 * @return
+	 */
 	public Converter getDecoder(List<Converter> converters, ResourceKey key) {
 		ListIterator<Converter> it = converters.listIterator(converters.size());
 		while (it.hasPrevious()) {
@@ -71,10 +108,21 @@ public class FormatManager extends AbstractManager {
 		return null;
 	}
 	
+	/**
+	 * Same as {@link #getEncoder(List,File)}, but checks all converters supported by the program.
+	 * @param file
+	 * @return
+	 */
 	public Converter getEncoder(File file) {
 		return getEncoder(converters, file);
 	}
 	
+	/**
+	 * Returns the first Converter of the list that is capable of encoding (converting into Spore format) the given file.
+	 * @param converters The list of possible converters.
+	 * @param file The file that would need to be encoded.
+	 * @return
+	 */
 	public Converter getEncoder(List<Converter> converters, File file) {
 		ListIterator<Converter> it = converters.listIterator(converters.size());
 		while (it.hasPrevious()) {
@@ -86,13 +134,19 @@ public class FormatManager extends AbstractManager {
 		return null;
 	}
 	
+	/**
+	 * Returns a list of all the converters supported by the program.
+	 * @return
+	 */
 	public List<Converter> getConverters() {
 		return converters;
 	}
 
+	/**
+	 * Returns the current instance of the FormatManager class.
+	 */
 	public static FormatManager get() {
 		return MainApp.get().getFormatManager();
 	}
-	
 	
 }

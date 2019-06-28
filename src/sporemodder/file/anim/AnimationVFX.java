@@ -75,8 +75,10 @@ public class AnimationVFX {
 		long offset = stream.getUInt(0x40);
 		field_44 = stream.getFloat(0x44);
 		
-		stream.getStream().seek(offset);
-		name = stream.getStream().readCString(StringEncoding.ASCII);
+		if (id != 0) {
+			stream.getStream().seek(offset);
+			name = stream.getStream().readCString(StringEncoding.ASCII);
+		}
 	}
 	
 	public void write(StreamWriter stream, List<Long> pointers, long namePtr) throws IOException {
@@ -97,7 +99,7 @@ public class AnimationVFX {
 		
 		stream.writeLEInt(0);  // ?
 		stream.writeLEInt(id);
-		stream.writeLEUInt(namePtr);
+		stream.writeLEUInt(id == 0 ? 0 : namePtr);
 		stream.writeLEFloat(field_44);
 		
 		// from 48h to 60h, unknown
@@ -105,9 +107,10 @@ public class AnimationVFX {
 	}
 	
 	public void toArgScript(ArgScriptWriter writer, String internal_name) {
-		writer.command("vfx").arguments(internal_name, name);
+		writer.command("vfx").arguments(internal_name);
+		if (name != null) writer.arguments(name);
 		
-		if (HashManager.get().fnvHash(name) != id) {
+		if (id != 0 && HashManager.get().fnvHash(name) != id) {
 			writer.option("id").arguments(HashManager.get().getFileName(id));
 		}
 		
@@ -132,9 +135,14 @@ public class AnimationVFX {
 			AnimationVFX vfx = new AnimationVFX();
 			Number value;
 			
-			if (line.getArguments(args, 2)) {
-				vfx.name = args.get(1);
-				vfx.id = HashManager.get().getFileHash(vfx.name);
+			if (line.getArguments(args, 1, 2)) {
+				if (args.size() == 2) {
+					vfx.name = args.get(1);
+					vfx.id = HashManager.get().getFileHash(vfx.name);
+				} else {
+					vfx.id = 0;
+					vfx.name = null;
+				}
 				
 				stream.getData().vfxMap.put(args.get(0), vfx);
 			}

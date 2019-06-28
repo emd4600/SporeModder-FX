@@ -19,6 +19,7 @@
 package sporemodder.view.editors;
 
 import sporemodder.file.tlsa.TLSAUnit;
+import sporemodder.view.UserInterface;
 
 public class TlsaEditor extends ArgScriptEditor<TLSAUnit> {
 	
@@ -27,5 +28,18 @@ public class TlsaEditor extends ArgScriptEditor<TLSAUnit> {
 		
 		TLSAUnit unit = new TLSAUnit();
 		stream = unit.generateStream();
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Animation List (TLSA)", "tlsa", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 }

@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 
 import javafx.beans.value.ChangeListener;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -55,6 +56,7 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -65,8 +67,7 @@ import sporemodder.file.raster.RasterTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
 import sporemodder.file.rw4.RenderWare;
 import sporemodder.util.ProjectItem;
-import sporemodder.util.inspector.InspectorUnit;
-import sporemodder.view.InspectorPaneUI;
+import sporemodder.view.UserInterface;
 
 /**
  * An editor used for visualizing images and textures. It is called 'viewer' instead of 'editor' because images are not editable; they can't
@@ -132,8 +133,8 @@ public class ImageViewer implements ItemEditor {
 	private CheckBox cbBlueMask;
 	private CheckBox cbAlphaMask;
 	
-	private Pane inspectorUI;
-	private InspectorUnit<ImageViewer> inspector;
+	//private Pane inspectorUI;
+	private Pane inspector;
 	
 	private ImageViewer() {
 		super();
@@ -236,7 +237,8 @@ public class ImageViewer implements ItemEditor {
 		cbBlueMask.selectedProperty().addListener(channelsListener);
 		cbAlphaMask.selectedProperty().addListener(channelsListener);
 		
-		inspector = new InspectorUnit<ImageViewer>(this, null);
+		inspector = new VBox(5);
+		inspector.setPadding(new Insets(5, 0, 0, 0));
 	}
 	
 	private void updateChannels() {
@@ -320,15 +322,14 @@ public class ImageViewer implements ItemEditor {
 			
 			imageView.setImage(originalImage);
 			
-			inspectorUI = inspector.generateUI(false);
-			inspector.clear();
+			inspector.getChildren().clear();
 			
-			inspector.add(exportAsPNG);
-			inspector.add(exportAsDDS);
-			inspector.add(new Separator(Orientation.HORIZONTAL));
+			inspector.getChildren().add(exportAsPNG);
+			inspector.getChildren().add(exportAsDDS);
+			inspector.getChildren().add(new Separator(Orientation.HORIZONTAL));
 			
-			inspector.add(new Label("Zoom:"));
-			inspector.add(zoomLvlSpinner);
+			inspector.getChildren().add(new Label("Zoom:"));
+			inspector.getChildren().add(zoomLvlSpinner);
 			
 			ColorPicker backgroundColor = new ColorPicker();
 			backgroundColor.setPrefWidth(Double.MAX_VALUE);
@@ -341,14 +342,14 @@ public class ImageViewer implements ItemEditor {
 			});
 			backgroundColor.setValue(Color.web("#f2f2f2"));
 			
-			inspector.add(new Label("Background Color:"));
-			inspector.add(backgroundColor);
+			inspector.getChildren().add(new Label("Background Color:"));
+			inspector.getChildren().add(backgroundColor);
 			
-			inspector.add(new Label("Channels:"));
-			inspector.add(cbRedMask);
-			inspector.add(cbGreenMask);
-			inspector.add(cbBlueMask);
-			inspector.add(cbAlphaMask);
+			inspector.getChildren().add(new Label("Channels:"));
+			inspector.getChildren().add(cbRedMask);
+			inspector.getChildren().add(cbGreenMask);
+			inspector.getChildren().add(cbBlueMask);
+			inspector.getChildren().add(cbAlphaMask);
 			
 			if (imageType.equals("rw4")) {
 				Label label = new Label("RW4 textures cannot be directly used outside SporeModder, you must convert them first.");
@@ -422,12 +423,10 @@ public class ImageViewer implements ItemEditor {
 	}
 	
 	private void showInspector() {
-		InspectorPaneUI inspectorPane = UIManager.get().getUserInterface().getInspectorPane();
-		inspectorPane.setTitle("Image Viewer");
-		inspectorPane.setContent(inspectorUI);
+		UserInterface.get().getInspectorPane().configureDefault("Image Viewer", "image", inspector);
 	}
 	private void hideInspector() {
-		 UIManager.get().getUserInterface().removeInspector();
+		 UserInterface.get().getInspectorPane().reset();
 	}
 
 	@Override

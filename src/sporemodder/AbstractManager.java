@@ -29,6 +29,7 @@ public abstract class AbstractManager {
 	
 	/**
 	 * Called when the program is started. The settings should be read here.
+	 * This is called automatically by the main program, developers should never call this.
 	 */
 	public void initialize(Properties properties) {
 		
@@ -36,6 +37,7 @@ public abstract class AbstractManager {
 
 	/**
 	 * Called when the program is closed.
+	 * This is called automatically by the main program, developers should never call this.
 	 */
 	public void dispose() {
 		

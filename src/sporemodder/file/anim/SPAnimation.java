@@ -146,11 +146,11 @@ public class SPAnimation {
 		stream.writePadding(0x13C - 0x124);
 		
 		stream.writeLEInt(vfxList.size());
-		stream.writeLEInt(0);  // ptr, TODO
+		stream.writeLEInt(0);  // vfx ptr,
 		stream.writeLEInt(channels.size());
-		stream.writeLEInt(0);  // ptr, TODO
-		stream.writeLEInt(0);  // offsets count, TODO
-		stream.writeLEInt(0);  // offsets ptr, TODO
+		stream.writeLEInt(0);  // channels ptr,
+		stream.writeLEInt(0);  // offsets count,
+		stream.writeLEInt(0);  // offsets ptr,
 		
 		stream.writePadding(0x200 - 0x154);
 		
@@ -279,12 +279,13 @@ public class SPAnimation {
 	
 	public static void unpackTest() throws IOException {
 		//String path = "C:\\Users\\Eric\\Desktop\\0x30EF4216.animation";
-		//String path = "C:\\Users\\Eric\\Desktop\\tree_idle.animation";
+		//String path = "C:\\Users\\Eric\\Desktop\\baby_born_02.animation";
+		String path = "C:\\Users\\Eric\\Desktop\\ec_vi_cnv_01c_nog.animation";
 		//String path = "C:\\Users\\Eric\\Desktop\\com_punch.animation";
 		//String path = "C:\\Users\\Eric\\Desktop\\ep1_trader_jumpjet_land.animation";
 		//String path = "E:\\Eric\\SporeModder\\Projects\\Spore_Game.package.unpacked\\animations~\\csa_actn_jumphit.animation";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~\\0x30EF4216.animation";
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomAnimations\\animations~\\csa_actn_jumphit_COPY.animation";
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomAnimations\\animations~\\csa_actn_jumphit_COPY.animation";
 		MainApp.testInit();
 		
 		try (MemoryStream stream = new MemoryStream(Files.readAllBytes(new File(path).toPath()))) {

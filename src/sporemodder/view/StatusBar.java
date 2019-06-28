@@ -28,6 +28,10 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 import sporemodder.view.skin.StatusBarSkin;
 
+/**
+ * This basic control is used to create a small status bar. Basically, it's a small horizontal bar (usually only 35 pixels high)
+ * that shows controls both on the left and on the right side.
+ */
 public class StatusBar extends Control {
 	
 	private static final int DEFAULT_HEIGHT = 35;

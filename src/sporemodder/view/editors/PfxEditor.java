@@ -29,12 +29,12 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import sporemodder.HashManager;
-import sporemodder.UIManager;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.effects.EffectComponent;
 import sporemodder.file.effects.EffectFileElement;
 import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.effects.ImportEffect;
+import sporemodder.view.UserInterface;
 
 public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 	
@@ -89,13 +89,11 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
     	});
 	}
 	
-	private void showInspector(boolean show) {
+	@Override protected void showInspector(boolean show) {
 		if (show) {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle("Effects Editor");
-			UIManager.get().getUserInterface().setInspectorContent(inspectorPane);
+			UserInterface.get().getInspectorPane().configureDefault("Spore Effects (.pfx)", "pfx", inspectorPane);
 		} else {
-			UIManager.get().getUserInterface().getInspectorPane().setTitle(null);
-			UIManager.get().getUserInterface().setInspectorContent(null);
+			UserInterface.get().getInspectorPane().reset();
 		}
 	}
 	

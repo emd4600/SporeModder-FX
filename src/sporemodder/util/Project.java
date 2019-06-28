@@ -26,9 +26,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import sporemodder.MessageManager;
+import sporemodder.MessageManager.MessageType;
 import sporemodder.PathManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
@@ -94,13 +98,13 @@ public class Project {
 	/** The folder that contains the data of the project. */
 	private File folder;
 	
-	private final List<Project> sources = new ArrayList<Project>();
+	private final List<Project> sources = new ArrayList<>();
 	
 	/** The object that holds the path to the folder where the project DBPF is packed. */
 	private final GamePathConfiguration packPath;
 	
 	/** A list of relative paths of all those files that are fixed tabs. */
-	private final List<String> fixedTabPaths = new ArrayList<String>();
+	private final List<String> fixedTabPaths = new ArrayList<>();
 	
 	/** The embedded 'editorPackages~' file that represents the package signature. */
 	private PackageSignature packageSignature = PackageSignature.NONE;
@@ -109,6 +113,9 @@ public class Project {
 	private boolean isReadOnly;
 	
 	private final Properties settings = new Properties();
+	
+	/** Extra properties that can be used by plugins. */
+	private Map<String, Object> extraProperties = new HashMap<>();
 	
 	
 	public Project(String name) {
@@ -176,6 +183,8 @@ public class Project {
 				}
 				
 				isReadOnly = Boolean.parseBoolean(settings.getProperty(PROPERTY_isReadOnly, "false"));
+				
+				MessageManager.get().postMessage(MessageType.OnProjectSettingsLoad, this);
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
@@ -225,6 +234,8 @@ public class Project {
 			
 			settings.put(PROPERTY_isReadOnly, Boolean.toString(isReadOnly));
 			
+			MessageManager.get().postMessage(MessageType.OnProjectSettingsSave, this);
+			
 			settings.store(stream, null);
 		} 
 		catch (IOException e) {
@@ -233,6 +244,14 @@ public class Project {
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
+	}
+	
+	/**
+	 * Returns the object that is used to load/store the project settings.
+	 * @return
+	 */
+	public Properties getSettings() {
+		return settings;
 	}
 	
 	/**
@@ -338,5 +357,12 @@ public class Project {
 		this.packageSignature = packageSignature;
 	}
 	
-	
+	/**
+	 * Returns a map that can be used by plugins to store extra properties in this Project.
+	 * These properties won't be saved/loaded by default; if you want to save/load them, use the {@link MessageManager}
+	 * @return
+	 */
+	public Map<String, Object> getExtraProperties() {
+		return extraProperties;
+	}
 }

@@ -19,6 +19,7 @@
 package sporemodder.view.editors;
 
 import sporemodder.file.shaders.MaterialStateLink;
+import sporemodder.view.UserInterface;
 
 public class SmtTextEditor extends ArgScriptEditor<MaterialStateLink> {
 	
@@ -31,5 +32,18 @@ public class SmtTextEditor extends ArgScriptEditor<MaterialStateLink> {
 	
 	@Override protected void onStreamParse() {
 		stream.getData().reset();
+	}
+	
+	@Override protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault("Spore Material (.smt)", "smt", null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
+	}
+	
+	@Override public void setActive(boolean isActive) {
+		super.setActive(isActive);
+		showInspector(isActive);
 	}
 }

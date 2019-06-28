@@ -35,7 +35,14 @@ public class XmlEditorFactory implements EditorFactory {
 
 	@Override
 	public boolean isSupportedFile(ProjectItem item) {
-		return !item.isFolder() && item.getName().endsWith(".prop.xml");
+		return !item.isFolder() && (
+				item.getName().endsWith(".xml") |
+				item.getName().endsWith(".crt") |
+				item.getName().endsWith(".cll") |
+				item.getName().endsWith(".flr") |
+				item.getName().endsWith(".bld") |
+				item.getName().endsWith(".vcl") |
+				item.getName().endsWith(".ufo"));
 	}
 	
 	@Override

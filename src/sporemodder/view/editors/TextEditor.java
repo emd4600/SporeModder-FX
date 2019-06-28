@@ -47,12 +47,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Popup;
 import sporemodder.EditorManager;
+import sporemodder.FileManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentFragment;
 import sporemodder.file.DocumentStructure;
 import sporemodder.file.TextUtils;
 import sporemodder.util.ProjectItem;
+import sporemodder.view.UserInterface;
 import sporemodder.view.syntax.SyntaxFormat;
 import sporemodder.view.syntax.SyntaxHighlighter;
 
@@ -445,6 +447,8 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 			// This will allow the editor to set error into the status bar if necessary
 			updateSyntaxHighlighting();
 		}
+		
+		showInspector(isActive);
 	}
 	
 	/**
@@ -453,6 +457,14 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 	 */
 	public final String getText() {
 		return codeArea.getText();
+	}
+	
+	protected void showInspector(boolean show) {
+		if (show) {
+			UserInterface.get().getInspectorPane().configureDefault(null, FileManager.getExtension(getFile().getName()), null);
+		} else {
+			UserInterface.get().getInspectorPane().reset();
+		}
 	}
 	
 	@Override protected void saveData() throws Exception {

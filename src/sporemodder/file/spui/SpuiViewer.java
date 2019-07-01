@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.file.spui;
 
+import java.awt.Color;
 import java.util.ListIterator;
 
 import javafx.beans.property.BooleanProperty;
@@ -27,6 +28,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventType;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.effect.Effect;
 import javafx.scene.input.MouseEvent;
 import sporemodder.file.spui.components.IWindow;
 import sporemodder.view.editors.SpuiEditor;
@@ -200,10 +202,14 @@ public class SpuiViewer extends Canvas {
 	}
 	
 	private void repaint_internal() {
+		// Stupid? Yes. Necessary? Yes, unless you want a hall of mirrors.
+		Effect eff = null;
+		eff = getGraphicsContext2D().getEffect(eff);
+		getGraphicsContext2D().setEffect(null);
 		getGraphicsContext2D().clearRect(0, 0, getWidth(), getHeight());
+		getGraphicsContext2D().setEffect(eff);
 		
 		// First layout the elements, then paint them
-		
 		relayout();
 		
 		PaintEvent paintEvent = new PaintEvent(PAINT_EVENT, this);

@@ -35,7 +35,7 @@ public class SliderDrawable extends IDrawable {
 		SPUIRectangle area = window.getRealArea();
 		
 		if (images[IMAGE_BACKGROUND] != null) {
-			ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_BACKGROUND], area);
+			ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_BACKGROUND], area, window.getShadeColor());
 		}
 		
 		if (images[IMAGE_THUMB_CONTAINER] != null) {
@@ -59,12 +59,12 @@ public class SliderDrawable extends IDrawable {
 				sliderArea.setHeight(area.getWidth());
 			}
 			
-			ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), images[IMAGE_THUMB_CONTAINER], false, sliderArea, scaleArea);
+			ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), images[IMAGE_THUMB_CONTAINER], false, sliderArea, scaleArea, window.getShadeColor());
 		}
 		
 		if (images[IMAGE_THUMB] != null) {
 			SPUIRectangle thumbArea = slider.getThumb().getRealArea();
-			ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(slider.getThumb(), images[IMAGE_THUMB], 4), thumbArea);
+			ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(slider.getThumb(), images[IMAGE_THUMB], 4), thumbArea, window.getShadeColor());
 		} else {
 			new ButtonDrawableStandard().paint(slider.getThumb(), viewer);
 		}

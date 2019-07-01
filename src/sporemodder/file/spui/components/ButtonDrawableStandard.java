@@ -39,9 +39,9 @@ public class ButtonDrawableStandard extends IDrawable {
 
 			if (tileable) {
 				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image, false, sourceBounds, window.getRealArea(),
-						new Borders(0.333f, 0.333f, 0.333f, 0.333f));
+						new Borders(0.333f, 0.333f, 0.333f, 0.333f), window.getShadeColor());
 			} else {
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image, false, sourceBounds, window.getRealArea());
+				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image, false, sourceBounds, window.getRealArea(), window.getShadeColor());
 			}
 		}
 		else {

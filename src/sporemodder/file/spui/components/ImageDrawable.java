@@ -40,13 +40,13 @@ public class ImageDrawable extends IDrawable {
 		//TODO use alignment for something
 		if (image != null) {
 			if (tiling == TILING_EDGE) {
-				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image, false, window.getRealArea(), new Borders(0.333f, 0.333f, 0.333f, 0.333f));
+				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image, false, window.getRealArea(), new Borders(0.333f, 0.333f, 0.333f, 0.333f), window.getShadeColor());
 			}
 			else if (tiling == TILING_STANDARD) {
-				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), image, window.getRealArea());
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), image, window.getRealArea(), window.getShadeColor());
 			}
 			else {
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image, window.getRealArea());
+				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image, window.getRealArea(), window.getShadeColor());
 			}
 		}
 	}

@@ -49,13 +49,13 @@ public class ComboBoxDrawable extends IDrawable {
 		}
 		
 		if (images[IMAGE_SELECTION_BACKGROUND] != null) {
-			ISporeImage.drawImage(viewer.getGraphicsContext2D(), images[IMAGE_SELECTION_BACKGROUND], area);
+			ISporeImage.drawImage(viewer.getGraphicsContext2D(), images[IMAGE_SELECTION_BACKGROUND], area, window.getShadeColor());
 		}
 		
 		if (images[IMAGE_BUTTON] != null) {
 			ISporeImage.drawImage(viewer.getGraphicsContext2D(), images[IMAGE_BUTTON], false, 
 					ISporeImage.getTileArea(comboBox.getPulldownButton(), images[IMAGE_BUTTON], 4), 
-					comboBox.getPulldownButton().getRealArea());
+					comboBox.getPulldownButton().getRealArea(), window.getShadeColor());
 		}
 		
 		int drawText;

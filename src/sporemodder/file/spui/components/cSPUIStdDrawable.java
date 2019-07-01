@@ -63,7 +63,7 @@ public class cSPUIStdDrawable extends StdDrawable {
 			area.y2 = area.y1 + image.backgroundScale.getY() * windowArea.getHeight();
 			
 			if (image.backgroundImage != null) {
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area);
+				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, image.backgroundColor);
 			}
 			
 			ISporeImage iconImage = image.iconImage;
@@ -83,7 +83,8 @@ public class cSPUIStdDrawable extends StdDrawable {
 				iconArea.translateX(area.x1 + h + image.iconOffset.getX());
 				iconArea.translateY(area.y1 + v + image.iconOffset.getY());
 				
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), iconImage, iconArea);
+				ISporeImage.drawImage(viewer.getGraphicsContext2D(), iconImage, iconArea, image.iconColor);
+				//window.getShadeColor()
 			}
 		}
 	}

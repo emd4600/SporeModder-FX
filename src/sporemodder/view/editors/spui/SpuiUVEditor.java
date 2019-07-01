@@ -202,7 +202,7 @@ public class SpuiUVEditor extends Dialog<ButtonType> {
 		previewCanvas.setHeight(h);
 		
 		previewCanvas.getGraphicsContext2D().clearRect(0, 0, w, h);
-		atlasImage.drawImage(previewCanvas.getGraphicsContext2D(), 0, 0, w, h, 0, 0, w, h);
+		atlasImage.drawImage(previewCanvas.getGraphicsContext2D(), 0, 0, w, h, 0, 0, w, h, Color.WHITE);
 		
 		previewCanvas.translateXProperty().bind(previewPane.widthProperty().subtract(w).divide(2.0));
 		previewCanvas.translateYProperty().bind(previewPane.heightProperty().subtract(h).divide(2.0));

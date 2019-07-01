@@ -22,6 +22,7 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -37,8 +38,8 @@ import sporemodder.view.inspector.PropertyPane;
 public class DirectImage extends InspectableObject implements ISporeImage {
 	
 	private static InspectorReferenceLink referenceLink;
-	private static ImageView imageView;
-	private static ScrollPane scrollPane;
+	private ImageView imageView;
+	private ScrollPane scrollPane;
 	
 	private final ResourceKey key;
 	private Image image;
@@ -91,21 +92,46 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 
 	@Override
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
-			double dw, double dh) {
+			double dw, double dh, Color shadeColor) {
+
+		ColorAdjust tint = new ColorAdjust();
+		double hueVal = shadeColor.getHue();
+		while (hueVal > 360)
+			hueVal -= 360;
+		while (hueVal < 0)
+			hueVal += 360;
+		
+		hueVal += 180;
+		
+		tint.setHue(map(hueVal, 0, 360, -1, 1));
+		tint.setSaturation(shadeColor.getSaturation());
+		tint.setBrightness(map(shadeColor.getBrightness(), 0, 1, -1, 0));
+		/*if (this.imageView != null) {
+			this.imageView.setEffect(tint);
+			System.out.println("imageView effect set!");
+		}*/
 		
 		if (image == null) {
 			graphics.setFill(Color.WHITE);
 			graphics.fillRect(dx, dy, dw, dh);
 		} else {
+			graphics.setEffect(tint);
 			graphics.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
 		}
 	}
+	
+	//https://stackoverflow.com/questions/31587092/how-to-use-coloradjust-to-set-a-target-color
+	public static double map(double value, double start, double stop, double targetStart, double targetStop) {
+        return targetStart + (targetStop - targetStart) * ((value - start) / (stop - start));
+   }
 	
 	private void setImageView(ImageView imageView, ScrollPane scrollPane) {
 		imageView.setImage(image);
 		if (image != null) {
 			imageView.translateXProperty().bind(scrollPane.widthProperty().subtract(image.getWidth()).divide(2.0));
 		}
+		//this.imageView = imageView;
+		//this.scrollPane = scrollPane;
 	}
 
 	@Override

@@ -19,9 +19,12 @@
 package sporemodder.view.inspector;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import sporemodder.HashManager;
 import sporemodder.file.DocumentException;
@@ -88,6 +91,22 @@ public class InspectorFloatSpinner extends Spinner<Double> implements InspectorV
 		focusedProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue) {
 				increment(0); // won't change value, but will commit editor
+			}
+		});
+		
+		this.getEditor().setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.UP) {
+					setValue(getValue() + getStep());
+					System.out.println("Up Arrow Key pressed!");
+					event.consume();
+				}
+				else if (event.getCode() == KeyCode.DOWN) {
+					setValue(getValue() - getStep());
+					System.out.println("Down Arrow Key pressed!");
+					event.consume();
+				}
 			}
 		});
 	}

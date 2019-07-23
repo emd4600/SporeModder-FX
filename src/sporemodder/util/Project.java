@@ -202,7 +202,9 @@ public class Project {
 	public void saveSettings() {
 		try (OutputStream stream = new FileOutputStream(new File(folder, SETTINGS_FILE_NAME))) {
 			
-			if (!sources.isEmpty()) {
+			//if (!sources.isEmpty()) {
+			// Do this even if it's empty, as we need to update it if sources were removed
+			{
 				StringBuilder sb = new StringBuilder();
 				
 				for (int i = 0; i < sources.size(); i++) {

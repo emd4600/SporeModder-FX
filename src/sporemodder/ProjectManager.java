@@ -314,6 +314,30 @@ public class ProjectManager extends AbstractManager {
 			
 			projectSearcher.setSearchedWords(searchedWords);
 			projectSearcher.setOnlyModFiles(isShowModdedOnly());
+			projectSearcher.setExtensiveSearch(true);
+			
+//			rootItem.propagateMatchesSearch(true);
+			projectSearcher.startSearch(rootItem);
+			
+			UIManager.get().notifyUIUpdate(false);
+			
+		} else {
+			searchFinished();
+		}
+	}
+	
+	private void startSearchFast() {
+		String text = treeUI.getSearchText();
+		if (!text.trim().isEmpty()) {
+			//TODO cancel existing search task
+			
+			searchFinished();
+			
+			getSearchStrings(text);
+			
+			projectSearcher.setSearchedWords(searchedWords);
+			projectSearcher.setOnlyModFiles(isShowModdedOnly());
+			projectSearcher.setExtensiveSearch(false);
 			
 //			rootItem.propagateMatchesSearch(true);
 			projectSearcher.startSearch(rootItem);
@@ -365,6 +389,10 @@ public class ProjectManager extends AbstractManager {
 		
 		treeUI.getSearchButton().setOnAction(event -> {
 			startSearch();
+		});
+		
+		treeUI.getSearchFastButton().setOnAction(event -> {
+			startSearchFast();
 		});
 		
 		treeUI.getTreeView().getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
@@ -660,7 +688,11 @@ public class ProjectManager extends AbstractManager {
 		contextMenu.getItems().addAll(itemNewFile, itemNewFolder, itemRename, itemRemove, itemModify, itemImportFiles, itemRefresh, new SeparatorMenuItem());
 		
 		for (Converter converter : FormatManager.get().getConverters()) {
-			converter.generateContextMenu(contextMenu, item);
+			try {
+				converter.generateContextMenu(contextMenu, item);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		item.generateContextMenu(contextMenu);

@@ -39,9 +39,13 @@ import sporemodder.FileManager;
 import sporemodder.view.ProjectTreeItem;
 
 public class ProjectSearcher {
+	private int numFilesSearched;
+	
 	private Project project;
 	private final List<File> projectFolders = new ArrayList<File>();
 	private boolean onlyModFiles;
+	/** If enabled, file contents will be searched. */
+	private boolean isExtensiveSearch = true;
 	
 	private final List<String> words = new ArrayList<String>();
 	private byte[][] wordBytes;
@@ -77,6 +81,14 @@ public class ProjectSearcher {
 	
 	public void setOnlyModFiles(boolean onlyModFiles) {
 		this.onlyModFiles = onlyModFiles;
+	}
+	
+	public boolean isExtensiveSearch() {
+		return isExtensiveSearch;
+	}
+	
+	public void setExtensiveSearch(boolean isExtensiveSearch) {
+		this.isExtensiveSearch = isExtensiveSearch;
 	}
 	
 //	/**
@@ -159,6 +171,8 @@ public class ProjectSearcher {
 	}
 	
 	public void startSearch(ProjectTreeItem item) {
+		numFilesSearched = 0;
+		
 		ForkJoinPool.commonPool().submit(new SearchTask(item));
 	}
 	
@@ -212,7 +226,7 @@ public class ProjectSearcher {
 			}
 			else {
 				if (!isRoot && file.isFile()) {
-					if (FileManager.get().isSearchable(file.getName())) {
+					if (FileManager.get().isSearchable(file.getName()) && isExtensiveSearch) {
 						try {
 							matches = searchInFile(file, foundWords);
 						} catch (IOException e) {
@@ -238,6 +252,8 @@ public class ProjectSearcher {
 					new FileSearchRecursive(item.getValue().getRelativePath(), null, null, anyMatch).invoke();
 					matches = anyMatch.get();
 				}
+				
+				System.out.println(++numFilesSearched);
 			}
 			
 			item.setMatchesSearch(matches);
@@ -274,7 +290,7 @@ public class ProjectSearcher {
 			
 			if (file != null) {
 				try {
-					if (FileManager.get().isSearchable(file.getName()) && searchInFile(file, foundWords)) {
+					if (isExtensiveSearch && FileManager.get().isSearchable(file.getName()) && searchInFile(file, foundWords)) {
 						searchFinished.set(true);  // stop searching, we've found a match
 					}
 				} catch (IOException e) {
@@ -315,6 +331,8 @@ public class ProjectSearcher {
 				
 				ForkJoinTask.invokeAll(tasks);
 			}
+			
+			System.out.println(++numFilesSearched);
 		}
 		
 	}

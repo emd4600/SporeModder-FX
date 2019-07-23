@@ -28,6 +28,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Pane;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.ProjectItem;
@@ -42,6 +43,7 @@ public class ProjectTreeUI implements Controller {
 	
 	@FXML private TreeView<ProjectItem> tvProjectTree;
 	
+	@FXML private Button searchFastButton;
 	@FXML private Button searchButton;
 	
 	@FXML private TreeView<ProjectItem> tvSpecialItems;
@@ -70,6 +72,10 @@ public class ProjectTreeUI implements Controller {
 		tvProjectTree.setEditable(true);
 		
 		searchButton.setGraphic(UIManager.get().loadIcon("search.png", 24, 24, true));
+		searchFastButton.setGraphic(UIManager.get().loadIcon("search-fast.png", 24, 24, true));
+		
+		//TODO enable this at some point?
+		((Pane) searchFastButton.getParent()).getChildren().remove(searchFastButton);
 		
 		ProjectManager.get().setUI(this);
 	}
@@ -92,6 +98,10 @@ public class ProjectTreeUI implements Controller {
 	
 	public Button getSearchButton() {
 		return searchButton;
+	}
+	
+	public Button getSearchFastButton() {
+		return searchFastButton;
 	}
 
 	public String getSearchText() {

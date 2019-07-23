@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 
 <BorderPane fx:id="mainNode" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="280.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ProjectTreeUI">
    <top>
@@ -18,13 +19,6 @@
                </BorderPane.margin>
             </TextField>
          </center>
-         <right>
-            <Button fx:id="searchButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0" styleClass="button-no-background" text="Button" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets right="5.0" />
-               </BorderPane.margin>
-            </Button>
-         </right>
          <bottom>
             <CheckBox fx:id="cbShowModded" mnemonicParsing="false" text="Show only modded files" BorderPane.alignment="CENTER_LEFT">
                <BorderPane.margin>
@@ -32,6 +26,17 @@
                </BorderPane.margin>
             </CheckBox>
          </bottom>
+         <right>
+            <HBox BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="searchFastButton" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0" styleClass="button-no-background" text="Button" />
+                  <Button fx:id="searchButton" contentDisplay="GRAPHIC_ONLY" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="26.0" styleClass="button-no-background" text="Button" />
+               </children>
+               <BorderPane.margin>
+                  <Insets right="5.0" top="5.0" />
+               </BorderPane.margin>
+            </HBox>
+         </right>
       </BorderPane>
    </top>
    <center>

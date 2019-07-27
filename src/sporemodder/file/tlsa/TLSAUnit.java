@@ -46,7 +46,7 @@ public class TLSAUnit {
 
 	public void read(StreamReader stream) throws IOException {
 		if (stream.readInt() != MAGIC) {
-			throw new IOException("Input file is not a PCTP file! Position: " + stream.getFilePointer());
+			throw new IOException("Input file is not a TLSA file! Position: " + stream.getFilePointer());
 		}
 		
 		version = stream.readInt();
@@ -61,6 +61,7 @@ public class TLSAUnit {
 	}
 	
 	public void write(StreamWriter stream) throws IOException {
+		stream.writeInt(MAGIC);
 		stream.writeInt(version);
 		stream.writeInt(groups.size());
 		for (TLSAAnimationGroup group : groups) group.write(stream, version);

@@ -131,9 +131,8 @@ public class AnimConverter implements Converter {
 	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
-			
-			if (isEncoder(item.getFile())) {
+		if (!item.isRoot()) {
+			if (item.isMod() && isEncoder(item.getFile())) {
 				MenuItem menuItem = new MenuItem("Convert to ANIMATION");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {

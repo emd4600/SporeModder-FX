@@ -57,7 +57,7 @@ public class AnimChannelParser extends ArgScriptBlock<SPAnimation> {
 					stream.addError(line.createErrorForArgument("pctp capability can only have up to 4 characters", 1));
 				}
 				
-				channel.capability = args.get(1);
+				channel.capability = args.get(1).trim();
 				
 				if (channel.capability.equals("root")) {
 					channel.capability = null;

@@ -113,6 +113,11 @@
 .project-tree-context-menu {
 	-fx-font-weight: normal;  /* Otherwise it will show bold on bolded items. */
 }
+
+.search-progress-bar > .bar {
+    -fx-background-insets: 1 1 2 1;
+    -fx-padding: 0.20em;
+}
  
  /** ------------------- */
  

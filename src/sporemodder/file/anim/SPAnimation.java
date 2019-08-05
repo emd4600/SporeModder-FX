@@ -169,17 +169,22 @@ public class SPAnimation {
 		}
 		
 		long offsetsOffset = stream.getFilePointer();
-		for (long offset : offsets) stream.writeLEUInt(offset);
+		// One pointer per vfx
+		long vfxOffset = stream.getFilePointer() + 4 * (offsets.size() + vfxList.size());
+		for (int i = 0; i < vfxList.size(); ++i) {
+			// The pointer to the name is at 0x40; it's only written if ID != 0
+			if (vfxList.get(i).id != 0) {
+				offsets.add(vfxOffset + 0x60*i + 0x40);
+			}
+		}
 		
-		long vfxOffset = stream.getFilePointer();
-		offsets.add(vfxOffset);
+		for (long offset : offsets) stream.writeLEUInt(offset);
 		
 		if (!vfxList.isEmpty()) {
 			long vfxNamesOffset = vfxOffset + vfxList.size()*0x60;
 			
 			for (AnimationVFX vfx : vfxList) {
-				offsets.add(vfxNamesOffset);
-				vfx.write(stream, offsets, vfxNamesOffset);
+				vfx.write(stream, vfxNamesOffset);
 				vfxNamesOffset += vfx.name.length() + 1;
 			}
 			

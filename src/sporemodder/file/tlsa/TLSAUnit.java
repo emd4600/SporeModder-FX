@@ -100,7 +100,7 @@ public class TLSAUnit {
 				
 				ArgScriptArguments args = new ArgScriptArguments();
 				Number value = null;
-				if (line.getArguments(args, 2) && (value = stream.parseUInt(args, 0)) != null) {
+				if (line.getArguments(args, 2) && (value = stream.parseFileID(args, 0)) != null) {
 					group.id = value.intValue();
 					group.name = args.get(1);
 				}

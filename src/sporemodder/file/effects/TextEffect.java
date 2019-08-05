@@ -256,9 +256,10 @@ public class TextEffect extends EffectComponent {
 		if (offset[0] != 0 || offset[1] != 0) writer.option("offset").vector(offset);
 		
 		if (!fontIsDefault) {
-			writer.command("life").floats(1.0f / life);
-			writer.flag("sustain", (flags & FLAG_SUSTAIN) == FLAG_SUSTAIN);
+			writer.command("style").arguments(fontID).option("size").floats(fontSize);
 		}
+		
+		writer.command("life").floats(1.0f / life).flag("sustain", (flags & FLAG_SUSTAIN) == FLAG_SUSTAIN);
 		
 		writer.command("color").colors(color);
 		writer.command("alpha").floats(alpha);

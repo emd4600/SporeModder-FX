@@ -35,11 +35,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import sporemodder.FileManager;
 import sporemodder.view.ProjectTreeItem;
 
 public class ProjectSearcher {
 	private int numFilesSearched;
+	private int numItemsSearched;
 	
 	private Project project;
 	private final List<File> projectFolders = new ArrayList<File>();
@@ -51,7 +55,11 @@ public class ProjectSearcher {
 	private byte[][] wordBytes;
 	private byte[][] wordBytesUppercase;
 	
+	// It must change immediately, not with Platform.runLater
+	private boolean internalIsSearching;
 	private final ReadOnlyBooleanWrapper isSearching = new ReadOnlyBooleanWrapper();
+	private final ReadOnlyDoubleWrapper progress = new ReadOnlyDoubleWrapper();
+	private int progressMax;
 	
 	public final boolean isSearching() {
 		return isSearching.get();
@@ -59,6 +67,24 @@ public class ProjectSearcher {
 	
 	public final ReadOnlyBooleanProperty isSearchingProperty() {
 		return isSearching.getReadOnlyProperty();
+	}
+	
+	public void cancel() {
+		internalIsSearching = false;
+		if (Platform.isFxApplicationThread()) {
+			isSearching.set(false);
+		} else {
+			Platform.runLater(() -> isSearching.set(false));
+		}
+		reset();
+	}
+	
+	public final double getProgress() {
+		return progress.get();
+	}
+	
+	public final ReadOnlyDoubleProperty progressProperty() {
+		return progress.getReadOnlyProperty();
 	}
 	
 	public Project getProject() {
@@ -170,8 +196,16 @@ public class ProjectSearcher {
 		}
 	}
 	
-	public void startSearch(ProjectTreeItem item) {
+	public void reset() {
+		internalIsSearching = false;
 		numFilesSearched = 0;
+		numItemsSearched = 0;
+		progress.set(0.0);
+	}
+	
+	public void startSearch(ProjectTreeItem item) {
+		reset();
+		progressMax = item.getInternalChildren().size();
 		
 		ForkJoinPool.commonPool().submit(new SearchTask(item));
 	}
@@ -187,37 +221,55 @@ public class ProjectSearcher {
 
 		@Override
 		protected void compute() {
+			internalIsSearching = true;
 			Platform.runLater(() -> isSearching.set(true));
 			long time = System.currentTimeMillis();
 			
-			ForkJoinPool.commonPool().invoke(new ItemSearchRecursive(item, item.getValue().isRoot(), null));
+			// The given item is expected to have its children loaded
+			List<ItemSearchRecursive> tasks = new ArrayList<ItemSearchRecursive>();
+			for (ProjectTreeItem child : item.getInternalChildren()) {
+				tasks.add(new ItemSearchRecursive(child, null, 1.0 / progressMax));
+			}
+			ForkJoinTask.invokeAll(tasks);
 			
 			time = System.currentTimeMillis() - time;
 
-			Platform.runLater(() -> isSearching.set(false));
+			// If it wasn't cancelled
+			if (internalIsSearching) Platform.runLater(() -> {
+				isSearching.set(false);
+				progress.set(1.0);
+			});
+			internalIsSearching = false;
 			
+			System.out.println("Files searched: " + numFilesSearched);
+			System.out.println("Items searched: " + numItemsSearched);
 			System.out.println(time + " ms");
 		}
 	}
 	
 	private class ItemSearchRecursive extends RecursiveTask<Boolean> {
 		
-		private final boolean isRoot;
 		private final ProjectTreeItem item;
 		private final boolean[] foundWords;
+		private final double progressIncrement;
 		
-		public ItemSearchRecursive(ProjectTreeItem item, boolean isRoot, boolean[] foundWords) {
+		public ItemSearchRecursive(ProjectTreeItem item, boolean[] foundWords, double progressIncrement) {
 			super();
-			this.isRoot = isRoot;
 			this.item = item;
 			this.foundWords = new boolean[wordBytes.length];
+			this.progressIncrement = progressIncrement;
 			if (foundWords != null) {
 				System.arraycopy(foundWords, 0, this.foundWords, 0, foundWords.length);
 			}
 		}
 		
 		@Override protected Boolean compute() {
-			boolean matches = !isRoot && searchInNameOptional(item.getValue().name, foundWords);
+			if (!internalIsSearching) return false;
+			
+			numItemsSearched++;
+			//System.out.println("Items: " + numItemsSearched + "\t[" + item.getValue().getName() + "]");
+			
+			boolean matches = searchInNameOptional(item.getValue().name, foundWords);
 			File file = item.getValue().getFile();
 			
 			if (matches) {
@@ -225,7 +277,7 @@ public class ProjectSearcher {
 				item.propagateMatchesSearch(matches);
 			}
 			else {
-				if (!isRoot && file.isFile()) {
+				if (file.isFile()) {
 					if (FileManager.get().isSearchable(file.getName()) && isExtensiveSearch) {
 						try {
 							matches = searchInFile(file, foundWords);
@@ -238,8 +290,10 @@ public class ProjectSearcher {
 					// We must search in all children
 					List<ItemSearchRecursive> tasks = new ArrayList<ItemSearchRecursive>();
 					for (ProjectTreeItem child : item.getInternalChildren()) {
-						tasks.add(new ItemSearchRecursive(child, false, foundWords));
+						tasks.add(new ItemSearchRecursive(child, foundWords, 0.0));
 					}
+					
+					//System.out.println(tasks.size() + " tasks scheduled");
 					
 					// matches will be true if any of its children matched
 					matches = ForkJoinTask.invokeAll(tasks).stream().map(ForkJoinTask::join).anyMatch(b -> b == null ? false : b.booleanValue());
@@ -248,12 +302,15 @@ public class ProjectSearcher {
 					// The name does not match, so search in its children
 					// BUT the children are not loaded, so we must do it on the files directly
 					
+					//System.out.println("\tInvoking file search: " + item.getValue().getRelativePath());
 					final AtomicBoolean anyMatch = new AtomicBoolean(false);
 					new FileSearchRecursive(item.getValue().getRelativePath(), null, null, anyMatch).invoke();
 					matches = anyMatch.get();
 				}
-				
-				System.out.println(++numFilesSearched);
+			}
+			
+			if (progressIncrement != 0.0) {
+				progress.setValue(progress.getValue() + progressIncrement);
 			}
 			
 			item.setMatchesSearch(matches);
@@ -286,6 +343,7 @@ public class ProjectSearcher {
 		}
 		
 		@Override protected void compute() {
+			if (!internalIsSearching) return;
 			if (searchFinished.get()) return;
 			
 			if (file != null) {
@@ -301,38 +359,47 @@ public class ProjectSearcher {
 				List<FileSearchRecursive> tasks = new ArrayList<FileSearchRecursive>();
 				Set<String> usedNames = new HashSet<String>();
 				
-				for (File projectFolder : projectFolders) {
-					File folder = new File(projectFolder, relativePath);
+				int numProjects = projectFolders.size();
+				for (int i = 0; i < numProjects; ++i) 
+				{
+					if (searchFinished.get()) return;
+					
+					File folder = new File(projectFolders.get(i), relativePath);
 					if (folder.exists()) {
 						String[] names = folder.list();
 						
 						for (String name : names) {
 							if (!usedNames.contains(name)) {
 									
-								
 								// For multiple searched words, some might be in the name and others in the file contents
 								if (searchInNameOptional(name, foundWords)) {
-									searchFinished.set(true);  // stop searching, we've found a match
+									searchFinished.set(true);  // Stop searching, we've found a match
 									return;
 								}
 								
-								usedNames.add(name);
+								// If it's the last project (hopefully the big source) you don't need to add anymore
+								if (i != numProjects-1) usedNames.add(name);
+								
+								FileSearchRecursive task = null;
 								File file = new File(folder, name);
 								if (file.isFile()) {
-									tasks.add(new FileSearchRecursive(null, file, foundWords, searchFinished));
+									task = new FileSearchRecursive(null, file, foundWords, searchFinished);
 								}
 								else {
-									tasks.add(new FileSearchRecursive(relativePath + File.separatorChar + name, null, foundWords, searchFinished));
+									task = new FileSearchRecursive(relativePath + File.separatorChar + name, null, foundWords, searchFinished);
 								}
+								
+								tasks.add(task);
 							}
 						}
 					}
+					
+					// Invoke for every project
+					ForkJoinTask.invokeAll(tasks);
 				}
-				
-				ForkJoinTask.invokeAll(tasks);
 			}
 			
-			System.out.println(++numFilesSearched);
+			++numFilesSearched;
 		}
 		
 	}

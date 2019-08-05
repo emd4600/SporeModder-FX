@@ -21,11 +21,13 @@ package sporemodder.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TreeItem;
 import sporemodder.EditorManager;
+import sporemodder.PathManager;
 import sporemodder.ProjectManager;
 import sporemodder.view.ProjectTreeItem;
 import sporemodder.view.editors.EditorFactory;
@@ -164,11 +166,11 @@ public class ProjectItem {
 		}
 	}
 	
-	private boolean getRelativePath_impl(StringBuilder sb) {
+	private boolean getRelativePath_tree(StringBuilder sb) {
 		TreeItem<ProjectItem> parent = treeItem.getParent();
 		
 		if (parent != null) {
-			if (parent.getValue().getRelativePath_impl(sb)) {
+			if (parent.getValue().getRelativePath_tree(sb)) {
 				sb.append(File.separatorChar);
 			}
 			sb.append(name);
@@ -180,15 +182,25 @@ public class ProjectItem {
 	}
 	
 	public String getRelativePath() {
+		if (isRoot) return "";
+		
 		if (treeItem == null) {
 			return null;
 		}
 		
-		StringBuilder sb = new StringBuilder();
-		
-		getRelativePath_impl(sb);
-		
-		return sb.toString();
+		if (file != null) {
+			// The project is not always the same as in folder
+			// A workaround: relativize with Projects folder
+			Path path = PathManager.get().getProjectsFolder().toPath().relativize(file.toPath());
+			return path.subpath(1, path.getNameCount()).toString();
+		}
+		else {
+			System.err.println(name + (project == null ? " does not have project" : " does not have file"));
+			// This won't work if the file does not match search, but hopefully it never happens anyways??
+			StringBuilder sb = new StringBuilder();
+			getRelativePath_tree(sb);
+			return sb.toString();
+		}
 	}
 	
 	/** Gets the file that this project item represents. */

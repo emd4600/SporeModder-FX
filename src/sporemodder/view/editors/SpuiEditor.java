@@ -227,6 +227,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		overlayCanvas = new Canvas();
 		overlayCanvas.widthProperty().bind(widthProperty());
 		overlayCanvas.heightProperty().bind(heightProperty());
+
 		//overlayCanvas.translateXProperty().bind(viewer.contentTranslateXProperty());
 		//overlayCanvas.translateYProperty().bind(viewer.contentTranslateYProperty());
 		// We want the events go to the viewer and not this layer
@@ -526,6 +527,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		editorGroup.getNodes().add(importButton);
 
 		ribbonTab.getGroups().addAll(windowsGroup, winprocsGroup, editorGroup);
+
 	}
 
 	private void addWinProc(String className) {
@@ -1244,9 +1246,9 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 			if (window.getArea().getHeight() > height)
 				height = window.getArea().getHeight();
 		}
-
-		Scene scene = new Scene(group, width, height);
-
+		
+ 		Scene scene = new Scene(group, width, height);
+		
 		preview.setIsPreview(true);
 		preview.widthProperty().bind(scene.widthProperty());
 		preview.heightProperty().bind(scene.heightProperty());

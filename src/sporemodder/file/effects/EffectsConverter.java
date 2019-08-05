@@ -149,10 +149,10 @@ public class EffectsConverter implements Converter {
 	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
+		if (!item.isRoot()) {
 			boolean isEncoder = isEncoder(item.getFile());
 			// We also accept converting single .pfx files
-			if (isEncoder || (!item.isFolder() && item.getName().endsWith(".pfx"))) {
+			if (item.isMod() && (isEncoder || (!item.isFolder() && item.getName().endsWith(".pfx")))) {
 				
 				MenuItem menuItem = new MenuItem("Pack into EFFDIR");
 				menuItem.setMnemonicParsing(false);

@@ -55,6 +55,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.TreeItem;
@@ -301,19 +302,62 @@ public class ProjectManager extends AbstractManager {
 				searchedWords.add(splits[i++]);
 			}
 		}
-}
+	}
 	
-	private void startSearch() {
-		String text = treeUI.getSearchText();
-		if (!text.trim().isEmpty()) {
-			//TODO cancel existing search task
-			
-			searchFinished();
+	/**
+	 * Starts a search with the given text; words are separated by spaces. 
+	 * If the text is empty or null, this will call {@link #clearSearch()} removing the current search.
+	 * @param text
+	 */
+	public void startSearch(String text) {
+		clearSearch();
+		
+		if (text != null && !text.trim().isEmpty()) {
+			clearSearch();
 			
 			getSearchStrings(text);
 			
 			projectSearcher.setSearchedWords(searchedWords);
 			projectSearcher.setOnlyModFiles(isShowModdedOnly());
+			projectSearcher.setExtensiveSearch(true);
+			
+			projectSearcher.startSearch(rootItem);
+			
+			UIManager.get().notifyUIUpdate(false);
+			
+		}
+	}
+	
+	/**
+	 * Disables the current searching; this will make the project tree show all items.
+	 */
+	public void clearSearch() {
+		searchedWords.clear();
+		if (rootItem != null) {
+			rootItem.propagateMatchesSearch(true);
+		}
+		isShowingSearch.set(false);
+		// Set progress bar to 0 again
+		projectSearcher.reset();
+	}
+	
+	public void cancelSearch() {
+		projectSearcher.cancel();
+		clearSearch();
+	}
+	
+	private void startSearchFast() {
+		String text = treeUI.getSearchText();
+		if (!text.trim().isEmpty()) {
+			//TODO cancel existing search task
+			
+			clearSearch();
+			
+			getSearchStrings(text);
+			
+			projectSearcher.setSearchedWords(searchedWords);
+			projectSearcher.setOnlyModFiles(isShowModdedOnly());
+			projectSearcher.setExtensiveSearch(false);
 			
 //			rootItem.propagateMatchesSearch(true);
 			projectSearcher.startSearch(rootItem);
@@ -321,20 +365,20 @@ public class ProjectManager extends AbstractManager {
 			UIManager.get().notifyUIUpdate(false);
 			
 		} else {
-			searchFinished();
+			clearSearch();
 		}
-	}
-	
-	private void searchFinished() {
-		searchedWords.clear();
-		if (rootItem != null) {
-			rootItem.propagateMatchesSearch(true);
-		}
-		isShowingSearch.set(false);
 	}
 	
 	public List<String> getSearchedWords() {
 		return searchedWords;
+	}
+	
+	public ReadOnlyBooleanProperty isSearchingProperty() {
+		return projectSearcher.isSearchingProperty();
+	}
+	
+	public boolean isSearching() {
+		return projectSearcher.isSearching();
 	}
 	
 	public void setUI(ProjectTreeUI treeUI) {
@@ -348,23 +392,34 @@ public class ProjectManager extends AbstractManager {
 		
 		treeUI.getSpecialItems().setPrefHeight(30);
 		
-		projectSearcher.isSearchingProperty().addListener((obs, oldValue, newValue) -> {
-			if (newValue) {
-				this.treeUI.getTreeView().setDisable(true);
-				this.treeUI.getTreeView().setCursor(Cursor.WAIT);
-			} else {
-				this.treeUI.getTreeView().setDisable(false);
-				this.treeUI.getTreeView().setCursor(null);
-				isShowingSearch.set(true);
-			}
+		
+		treeUI.getSearchProgressBar().progressProperty().bind(projectSearcher.progressProperty());
+		
+		projectSearcher.isSearchingProperty().addListener((obs, oldValue, isSearching) -> {
+			
+			this.treeUI.getTreeView().setDisable(isSearching);
+			this.treeUI.getTreeView().setCursor(isSearching ? Cursor.WAIT : null);
+			this.treeUI.getSearchField().setDisable(isSearching);
+			this.treeUI.changeSearchGraphic(isSearching);
+			
+			ProgressBar progressBar = this.treeUI.getSearchProgressBar();
+			progressBar.setDisable(!isSearching);
+			
+			if (isSearching) isShowingSearch.set(true);
 		});
 		
 		treeUI.getSearchField().setOnAction(event -> {
-			startSearch();
+			if (!isSearching()) startSearch(this.treeUI.getSearchField().getText());
+			else cancelSearch();
 		});
 		
 		treeUI.getSearchButton().setOnAction(event -> {
-			startSearch();
+			if (!isSearching()) startSearch(this.treeUI.getSearchField().getText());
+			else cancelSearch();
+		});
+		
+		treeUI.getSearchFastButton().setOnAction(event -> {
+			startSearchFast();
 		});
 		
 		treeUI.getTreeView().getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
@@ -660,7 +715,11 @@ public class ProjectManager extends AbstractManager {
 		contextMenu.getItems().addAll(itemNewFile, itemNewFolder, itemRename, itemRemove, itemModify, itemImportFiles, itemRefresh, new SeparatorMenuItem());
 		
 		for (Converter converter : FormatManager.get().getConverters()) {
-			converter.generateContextMenu(contextMenu, item);
+			try {
+				converter.generateContextMenu(contextMenu, item);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		item.generateContextMenu(contextMenu);
@@ -778,7 +837,7 @@ public class ProjectManager extends AbstractManager {
 		UIManager.get().setTitleInfo(project.getName());
 		
 		// Disable searching things
-		searchFinished();
+		clearSearch();
 		
 		if (activeProject != null) {
 			activeProject.saveSettings();

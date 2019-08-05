@@ -19,7 +19,6 @@
 package sporemodder.file.anim;
 
 import java.io.IOException;
-import java.util.List;
 
 import emord.filestructures.Stream.StringEncoding;
 import emord.filestructures.StreamWriter;
@@ -81,7 +80,7 @@ public class AnimationVFX {
 		}
 	}
 	
-	public void write(StreamWriter stream, List<Long> pointers, long namePtr) throws IOException {
+	public void write(StreamWriter stream, long namePtr) throws IOException {
 		stream.writeLEInt(flags);
 		
 		for (int i = 0; i < 4; ++i) {

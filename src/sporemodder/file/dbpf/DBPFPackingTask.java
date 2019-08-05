@@ -118,7 +118,7 @@ public class DBPFPackingTask extends Task<Void> {
 	 * @returns The file that was being processed when the error happened.
 	 */
 	public File getCurrentFile() {
-		return packer.getCurrentFile();
+		return packer == null ? null : packer.getCurrentFile();
 	}
 	
 	/**

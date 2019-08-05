@@ -421,6 +421,7 @@ public class ArgScriptStream<T> {
 			try {
 				processLine(line);
 			} catch (Exception e) {
+				e.printStackTrace();
 				addError(new DocumentError(e.getMessage(), 0, line.length()));
 			}
 			

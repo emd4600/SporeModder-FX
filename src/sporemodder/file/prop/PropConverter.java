@@ -220,9 +220,9 @@ public class PropConverter implements Converter {
 	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
+		if (!item.isRoot()) {
 			
-			if (isEncoder(item.getFile())) {
+			if (item.isMod() && isEncoder(item.getFile())) {
 				MenuItem menuItem = new MenuItem("Convert to PROP");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {

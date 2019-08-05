@@ -24,10 +24,12 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.Pane;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.ProjectItem;
@@ -37,12 +39,16 @@ public class ProjectTreeUI implements Controller {
 	@FXML private Node mainNode;
 
 	@FXML private TextField tfSearch;
+	@FXML private ProgressBar pbSearchProgress;
 	
 	@FXML private CheckBox cbShowModded;
 	
 	@FXML private TreeView<ProjectItem> tvProjectTree;
 	
+	@FXML private Button searchFastButton;
 	@FXML private Button searchButton;
+	private Node searchGraphic;
+	private Node cancelGraphic;
 	
 	@FXML private TreeView<ProjectItem> tvSpecialItems;
 	
@@ -69,9 +75,22 @@ public class ProjectTreeUI implements Controller {
 		tvProjectTree.setCellFactory(c -> new ProjectTreeCell(true));
 		tvProjectTree.setEditable(true);
 		
-		searchButton.setGraphic(UIManager.get().loadIcon("search.png", 24, 24, true));
+		searchGraphic = UIManager.get().loadIcon("search.png", 24, 24, true);
+		cancelGraphic = UIManager.get().loadIcon("cancel.png", 24, 24, true);
+		searchButton.setGraphic(searchGraphic);
+		searchFastButton.setGraphic(UIManager.get().loadIcon("search-fast.png", 24, 24, true));
+		
+		//TODO enable this at some point?
+		((Pane) searchFastButton.getParent()).getChildren().remove(searchFastButton);
+		
+		pbSearchProgress.setDisable(true);
+		pbSearchProgress.setPrefWidth(Double.MAX_VALUE);
 		
 		ProjectManager.get().setUI(this);
+	}
+	
+	public void changeSearchGraphic(boolean isCancel) {
+		searchButton.setGraphic(isCancel ? cancelGraphic : searchGraphic);
 	}
 	
 	public TreeView<ProjectItem> getTreeView() {
@@ -93,6 +112,10 @@ public class ProjectTreeUI implements Controller {
 	public Button getSearchButton() {
 		return searchButton;
 	}
+	
+	public Button getSearchFastButton() {
+		return searchFastButton;
+	}
 
 	public String getSearchText() {
 		return tfSearch.getText();
@@ -100,5 +123,9 @@ public class ProjectTreeUI implements Controller {
 
 	public TextField getSearchField() {
 		return tfSearch;
+	}
+	
+	public ProgressBar getSearchProgressBar() {
+		return pbSearchProgress;
 	}
 }

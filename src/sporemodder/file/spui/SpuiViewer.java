@@ -150,38 +150,6 @@ public class SpuiViewer extends Canvas {
 		}
 	}
 	
-	private DoubleProperty contentTranslateX;
-
-    public final DoubleProperty contentTranslateXProperty() {
-    	if (contentTranslateX == null) {
-    		contentTranslateX = new SimpleDoubleProperty(this, "contentTranslateX", 0);
-    	}
-    	return contentTranslateX;
-    }
-    public final double getContentTranslateX() {
-    	return contentTranslateX.get();
-    }
-
-    public final void setContentTranslateX(double value) {
-    	contentTranslateX.set(value);
-    }
-
-	private DoubleProperty contentTranslateY;
-
-    public final DoubleProperty contentTranslateYProperty() {
-    	if (contentTranslateY == null) {
-    		contentTranslateY = new SimpleDoubleProperty(this, "contentTranslateY", 0);
-    	}
-    	return contentTranslateY;
-    }
-    public final double getContentTranslateY() {
-    	return contentTranslateY.get();
-    }
-
-    public final void setContentTranslateY(double value) {
-    	contentTranslateY.set(value);
-    }
-	
 	private void restoreOriginalFlags(IWindow window) {
 		window.setState(0);
 		for (IWindow child : window.getChildren()) restoreOriginalFlags(child);

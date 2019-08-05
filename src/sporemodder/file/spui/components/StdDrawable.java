@@ -31,9 +31,9 @@ public class StdDrawable extends IDrawable {
 	
 	private final ISporeImage[] image = new ISporeImage[8];
 	private RLEHitMask hitMask;  //TODO use this to detect hits
-	private int scaleType;
+	protected int scaleType;
 	private final Vector2 scaleFactor = new Vector2(1.0f, 1.0f);
-	private	final Borders scaleArea = new Borders();
+	protected final Borders scaleArea = new Borders();
 	// outline format as well, but we don't use it
 	
 	@Override public void paint(IWindow window, SpuiViewer viewer) {

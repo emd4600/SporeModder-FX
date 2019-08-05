@@ -25,6 +25,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelFormat;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import sporemodder.HashManager;
 import sporemodder.file.ResourceKey;
@@ -94,7 +98,7 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
 			double dw, double dh, Color shadeColor) {
 
-		ColorAdjust tint = new ColorAdjust();
+		/*ColorAdjust tint = new ColorAdjust();
 		double hueVal = shadeColor.getHue();
 		while (hueVal > 360)
 			hueVal -= 360;
@@ -105,33 +109,69 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 		
 		tint.setHue(map(hueVal, 0, 360, -1, 1));
 		tint.setSaturation(shadeColor.getSaturation());
-		tint.setBrightness(map(shadeColor.getBrightness(), 0, 1, -1, 0));
-		/*if (this.imageView != null) {
-			this.imageView.setEffect(tint);
-			System.out.println("imageView effect set!");
-		}*/
+		tint.setBrightness(map(shadeColor.getBrightness(), 0, 1, -1, 0));*/
 		
 		if (image == null) {
-			graphics.setFill(Color.WHITE);
+			graphics.setFill(shadeColor);
 			graphics.fillRect(dx, dy, dw, dh);
-		} else {
-			graphics.setEffect(tint);
+		} else if ((shadeColor.getRed() >= 1)
+				&& (shadeColor.getGreen() >= 1)
+				&& (shadeColor.getBlue() >= 1)
+				&& (shadeColor.getOpacity() >= 1)
+				) {
+			//System.out.println("DRAWING WITHOUT SHADECOLOR");
 			graphics.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+		} else {
+			//System.out.println("DRAWING WITH SHADECOLOR");
+			int imgWidth = (int)image.getWidth();
+			int imgHeight = (int)image.getHeight();
+			//System.out.println("IMAGE DIMENSIONS: " + imgWidth + ", " + imgHeight);
+			/*int targetWidth = (int)dw;
+			int destHeight = (int)dh;*/
+			int sourceX = (int)sx;
+			int sourceY = (int)sy;
+			int sourceRight = (int)sw + sourceX;
+			int sourceBottom = (int)sh + sourceY;
+			
+			PixelReader reader = image.getPixelReader();
+			WritableImage wrImage = new WritableImage(imgWidth, imgHeight);
+			PixelWriter writer = wrImage.getPixelWriter();
+			for (int x = 0; x < sourceRight; x++) {
+				for (int y = 0; y < sourceBottom; y++) {
+					//Begin awkward nesting (looks dumb but helps performance)
+					int safeSourceX = sourceX + x;
+					if ((safeSourceX >= 0) && (safeSourceX < imgWidth)) {
+						int safeSourceY = sourceY + y;
+						if ((safeSourceY >= 0) && (safeSourceY < imgHeight)) {
+							int safeDestX = x;
+							if (safeDestX >= 0 && (safeDestX < imgWidth)) {
+								int safeDestY = y;
+								if ((safeDestY >= 0) && (safeDestY < imgHeight)) {
+									//End awkward nesting
+									Color initialColor = reader.getColor(safeSourceX, safeSourceY); //(int)(sx + x), (int)(sx + y));
+									double red = shadeColor.getRed();
+									double green = shadeColor.getGreen();
+									double blue = shadeColor.getBlue();
+									double alpha = shadeColor.getOpacity();
+									writer.setColor(safeSourceX, safeSourceY, new Color(initialColor.getRed() * red,
+											initialColor.getGreen() * green,
+											initialColor.getBlue() * blue,
+											initialColor.getOpacity() * alpha));
+								}
+							}
+						}
+					}
+				}
+			}
+			graphics.drawImage(wrImage, sx, sy, sw, sh, dx, dy, dw, dh);
 		}
 	}
-	
-	//https://stackoverflow.com/questions/31587092/how-to-use-coloradjust-to-set-a-target-color
-	public static double map(double value, double start, double stop, double targetStart, double targetStop) {
-        return targetStart + (targetStop - targetStart) * ((value - start) / (stop - start));
-   }
 	
 	private void setImageView(ImageView imageView, ScrollPane scrollPane) {
 		imageView.setImage(image);
 		if (image != null) {
 			imageView.translateXProperty().bind(scrollPane.widthProperty().subtract(image.getWidth()).divide(2.0));
 		}
-		//this.imageView = imageView;
-		//this.scrollPane = scrollPane;
 	}
 
 	@Override

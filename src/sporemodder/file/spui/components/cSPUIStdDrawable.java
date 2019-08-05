@@ -63,7 +63,20 @@ public class cSPUIStdDrawable extends StdDrawable {
 			area.y2 = area.y1 + image.backgroundScale.getY() * windowArea.getHeight();
 			
 			if (image.backgroundImage != null) {
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, image.backgroundColor);
+				//ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, image.backgroundColor);
+				
+				if (scaleType == STRETCH_IMAGE) {
+					ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, window.getShadeColor());
+				}
+				else if (scaleType == STRETCH_CENTER) {
+					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, false, area, scaleArea, window.getShadeColor());
+				}
+				else if (scaleType == TILE_IMAGE) {
+					ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), image.backgroundImage, area, window.getShadeColor());
+				}
+				else if (scaleType == TILE_CENTER) {
+					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, true, area, scaleArea, window.getShadeColor());
+				}
 			}
 			
 			ISporeImage iconImage = image.iconImage;
@@ -84,7 +97,6 @@ public class cSPUIStdDrawable extends StdDrawable {
 				iconArea.translateY(area.y1 + v + image.iconOffset.getY());
 				
 				ISporeImage.drawImage(viewer.getGraphicsContext2D(), iconImage, iconArea, image.iconColor);
-				//window.getShadeColor()
 			}
 		}
 	}

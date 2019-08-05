@@ -137,9 +137,9 @@ public class RenderWareConverter implements Converter {
 
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
+		if (!item.isRoot()) {
 			
-			if (isEncoder(item.getFile())) {
+			if (item.isMod() && isEncoder(item.getFile())) {
 				MenuItem menuItem = new MenuItem("Convert to RW4");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {

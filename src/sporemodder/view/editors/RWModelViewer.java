@@ -549,18 +549,20 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		group.getChildren().add(ambientLight);
 		
 		for (RWMeshCompiledStateLink rwLink : rwMeshes) {
-			MeshView meshView = new MeshView(readMesh(rwLink.mesh));
-			loadMaterial(rwLink.compiledStates.get(0), meshView);
-			
-			meshView.setCullFace(CullFace.BACK);
-//			meshView.setDrawMode(DrawMode.LINE);
-			
-			meshView.getTransforms().addAll(
-					new Rotate(-90, Rotate.X_AXIS),
-					new Rotate(180, Rotate.Y_AXIS));
-			
-			group.getChildren().add(meshView);
-			meshes.add(meshView);
+			UIManager.get().tryAction(() -> {
+				MeshView meshView = new MeshView(readMesh(rwLink.mesh));
+				loadMaterial(rwLink.compiledStates.get(0), meshView);
+				
+				meshView.setCullFace(CullFace.BACK);
+//				meshView.setDrawMode(DrawMode.LINE);
+				
+				meshView.getTransforms().addAll(
+						new Rotate(-90, Rotate.X_AXIS),
+						new Rotate(180, Rotate.Y_AXIS));
+				
+				group.getChildren().add(meshView);
+				meshes.add(meshView);
+			}, "Cannot load mesh for this RW4 file");
 		}
 		
 //		cameraRotateY.setAngle(-57 + 90*3);

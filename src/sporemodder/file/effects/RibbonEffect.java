@@ -54,9 +54,9 @@ public class RibbonEffect extends EffectComponent {
 	
 	// WARNING: These are based in particle effects. They might not be the same/exist in ribbon effects!
 	// also used in 'material'
-	public static final int FLAG_TEXTURE = ~0x200000;
+	// public static final int FLAG_TEXTURE = 0x200000; Unknown
 	public static final int FLAG_ACCEPTCOMPOSITE = 0x400000;
-	public static final int FLAG_FORCEMAP = 0x2000;
+	public static final int FLAG_TEXTURE = 0x2000;
 	public static final int FLAG_MAP_ADVECT = 0x8000;
 	public static final int FLAG_MAP_FORCE = 0x10000;
 	public static final int FLAG_KILLOUTSIDEMAP = 0x20000;
@@ -82,7 +82,7 @@ public class RibbonEffect extends EffectComponent {
 	public final TextureSlot texture = new TextureSlot();
 	public int tileUV = -1;  // 0xFFFFFFFF
 	public float slipCurveSpeed = -999f;  //?
-	public float slipUVSpeed = -1f;  // ?
+	public float slipUVSpeed = 0.0f;  // ?
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] directionForcesSum = new float[3];
 	public float windStrength;
 	public float gravityStrength;
@@ -430,7 +430,7 @@ public class RibbonEffect extends EffectComponent {
 						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
 					}
 					
-					effect.flags |= FLAG_FORCEMAP;
+					// effect.flags |= FLAG_FORCEMAP;
 					effect.flags |= FLAG_MAP_ADVECT;
 				}
 				
@@ -462,7 +462,7 @@ public class RibbonEffect extends EffectComponent {
 						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
 					}
 					
-					effect.flags |= FLAG_FORCEMAP;
+					// effect.flags |= FLAG_FORCEMAP;
 					effect.flags |= FLAG_MAP_FORCE;
 				}
 				
@@ -547,7 +547,7 @@ public class RibbonEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		int bigflag = FLAG_FORCEMAP | FLAG_MAP_ADVECT | FLAG_MAP_FORCE | FLAG_ACCEPTCOMPOSITE | FLAG_KILLOUTSIDEMAP;
+		int bigflag = FLAG_TEXTURE | FLAG_MAP_ADVECT | FLAG_MAP_FORCE | FLAG_ACCEPTCOMPOSITE | FLAG_KILLOUTSIDEMAP;
 		if ((bigflag | flags) != bigflag) writer.command("flags").arguments(HashManager.get().hexToString(flags));
 		
 		if (!writer.isDefaultColor(color)) writer.command("color").colors(color);
@@ -579,7 +579,7 @@ public class RibbonEffect extends EffectComponent {
 		//TODO face?
 		if (tileUV != -1) writer.command("tileUV").ints(tileUV);
 		if (slipCurveSpeed != -999.0f) writer.command("slipCurve").floats(slipCurveSpeed);
-		if (slipUVSpeed != 0) writer.command("slipUV").floats(slipUVSpeed);
+		if (slipUVSpeed != 0.0f) writer.command("slipUV").floats(slipUVSpeed);
 		
 		if (!mapEmitColor.isDefault()) writer.command("mapEmitColor").arguments(mapEmitColor);
 		

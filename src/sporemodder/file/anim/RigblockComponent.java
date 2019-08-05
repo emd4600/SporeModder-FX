@@ -157,11 +157,11 @@ public class RigblockComponent implements AbstractComponentKeyframe {
 						if (cap == null) cap = "";
 						List<Integer> deforms = RIGBLOCK_DEFORMS.get(cap);
 						if (deforms == null) {
-							stream.addError(line.createErrorForArgument("Cannot add deforms for capability '" + cap + "', not supported.", 1));
+							stream.addError(line.createErrorForArgument("Cannot add deforms for capability '" + cap + "', not supported.", 0));
 						} else {
 							int indexOf = deforms.indexOf(compData.id);
 							if (indexOf == -1) {
-								stream.addError(line.createErrorForArgument(args.get(0) + " is not a valid deform of the capability " + cap, 1));
+								stream.addError(line.createErrorForArgument(args.get(0) + " is not a valid deform of the capability " + cap, 0));
 							}
 							else {
 								compData.index = 3 + indexOf;

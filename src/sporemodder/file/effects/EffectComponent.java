@@ -32,7 +32,9 @@ public abstract class EffectComponent implements EffectFileElement {
 	}
 	
 	@Override public String toString() {
-		return getFactory().getKeyword() + ' '  + getName();
+		String name = getName();
+		if (name == null) name = super.toString();
+		return getFactory().getKeyword() + ' '  + name;
 	}
 	
 	@Override public String getName() {

@@ -26,13 +26,6 @@ import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.argscript.inspector.ASEnumInspector;
-import sporemodder.file.argscript.inspector.ASFlagOption;
-import sporemodder.file.argscript.inspector.ASFloatInspector;
-import sporemodder.file.argscript.inspector.ASIntInspector;
-import sporemodder.file.argscript.inspector.ASLineInspector;
-import sporemodder.file.argscript.inspector.ASOptionInspector;
-import sporemodder.file.argscript.inspector.ASStringInspector;
 import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
@@ -159,57 +152,6 @@ public class TextureSlot {
 		}
 	}
 	
-	public static void generateInspector(ASLineInspector<EffectUnit> lineInspector, boolean showDraw, boolean noDrawMode) {
-		
-		if (showDraw) {
-			if (noDrawMode) {
-				lineInspector.add(new ASOptionInspector("texture", 
-						new ASStringInspector("Material", "particles.textureSlot.texture", null)));
-			}
-			else {
-				lineInspector.add(new ASOptionInspector("draw", 
-						new ASEnumInspector("Draw Mode", "particles.textureSlot.drawMode", "decal",
-								new ASEnumInspector.Value("Decal", "decal", "particles.textureSlot.drawMode.decal"),
-								new ASEnumInspector.Value("Decal Invert Depth", "decalInvertDepth", "particles.textureSlot.drawMode.decalInvertDepth"),
-								new ASEnumInspector.Value("Decal Ignore Depth", "decalIgnoreDepth", "particles.textureSlot.drawMode.decalIgnoreDepth"),
-								new ASEnumInspector.Value("Decal Depth", "decalDepth", "particles.textureSlot.drawMode.decalDepth"),
-								new ASEnumInspector.Value("Additive", "additive", "particles.textureSlot.drawMode.additive"),
-								new ASEnumInspector.Value("Additive Invert Depth", "additiveInvertDepth", "particles.textureSlot.drawMode.additiveInvertDepth"),
-								new ASEnumInspector.Value("Additive Ignore Depth", "additiveIgnoreDepth", "particles.textureSlot.drawMode.additiveIgnoreDepth"),
-								new ASEnumInspector.Value("Modulate", "modulate", "particles.textureSlot.drawMode.modulate"),
-								new ASEnumInspector.Value("Normal Map", "normalMap", "particles.textureSlot.drawMode.normalMap"),
-								new ASEnumInspector.Value("Normal Map Depth", "depthNormalMap", "particles.textureSlot.drawMode.normalMapDepth"),
-								new ASEnumInspector.Value("Alpha Test Dissolve", "alphaTestDissolve", "particles.textureSlot.drawMode.alphaTestDissolve"),
-								new ASEnumInspector.Value("User 1", "user1", "particles.textureSlot.drawMode.user1"),
-								new ASEnumInspector.Value("User 2", "user2", "particles.textureSlot.drawMode.user2"),
-								new ASEnumInspector.Value("User 3", "user3", "particles.textureSlot.drawMode.user3"),
-								new ASEnumInspector.Value("User 4", "user4", "particles.textureSlot.drawMode.user4")),
-						new ASStringInspector("Resource 2", "particles.textureSlot.resource2", null)).setOptionalIndex(1));
-			}
-		}
-		
-		
-		lineInspector.add(new ASOptionInspector("buffer", 
-				new ASIntInspector("Buffer", "particles.textureSlot.buffer", 0).setRange(Byte.MIN_VALUE, Byte.MAX_VALUE)));
-		
-		lineInspector.add(new ASOptionInspector("layer", 
-				new ASIntInspector("Layer", "particles.textureSlot.layer", 0).setRange(Short.MIN_VALUE, Short.MAX_VALUE)));
-		
-		lineInspector.add(new ASOptionInspector("sortOffset", 
-				new ASFloatInspector("Sort Offset", "particles.textureSlot.sortOffset", 0)));
-		
-		lineInspector.add(new ASFlagOption("light", "Light", "particles.textureSlot.light"));
-		lineInspector.add(new ASFlagOption("noFog", "No Fog", "particles.textureSlot.noFog"));
-		lineInspector.add(new ASFlagOption("shadow", "Shadow", "particles.textureSlot.shadow"));
-		lineInspector.add(new ASFlagOption("noCull", "No Cull", "particles.textureSlot.noCull"));
-		lineInspector.add(new ASFlagOption("user1", "User 1", "particles.textureSlot.user1"));
-		lineInspector.add(new ASFlagOption("user2", "User 2", "particles.textureSlot.user2"));
-		lineInspector.add(new ASFlagOption("user3", "User 3", "particles.textureSlot.user3"));
-		
-		lineInspector.add(new ASOptionInspector("format", 
-				new ASIntInspector("Format", "particles.textureSlot.format", 0).setRange(Byte.MIN_VALUE, Byte.MAX_VALUE)));
-	}
-
 	public void toArgScript(String keyword, ArgScriptWriter writer) {
 		writer.command(keyword);
 		if (!resource.isDefault()) writer.arguments(resource);

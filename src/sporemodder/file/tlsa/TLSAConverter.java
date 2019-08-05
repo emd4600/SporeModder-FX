@@ -129,9 +129,9 @@ public class TLSAConverter implements Converter {
 	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
+		if (!item.isRoot()) {
 			
-			if (isEncoder(item.getFile())) {
+			if (item.isMod() && isEncoder(item.getFile())) {
 				MenuItem menuItem = new MenuItem("Convert to TLSA");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {

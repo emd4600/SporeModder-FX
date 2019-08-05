@@ -132,6 +132,15 @@ public class SpuiViewer extends Canvas {
 		showInvisible.addListener((obs, oldValue, newValue) -> repaint());
 		isPreview.addListener((obs, oldValue, newValue) -> repaint());
 		
+		contentTranslateXProperty().addListener((obs, oldValue, newValue) -> {
+			resizeForPreview();
+			repaint();
+		});
+		contentTranslateYProperty().addListener((obs, oldValue, newValue) -> {
+			resizeForPreview();
+			repaint();
+		});
+		
 		addEventFilter(MouseEvent.ANY, event -> {
 			if (isPreview()) handleEvent(event);
 		});
@@ -140,6 +149,38 @@ public class SpuiViewer extends Canvas {
 			originalRootArea.copy(layoutWindow.getChildren().get(0).getArea());
 		}
 	}
+	
+	private DoubleProperty contentTranslateX;
+
+    public final DoubleProperty contentTranslateXProperty() {
+    	if (contentTranslateX == null) {
+    		contentTranslateX = new SimpleDoubleProperty(this, "contentTranslateX", 0);
+    	}
+    	return contentTranslateX;
+    }
+    public final double getContentTranslateX() {
+    	return contentTranslateX.get();
+    }
+
+    public final void setContentTranslateX(double value) {
+    	contentTranslateX.set(value);
+    }
+
+	private DoubleProperty contentTranslateY;
+
+    public final DoubleProperty contentTranslateYProperty() {
+    	if (contentTranslateY == null) {
+    		contentTranslateY = new SimpleDoubleProperty(this, "contentTranslateY", 0);
+    	}
+    	return contentTranslateY;
+    }
+    public final double getContentTranslateY() {
+    	return contentTranslateY.get();
+    }
+
+    public final void setContentTranslateY(double value) {
+    	contentTranslateY.set(value);
+    }
 	
 	private void restoreOriginalFlags(IWindow window) {
 		window.setState(0);

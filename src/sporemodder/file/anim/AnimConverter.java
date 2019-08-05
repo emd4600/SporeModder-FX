@@ -84,7 +84,7 @@ public class AnimConverter implements Converter {
 			ResourceKey name = packer.getTemporaryName();
 			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
 			name.setGroupID(groupID);
-			name.setTypeID(0x7C19AA7A);  // soundProp or prop
+			name.setTypeID(TYPE_ID);  // soundProp or prop
 			
 			packer.writeFile(name, output -> anim.write(output, input.getAbsolutePath(), name.getInstanceID()));
 			
@@ -131,9 +131,8 @@ public class AnimConverter implements Converter {
 	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
-		if (!item.isRoot() && item.isMod()) {
-			
-			if (isEncoder(item.getFile())) {
+		if (!item.isRoot()) {
+			if (item.isMod() && isEncoder(item.getFile())) {
 				MenuItem menuItem = new MenuItem("Convert to ANIMATION");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {

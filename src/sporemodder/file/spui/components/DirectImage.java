@@ -67,7 +67,6 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 	}
 
 	@Override public String toString() {
-		//return "Image: " + key.toString();
 		return "Image: " + getLinkString();
 	}
 
@@ -100,20 +99,6 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 	@Override
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
 			double dw, double dh, Color shadeColor) {
-
-		/*ColorAdjust tint = new ColorAdjust();
-		double hueVal = shadeColor.getHue();
-		while (hueVal > 360)
-			hueVal -= 360;
-		while (hueVal < 0)
-			hueVal += 360;
-
-		hueVal += 180;
-
-		tint.setHue(map(hueVal, 0, 360, -1, 1));
-		tint.setSaturation(shadeColor.getSaturation());
-		tint.setBrightness(map(shadeColor.getBrightness(), 0, 1, -1, 0));*/
-
 		if (image == null) {
 			graphics.setFill(shadeColor);
 			graphics.fillRect(dx, dy, dw, dh);
@@ -122,51 +107,48 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 				&& (shadeColor.getBlue() >= 1)
 				&& (shadeColor.getOpacity() >= 1)
 				) {
-			//System.out.println("DRAWING WITHOUT SHADECOLOR");
 			graphics.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
 		} else {
-			//System.out.println("DRAWING WITH SHADECOLOR");
-			int imgWidth = (int)image.getWidth();
-			int imgHeight = (int)image.getHeight();
-			//System.out.println("IMAGE DIMENSIONS: " + imgWidth + ", " + imgHeight);
-			/*int targetWidth = (int)dw;
-			int destHeight = (int)dh;*/
-			int sourceX = (int)sx;
-			int sourceY = (int)sy;
-			int sourceRight = (int)sw + sourceX;
-			int sourceBottom = (int)sh + sourceY;
+			int imgWidth = (int)Math.round(sw);
+			int imgHeight = (int)Math.round(sh);
+			int sourceX = (int)Math.round(sx);
+			int sourceY = (int)Math.round(sy);
 
-			PixelReader reader = image.getPixelReader();
-			WritableImage wrImage = new WritableImage(imgWidth, imgHeight);
-			PixelWriter writer = wrImage.getPixelWriter();
-			
+			if (sourceX + imgWidth > image.getWidth())
+				imgWidth = (int) Math.round(image.getWidth() - sourceX);
+
+			if (sourceY + imgHeight > image.getHeight())
+				imgHeight = (int) Math.round(image.getHeight() - sourceY);
+
+			PixelReader sourceReader = image.getPixelReader();
+			WritableImage tintedImage = new WritableImage(imgWidth, imgHeight);
+			PixelWriter tintedWriter = tintedImage.getPixelWriter();
+
 			int[] originalPixels = new int[imgWidth * imgHeight];
 			WritablePixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
-		    reader.getPixels(0, 0, imgWidth, imgHeight, pixelFormat, originalPixels, 0, imgWidth);
+			sourceReader.getPixels(sourceX, sourceY, imgWidth, imgHeight, pixelFormat, originalPixels, 0, imgWidth);
 
-		    float shadeAlpha = (float)(shadeColor.getOpacity());
-		    float shadeRed = (float)(shadeColor.getRed());
-		    float shadeGreen = (float)(shadeColor.getGreen());
-		    float shadeBlue = (float)(shadeColor.getBlue());
-		    int[] tintedPixels = new int[originalPixels.length];
-		    for (int i = 0 ; i < originalPixels.length; i++) {
-		        int c = originalPixels[i];
-		        int alpha = (c >> 24) & 0xFF;
-		        int red = (c >> 16) & 0xFF;
-		        int green = (c >> 8) & 0xFF;
-		        int blue = c & 0xFF;
+			double shadeAlpha = shadeColor.getOpacity();
+			double shadeRed = shadeColor.getRed();
+			double shadeGreen = shadeColor.getGreen();
+			double shadeBlue = shadeColor.getBlue();
+			int[] tintedPixels = new int[originalPixels.length];
+			for (int i = 0 ; i < originalPixels.length; i++) {
+				int c = originalPixels[i];
+				int alpha = (c >> 24) & 0xFF;
+				int red = (c >> 16) & 0xFF;
+				int green = (c >> 8) & 0xFF;
+				int blue = c & 0xFF;
 
-		        /*WORKS BUT SLOW
-		        java.awt.Color color = new java.awt.Color((int)(red * shadeRed), (int)(green * shadeGreen), (int)(blue * shadeBlue), (int)(alpha * shadeAlpha));
-		        tintedPixels[i] = color.getRGB();
-		        */
-		        
-		        tintedPixels[i] = ((int)(alpha * shadeAlpha) << 24) | ((int)(red * shadeRed) << 16) | ((int)(green * shadeGreen) << 8) | ((int)(blue * shadeBlue) << 0); 
-		    }
+				tintedPixels[i] = ((int)(alpha * shadeAlpha) << 24) | 
+						((int)(red * shadeRed) << 16) | 
+						((int)(green * shadeGreen) << 8) | 
+						((int)(blue * shadeBlue) << 0); 
+			}
 
-		    writer.setPixels(0, 0, imgWidth, imgHeight, pixelFormat, tintedPixels, 0, imgWidth);
+			tintedWriter.setPixels(0, 0, imgWidth, imgHeight, pixelFormat, tintedPixels, 0, imgWidth);
 
-			graphics.drawImage(wrImage, sx, sy, sw, sh, dx, dy, dw, dh);
+			graphics.drawImage(tintedImage, 0, 0, sw, sh, dx, dy, dw, dh);
 		}
 	}
 

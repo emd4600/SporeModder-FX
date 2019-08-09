@@ -135,12 +135,10 @@ public class InspectorIntSpinner extends Spinner<Long> implements InspectorValue
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.UP) {
 					setValue(getValue() + getStep());
-					System.out.println("Up Arrow Key pressed!");
 					event.consume();
 				}
 				else if (event.getCode() == KeyCode.DOWN) {
 					setValue(getValue() - getStep());
-					System.out.println("Down Arrow Key pressed!");
 					event.consume();
 				}
 			}

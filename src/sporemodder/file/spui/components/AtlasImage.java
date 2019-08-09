@@ -24,7 +24,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.paint.Color;
 import sporemodder.UIManager;
 import sporemodder.file.spui.SPUIRectangle;

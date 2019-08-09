@@ -19,9 +19,12 @@
 package sporemodder.view.inspector;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import sporemodder.HashManager;
 import sporemodder.file.DocumentException;
@@ -61,6 +64,8 @@ public class InspectorIntSpinner extends Spinner<Long> implements InspectorValue
 			final long newIndex = getValue() + steps * step;
             setValue(newIndex <= max ? newIndex : max);
 		}
+		
+		
 	};
 	
 	private long defaultValue = 0;
@@ -122,6 +127,20 @@ public class InspectorIntSpinner extends Spinner<Long> implements InspectorValue
 		focusedProperty().addListener((observable, oldValue, newValue) -> {
 			if (!newValue) {
 				increment(0); // won't change value, but will commit editor
+			}
+		});
+		
+		this.getEditor().setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.UP) {
+					setValue(getValue() + getStep());
+					event.consume();
+				}
+				else if (event.getCode() == KeyCode.DOWN) {
+					setValue(getValue() - getStep());
+					event.consume();
+				}
 			}
 		});
 	}

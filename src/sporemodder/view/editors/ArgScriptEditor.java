@@ -25,10 +25,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javafx.scene.control.Alert.AlertType;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
-import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
@@ -42,7 +41,6 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentError;
 import sporemodder.file.DocumentFragment;
-import sporemodder.file.argscript.ArgScriptLexer;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
@@ -211,7 +209,7 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 				if (colorHyperlink.object instanceof ColorRGB) {
 					object = new ColorRGB((float) customColor.getRed(), (float) customColor.getGreen(), (float) customColor.getBlue());
 				} else {
-					object = new ColorRGBA((float) customColor.getRed(), (float) customColor.getGreen(), (float) customColor.getBlue(), 1.0f);
+					object = new ColorRGBA((float) customColor.getRed(), (float) customColor.getGreen(), (float) customColor.getBlue(), ((ColorRGBA) colorHyperlink.object).getA());
 				}
 				getCodeArea().replaceText(linePos + colorHyperlink.start, linePos + colorHyperlink.end, object.toString());
 				

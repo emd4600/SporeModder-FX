@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
@@ -179,6 +182,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		hasher.getProjectRegistry().clear();
 		findNamesFile(index.items, packageStream);
 		
+		int itemIndex = 0;
+		CountDownLatch latch = new CountDownLatch(index.items.size());
 		for (DBPFItem item : index.items) {
 			// Ensure the task is not paused
 			ensureRunning();
@@ -213,70 +218,30 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			File folder = new File(outputFolder, hasher.getFileName(groupID));
 			folder.mkdir();
 			
-			try (MemoryStream dataStream = item.processFile(packageStream)) {
-				
-				// Has the file been converted?
-				boolean isConverted = false;
-				
-				// Do not convert editor packages
-				if (groupID == 0x40404000 && item.name.getTypeID() == 0x00B1B104) {
-					if (project != null) {
-						for (PackageSignature entry : PackageSignature.values()) {
-							if (entry.getFileName() != null && hasher.fnvHash(entry.getFileName()) == instanceID) {
-								project.setPackageSignature(entry);
-								break;
-							}
-						}
-					}
-				}
-				else {
-					try {
-						for (Converter converter : converters) {
-							if (converter.isDecoder(item.name)) {
-								
-								if (converter.decode(dataStream, folder, item.name)) {
-									isConverted = true;
-									break;
-								}
-								else {
-									// throw new IOException("File could not be converted.");
-									// We could throw an error here, but it is not appropriate:
-									// some files cannot be converted but did not necessarily have an error,
-									// for example trying to convert a non-texture rw4. So we jsut keep searching
-									// for another converter or write the raw file.s
-									continue;
-								}
-							}
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						exceptions.put(item, e);
-						// Handling the exception here will make it write the unconverted file
-					}
-				}
-				
-				if (!isConverted) {
-					// If it hasn't been converted, just write the file straight away.
-					
-					String name = hasher.getFileName(item.name.getInstanceID()) + "." + hasher.getTypeName(item.name.getTypeID());
-					dataStream.writeToFile(new File(folder, name));
-				}
-				
-				if (writtenFiles != null) {
-					List<ResourceKey> list = writtenFiles.get(groupID);
-					if (list == null) {
-						list = new ArrayList<ResourceKey>();
-						writtenFiles.put(groupID, list);
-					}
-					list.add(item.name);
-				}
+			FileConvertAction action = new FileConvertAction(item, folder, item.processFile(packageStream), inc, latch);
+			if (itemIndex == index.items.size() - 1) {
+				// Execute in same thread if it's the last item
+				ForkJoinPool.commonPool().invoke(action);
 			}
-			catch (Exception e) {
-				exceptions.put(item, e);
+			else {
+				ForkJoinPool.commonPool().execute(action);
 			}
-			
-			incProgress(inc);
+				
+			if (writtenFiles != null) {
+				List<ResourceKey> list = writtenFiles.get(groupID);
+				if (list == null) {
+					list = new ArrayList<ResourceKey>();
+					writtenFiles.put(groupID, list);
+				}
+				list.add(item.name);
+			}
 		}
+		
+		// Await for all files to finish writing
+		latch.await();
+		
+		// Remove the extra names; if they need to be used, loading the project will load them as well
+		hasher.getProjectRegistry().clear();
 		
 		// Remove the extra names; if they need to be used, loading the project will load them as well
 		hasher.getProjectRegistry().clear();
@@ -352,5 +317,84 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	 */
 	public List<File> getFailedDBPFs() {
 		return failedDBPFs;
+	}
+	
+	private class FileConvertAction extends RecursiveAction {
+		final DBPFItem item;
+		final File folder;
+		final MemoryStream dataStream;
+		final double inc;
+		final CountDownLatch latch;
+		
+		FileConvertAction(DBPFItem item, File folder, MemoryStream dataStream, double inc, CountDownLatch latch) {
+			this.item = item;
+			this.folder = folder;
+			this.dataStream = dataStream;
+			this.inc = inc;
+			this.latch = latch;
+		}
+		
+		@Override public void compute() {
+			try {
+				HashManager hasher = HashManager.get();
+				int groupID = item.name.getGroupID();
+				int instanceID = item.name.getInstanceID();
+				
+				// Has the file been converted?
+				boolean isConverted = false;
+				
+				// Do not convert editor packages
+				if (groupID == 0x40404000 && item.name.getTypeID() == 0x00B1B104) {
+					if (project != null) {
+						for (PackageSignature entry : PackageSignature.values()) {
+							if (entry.getFileName() != null && hasher.fnvHash(entry.getFileName()) == instanceID) {
+								project.setPackageSignature(entry);
+								break;
+							}
+						}
+					}
+				}
+				else {
+					try {
+						for (Converter converter : converters) {
+							if (converter.isDecoder(item.name)) {
+								
+								if (converter.decode(dataStream, folder, item.name)) {
+									isConverted = true;
+									break;
+								}
+								else {
+									// throw new IOException("File could not be converted.");
+									// We could throw an error here, but it is not appropriate:
+									// some files cannot be converted but did not necessarily have an error,
+									// for example trying to convert a non-texture rw4. So we jsut keep searching
+									// for another converter or write the raw file.s
+									continue;
+								}
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						exceptions.put(item, e);
+						// Handling the exception here will make it write the unconverted file
+					}
+				}
+				
+				if (!isConverted) {
+					// If it hasn't been converted, just write the file straight away.
+					
+					String name = hasher.getFileName(item.name.getInstanceID()) + "." + hasher.getTypeName(item.name.getTypeID());
+					dataStream.writeToFile(new File(folder, name));
+				}
+			}
+			catch (Exception e) {
+				exceptions.put(item, e);
+			}
+			finally {
+				dataStream.close();
+				incProgress(inc);
+				latch.countDown();
+			}
+		}
 	}
 }

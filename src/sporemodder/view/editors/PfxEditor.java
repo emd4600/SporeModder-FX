@@ -29,6 +29,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import sporemodder.HashManager;
+import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.effects.EffectComponent;
 import sporemodder.file.effects.EffectFileElement;
@@ -108,6 +109,8 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 	}
 	
 	@Override protected void onHyperlinkAction(HyperlinkData hyperlink) {
+		super.onHyperlinkAction(hyperlink);
+		
 		String[] names;
 		
 		switch (hyperlink.type) {
@@ -137,6 +140,9 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 				name = names[0] + '!' + name; 
 			}
 			moveTo(stream.getData().getResource(name));
+			break;
+			
+		case ArgScriptStream.HYPERLINK_COLOR:
 			break;
 			
 		default:

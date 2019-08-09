@@ -88,7 +88,6 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 	private final Popup popup = new Popup();
 	/** The label shown in text tooltips. */
 	private final Label popupMsg = new Label();
-	private boolean maintainTooltip;
 	
 	private boolean isValidText = true;
 	private String originalContents;
@@ -498,21 +497,6 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * If set to true, the tooltip will still appear even when the user moves the mouse; it will only disappear when the
-	 * mouse moves outside the editor, a mouse click is detected, or the user presses a key.
-	 * This is set to false again when the tooltip is hidden.
-	 * @param value
-	 */
-	public void setMaintainTooltip(boolean value) {
-		maintainTooltip = value;
-	}
-	
-	public void hideTooltip() {
-		popup.hide();
-		maintainTooltip = false;
 	}
 
 	@Override

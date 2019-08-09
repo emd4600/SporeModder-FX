@@ -1063,6 +1063,8 @@ public class ArgScriptLexer {
 			
 			case "floor":
 				return Math.floor(parseFloatParenthesis());
+			case "round":
+				return Math.round(parseFloatParenthesis());
 			case "ceil":
 				return Math.ceil(parseFloatParenthesis());
 			case "sqr":

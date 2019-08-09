@@ -23,5 +23,5 @@ import org.fxmisc.richtext.event.MouseOverTextEvent;
 @FunctionalInterface
 public interface TooltipFactory {
 
-	public String getTooltip(String text, MouseOverTextEvent event);
+	public Object getTooltip(String text, MouseOverTextEvent event);
 }

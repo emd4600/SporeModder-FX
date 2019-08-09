@@ -183,7 +183,7 @@ public class UnpackPackageUI implements Controller {
 		UIManager.get().setOverlay(false);
 	}
 	
-	private void showErrorDialog(DBPFUnpackingTask task) {
+	public static void showErrorDialog(DBPFUnpackingTask task) {
 		Alert alert = new Alert(AlertType.ERROR, "Unpack finished", ButtonType.OK);
 		
 		alert.setContentText("There were errors on " + task.getExceptions().size() + " files, which were not unpacked.");

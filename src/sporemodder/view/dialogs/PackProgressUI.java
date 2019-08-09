@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.view.dialogs;
 
+import java.io.File;
 import java.io.IOException;
 
 import javafx.fxml.FXML;
@@ -63,9 +64,9 @@ public class PackProgressUI implements Controller {
 		return dialog;
 	}
 
-	private void showInternal(Project project, DBPFPackingTask task) {
+	private void showInternal(File inputFolder, String projectName, DBPFPackingTask task) {
 		dialog = new Dialog<Void>();
-		dialog.setTitle("Packing '" + project.getName() + "'");
+		dialog.setTitle("Packing '" + projectName + "'");
 		dialog.setDialogPane(mainNode);
 		dialog.setResizable(false);
 		dialog.initModality(Modality.APPLICATION_MODAL);
@@ -114,9 +115,9 @@ public class PackProgressUI implements Controller {
 			dialog.close();
 			
 			if (task.getFailException() != null) {
-				showErrorDialog(project, task);
+				showErrorDialog(inputFolder, task);
 				
-				String relativePath = task.getCurrentFile().getAbsolutePath().substring(project.getFolder().getAbsolutePath().length() + 1);
+				String relativePath = task.getCurrentFile().getAbsolutePath().substring(inputFolder.getAbsolutePath().length() + 1);
 				ProjectItem item = ProjectManager.get().getItem(relativePath);
 				EditorManager mgr = EditorManager.get();
 				try {
@@ -142,12 +143,12 @@ public class PackProgressUI implements Controller {
 		UIManager.get().setOverlay(false);
 	}
 	
-	private void showErrorDialog(Project project, DBPFPackingTask task) {
+	private void showErrorDialog(File folder, DBPFPackingTask task) {
 		Alert alert = new Alert(AlertType.ERROR, "The project was not packed", ButtonType.OK);
 		
 		String errorText;
 		if (task.getCurrentFile() != null) {
-			String relativePath = task.getCurrentFile().getAbsolutePath().substring(project.getFolder().getAbsolutePath().length());
+			String relativePath = task.getCurrentFile().getAbsolutePath().substring(folder.getAbsolutePath().length());
 			errorText = "The project was not packed due to an error in file " + relativePath;
 		}
 		else {
@@ -164,7 +165,19 @@ public class PackProgressUI implements Controller {
 		PackProgressUI controller = UIManager.get().loadUI("dialogs/PackProgressUI");
 		DBPFPackingTask task = new DBPFPackingTask(project, storeDebugInformation);
 		
-		controller.showInternal(project, task);
+		controller.showInternal(project.getFolder(), project.getName(), task);
+		
+		// Update the UI
+		UIManager.get().notifyUIUpdate(false);
+		
+		return task.getFailException() == null && !task.isCancelled();
+	}
+	
+	public static boolean show(File folder, File outputFile, String projectName, boolean storeDebugInformation) {
+		PackProgressUI controller = UIManager.get().loadUI("dialogs/PackProgressUI");
+		DBPFPackingTask task = new DBPFPackingTask(folder, outputFile);
+		
+		controller.showInternal(folder, projectName, task);
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);

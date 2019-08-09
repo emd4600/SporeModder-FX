@@ -63,6 +63,8 @@ public class ArgScriptStream<T> {
 		}
 	}
 	
+	public static final String HYPERLINK_COLOR = "COLOR";
+	
 	public static final String SYNTAX_COMMENT = "argscript-comment";
 	public static final String SYNTAX_BLOCK = "argscript-block";
 	public static final String SYNTAX_COMMAND = "argscript-command";
@@ -1643,6 +1645,8 @@ public class ArgScriptStream<T> {
 				throw new DocumentException(new DocumentError("Garbage at end of expression", endIndex, lexer.getChars().length));
 			}
 			
+			this.addHyperlink(HYPERLINK_COLOR, dst, args.getRealPosition(args.getPosition(index)), args.getRealPosition(args.getEndPosition(index)));
+			
 			return true;
 		} 
 		catch (DocumentException e) {
@@ -1718,6 +1722,8 @@ public class ArgScriptStream<T> {
 			if (lexer.available()) {
 				throw new DocumentException(new DocumentError("Garbage at end of expression", endIndex, lexer.getChars().length));
 			}
+			
+			this.addHyperlink(HYPERLINK_COLOR, dst, args.getRealPosition(args.getPosition(index)), args.getRealPosition(args.getEndPosition(index)));
 			
 			return true;
 		} 

@@ -68,13 +68,15 @@ public class DBPFPacker implements AutoCloseable {
 	private final RefPackCompression.CompressorOutput compressOut = new RefPackCompression.CompressorOutput();
 	private File currentFile;
 	
-	public DBPFPacker(StreamWriter output) throws IOException {
+	private boolean closeStream;
+	
+	public DBPFPacker(StreamWriter output, boolean closeStream) throws IOException {
 		stream = output;
 		initialWrite();
 	}
 	
 	public DBPFPacker(File output) throws IOException {
-		this(new FileStream(output, "rw"));
+		this(new FileStream(output, "rw"), true);
 	}
 	
 	/**
@@ -112,7 +114,7 @@ public class DBPFPacker implements AutoCloseable {
 		stream.seek(0);
 		header.writeHeader(stream);
 		
-		if (stream != null) stream.close();
+		if (closeStream) stream.close();
 		indexStream.close();
 	}
 	

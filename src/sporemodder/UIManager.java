@@ -185,6 +185,7 @@ public class UIManager extends AbstractManager {
 			// Apply styling
 			mainScene.getStylesheets().add(PathManager.get().getStyleFile("basic.css").toURI().toString());
 			mainScene.getStylesheets().add(PathManager.get().getStyleFile("syntax.css").toURI().toString());
+			mainScene.getStylesheets().add(PathManager.get().getStyleFile("color-swatch.css").toURI().toString());
 			
 			mainScene.getStylesheets().addAll(stylesheetsToLoad);
 		}

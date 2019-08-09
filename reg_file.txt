@@ -77657,3 +77657,6 @@ joint9
 DeformBoneBaseJoint
 DeformBoneEndJoint
 DeformBoneMiddle
+zh-tw
+ja-jp
+ko-kr

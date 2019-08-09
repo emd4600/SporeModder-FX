@@ -21,6 +21,7 @@ SporeModder FX was programmed in Java 1.8, using the Eclipse tool. Additionally,
  - [JSON-java](https://github.com/stleary/JSON-java)
  - [Java DDS ImageIO Plugin](https://github.com/GoldenGnu/java-dds)
  - [WinMerge](http://winmerge.org/) (not a Java library, but it's included in the public release to compare files)
+ - [UnicodeBOMInputStream](https://github.com/gpakosz/UnicodeBOMInputStream)
  - Even though it was not directly used, the custom ribbon developed in this program was heavily based in [FXRibbon](https://github.com/dukke/FXRibbon)
  
 Also wanted to give thanks to:

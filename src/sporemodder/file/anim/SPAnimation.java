@@ -61,9 +61,9 @@ public class SPAnimation {
 		stream.readLEInt();  // file size
 		int version = stream.readLEInt();
 		
-		System.out.println("version: " + version);
+		// System.out.println("version: " + version);
 		if (version < MIN_VERSION) {
-			System.err.println("Only versions [" + MIN_VERSION + ", " + VERSION + "] are supported.");
+			throw new IOException("Only versions [" + MIN_VERSION + ", " + VERSION + "] are supported.");
 		}
 		
 		DataStructure data = new DataStructure(stream);
@@ -74,8 +74,8 @@ public class SPAnimation {
 		// 11Ch: always 0x3D088889 ?
 		length = data.getFloat(0x120);
 		
-		System.out.println("id: " + HashManager.get().getFileName(id) + "\tlength: " + length);
-		System.out.println();
+		// System.out.println("id: " + HashManager.get().getFileName(id) + "\tlength: " + length);
+		// System.out.println();
 		
 		// 12Ch: number of animation loaded, doesn't matter
 		// 130h: version

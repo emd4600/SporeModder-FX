@@ -27,6 +27,7 @@ import java.util.Properties;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.anim.AnimConverter;
+import sporemodder.file.dbpf.DBPFConverter;
 import sporemodder.file.effects.EffectsConverter;
 import sporemodder.file.pctp.PCTPConverter;
 import sporemodder.file.prop.PropConverter;
@@ -50,6 +51,7 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new DBPFConverter());
 		converters.add(new AnimConverter());
 		converters.add(new SmtConverter());
 		converters.add(new RasterConverter());

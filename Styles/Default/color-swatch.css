@@ -1,0 +1,75 @@
+.color-swatch-menu-item:focused {
+    -fx-background-color: transparent;
+}
+
+.simple-color-swatch {
+    -fx-background-color: derive(#ececec,26.4%);
+    -fx-padding: 1.25em;
+    -fx-spacing: 1.25em;
+    -fx-min-width: 20em;
+    -fx-pref-width: 20em;
+    -fx-max-width: 20em;
+}
+
+.simple-color-swatch:focused,
+.simple-color-swatch:selected {
+    -fx-background-color: transparent;
+}
+
+.simple-color-swatch > .color-rect-pane {
+    -fx-spacing: 0.75em;
+    -fx-pref-height: 16.666667em;
+    -fx-alignment: top-left;
+    -fx-fill-height: true;
+}
+
+.simple-color-swatch > .color-rect-pane > .color-rect {
+    -fx-min-width: 16.666667em;
+    -fx-min-height: 16.666667em;
+}
+
+.simple-color-swatch > .color-rect-pane > .color-rect-border {
+    -fx-border-color: derive(#ececec, -20%);
+}
+
+.simple-color-swatch > .color-rect-pane > .color-rect > .color-rect-indicator {
+    -fx-background-color: null;
+    -fx-border-color: white;
+    -fx-border-radius: 0.4166667em;
+    -fx-translate-x: -0.4166667em;
+    -fx-translate-y: -0.4166667em;
+    -fx-pref-width: 0.833333em;
+    -fx-pref-height: 0.833333em;
+    -fx-effect: dropshadow(three-pass-box, black, 2, 0.0, 0, 1);
+}
+
+.simple-color-swatch > .color-rect-pane > .color-bar {
+    -fx-min-height: 1.666667em;
+    -fx-min-width: 16.666667em;
+    -fx-max-height: 1.666667em;
+    -fx-border-color: derive(#ececec, -20%);
+}
+
+.simple-color-swatch > .color-rect-pane > .color-bar > .color-bar-indicator {
+    -fx-border-radius: 0.333333em;
+    -fx-border-color: white;
+    -fx-effect: dropshadow(three-pass-box, black, 2, 0.0, 0, 1);
+    -fx-pref-height: 2em;
+    -fx-pref-width: 0.833333em;
+    -fx-translate-y: -0.1666667em;
+    -fx-translate-x: -0.4166667em;
+}
+
+.simple-color-swatch > .color-rect-pane > .color-rect > .transparent-pattern {
+    -fx-background-image: url("pattern-transparent.png"); 
+    -fx-background-repeat: repeat;
+    -fx-background-size: auto;
+}
+
+.simple-color-swatch > .color-rect-pane > .color-new-rect {
+    -fx-min-width: 10.666667em;
+    -fx-min-height: 1.75em;
+    -fx-pref-width: 10.666667em;
+    -fx-pref-height: 1.75em;
+    -fx-border-color: derive(#ececec, -20%);
+}

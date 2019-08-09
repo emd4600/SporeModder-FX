@@ -26,20 +26,31 @@ import java.util.Comparator;
 import java.util.List;
 
 import javafx.scene.control.Alert.AlertType;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import sporemodder.EditorManager;
 import sporemodder.HashManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentError;
 import sporemodder.file.DocumentFragment;
+import sporemodder.file.argscript.ArgScriptLexer;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
+import sporemodder.util.ColorRGB;
+import sporemodder.util.ColorRGBA;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.StatusBar.Status;
+import sporemodder.view.colorpicker.ColorSwatchUI;
 import sporemodder.view.syntax.SyntaxHighlighter;
 
 /**
@@ -66,6 +77,10 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 	private double mouseX;
 	private double mouseY;
 	
+	private ContextMenu colorPickerMenu;
+	private ColorSwatchUI colorPicker;
+	private HyperlinkData colorHyperlink;
+	
 	public ArgScriptEditor() {
 		super();
 		
@@ -76,6 +91,30 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 			for (ErrorInfo error : errors) {
 				if (error.position <= index && index < error.position + error.length) {
 					return error.error.getMessage();
+				}
+			}
+			
+			return null;
+		});
+		
+		// Generate tooltips for colors
+		getTooltipFactories().add((text, event) -> {
+			if (stream == null) return null;
+			
+			int index = event.getCharacterIndex();
+			
+			for (HyperlinkData hyperlink : stream.getHyperlinkData()) {
+				int lineStart = stream.getLinePositions().get(hyperlink.line);
+				if (ArgScriptStream.HYPERLINK_COLOR.equals(hyperlink.type) && 
+						index >= lineStart + hyperlink.start && index <= lineStart + hyperlink.end) {
+					
+					ColorRGB value = (ColorRGB) hyperlink.object;
+					
+					Rectangle rect = new Rectangle(0, 0, 80, 25);
+					rect.setFill(value.toColor());
+					rect.setStroke(Color.BLACK);
+					
+					return rect;
 				}
 			}
 			
@@ -120,9 +159,83 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 				});
 			}
 		});
+
+        UIManager.get().getScene().addEventFilter(MouseEvent.MOUSE_PRESSED, this::handleColorPickerClick);
+	}
+	
+	@Override public void loadFile(ProjectItem item) throws IOException {
+		if (item == null) {
+			UIManager.get().getScene().removeEventFilter(MouseEvent.MOUSE_PRESSED, this::handleColorPickerClick);
+		}
+		super.loadFile(item);
+	}
+	
+	private void handleColorPickerClick(MouseEvent event) {
+		if (colorPicker != null && colorPickerMenu.isShowing() && !colorPicker.contains(colorPicker.sceneToLocal(event.getSceneX(), event.getSceneY()))) {
+			colorPickerMenu.hide();
+    	}
+	}
+	
+	protected void onColorHyperlink(HyperlinkData hyperlink) {
+		colorHyperlink = hyperlink;
+		double r, g, b;
+		
+		if (hyperlink.object instanceof ColorRGB) {
+			ColorRGB color = (ColorRGB) hyperlink.object;
+			r = color.getR();
+			g = color.getG();
+			b = color.getB();
+		} else {
+			ColorRGBA color = (ColorRGBA) hyperlink.object;
+			r = color.getR();
+			g = color.getG();
+			b = color.getB();
+		}
+		
+		if (colorPicker == null) {
+			colorPicker = new ColorSwatchUI();
+	        
+			CustomMenuItem menuItem = new CustomMenuItem();
+			menuItem.getStyleClass().add("color-swatch-menu-item");
+			menuItem.setContent(colorPicker);
+			menuItem.setHideOnClick(false);
+			
+			colorPickerMenu = new ContextMenu();
+			colorPickerMenu.setHideOnEscape(true);
+			colorPickerMenu.getItems().add(menuItem);
+			
+			colorPickerMenu.setOnHidden(event -> {
+				int linePos = stream.getLinePositions().get(colorHyperlink.line);
+				Color customColor = colorPicker.getCustomColor();
+				Object object;
+				if (colorHyperlink.object instanceof ColorRGB) {
+					object = new ColorRGB((float) customColor.getRed(), (float) customColor.getGreen(), (float) customColor.getBlue());
+				} else {
+					object = new ColorRGBA((float) customColor.getRed(), (float) customColor.getGreen(), (float) customColor.getBlue(), 1.0f);
+				}
+				getCodeArea().replaceText(linePos + colorHyperlink.start, linePos + colorHyperlink.end, object.toString());
+				
+				updateSyntaxHighlighting();
+			});
+		}
+		else if (colorPickerMenu.isShowing()) {
+			colorPickerMenu.hide();
+		}
+		
+		colorPicker.setCurrentColor(new Color(r, g, b, 1.0));
+		
+		int linePos = stream.getLinePositions().get(hyperlink.line);
+		int pos = hyperlink.start + linePos;
+		
+		Bounds bounds = getCodeArea().getCharacterBoundsOnScreen(pos, pos+1).orElse(new BoundingBox(0, 0, 0, 0));
+		
+		colorPickerMenu.show(getCodeArea(), bounds.getMinX(), bounds.getMaxY());
 	}
 	
 	protected void onHyperlinkAction(HyperlinkData hyperlink) {
+		if (ArgScriptStream.HYPERLINK_COLOR.equals(hyperlink.type)) {
+			onColorHyperlink(hyperlink);
+		}
 	}
 	
 	protected boolean hyperlinkOpenFile(String path) {

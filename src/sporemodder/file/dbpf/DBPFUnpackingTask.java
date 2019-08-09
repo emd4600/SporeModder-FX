@@ -56,6 +56,9 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	/** The list of input DBPF files, in order of priority. */
 	private final List<File> inputFiles = new ArrayList<File>();
 	
+	/** Alternative input, an StreamReader. */
+	private final StreamReader inputStream;
+	
 	/** The list of input DBPF files that could not be unpacked (because they didn't exist). */
 	private final List<File> failedDBPFs = new ArrayList<File>();
 	
@@ -81,10 +84,19 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		this.outputFolder = outputFolder;
 		this.converters = converters;
 		this.project = project;
+		this.inputStream = null;
 	}
 	
 	public DBPFUnpackingTask(Collection<File> inputFiles, File outputFolder, Project project, List<Converter> converters) {
 		this.inputFiles.addAll(inputFiles);
+		this.outputFolder = outputFolder;
+		this.converters = converters;
+		this.project = project;
+		this.inputStream = null;
+	}
+	
+	public DBPFUnpackingTask(StreamReader inputStream, File outputFolder, Project project, List<Converter> converters) {
+		this.inputStream = inputStream;
 		this.outputFolder = outputFolder;
 		this.converters = converters;
 		this.project = project;
@@ -146,150 +158,159 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		}
 	}
 
+	private void unpackStream(StreamReader packageStream, HashMap<Integer, List<ResourceKey>> writtenFiles) throws IOException, InterruptedException {
+		HashManager hasher = HashManager.get();
+			
+		updateMessage("Reading file index...");
+		
+		DatabasePackedFile header = new DatabasePackedFile();
+		header.readHeader(packageStream);
+		header.readIndex(packageStream);
+		
+		DBPFIndex index = header.index;
+		index.readItems(packageStream, header.indexCount, header.isDBBF);
+		
+		incProgress(INDEX_PROGRESS / inputFiles.size());
+		updateMessage("Unpacking files...");
+		
+		double inc = ((1.0 - INDEX_PROGRESS) / header.indexCount) / inputFiles.size();
+		
+		//First search sporemaster/names.txt, and use it if it exists
+		hasher.getProjectRegistry().clear();
+		findNamesFile(index.items, packageStream);
+		
+		for (DBPFItem item : index.items) {
+			// Ensure the task is not paused
+			ensureRunning();
+			
+			if (itemFilter != null && !itemFilter.filter(item)) continue;
+			
+			int groupID = item.name.getGroupID();
+			int instanceID = item.name.getInstanceID();
+			
+			if (writtenFiles != null) {
+				List<ResourceKey> list = writtenFiles.get(groupID);
+				if (list != null) {
+					boolean skipFile = false;
+					for (ResourceKey key : list) {
+						if (key.isEquivalent(item.name)) {
+							skipFile = true;
+							break;
+						}
+					}
+					if (skipFile) continue;
+				}
+			}
+			
+			String fileName = hasher.getFileName(instanceID);
+			
+			// skip autolocale files
+			if (groupID == 0x02FABF01 && fileName.startsWith("auto_")) {
+				continue;
+			}
+			
+			
+			File folder = new File(outputFolder, hasher.getFileName(groupID));
+			folder.mkdir();
+			
+			try (MemoryStream dataStream = item.processFile(packageStream)) {
+				
+				// Has the file been converted?
+				boolean isConverted = false;
+				
+				// Do not convert editor packages
+				if (groupID == 0x40404000 && item.name.getTypeID() == 0x00B1B104) {
+					if (project != null) {
+						for (PackageSignature entry : PackageSignature.values()) {
+							if (entry.getFileName() != null && hasher.fnvHash(entry.getFileName()) == instanceID) {
+								project.setPackageSignature(entry);
+								break;
+							}
+						}
+					}
+				}
+				else {
+					try {
+						for (Converter converter : converters) {
+							if (converter.isDecoder(item.name)) {
+								
+								if (converter.decode(dataStream, folder, item.name)) {
+									isConverted = true;
+									break;
+								}
+								else {
+									// throw new IOException("File could not be converted.");
+									// We could throw an error here, but it is not appropriate:
+									// some files cannot be converted but did not necessarily have an error,
+									// for example trying to convert a non-texture rw4. So we jsut keep searching
+									// for another converter or write the raw file.s
+									continue;
+								}
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						exceptions.put(item, e);
+						// Handling the exception here will make it write the unconverted file
+					}
+				}
+				
+				if (!isConverted) {
+					// If it hasn't been converted, just write the file straight away.
+					
+					String name = hasher.getFileName(item.name.getInstanceID()) + "." + hasher.getTypeName(item.name.getTypeID());
+					dataStream.writeToFile(new File(folder, name));
+				}
+				
+				if (writtenFiles != null) {
+					List<ResourceKey> list = writtenFiles.get(groupID);
+					if (list == null) {
+						list = new ArrayList<ResourceKey>();
+						writtenFiles.put(groupID, list);
+					}
+					list.add(item.name);
+				}
+			}
+			catch (Exception e) {
+				exceptions.put(item, e);
+			}
+			
+			incProgress(inc);
+		}
+		
+		// Remove the extra names; if they need to be used, loading the project will load them as well
+		hasher.getProjectRegistry().clear();
+	}
+	
 	@Override
 	protected Exception call() throws Exception {
 		
 		MessageManager.get().postMessage(MessageType.BeforeDbpfUnpack, this);
 		
-		HashManager hasher = HashManager.get();
 		long initialTime = System.currentTimeMillis();
 		
-		final HashMap<Integer, List<ResourceKey>> writtenFiles = new HashMap<Integer, List<ResourceKey>>();
-		boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
-		
-		for (File inputFile : inputFiles) {
-			if (!inputFile.exists()) {
-				incProgress(100.0f / inputFiles.size());
-				failedDBPFs.add(inputFile);
-				continue;
-			}
+		if (inputStream != null) {
+			unpackStream(inputStream, null);
+		}
+		else {
+			final HashMap<Integer, List<ResourceKey>> writtenFiles = new HashMap<Integer, List<ResourceKey>>();
+			boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
 			
-			for (Converter converter : converters) converter.reset();
-			
-			try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
-				
-				updateMessage("Reading file index...");
-				
-				DatabasePackedFile header = new DatabasePackedFile();
-				header.readHeader(packageStream);
-				header.readIndex(packageStream);
-				
-				DBPFIndex index = header.index;
-				index.readItems(packageStream, header.indexCount, header.isDBBF);
-				
-				incProgress(INDEX_PROGRESS / inputFiles.size());
-				updateMessage("Unpacking files...");
-				
-				double inc = ((1.0 - INDEX_PROGRESS) / header.indexCount) / inputFiles.size();
-				
-				//First search sporemaster/names.txt, and use it if it exists
-				hasher.getProjectRegistry().clear();
-				findNamesFile(index.items, packageStream);
-				
-				for (DBPFItem item : index.items) {
-					// Ensure the task is not paused
-					ensureRunning();
-					
-					if (itemFilter != null && !itemFilter.filter(item)) continue;
-					
-					int groupID = item.name.getGroupID();
-					int instanceID = item.name.getInstanceID();
-					
-					if (checkFiles) {
-						List<ResourceKey> list = writtenFiles.get(groupID);
-						if (list != null) {
-							boolean skipFile = false;
-							for (ResourceKey key : list) {
-								if (key.isEquivalent(item.name)) {
-									skipFile = true;
-									break;
-								}
-							}
-							if (skipFile) continue;
-						}
-					}
-					
-					String fileName = hasher.getFileName(instanceID);
-					
-					// skip autolocale files
-					if (groupID == 0x02FABF01 && fileName.startsWith("auto_")) {
-						continue;
-					}
-					
-					
-					File folder = new File(outputFolder, hasher.getFileName(groupID));
-					folder.mkdir();
-					
-					try (MemoryStream dataStream = item.processFile(packageStream)) {
-						
-						// Has the file been converted?
-						boolean isConverted = false;
-						
-						// Do not convert editor packages
-						if (groupID == 0x40404000 && item.name.getTypeID() == 0x00B1B104) {
-							if (project != null) {
-								for (PackageSignature entry : PackageSignature.values()) {
-									if (entry.getFileName() != null && hasher.fnvHash(entry.getFileName()) == instanceID) {
-										project.setPackageSignature(entry);
-										break;
-									}
-								}
-							}
-						}
-						else {
-							try {
-								for (Converter converter : converters) {
-									if (converter.isDecoder(item.name)) {
-										
-										if (converter.decode(dataStream, folder, item.name)) {
-											isConverted = true;
-											break;
-										}
-										else {
-											// throw new IOException("File could not be converted.");
-											// We could throw an error here, but it is not appropriate:
-											// some files cannot be converted but did not necessarily have an error,
-											// for example trying to convert a non-texture rw4. So we jsut keep searching
-											// for another converter or write the raw file.s
-											continue;
-										}
-									}
-								}
-							} catch (Exception e) {
-								e.printStackTrace();
-								exceptions.put(item, e);
-								// Handling the exception here will make it write the unconverted file
-							}
-						}
-						
-						if (!isConverted) {
-							// If it hasn't been converted, just write the file straight away.
-							
-							String name = hasher.getFileName(item.name.getInstanceID()) + "." + hasher.getTypeName(item.name.getTypeID());
-							dataStream.writeToFile(new File(folder, name));
-						}
-						
-						if (checkFiles) {
-							List<ResourceKey> list = writtenFiles.get(groupID);
-							if (list == null) {
-								list = new ArrayList<ResourceKey>();
-								writtenFiles.put(groupID, list);
-							}
-							list.add(item.name);
-						}
-					}
-					catch (Exception e) {
-						exceptions.put(item, e);
-					}
-					
-					incProgress(inc);
+			for (File inputFile : inputFiles) {
+				if (!inputFile.exists()) {
+					incProgress(100.0f / inputFiles.size());
+					failedDBPFs.add(inputFile);
+					continue;
 				}
 				
-				// Remove the extra names; if they need to be used, loading the project will load them as well
-				hasher.getProjectRegistry().clear();
-			} 
-			catch (Exception e) {
-				return e;
+				for (Converter converter : converters) converter.reset();
+				
+				try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
+					unpackStream(packageStream, checkFiles ? writtenFiles : null);
+				}
+				catch (Exception e) {
+					return e;
+				}
 			}
 		}
 		

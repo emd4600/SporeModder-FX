@@ -20,12 +20,13 @@
 package sporemodder.view.editors;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentFragment;
 import sporemodder.file.DocumentStructure;
+import sporemodder.file.TextReader;
 import sporemodder.file.TextUtils;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.UserInterface;
@@ -86,8 +88,9 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 	private final Popup popup = new Popup();
 	/** The label shown in text tooltips. */
 	private final Label popupMsg = new Label();
-	private boolean isValidText = true;
+	private boolean maintainTooltip;
 	
+	private boolean isValidText = true;
 	private String originalContents;
 	
 	
@@ -140,9 +143,15 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		codeArea.setMouseOverTextDelay(Duration.ofMillis(500));
 		
 		codeArea.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, event -> {
-			String text = getTooltipText(event);
-			if (text != null) {
-				popupMsg.setText(text);
+			Object object = getTooltipObject(event);
+			if (object != null) {
+				if (object instanceof String) {
+					popup.getContent().set(0, popupMsg);
+					popupMsg.setText((String) object);
+				}
+				else {
+					popup.getContent().set(0, (Node) object);
+				}
 				
 				Point2D pos = event.getScreenPosition();
 				popup.show(codeArea, pos.getX(), pos.getY() + 10);
@@ -251,21 +260,12 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 			this.syntaxHighlighting = syntaxHighlighting;
 		}
 		
-		// Set the text
-		byte[] bytes = Files.readAllBytes(file.toPath());
-		
-		// Always returns null, does not work fine
-//		String type = Files.probeContentType(file.toPath());
-//		isValidText = "text/plain".equals(type);
-		try {  
-			Charset.availableCharsets().get("UTF-8").newDecoder()
-				.decode(ByteBuffer.wrap(bytes));  
-			isValidText = true;
-		} catch (CharacterCodingException e) {  
-			isValidText = false;
-		}  
-		
-		loadContents(new String(bytes));
+		try (InputStream input = new FileInputStream(file)) {
+			TextReader reader = new TextReader();
+			reader.read(input);
+			isValidText = reader.isValidText();
+			loadContents(reader.getText());
+		}
 	}
 	
 	public void loadContents(String contents) throws IOException {
@@ -470,7 +470,7 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 	@Override protected void saveData() throws Exception {
 		if (!file.exists()) file.createNewFile();
 		
-		try (PrintWriter out = new PrintWriter(file)) {
+		try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
 			out.write(codeArea.getText());
 			
 			setIsSaved(true);
@@ -486,8 +486,8 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		return tooltipFactories;
 	}
 	
-	private String getTooltipText(MouseOverTextEvent e) {
-		String tooltip = null;
+	private Object getTooltipObject(MouseOverTextEvent e) {
+		Object tooltip = null;
 		String text = codeArea.getText();
 		
 		for (TooltipFactory factory : tooltipFactories) {
@@ -498,6 +498,21 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * If set to true, the tooltip will still appear even when the user moves the mouse; it will only disappear when the
+	 * mouse moves outside the editor, a mouse click is detected, or the user presses a key.
+	 * This is set to false again when the tooltip is hidden.
+	 * @param value
+	 */
+	public void setMaintainTooltip(boolean value) {
+		maintainTooltip = value;
+	}
+	
+	public void hideTooltip() {
+		popup.hide();
+		maintainTooltip = false;
 	}
 
 	@Override

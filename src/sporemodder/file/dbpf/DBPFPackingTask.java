@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,7 +45,8 @@ public class DBPFPackingTask extends Task<Void> {
 	/** The folder with the contents that are being packed. */
 	private File inputFolder;
 	private File outputFile;
-	private Project project;
+	
+	private StreamWriter outputStream;
 	
 	/** The total progress (in [0, 1]). */
 	private double progress = 0;
@@ -63,22 +63,28 @@ public class DBPFPackingTask extends Task<Void> {
 	private final AtomicBoolean running = new AtomicBoolean(true);
 	
 	public DBPFPackingTask(Project project, boolean storeDebugInformation) {
-		this.project = project;
 		this.inputFolder = project.getFolder();
 		this.outputFile = project.getOutputPackage();
 		this.packageSignature = project.getPackageSignature();
+		this.outputStream = null;
 		
 		if (storeDebugInformation) {
 			debugInfo = new DebugInformation(project.getName(), inputFolder.getAbsolutePath());
 		}
 	}
 	
-	/**
-	 * Returns the project that is being packed.
-	 * @return
-	 */
-	public Project getProject() {
-		return project;
+	public DBPFPackingTask(File inputFolder, File outputFile) {
+		this.inputFolder = inputFolder;
+		this.outputFile = outputFile;
+		this.packageSignature = PackageSignature.NONE;
+		this.outputStream = null;
+	}
+	
+	public DBPFPackingTask(File inputFolder, StreamWriter outputStream) {
+		this.inputFolder = inputFolder;
+		this.outputFile = null;
+		this.outputStream = outputStream;
+		this.packageSignature = PackageSignature.NONE;
 	}
 	
 	/**
@@ -148,122 +154,133 @@ public class DBPFPackingTask extends Task<Void> {
 			running.notify();
 		}
 	}
+	
+	private void pack() throws Exception {
+		final HashManager hasher = HashManager.get();
+		
+		MessageManager.get().postMessage(MessageType.BeforeDbpfPack, this);
+		
+		//TODO support DBBF maybe?
+		
+		// Doesn't really make sense to let the user disable converters.
+		List<Converter> converters = new ArrayList<>(FormatManager.get().getConverters());
+		// Reverse them so the most common ones (.prop, .rw4) are first
+		Collections.reverse(converters);
+		
+		File[] folders = inputFolder.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File arg0) {
+				return arg0.isDirectory();
+			}
+			
+		});
+		
+		/** How much we increment the progress (in %) after every folder is completed. */
+		double inc = 1.0 / folders.length;
+		
+		boolean alreadyHasPackageSignature = false;
+		
+		hasher.getProjectRegistry().clear();
+		hasher.setUpdateProjectRegistry(true);
+		
+		for (File folder : folders) {
+			
+			setCurrentFile(folder);
+			
+			String currentFolderName = folder.getName();
+			int currentGroupID = hasher.getFileHash(currentFolderName);
+			
+			File[] files = folder.listFiles();
+			
+			for (File file : files) {
+				// Ensure the task is not paused
+				if (!running.get()) {
+					synchronized (running) {
+						while (!running.get()) {
+							running.wait();
+						}
+					}
+				}
+				
+				boolean bUsesConverter = false;
+				
+				String name = file.getName();
+				file = getNestedFile(file, name, converters);
+				setCurrentFile(file);
+				
+				for (Converter converter : converters) {
+					if (converter.encode(file, packer, currentGroupID)) {
+						bUsesConverter = true;
+						break;
+					}
+				}
+				
+				// The converter must have written the data and added the DBPF item;
+				// if there was no converter, we do it here
+				if (!bUsesConverter) {
+					
+					String[] splits = name.split("\\.", 2);
+					String currentExtension = splits.length > 1 ? splits[1] : "";
+					
+					int currentInstanceID = hasher.getFileHash(splits[0]);
+					int currentTypeID = hasher.getTypeHash(currentExtension);
+					
+					byte[] currentInputData = Files.readAllBytes(file.toPath());
+					
+					packer.writeFile(new ResourceKey(currentGroupID, currentInstanceID, currentTypeID),
+							currentInputData, currentInputData.length);
+					
+					// Add debug information
+					// We only do it here because we cannot get the files from disk in Spore if they needed to be converted
+					if (debugInfo != null ) {
+						debugInfo.addFile(currentFolderName, name, currentGroupID, currentInstanceID, currentTypeID);
+					}
+				}
+			}
+			
+			if (!alreadyHasPackageSignature && currentGroupID == 0x40404000) {
+				alreadyHasPackageSignature = true;
+			}
+			
+			incProgress(inc);
+		}
+		
+		writeNamesList();
+		writePackageSignature(alreadyHasPackageSignature);
+		
+		// Save debug information
+		if (debugInfo != null) {
+			debugInfo.saveInformation(packer);
+		}
+		
+		MessageManager.get().postMessage(MessageType.OnDbpfPack, this);
+	}
 
 	@Override
 	protected Void call() throws Exception {
 		
 		long time = System.currentTimeMillis();
 		
-		final HashManager hasher = HashManager.get();
+		DBPFPacker packer;
+		if (outputStream != null) packer = new DBPFPacker(outputStream, false);
+		else packer = new DBPFPacker(outputFile);
 		
-		try (DBPFPacker packer = new DBPFPacker(outputFile)) {
+		try {
 			this.packer = packer;
 			
-			MessageManager.get().postMessage(MessageType.BeforeDbpfPack, this);
-			
-			//TODO support DBBF maybe?
-			
-			// Doesn't really make sense to let the user disable converters.
-			List<Converter> converters = new ArrayList<>(FormatManager.get().getConverters());
-			// Reverse them so the most common ones (.prop, .rw4) are first
-			Collections.reverse(converters);
-			
-			File[] folders = inputFolder.listFiles(new FileFilter() {
-
-				@Override
-				public boolean accept(File arg0) {
-					return arg0.isDirectory();
-				}
-				
-			});
-			
-			/** How much we increment the progress (in %) after every folder is completed. */
-			double inc = 1.0 / folders.length;
-			
-			boolean alreadyHasPackageSignature = false;
-			
-			hasher.getProjectRegistry().clear();
-			hasher.setUpdateProjectRegistry(true);
-			
-			for (File folder : folders) {
-				
-				setCurrentFile(folder);
-				
-				String currentFolderName = folder.getName();
-				int currentGroupID = hasher.getFileHash(currentFolderName);
-				
-				File[] files = folder.listFiles();
-				
-				for (File file : files) {
-					// Ensure the task is not paused
-					if (!running.get()) {
-						synchronized (running) {
-							while (!running.get()) {
-								running.wait();
-							}
-						}
-					}
-					
-					boolean bUsesConverter = false;
-					
-					String name = file.getName();
-					file = getNestedFile(file, name, converters);
-					setCurrentFile(file);
-					
-					for (Converter converter : converters) {
-						if (converter.encode(file, packer, currentGroupID)) {
-							bUsesConverter = true;
-							break;
-						}
-					}
-					
-					// The converter must have written the data and added the DBPF item;
-					// if there was no converter, we do it here
-					if (!bUsesConverter) {
-						
-						String[] splits = name.split("\\.", 2);
-						String currentExtension = splits.length > 1 ? splits[1] : "";
-						
-						int currentInstanceID = hasher.getFileHash(splits[0]);
-						int currentTypeID = hasher.getTypeHash(currentExtension);
-						
-						byte[] currentInputData = Files.readAllBytes(file.toPath());
-						
-						packer.writeFile(new ResourceKey(currentGroupID, currentInstanceID, currentTypeID),
-								currentInputData, currentInputData.length);
-						
-						// Add debug information
-						// We only do it here because we cannot get the files from disk in Spore if they needed to be converted
-						if (debugInfo != null ) {
-							debugInfo.addFile(currentFolderName, name, currentGroupID, currentInstanceID, currentTypeID);
-						}
-					}
-				}
-				
-				if (!alreadyHasPackageSignature && currentGroupID == 0x40404000) {
-					alreadyHasPackageSignature = true;
-				}
-				
-				incProgress(inc);
-			}
-			
-			writeNamesList();
-			writePackageSignature(alreadyHasPackageSignature);
-			
-			// Save debug information
-			if (debugInfo != null) {
-				debugInfo.saveInformation(packer);
-			}
-			
-			MessageManager.get().postMessage(MessageType.OnDbpfPack, this);
+			pack();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			failException = e;
 		}
+		finally {
+			if (packer != null) packer.close();
+		}
 		
 		// Once done, we can disable updating the project registry
-		hasher.setUpdateProjectRegistry(false);
+		HashManager.get().setUpdateProjectRegistry(false);
 		
 		time = System.currentTimeMillis() - time;
 		System.out.println("Packed in " + time + " ms");

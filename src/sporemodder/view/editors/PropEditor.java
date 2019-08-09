@@ -311,6 +311,8 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 	}
 	
 	@Override protected void onHyperlinkAction(HyperlinkData hyperlink) {
+		super.onHyperlinkAction(currentHyperlink);
+		
 		String path = null;
 		
 		if (hyperlink.type.equals("locale")) {

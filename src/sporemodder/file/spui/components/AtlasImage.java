@@ -64,7 +64,8 @@ public class AtlasImage extends SpuiElement implements ISporeImage {
 
 	@Override
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
-			double dw, double dh) {
+			double dw, double dh, Color shadeColor) {
+		
 		if (atlas == null) {
 			graphics.setFill(Color.WHITE);
 			graphics.fillRect(dx, dy, dw, dh);
@@ -95,7 +96,7 @@ public class AtlasImage extends SpuiElement implements ISporeImage {
 			sx = atlas.getWidth() * (uvCoordinates.x1 + relativeX);
 			sy = atlas.getHeight() * (uvCoordinates.y1 + relativeY);
 			
-			atlas.drawImage(graphics, sx, sy, sw, sh, dx, dy, dw, dh);
+			atlas.drawImage(graphics, sx, sy, sw, sh, dx, dy, dw, dh, shadeColor);
 		}
 	}
 
@@ -109,9 +110,8 @@ public class AtlasImage extends SpuiElement implements ISporeImage {
 		double h = getHeight();
 		canvas.setWidth(w);
 		canvas.setHeight(h);
-		
 		canvas.getGraphicsContext2D().clearRect(0, 0, w, h);
-		drawImage(canvas.getGraphicsContext2D(), 0, 0, w, h, 0, 0, w, h);
+		drawImage(canvas.getGraphicsContext2D(), 0, 0, w, h, 0, 0, w, h, Color.WHITE);
 		
 		canvas.translateXProperty().bind(scrollPane.widthProperty().subtract(w).divide(2.0));
 	}

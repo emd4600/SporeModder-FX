@@ -179,6 +179,41 @@
     </Category>
 
     <Category name="Spore UI Effects" display="submenu">
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Sound  Effect                                                                            ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+            <Enum name="Modes">
+                <EnumVal name="Play  Sound" value="0"></EnumVal>
+                <EnumVal name="Start Sound" value="1"></EnumVal>
+                <EnumVal name="Stop Sound" value="2"></EnumVal>
+                <EnumVal name="Stop Sound Hard" value="3"></EnumVal>
+                <EnumVal name="Send Slider Value" value="4"></EnumVal>
+                <EnumVal name="Send Button Selected" value="5"></EnumVal>
+                <EnumVal name="Send User Value" value="6"></EnumVal>
+            </Enum>
+            <Enum name="MyTriggerTypes">
+                <EnumVal name="Button Click" value="1000"></EnumVal>
+                <EnumVal name="Slider Change Begin" value="1001"></EnumVal>
+                <EnumVal name="Slider Change End" value="1002"></EnumVal>
+                <EnumVal name="Slider Change" value="1003"></EnumVal>
+                <EnumVal name="Mouse Down" value="1004"></EnumVal>
+                <EnumVal name="Mouse Up" value="1005"></EnumVal>
+                <EnumVal name="Mouse Enter" value="1006"></EnumVal>
+                <EnumVal name="Mouse Leave" value="1007"></EnumVal>
+                <EnumVal name="Button Selected" value="10"></EnumVal>
+                <EnumVal name="Button Unselected" value="11"></EnumVal>
+                <EnumVal name="Visible" value="0"></EnumVal>
+                <EnumVal name="Invisible" value="1"></EnumVal>
+                <EnumVal name="Enabled" value="2"></EnumVal>
+                <EnumVal name="Disabled" value="3"></EnumVal>
+            </Enum>
+        <Class name="Sound Effect" base="Effect" proxy="0x085a147e" description="Play sounds or set audio properties">
+            <Property name="Trigger" type="uint32" proxy="0x4f2b0001" enum="MyTriggerTypes" default="1000" description="The type of event that triggers this effect"/>
+            <Property name="Mode" enum="Modes" type="uint32" proxy="0x085a0f81" default="0" description="Mode of operation"/>
+            <Property name="ID Name" type="string" default=""  proxy="0x085a0f5e" description="Sound/property name"/>
+            <Property name="User Value" type="float" proxy="0x085a0f79" description="Property value used on begin-event"/>
+        </Class>
+		
         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               ~~~                    Rotate effect that allows to set the start rotation angle        ~~~        
               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->

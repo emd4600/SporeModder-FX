@@ -31,9 +31,9 @@ public class StdDrawable extends IDrawable {
 	
 	private final ISporeImage[] image = new ISporeImage[8];
 	private RLEHitMask hitMask;  //TODO use this to detect hits
-	private int scaleType;
+	protected int scaleType;
 	private final Vector2 scaleFactor = new Vector2(1.0f, 1.0f);
-	private	final Borders scaleArea = new Borders();
+	protected final Borders scaleArea = new Borders();
 	// outline format as well, but we don't use it
 	
 	@Override public void paint(IWindow window, SpuiViewer viewer) {
@@ -41,16 +41,16 @@ public class StdDrawable extends IDrawable {
 		if (img == null) img = image[0];
 		if (img != null) {
 			if (scaleType == STRETCH_IMAGE) {
-				ISporeImage.drawImage(viewer.getGraphicsContext2D(), img, window.getRealArea());
+				ISporeImage.drawImage(viewer.getGraphicsContext2D(), img, window.getRealArea(), window.getShadeColor());
 			}
 			else if (scaleType == STRETCH_CENTER) {
-				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), img, false, window.getRealArea(), scaleArea);
+				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), img, false, window.getRealArea(), scaleArea, window.getShadeColor());
 			}
 			else if (scaleType == TILE_IMAGE) {
-				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), img, window.getRealArea());
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), img, window.getRealArea(), window.getShadeColor());
 			}
 			else if (scaleType == TILE_CENTER) {
-				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), img, true, window.getRealArea(), scaleArea);
+				ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), img, true, window.getRealArea(), scaleArea, window.getShadeColor());
 			}
 		}
 	}

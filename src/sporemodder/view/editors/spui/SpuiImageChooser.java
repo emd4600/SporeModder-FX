@@ -28,6 +28,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import sporemodder.file.spui.components.ISporeImage;
 
 public class SpuiImageChooser extends Dialog<ButtonType> {
@@ -90,6 +91,6 @@ public class SpuiImageChooser extends Dialog<ButtonType> {
 		
 		image.drawImage(imageCanvas.getGraphicsContext2D(), 
 				0, 0, width, height, 
-				(totalWidth - width) / 2.0, (totalHeight - height) / 2.0, width, height);
+				(totalWidth - width) / 2.0, (totalHeight - height) / 2.0, width, height, Color.WHITE);
 	}
 }

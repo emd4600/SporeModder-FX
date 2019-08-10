@@ -72,6 +72,7 @@ public class DBPFPacker implements AutoCloseable {
 	
 	public DBPFPacker(StreamWriter output, boolean closeStream) throws IOException {
 		stream = output;
+		this.closeStream = closeStream;
 		initialWrite();
 	}
 	

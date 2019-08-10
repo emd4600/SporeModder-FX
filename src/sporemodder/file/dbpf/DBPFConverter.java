@@ -73,22 +73,25 @@ public class DBPFConverter implements Converter {
 
 	@Override
 	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
-		String[] splits = input.getName().split("\\.", 2);
-		
-		ResourceKey name = packer.getTemporaryName();
-		name.setInstanceID(HashManager.get().getFileHash(splits[0]));
-		name.setGroupID(groupID);
-		name.setTypeID(TYPE_ID);  // soundProp or prop
-		
-		packer.writeFile(name, stream -> {
-			DBPFPackingTask task = new DBPFPackingTask(input, stream);
-			task.call();
+		if (isEncoder(input)) {
+			String[] splits = input.getName().split("\\.", 2);
 			
-			// The task will have disabled this, enable it again
-			HashManager.get().setUpdateProjectRegistry(true);
-		});
-		
-		return true;
+			ResourceKey name = packer.getTemporaryName();
+			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
+			name.setGroupID(groupID);
+			name.setTypeID(TYPE_ID);  // soundProp or prop
+			
+			packer.writeFile(name, stream -> {
+				DBPFPackingTask task = new DBPFPackingTask(input, stream);
+				task.call();
+				
+				// The task will have disabled this, enable it again
+				HashManager.get().setUpdateProjectRegistry(true);
+			});
+			
+			return true;
+		}
+		return false;
 	}
 
 	@Override

@@ -109,4 +109,35 @@ public abstract class RWKeyframe {
 		}
 		
 	}
+	
+	public static class BlendFactor extends RWKeyframe {
+		
+		public static final int COMPONENTS = 0x100;
+		public static final int SIZE = 8;
+		
+		public float factor = 0.0f;
+
+		@Override
+		public void read(StreamReader stream) throws IOException {
+			factor = stream.readLEFloat();
+			time = stream.readLEFloat();
+		}
+
+		@Override
+		public void write(StreamWriter stream) throws IOException {
+			stream.writeLEFloat(factor);
+			stream.writeLEFloat(time);
+		}
+
+		@Override
+		public int getComponents() {
+			return COMPONENTS;
+		}
+
+		@Override
+		public int getSize() {
+			return SIZE;
+		}
+		
+	}
 }

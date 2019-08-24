@@ -82,6 +82,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	
 	private Project project;
 	
+	private boolean isOptimized;
+	
 	public DBPFUnpackingTask(File inputFile, File outputFolder, Project project, List<Converter> converters) {
 		this.inputFiles.add(inputFile);
 		this.outputFolder = outputFolder;
@@ -219,12 +221,16 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			folder.mkdir();
 			
 			FileConvertAction action = new FileConvertAction(item, folder, item.processFile(packageStream), inc, latch);
-			if (itemIndex == index.items.size() - 1) {
-				// Execute in same thread if it's the last item
-				ForkJoinPool.commonPool().invoke(action);
-			}
-			else {
-				ForkJoinPool.commonPool().execute(action);
+			if (isOptimized) {
+				if (itemIndex == index.items.size() - 1) {
+					// Execute in same thread if it's the last item
+					ForkJoinPool.commonPool().invoke(action);
+				}
+				else {
+					ForkJoinPool.commonPool().execute(action);
+				}
+			} else {
+				action.compute();
 			}
 				
 			if (writtenFiles != null) {

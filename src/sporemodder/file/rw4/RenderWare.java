@@ -23,19 +23,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
-import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
 import sporemodder.file.rw4.RWSectionSubReferences.SubReference;
-import sporemodder.file.rw4.RWSkeleton.Bone;
 
 public class RenderWare {
 	
@@ -55,6 +52,8 @@ public class RenderWare {
 		// First we must create the objects
 		// Don't read the objects themselves as they might reference an object that does not yet exist.
 		for (RWSectionInfo info : sectionInfos) {
+			info.print();
+			System.out.println();
 			RWObject object = createObject(info.typeCode);
 			objects.add(object);
 			
@@ -65,7 +64,7 @@ public class RenderWare {
 				System.err.println("Unrecognised RW section type: 0x" + Integer.toHexString(info.typeCode));
 			}
 		}
-		
+		System.out.println("position: " + stream.getFilePointer());
 		// Now that all objects have been created, read the sub references
 		header.sectionManifest.subReferences.readReferences(stream);
 		
@@ -389,6 +388,8 @@ public class RenderWare {
 		case RWTriangleKDTreeProcedural.TYPE_CODE: return new RWTriangleKDTreeProcedural(this);
 		case RWAnimations.TYPE_CODE: return new RWAnimations(this);
 		case RWKeyframeAnim.TYPE_CODE: return new RWKeyframeAnim(this);
+		case RWBlendShape.TYPE_CODE: return new RWBlendShape(this);
+		case RWBlendShapeBuffer.TYPE_CODE: return new RWBlendShapeBuffer(this);
 		default:
 			return null;
 		}
@@ -416,7 +417,9 @@ public class RenderWare {
 		MainApp.testInit();
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_03.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\be_classic_01.rw4";
-		String path = "C:\\Users\\Eric\\Desktop\\untitled.rw4";
+		//String path = "C:\\Users\\Eric\\Desktop\\Willosaur Mouth rig 4.rw4";
+		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_01.rw4";
+		String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
 		
 		RenderWare renderWare = RenderWare.fromFile(new File(path));

@@ -244,3 +244,10 @@ lua	0x3681D755
 blockdata	0x5caa5e28
 ClassAttributes	0x474940A5
 NonPlayerClass	0xD117AFCA
+
+mounted
+direct
+detail
+round
+square
+origin

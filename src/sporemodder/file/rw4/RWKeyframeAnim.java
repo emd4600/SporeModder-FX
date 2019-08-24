@@ -24,6 +24,7 @@ import java.util.List;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import sporemodder.file.rw4.RWKeyframe.BlendFactor;
 import sporemodder.file.rw4.RWKeyframe.LocRot;
 import sporemodder.file.rw4.RWKeyframe.LocRotScale;
 
@@ -47,6 +48,10 @@ public class RWKeyframeAnim extends RWObject {
 				return keyframe;
 			case LocRot.COMPONENTS:
 				keyframe = (T) new LocRot();
+				keyframes.add(keyframe);
+				return keyframe;
+			case BlendFactor.COMPONENTS:
+				keyframe = (T) new BlendFactor();
 				keyframes.add(keyframe);
 				return keyframe;
 			default:
@@ -149,6 +154,8 @@ public class RWKeyframeAnim extends RWObject {
 			return new Channel<LocRotScale>();
 		case LocRot.COMPONENTS:
 			return new Channel<LocRot>();
+		case BlendFactor.COMPONENTS:
+			return new Channel<BlendFactor>();
 		default:
 			return null;
 		}

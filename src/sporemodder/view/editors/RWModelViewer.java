@@ -86,6 +86,7 @@ import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
 import sporemodder.file.rw4.MaterialStateCompiler;
 import sporemodder.file.rw4.RWBBox;
 import sporemodder.file.rw4.RWBaseResource;
+import sporemodder.file.rw4.RWBlendShapeBuffer;
 import sporemodder.file.rw4.RWCompiledState;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
 import sporemodder.file.rw4.RWIndexBuffer;
@@ -272,9 +273,68 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     	
 	}
 	
-	private TriangleMesh readMesh(RWMesh mesh) throws IOException {
+	private TriangleMesh processBlendShape(RWMesh mesh) throws IOException {
 		
-		//TODO this will not work for shape key meshes
+		List<RWBlendShapeBuffer> buffers = renderWare.getObjects(RWBlendShapeBuffer.class);
+		if (buffers.size() != 1) {
+			throw new IOException("Unsupported type of blend shape mesh");
+		}
+		
+		RWBlendShapeBuffer buffer = buffers.get(0);
+		
+		if (buffer.data[RWBlendShapeBuffer.INDEX_POSITION] == null) {
+			throw new IOException("Cannot process BlendShape without POSITION.");
+		}
+		
+		int vertexCount = mesh.vertexCount;
+		int vertexStart = mesh.firstVertex;
+		float[] positions = new float[3 * vertexCount];
+		float[] texCoords = buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD] == null ? null : new float[2 * vertexCount];
+		float[] normals = buffer.data[RWBlendShapeBuffer.INDEX_POSITION] == null ? null : new float[3 * vertexCount];
+		
+		try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_POSITION])) {
+			for (int i = 0; i < vertexCount; ++i) {
+				stream.seek((vertexStart+i) * 16);
+				positions[i * 3 + 0] = stream.readLEFloat();
+				positions[i * 3 + 1] = stream.readLEFloat();
+				positions[i * 3 + 2] = stream.readLEFloat();
+				stream.skip(4);
+			}
+		}
+		
+		if (texCoords != null) {
+			try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD])) {
+				for (int i = 0; i < vertexCount; ++i) {
+					stream.seek((vertexStart+i) * 16);
+					texCoords[i * 2 + 0] = stream.readLEFloat();
+					texCoords[i * 2 + 1] = stream.readLEFloat();
+					stream.skip(8);
+				}
+			}
+		}
+		
+		if (normals != null) {
+			try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_NORMAL])) {
+				for (int i = 0; i < vertexCount; ++i) {
+					stream.seek((vertexStart+i) * 16);
+					normals[i * 3 + 0] = stream.readLEFloat();
+					normals[i * 3 + 1] = stream.readLEFloat();
+					normals[i * 3 + 2] = stream.readLEFloat();
+					stream.skip(4);
+				}
+			}
+		}
+		
+		TriangleMesh triangleMesh = new TriangleMesh();
+		triangleMesh.setVertexFormat(normals == null ? VertexFormat.POINT_TEXCOORD : VertexFormat.POINT_NORMAL_TEXCOORD);
+		triangleMesh.getPoints().addAll(positions);
+		if (texCoords != null) triangleMesh.getTexCoords().addAll(texCoords);
+		if (normals != null) triangleMesh.getNormals().addAll(normals);
+		
+		return triangleMesh;
+	}
+	
+	private TriangleMesh processVertexBuffer(RWMesh mesh) throws IOException {
 		RWVertexBuffer buffer = mesh.vertexBuffers.get(0);
 		
 		try (MemoryStream vertexStream = new MemoryStream(buffer.vertexData.data);
@@ -330,8 +390,26 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				}
 			}
 			
-			// Now do the indices
-			int indexComponents = normals == null ? 2 : 3;
+			TriangleMesh triangleMesh = new TriangleMesh();
+			triangleMesh.setVertexFormat(normals == null ? VertexFormat.POINT_TEXCOORD : VertexFormat.POINT_NORMAL_TEXCOORD);
+			triangleMesh.getPoints().addAll(positions);
+			triangleMesh.getTexCoords().addAll(texCoords);
+			if (normals != null) triangleMesh.getNormals().addAll(normals);
+			
+			return triangleMesh;
+		}
+	}
+	
+	private TriangleMesh readMesh(RWMesh mesh) throws IOException {
+		
+		RWVertexBuffer buffer = mesh.vertexBuffers.get(0);
+		TriangleMesh triangleMesh = buffer == null ? processBlendShape(mesh) : processVertexBuffer(mesh);
+		
+		boolean hasNormals = triangleMesh.getNormals().size() != 0;
+		
+		try (MemoryStream indexStream = new MemoryStream(mesh.indexBuffer.indexData.data)) 
+		{
+			int indexComponents = hasNormals ? 3 : 2;
 			int[] indices = new int[mesh.triangleCount * indexComponents * 3];
 			indexStream.seek(mesh.firstIndex * 2);
 			for (int i = 0; i < mesh.triangleCount; i++) {
@@ -339,7 +417,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 					int index = indexStream.readLEUShort();
 					indices[i*indexComponents*3 + indexComponents*j] = index;
 					indices[i*indexComponents*3 + indexComponents*j + 1] = index;
-					if (normals != null) indices[i*indexComponents*3 + indexComponents*j + 2] = index;
+					if (hasNormals) indices[i*indexComponents*3 + indexComponents*j + 2] = index;
 				}
 			}
 			
@@ -354,15 +432,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 					indices[i] -= mesh.firstVertex;
 				}
 			}
-			
-			// Finally, create the JavaFX mesh
-			
-			TriangleMesh triangleMesh = new TriangleMesh();
-			triangleMesh.setVertexFormat(normals == null ? VertexFormat.POINT_TEXCOORD : VertexFormat.POINT_NORMAL_TEXCOORD);
-			triangleMesh.getPoints().addAll(positions);
-			triangleMesh.getTexCoords().addAll(texCoords);
-			
-			if (normals != null) triangleMesh.getNormals().addAll(normals);
 			
 			triangleMesh.getFaces().addAll(indices);
 			

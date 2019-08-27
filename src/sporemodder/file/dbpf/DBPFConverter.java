@@ -113,7 +113,7 @@ public class DBPFConverter implements Converter {
 
 	@Override
 	public String getName() {
-		return "Database Packed File (." + HashManager.get().getTypeName(TYPE_ID) + ")";
+		return "Localization Package (." + HashManager.get().getTypeName(TYPE_ID) + ")";
 	}
 
 	@Override

@@ -30,6 +30,7 @@ public class RWBlendShape extends RWObject {
 		if (shapeCount != stream.readLEInt()) {
 			throw new IOException("Malformed BlendShape.");
 		}
+		id = stream.readLEInt();
 		
 		// This is a buffer for the shape times, gets replaced by code
 		stream.skip(4 * shapeCount);
@@ -51,6 +52,7 @@ public class RWBlendShape extends RWObject {
 		stream.writeLEInt(shapeIDs.size());
 		stream.writeLEInt(renderWare.indexOf(placeholder, RenderWare.INDEX_SUB_REFERENCE));
 		stream.writeLEInt(shapeIDs.size());
+		stream.writeLEInt(id);
 		stream.writePadding(shapeIDs.size() * 4);
 		for (int i : shapeIDs) stream.writeLEInt(i);
 	}

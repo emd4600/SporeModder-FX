@@ -18,8 +18,6 @@
 ****************************************************************************/
 package sporemodder.view.editors;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,22 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import javax.imageio.ImageIO;
-
 import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import javafx.beans.property.ObjectProperty;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
-import javafx.scene.Camera;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
-import javafx.scene.PointLight;
 import javafx.scene.SceneAntialiasing;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -52,8 +43,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.effect.BlurType;
-import javafx.scene.effect.Shadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -65,7 +54,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
@@ -73,7 +61,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import sporemodder.FileManager;
@@ -143,8 +130,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private static final double FOV = 45;
 	
-	/** How much the camera can rotate for every pixel of mouse dragged, in degree angles. */
-	private static final double CAMERA_SPEED = 0.25;
 	/** The minimum camera distance allowed. */
 	private static final double MIN_DISTANCE = 0.1;
 	/** The maximum camera distance allowed. */
@@ -183,15 +168,14 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	// WARNING: JavaFX uses Y axis for Spore's Z axis (up-down) 
 
-	private final XformCamera cameraXform = new XformCamera();
+	// We start with a rotation so the model is viewed from an angle
 	private PerspectiveCamera camera;
 	/** The camera rotation around its X axis, which produces a vertical movement of the camera. */
-	// We start with a rotation so the model is viewed from an angle
 	private final Rotate cameraRotateX = new Rotate(-20, Rotate.X_AXIS);
 	/** The camera rotation around its Y axis, which produces a horizontal movement of the camera. */
 	private final Rotate cameraRotateY = new Rotate(45, Rotate.Y_AXIS);
 	/** The camera translation used to create a zoom effect. Only the Z coordinate is used. */
-	private final Translate cameraZoomTranslate = new Translate(0, 0, -5);
+	private final Translate cameraTranslation = new Translate(0, 0, -5);
 	/** The initial camera distance from the object. At this distance, there is no zoom. */
 	private double initialCameraDistance;
 	/** The current distance from the object. */
@@ -212,12 +196,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private final Map<RWRaster, Image> rasterImages = new HashMap<>();
 	private final Map<RWRaster, ObjectProperty<Image>> rasterImageProperties = new HashMap<>();
 	
-	private double mouseX;
-	private double mouseY;
-	private double cameraAngleX;
-	private double cameraAngleY;
-	
-	double mousePosX, mousePosY, mouseOldX, mouseOldY, mouseDeltaX, mouseDeltaY;
+	double mousePosX, mousePosY, mouseOldX, mouseOldY;
 	
 	// -- Inspector -- //
 	
@@ -292,15 +271,27 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		float[] texCoords = buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD] == null ? null : new float[2 * vertexCount];
 		float[] normals = buffer.data[RWBlendShapeBuffer.INDEX_POSITION] == null ? null : new float[3 * vertexCount];
 		
+		//final int shapeIndex = 3;
+		
 		try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_POSITION])) {
+			stream.seek(vertexStart * 16);
 			for (int i = 0; i < vertexCount; ++i) {
-				stream.seek((vertexStart+i) * 16);
 				positions[i * 3 + 0] = stream.readLEFloat();
 				positions[i * 3 + 1] = stream.readLEFloat();
 				positions[i * 3 + 2] = stream.readLEFloat();
 				stream.skip(4);
 			}
 		}
+		
+//		try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_POSITION])) {
+//			stream.seek(shapeIndex*buffer.vertexCount*16 + vertexStart * 16);
+//			for (int i = 0; i < vertexCount; ++i) {
+//				positions[i * 3 + 0] += stream.readLEFloat();
+//				positions[i * 3 + 1] += stream.readLEFloat();
+//				positions[i * 3 + 2] += stream.readLEFloat();
+//				stream.skip(4);
+//			}
+//		}
 		
 		if (texCoords != null) {
 			try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD])) {
@@ -458,7 +449,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		}
 		
 		// Negative because we want to be behind the object to see it
-		cameraZoomTranslate.setZ(- cameraDistance);
+		cameraTranslation.setZ(-cameraDistance);
 	}
 	
 	private void buildAxes() {
@@ -689,35 +680,18 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
             mouseOldY = mousePosY;
             mousePosX = me.getSceneX();
             mousePosY = me.getSceneY();
-            mouseDeltaX = (mousePosX - mouseOldX);
-            mouseDeltaY = (mousePosY - mouseOldY);
+            double mouseDeltaX = (mousePosX - mouseOldX);
+            double mouseDeltaY = (mousePosY - mouseOldY);
             
             if (me.isPrimaryButtonDown()) {
-                cameraXform.ry(mouseDeltaX * 180.0 / subScene.getWidth());
-                cameraXform.rx(-mouseDeltaY * 180.0 / subScene.getHeight());
-            	
-//            	cameraRotateY.setAngle(mouseDeltaX * 180.0 / subScene.getWidth());
-//            	cameraRotateX.setAngle(-mouseDeltaY * 180.0 / subScene.getHeight());
+            	cameraRotateY.setAngle(cameraRotateY.getAngle() + mouseDeltaX * 180.0 / subScene.getWidth());
+            	cameraRotateX.setAngle(cameraRotateX.getAngle() - mouseDeltaY * 180.0 / subScene.getHeight());
             }
-//            else if (me.isSecondaryButtonDown()) {
-//                camera.setTranslateZ(camera.getTranslateZ() + mouseDeltaY);
-//            }
         });
 		
 		subScene.setOnScroll((event) -> {
 			zoom(event.getDeltaY() * ZOOM_FACTOR);
-		}); 
-		
-//		subScene.setOnMouseClicked((event) -> {
-//			if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-//				try {
-//					takeIconSnapshot();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		});
+		});
 		
 		fillTreeView();
 	}
@@ -759,158 +733,22 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private void buildCamera() {
 		camera = new PerspectiveCamera(true);
 		camera.setFieldOfView(FOV);
-//		camera.setTranslateZ(-initialCameraDistance);
 		
+		camera.getTransforms().clear();
 		camera.getTransforms().addAll(
-//			cameraRotateY,
-//			cameraRotateX,
-			cameraZoomTranslate);
+                cameraRotateY,
+                cameraRotateX,
+                cameraTranslation
+        );
 		
 		zoom(0);
 		
-        group.getChildren().add(cameraXform);
-        cameraXform.getChildren().add(camera);
+        group.getChildren().add(camera);
     }
 	
 	private void bindDimensions() {
 		subScene.widthProperty().bind(mainNode.widthProperty());
 		subScene.heightProperty().bind(mainNode.heightProperty());
-	}
-	
-	private void takeIconSnapshot() throws IOException {
-		// Store previous parameters
-		Paint originalFill = subScene.getFill();
-		Camera originalCamera = subScene.getCamera();
-		boolean originalAxes = axesGroup.isVisible();
-		boolean lightOn = ambientLight.isLightOn();
-		
-		double halfX = bbox.getLengthX() / 2.0;
-		double halfY = bbox.getLengthY() / 2.0;
-		double halfZ = bbox.getLengthZ() / 2.0;
-		
-		double movementX = halfX - bbox.getMax().getX();
-		double movementY = halfY - bbox.getMax().getY();
-		double movementZ = halfZ - bbox.getMax().getZ();
-		
-		final List<List<Transform>> originalTransforms = new ArrayList<List<Transform>>();
-		
-		double extraRotationX = -5;
-		double extraRotationY = -20;  // -5
-		double extraRotationZ = -10;  // -10 
-		
-		for (MeshView meshView : meshes) {
-			originalTransforms.add(new ArrayList<Transform>(meshView.getTransforms()));
-			
-			meshView.getTransforms().clear();
-			meshView.getTransforms().add(new Rotate(extraRotationX + -90, Rotate.X_AXIS));
-			meshView.getTransforms().add(new Rotate(extraRotationY + 180 + 51, Rotate.Y_AXIS));
-			meshView.getTransforms().add(new Rotate(extraRotationZ, Rotate.Z_AXIS));
-			meshView.getTransforms().add(new Translate(movementX, movementY, movementZ));
-		}
-		
-		// Remove binding
-		subScene.widthProperty().unbind();
-		subScene.heightProperty().unbind();
-		
-		// Set the camera settings
-		PerspectiveCamera snapshotCamera = new PerspectiveCamera(true);
-		snapshotCamera.setFieldOfView(45);
-		snapshotCamera.setNearClip(0.2);
-		snapshotCamera.setFarClip(200);
-//		snapshotCamera.getTransforms().addAll(
-//				new Rotate(50 + 90*2, Rotate.Y_AXIS),
-//				new Rotate(-15, Rotate.X_AXIS),
-//				new Translate(0, 0, -bbox.getBiggest()*2)
-//				);
-		
-		snapshotCamera.getTransforms().addAll(
-				new Rotate(-57 + 90*3, Rotate.Y_AXIS),
-				new Rotate(-28.6 + 90*0, Rotate.X_AXIS),
-				new Translate(0, 0, -bbox.getBiggestLength()*3.8*0.7)
-				);
-		
-		PointLight pointLight = new PointLight(Color.gray(0.38));
-		pointLight.getTransforms().addAll(snapshotCamera.getTransforms());
-		
-		PointLight pointLightTop = new PointLight(Color.gray(0.2));
-		pointLightTop.getTransforms().addAll(new Translate(0, bbox.getLengthZ()*2, 0));
-		
-		PointLight pointLightBottom = new PointLight(Color.gray(0.2));
-		pointLightBottom.getTransforms().addAll(new Translate(0, -bbox.getLengthZ()*2, 0));
-		
-		PointLight pointLightFront = new PointLight(Color.gray(0.3));
-		pointLightFront.getTransforms().addAll(new Translate(0, 0, -bbox.getLengthY()*2));
-		
-		PointLight pointLightBack = new PointLight(Color.gray(0.2));
-		pointLightBack.getTransforms().addAll(new Translate(0, 0, bbox.getLengthY()*2));
-		
-//		Box top = new Box(0.05, 0.05, 0.05);
-//		top.setMaterial(new PhongMaterial(Color.RED));
-//		top.getTransforms().addAll(new Translate(0, bbox.getLengthZ()*2, 0));
-//		
-//		Box bottom = new Box(0.05, 0.05, 0.05);
-//		bottom.setMaterial(new PhongMaterial(Color.DARKRED));
-//		bottom.getTransforms().addAll(new Translate(0, -bbox.getLengthZ()*2, 0));
-		
-		Box front = new Box(0.05, 0.05, 0.05);
-		front.setMaterial(new PhongMaterial(Color.PALEVIOLETRED));
-		front.getTransforms().addAll(new Translate(0, 0, bbox.getLengthY()*2));
-		
-//		group.getChildren().addAll(front);
-		
-//		ambientLight.setColor(Color.gray(0.8));
-		
-		group.getChildren().add(pointLight);
-//		group.getChildren().add(pointLightTop);
-//		group.getChildren().add(pointLightBottom);
-//		group.getChildren().add(pointLightFront);
-//		group.getChildren().add(pointLightBack);
-		
-		Shadow shadowEffect = new Shadow();
-		shadowEffect.setBlurType(BlurType.GAUSSIAN);
-		shadowEffect.setColor(Color.BLACK);
-		shadowEffect.setWidth(17);
-		shadowEffect.setHeight(17);
-
-		
-		int dimensions = 128;
-		
-		subScene.setCamera(snapshotCamera);
-		subScene.setWidth(dimensions);
-		subScene.setHeight(dimensions);
-		axesGroup.setVisible(false);
-		
-		SnapshotParameters sp = new SnapshotParameters();
-	    sp.setFill(Color.TRANSPARENT);
-	    subScene.setFill(Color.TRANSPARENT);
-	    
-	    // Take 2 snapshots: one for the shadow and the other the image itself
-	    BufferedImage normalSnapshot = SwingFXUtils.fromFXImage(subScene.snapshot(sp, null), null);
-	    
-	    subScene.setEffect(shadowEffect);
-	    BufferedImage shadowSnapshot = SwingFXUtils.fromFXImage(subScene.snapshot(sp, null), null);
-	    
-	    BufferedImage thumbnail = new BufferedImage(dimensions, dimensions, BufferedImage.TYPE_INT_ARGB);
-	    Graphics g = thumbnail.getGraphics();
-	    g.drawImage(shadowSnapshot, (int) (-dimensions*0.05), (int) (-dimensions*0.05), null);
-	    g.drawImage(normalSnapshot, 0, 0, null);
-		
-		// Save the thumbnail
-		ImageIO.write(thumbnail, "png", new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\creatureparticons~\\snapshot.png"));
-		
-		// Restore previous parameters
-		subScene.setFill(originalFill);
-		subScene.setCamera(originalCamera);
-		axesGroup.setVisible(originalAxes);
-		ambientLight.setLightOn(lightOn);
-		subScene.setEffect(null);
-		bindDimensions();
-		
-//		group.getChildren().remove(pointLight);
-		
-		for (int i = 0; i < meshes.size(); i++) {
-			meshes.get(i).getTransforms().setAll(originalTransforms.get(i));
-		}
 	}
 	
 	@Override
@@ -942,32 +780,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	@Override
 	public boolean isEditable() {
 		return true;
-	}
-	
-	class XformCamera extends Group {
-	    Point3D px = new Point3D(1.0, 0.0, 0.0);
-	    Point3D py = new Point3D(0.0, 1.0, 0.0);
-	    Rotate r;
-	    Transform t = new Rotate();
-
-	    public XformCamera() {
-	        super();
-	    }
-
-	    public void rx(double angle) {
-	        r = new Rotate(angle, px);
-	        this.t = t.createConcatenation(r);
-	        this.getTransforms().clear();
-	        this.getTransforms().addAll(t);
-	    }
-
-	    public void ry(double angle) {
-	        r = new Rotate(angle, py);
-	        this.t = t.createConcatenation(r);
-	        this.getTransforms().clear();
-	        this.getTransforms().addAll(t);
-	    }
-
 	}
 
 	@Override

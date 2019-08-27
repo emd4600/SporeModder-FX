@@ -420,6 +420,7 @@ public class RenderWare {
 		//String path = "C:\\Users\\Eric\\Desktop\\Willosaur Mouth rig 4.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_01.rw4";
 		String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\GridProject\\TestModels\\ce_mouth_mandible_carnivore_04.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
 		
 		RenderWare renderWare = RenderWare.fromFile(new File(path));

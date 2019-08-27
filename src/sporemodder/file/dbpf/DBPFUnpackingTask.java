@@ -82,7 +82,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	
 	private Project project;
 	
-	private boolean isOptimized;
+	//TODO it's faster, but apparently it causes problems; I can't reproduce the bug
+	private boolean isParallel = false;
 	
 	public DBPFUnpackingTask(File inputFile, File outputFolder, Project project, List<Converter> converters) {
 		this.inputFiles.add(inputFile);
@@ -147,7 +148,16 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	public void setItemFilter(DBPFItemFilter itemFilter) {
 		this.itemFilter = itemFilter;
 	}
+
 	
+	public boolean isParallel() {
+		return isParallel;
+	}
+
+	public void setParallel(boolean isParallel) {
+		this.isParallel = isParallel;
+	}
+
 	private static void findNamesFile(List<DBPFItem> items, StreamReader in) throws IOException {
 		HashManager hasher = HashManager.get();
 		int group = hasher.getFileHash("sporemaster");
@@ -221,7 +231,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			folder.mkdir();
 			
 			FileConvertAction action = new FileConvertAction(item, folder, item.processFile(packageStream), inc, latch);
-			if (isOptimized) {
+			if (isParallel) {
 				if (itemIndex == index.items.size() - 1) {
 					// Execute in same thread if it's the last item
 					ForkJoinPool.commonPool().invoke(action);

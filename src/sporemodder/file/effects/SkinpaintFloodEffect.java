@@ -519,7 +519,7 @@ public class SkinpaintFloodEffect extends EffectComponent {
 					else if (line.hasFlag("mirror")) variable.flag = 4;
 					else if (line.hasFlag("clamp2")) variable.flag = 5;
 					else if (line.hasFlag("wrap2")) variable.flag = 6;
-					else if (line.hasFlag("mirro2r")) variable.flag = 7;
+					else if (line.hasFlag("mirror2")) variable.flag = 7;
 				}
 				
 				effect.variables.add(variable);
@@ -715,7 +715,7 @@ public class SkinpaintFloodEffect extends EffectComponent {
 			if (modifier.value_1 != 1.0f) writer.option("scale").floats(modifier.value_1);
 			break;
 		case 3:
-			// 1 / (Vector(1, 1, 1) · vector)
+			// 1 / (Vector(1, 1, 1) Â· vector)
 			// float dotProduct = 1 * value_0 + 1 * value_1 + 1 * value_2  + 0.00000001; 
 			// we can't calculate this, but since it's already "normalized" it will work anyways
 			writer.vector(modifier.value_0, modifier.value_1, modifier.value_2);

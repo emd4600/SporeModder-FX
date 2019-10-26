@@ -24,6 +24,8 @@ public class RWBlendShapeBuffer extends RWObject {
 	public final byte[][] data = new byte[11][];
 	public int shapeCount;  //TODO not really! shapeCount - 1?
 	public int vertexCount;
+	public int unk;
+	public int boneIndicesCount;
 	
 	public RWBlendShapeBuffer(RenderWare renderWare) {
 		super(renderWare);
@@ -44,10 +46,14 @@ public class RWBlendShapeBuffer extends RWObject {
 		for (int i = 0; i < data.length; ++i) {
 			offsets[i] = stream.readLEUInt();
 			if (offsets[i] != 0) endOffsets.add(offsets[i]);
+			if (offsets[i] != 0) System.out.println(offsets[i] + baseOffset);
 		}
 		endOffsets.add((long) sectionInfo.size);
 		shapeCount = stream.readLEInt();
 		vertexCount = stream.readLEInt();
+		unk = stream.readLEInt();
+		boneIndicesCount = stream.readLEInt();
+		System.out.println("vertex count: " + vertexCount);
 		
 		Iterator<Long> it = endOffsets.iterator();
 		it.next();
@@ -70,6 +76,8 @@ public class RWBlendShapeBuffer extends RWObject {
 		stream.writePadding(4 * data.length);
 		stream.writeLEInt(shapeCount);
 		stream.writeLEInt(vertexCount);
+		stream.writeLEInt(unk);
+		stream.writeLEInt(boneIndicesCount);
 		
 		long[] offsets = new long[data.length];
 		
@@ -94,4 +102,8 @@ public class RWBlendShapeBuffer extends RWObject {
 		return TYPE_CODE;
 	}
 
+	@Override
+	public int getAlignment() {
+		return ALIGNMENT;
+	}
 }

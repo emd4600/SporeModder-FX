@@ -52,8 +52,7 @@ public class RenderWare {
 		// First we must create the objects
 		// Don't read the objects themselves as they might reference an object that does not yet exist.
 		for (RWSectionInfo info : sectionInfos) {
-			info.print();
-			System.out.println();
+			//info.print();
 			RWObject object = createObject(info.typeCode);
 			objects.add(object);
 			
@@ -64,7 +63,6 @@ public class RenderWare {
 				System.err.println("Unrecognised RW section type: 0x" + Integer.toHexString(info.typeCode));
 			}
 		}
-		System.out.println("position: " + stream.getFilePointer());
 		// Now that all objects have been created, read the sub references
 		header.sectionManifest.subReferences.readReferences(stream);
 		
@@ -364,8 +362,9 @@ public class RenderWare {
 		}
 	}
 	
-	public void addReference(RWObject object, int offset) {
+	public int addReference(RWObject object, int offset) {
 		header.sectionManifest.subReferences.references.add(new SubReference(object, offset));
+		return (INDEX_SUB_REFERENCE << 22) | (header.sectionManifest.subReferences.references.size() - 1);
 	}
 	
 	public RWObject createObject(int typeCode) {
@@ -419,7 +418,11 @@ public class RenderWare {
 		//String path = "C:\\Users\\Eric\\Desktop\\be_classic_01.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\Willosaur Mouth rig 4.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_01.rw4";
-		String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
+		//String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
+		//String path = "C:\\Users\\Eric\\Desktop\\ShapeKeys.rw4";
+		String path = "C:\\Users\\Eric\\Desktop\\ce_weapon_slasher_04.rw4";
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\ve_DI_spikeChest_01.rw4";
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\be_details_house_10.rw4";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\GridProject\\TestModels\\ce_mouth_mandible_carnivore_04.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
 		

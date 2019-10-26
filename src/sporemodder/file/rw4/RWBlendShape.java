@@ -42,15 +42,11 @@ public class RWBlendShape extends RWObject {
 
 	@Override
 	public void write(StreamWriter stream) throws IOException {
-		RWObject placeholder = new RWBlendShape(renderWare);
-		renderWare.addReference(this, 0x1C);
-		renderWare.addReference(placeholder, 0x1C + shapeIDs.size() * 4);
-		
 		stream.writeLEInt(0);
 		stream.writeLEInt(0);
-		stream.writeLEInt(renderWare.indexOf(this, RenderWare.INDEX_SUB_REFERENCE));
+		stream.writeLEInt(renderWare.addReference(this, 0x1C));
 		stream.writeLEInt(shapeIDs.size());
-		stream.writeLEInt(renderWare.indexOf(placeholder, RenderWare.INDEX_SUB_REFERENCE));
+		stream.writeLEInt(renderWare.addReference(this, 0x1C + shapeIDs.size() * 4));
 		stream.writeLEInt(shapeIDs.size());
 		stream.writeLEInt(id);
 		stream.writePadding(shapeIDs.size() * 4);
@@ -62,5 +58,8 @@ public class RWBlendShape extends RWObject {
 		return TYPE_CODE;
 	}
 	
-
+	@Override
+	public int getAlignment() {
+		return ALIGNMENT;
+	}
 }

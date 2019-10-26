@@ -26,7 +26,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
@@ -83,7 +86,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	private Project project;
 	
 	//TODO it's faster, but apparently it causes problems; I can't reproduce the bug
-	private boolean isParallel = false;
+	private boolean isParallel = true;
 	
 	public DBPFUnpackingTask(File inputFile, File outputFolder, Project project, List<Converter> converters) {
 		this.inputFiles.add(inputFile);
@@ -173,17 +176,19 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		}
 	}
 
-	private void unpackStream(StreamReader packageStream, HashMap<Integer, List<ResourceKey>> writtenFiles) throws IOException, InterruptedException {
+	private void unpackStream(StreamReader packageStream, Map<Integer, Set<ResourceKey>> writtenFiles) throws IOException, InterruptedException {
 		HashManager hasher = HashManager.get();
 			
 		updateMessage("Reading file index...");
-		
+
 		DatabasePackedFile header = new DatabasePackedFile();
 		header.readHeader(packageStream);
 		header.readIndex(packageStream);
 		
 		DBPFIndex index = header.index;
 		index.readItems(packageStream, header.indexCount, header.isDBBF);
+		
+		System.out.println("File index successfully read, " + index.items.size() + " items.");
 		
 		incProgress(INDEX_PROGRESS / inputFiles.size());
 		updateMessage("Unpacking files...");
@@ -194,28 +199,28 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		hasher.getProjectRegistry().clear();
 		findNamesFile(index.items, packageStream);
 		
-		int itemIndex = 0;
+		int itemIndex = -1;
 		CountDownLatch latch = new CountDownLatch(index.items.size());
 		for (DBPFItem item : index.items) {
+			++itemIndex;
 			// Ensure the task is not paused
 			ensureRunning();
 			
-			if (itemFilter != null && !itemFilter.filter(item)) continue;
+			if (itemFilter != null && !itemFilter.filter(item)) {
+				latch.countDown();
+				continue;
+			}
 			
 			int groupID = item.name.getGroupID();
 			int instanceID = item.name.getInstanceID();
 			
 			if (writtenFiles != null) {
-				List<ResourceKey> list = writtenFiles.get(groupID);
-				if (list != null) {
-					boolean skipFile = false;
-					for (ResourceKey key : list) {
-						if (key.isEquivalent(item.name)) {
-							skipFile = true;
-							break;
-						}
+				Set<ResourceKey> groupSet = writtenFiles.get(groupID);
+				if (groupSet != null) {
+					if (groupSet.contains(item.name)) {
+						latch.countDown();
+						continue;
 					}
-					if (skipFile) continue;
 				}
 			}
 			
@@ -223,6 +228,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			
 			// skip autolocale files
 			if (groupID == 0x02FABF01 && fileName.startsWith("auto_")) {
+				latch.countDown();
 				continue;
 			}
 			
@@ -244,12 +250,12 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			}
 				
 			if (writtenFiles != null) {
-				List<ResourceKey> list = writtenFiles.get(groupID);
-				if (list == null) {
-					list = new ArrayList<ResourceKey>();
-					writtenFiles.put(groupID, list);
+				Set<ResourceKey> groupSet = writtenFiles.get(groupID);
+				if (groupSet == null) {
+					groupSet = new HashSet<>();
+					writtenFiles.put(groupID, groupSet);
 				}
-				list.add(item.name);
+				groupSet.add(item.name);
 			}
 		}
 		
@@ -274,10 +280,11 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			unpackStream(inputStream, null);
 		}
 		else {
-			final HashMap<Integer, List<ResourceKey>> writtenFiles = new HashMap<Integer, List<ResourceKey>>();
+			final HashMap<Integer, Set<ResourceKey>> writtenFiles = new HashMap<>();
 			boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
 			
 			for (File inputFile : inputFiles) {
+				System.out.println("## UNPACKNG " + inputFile.getName());
 				if (!inputFile.exists()) {
 					incProgress(100.0f / inputFiles.size());
 					failedDBPFs.add(inputFile);
@@ -292,6 +299,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				catch (Exception e) {
 					return e;
 				}
+				
+				System.out.println();
 			}
 		}
 		

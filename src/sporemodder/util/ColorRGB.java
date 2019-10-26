@@ -150,7 +150,7 @@ public class ColorRGB {
 	}
 
 	public Color toColor() {
-		return Color.color(r, g, b);
+		return Color.color(r > 1.0 ? 1.0 : r, g > 1.0 ? 1.0 : g, b > 1.0 ? 1.0 : b);
 	}
 
 	@Override

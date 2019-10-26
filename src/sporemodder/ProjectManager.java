@@ -1422,9 +1422,9 @@ public class ProjectManager extends AbstractManager {
 				Desktop.getDesktop().open(file);
 			}
 			else {
-				Desktop.getDesktop().open(file.getParentFile());
-				return true;
+				Runtime.getRuntime().exec("explorer.exe /select, \"" + file.getAbsolutePath() + "\"");
 			}
+			return true;
 		}
 		return false;
 	}
@@ -1438,9 +1438,9 @@ public class ProjectManager extends AbstractManager {
 				Desktop.getDesktop().open(file);
 			}
 			else {
-				Desktop.getDesktop().open(file.getParentFile());
-				return true;
+				Runtime.getRuntime().exec("explorer.exe /select, \"" + file.getAbsolutePath() + "\"");
 			}
+			return true;
 		}
 		return false;
 	}

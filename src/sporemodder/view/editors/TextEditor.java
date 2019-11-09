@@ -397,7 +397,7 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 
 		// Try to find where the current line starts
 		// Subtract one because we just typed the '\n' character
-		String text = codeArea.getText().substring(0, codeArea.getCaretPosition() - 1);
+		String text = codeArea.getCaretPosition() == 0 ? "" : codeArea.getText().substring(0, codeArea.getCaretPosition() - 1);
 		int lineStartIndex = text.lastIndexOf("\n");
 		
 		if (lineStartIndex == -1) {

@@ -586,6 +586,8 @@ public class ProjectManager extends AbstractManager {
 		
 		showModdedOnlyProperty().addListener((obs, oldValue, newValue) -> {
 			projectSearcher.setOnlyModFiles(newValue);
+			if (activeProject != null) activeProject.setShowOnlyModded(newValue);
+			treeUI.getTreeView().scrollTo(treeUI.getTreeView().getRow(treeUI.getTreeView().getSelectionModel().getSelectedItem()));
 		});
 	}
 	
@@ -857,6 +859,9 @@ public class ProjectManager extends AbstractManager {
 		
 		UIManager.get().getUserInterface().setStatusFile(null);
 		UIManager.get().getUserInterface().setStatusInfo(null);
+		
+		treeUI.getSearchField().setText("");
+		treeUI.getShowModdedBox().setSelected(activeProject.isShowOnlyModded());
 		
 		refreshProjectTree();
 		
@@ -1318,11 +1323,10 @@ public class ProjectManager extends AbstractManager {
 			
 			// Create the project or override the existing one
 			final Project project = getOrCreateProject(preset.getName());
-			ProjectManager.get().initializeProject(project);
 			project.setReadOnly(true);
 			
 			// The project is passed to set the 'packageSignature' setting, but we don't want that in presets
-			final DBPFUnpackingTask task = new DBPFUnpackingTask(files.values(), project.getFolder(), null, converters);
+			final DBPFUnpackingTask task = new DBPFUnpackingTask(files.values(), project.getFolder(), project, converters);
 			
 			task.setItemFilter(preset.getItemFilter());
 			
@@ -1656,6 +1660,9 @@ public class ProjectManager extends AbstractManager {
 			EditorManager.get().reloadEditor(filePath);
 		}
 		
+		ProjectTreeItem parentItem = (ProjectTreeItem) item.getTreeItem().getParent();
+		if (parentItem != null) parentItem.invalidatePredicate();
+		
 		// Repaint tree
 		UIManager.get().getUserInterface().getProjectTree().getTreeView().refresh();
 		
@@ -1961,6 +1968,12 @@ public class ProjectManager extends AbstractManager {
 		
 		// Reloading the nodes
 		((ProjectTreeItem) treeItem).requestReload();
+		
+		if (!searchedWords.isEmpty()) {
+			// Search the new nodes
+			projectSearcher.startSearch(treeItem);
+		}
+		
 		// If it is expanded we need to ensure its children are reloaded
 		if (treeItem.isExpanded()) {
 			treeItem.setExpanded(false);

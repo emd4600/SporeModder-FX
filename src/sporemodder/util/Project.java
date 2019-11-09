@@ -88,6 +88,7 @@ public class Project {
 	private static final String PROPERTY_packageName = "packageName";
 	private static final String PROPERTY_packageSignature = "embeddedEditorPackages";  // for compatibility
 	private static final String PROPERTY_isReadOnly = "isReadOnly";
+	private static final String PROPERTY_showOnlyModded = "showOnlyModded";
 
 	/** The name of the project, which is taken from the folder name. */
 	private String name;
@@ -278,6 +279,14 @@ public class Project {
 	 */
 	public List<String> getFixedTabPaths() {
 		return fixedTabPaths;
+	}
+	
+	public boolean isShowOnlyModded() {
+		return Boolean.parseBoolean(settings.getProperty(PROPERTY_showOnlyModded, "False"));
+	}
+	
+	public void setShowOnlyModded(boolean value) {
+		settings.setProperty(PROPERTY_showOnlyModded, Boolean.toString(value));
 	}
 
 	/**

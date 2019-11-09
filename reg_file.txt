@@ -77668,3 +77668,4 @@ sail
 jetengine
 Nudge
 GlobalEditorUI
+CreatureDetailTemplate

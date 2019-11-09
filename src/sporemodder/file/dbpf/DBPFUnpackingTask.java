@@ -39,6 +39,7 @@ import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import sporemodder.HashManager;
 import sporemodder.MessageManager;
+import sporemodder.ProjectManager;
 import sporemodder.MessageManager.MessageType;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
@@ -54,7 +55,9 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	}
 	
 	/** The estimated progress (in [0, 1]) that reading the index takes. */ 
-	private static final double INDEX_PROGRESS = 0.15;
+	private static final double INDEX_PROGRESS = 0.05;
+	/** The estimated progress (in [0, 1]) that clearing the folder takes. */ 
+	private static final double CLEAR_FOLDER_PROGRESS = 0.10;
 	
 	// Cannot use getProgress() as it throws thread exception
 	private double progress = 0;
@@ -85,6 +88,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	
 	private Project project;
 	
+	private boolean setPackageSignature;
+	
 	//TODO it's faster, but apparently it causes problems; I can't reproduce the bug
 	private boolean isParallel = true;
 	
@@ -109,6 +114,10 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		this.outputFolder = outputFolder;
 		this.converters = converters;
 		this.project = project;
+	}
+	
+	public void setPackageSignature(boolean value) {
+		setPackageSignature = value && project != null;
 	}
 	
 	/**
@@ -190,10 +199,16 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		
 		System.out.println("File index successfully read, " + index.items.size() + " items.");
 		
-		incProgress(INDEX_PROGRESS / inputFiles.size());
+		double inc = 1.0;
+		
+		if (project != null) {
+			incProgress((1.0 - CLEAR_FOLDER_PROGRESS) * INDEX_PROGRESS / inputFiles.size());
+			inc -= CLEAR_FOLDER_PROGRESS;
+		}
+		
 		updateMessage("Unpacking files...");
 		
-		double inc = ((1.0 - INDEX_PROGRESS) / header.indexCount) / inputFiles.size();
+		inc = (inc * (1.0 - INDEX_PROGRESS) / header.indexCount) / inputFiles.size();
 		
 		//First search sporemaster/names.txt, and use it if it exists
 		hasher.getProjectRegistry().clear();
@@ -208,17 +223,20 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			
 			if (itemFilter != null && !itemFilter.filter(item)) {
 				latch.countDown();
+				incProgress(inc);
 				continue;
 			}
 			
 			int groupID = item.name.getGroupID();
 			int instanceID = item.name.getInstanceID();
 			
+			// Skip files if they have already been written by higher priority packages
 			if (writtenFiles != null) {
 				Set<ResourceKey> groupSet = writtenFiles.get(groupID);
 				if (groupSet != null) {
 					if (groupSet.contains(item.name)) {
 						latch.countDown();
+						incProgress(inc);
 						continue;
 					}
 				}
@@ -229,6 +247,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			// skip autolocale files
 			if (groupID == 0x02FABF01 && fileName.startsWith("auto_")) {
 				latch.countDown();
+				incProgress(inc);
 				continue;
 			}
 			
@@ -264,9 +283,6 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		
 		// Remove the extra names; if they need to be used, loading the project will load them as well
 		hasher.getProjectRegistry().clear();
-		
-		// Remove the extra names; if they need to be used, loading the project will load them as well
-		hasher.getProjectRegistry().clear();
 	}
 	
 	@Override
@@ -280,13 +296,26 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			unpackStream(inputStream, null);
 		}
 		else {
+			double progressInc = 1.0;
+			
+			if (project != null) {
+				updateMessage("Clearing folder...");
+				ProjectManager.get().initializeProject(project);
+				incProgress(CLEAR_FOLDER_PROGRESS);
+				
+				progressInc -= CLEAR_FOLDER_PROGRESS;
+			}
+			
+			progressInc = progressInc / inputFiles.size();
+			
 			final HashMap<Integer, Set<ResourceKey>> writtenFiles = new HashMap<>();
 			boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
 			
 			for (File inputFile : inputFiles) {
 				System.out.println("## UNPACKNG " + inputFile.getName());
+				
 				if (!inputFile.exists()) {
-					incProgress(100.0f / inputFiles.size());
+					incProgress(progressInc);
 					failedDBPFs.add(inputFile);
 					continue;
 				}
@@ -370,7 +399,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				
 				// Do not convert editor packages
 				if (groupID == 0x40404000 && item.name.getTypeID() == 0x00B1B104) {
-					if (project != null) {
+					if (setPackageSignature) {
 						for (PackageSignature entry : PackageSignature.values()) {
 							if (entry.getFileName() != null && hasher.fnvHash(entry.getFileName()) == instanceID) {
 								project.setPackageSignature(entry);

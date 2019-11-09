@@ -130,9 +130,6 @@ public class UnpackPackageUI implements Controller {
 				
 				final Project project = p;
 				
-				// Create already deletes the existing content if any
-				ProjectManager.get().initializeProject(project);
-				
 				project.setReadOnly(cbReadOnly.isSelected());
 				
 				List<Converter> selectedConverters = new ArrayList<Converter>();

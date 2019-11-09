@@ -37,7 +37,6 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
 import sporemodder.FileManager;
 import sporemodder.view.ProjectTreeItem;
 
@@ -226,11 +225,12 @@ public class ProjectSearcher {
 			long time = System.currentTimeMillis();
 			
 			// The given item is expected to have its children loaded
-			List<ItemSearchRecursive> tasks = new ArrayList<ItemSearchRecursive>();
-			for (ProjectTreeItem child : item.getInternalChildren()) {
-				tasks.add(new ItemSearchRecursive(child, null, 1.0 / progressMax));
-			}
-			ForkJoinTask.invokeAll(tasks);
+//			List<ItemSearchRecursive> tasks = new ArrayList<ItemSearchRecursive>();
+//			for (ProjectTreeItem child : item.getInternalChildren()) {
+//				tasks.add(new ItemSearchRecursive(child, null, 1.0 / progressMax));
+//			}
+//			ForkJoinTask.invokeAll(tasks);
+			new ItemSearchRecursive(item, null, 1.0 / progressMax, true).invoke();
 			
 			time = System.currentTimeMillis() - time;
 
@@ -252,15 +252,22 @@ public class ProjectSearcher {
 		private final ProjectTreeItem item;
 		private final boolean[] foundWords;
 		private final double progressIncrement;
+		// Roots don't add increment, but pass the increment to their children
+		private final boolean isSearchRoot;
 		
-		public ItemSearchRecursive(ProjectTreeItem item, boolean[] foundWords, double progressIncrement) {
+		public ItemSearchRecursive(ProjectTreeItem item, boolean[] foundWords, double progressIncrement, boolean isSearchRoot) {
 			super();
 			this.item = item;
 			this.foundWords = new boolean[wordBytes.length];
 			this.progressIncrement = progressIncrement;
+			this.isSearchRoot = isSearchRoot;
 			if (foundWords != null) {
 				System.arraycopy(foundWords, 0, this.foundWords, 0, foundWords.length);
 			}
+		}
+		
+		public ItemSearchRecursive(ProjectTreeItem item, boolean[] foundWords, double progressIncrement) {
+			this(item, foundWords, progressIncrement, false);
 		}
 		
 		@Override protected Boolean compute() {
@@ -268,8 +275,8 @@ public class ProjectSearcher {
 			
 			numItemsSearched++;
 			//System.out.println("Items: " + numItemsSearched + "\t[" + item.getValue().getName() + "]");
-			
-			boolean matches = searchInNameOptional(item.getValue().name, foundWords);
+			// We want to search in the name if the search root is not the project root
+			boolean matches = (isSearchRoot && item.getValue().isRoot) ? false : searchInNameOptional(item.getValue().name, foundWords);
 			File file = item.getValue().getFile();
 			
 			if (matches) {
@@ -277,7 +284,7 @@ public class ProjectSearcher {
 				item.propagateMatchesSearch(matches);
 			}
 			else {
-				if (file.isFile()) {
+				if (file != null && file.isFile()) {
 					if (FileManager.get().isSearchable(file.getName()) && isExtensiveSearch) {
 						try {
 							matches = searchInFile(file, foundWords);
@@ -290,7 +297,7 @@ public class ProjectSearcher {
 					// We must search in all children
 					List<ItemSearchRecursive> tasks = new ArrayList<ItemSearchRecursive>();
 					for (ProjectTreeItem child : item.getInternalChildren()) {
-						tasks.add(new ItemSearchRecursive(child, foundWords, 0.0));
+						tasks.add(new ItemSearchRecursive(child, foundWords, isSearchRoot ? progressIncrement : 0.0));
 					}
 					
 					//System.out.println(tasks.size() + " tasks scheduled");
@@ -309,7 +316,7 @@ public class ProjectSearcher {
 				}
 			}
 			
-			if (progressIncrement != 0.0) {
+			if (!isSearchRoot && progressIncrement != 0.0) {
 				progress.setValue(progress.getValue() + progressIncrement);
 			}
 			

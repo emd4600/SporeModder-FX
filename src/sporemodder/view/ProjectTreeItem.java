@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -40,6 +41,8 @@ public class ProjectTreeItem extends TreeItem<ProjectItem> {
 	private final ObservableList<ProjectTreeItem> sourceList = FXCollections.observableArrayList();
 	private final FilteredList<ProjectTreeItem> filteredList = new FilteredList<>(sourceList);
 	private final ReadOnlyObjectWrapper<TreeItemPredicate> predicate = new ReadOnlyObjectWrapper<>();
+	
+	private ObjectBinding<? extends Predicate<ProjectTreeItem>> predicateBinding;
 	
 	private boolean matchesSearch = false;
 
@@ -117,7 +120,7 @@ public class ProjectTreeItem extends TreeItem<ProjectItem> {
     public final void setPredicate(TreeItemPredicate predicate, Observable ... dependencies) {
     	this.predicate.set(predicate);
     	
-    	filteredList.predicateProperty().bind(Bindings.createObjectBinding(() -> {
+    	predicateBinding = Bindings.createObjectBinding(() -> {
             return child -> {
             	
                 // Set the predicate of child items to force filtering
@@ -131,7 +134,13 @@ public class ProjectTreeItem extends TreeItem<ProjectItem> {
                 // Otherwise ask the TreeItemPredicate
                 return this.predicate.get().test(this, child.getValue());
             };
-        }, dependencies));
+        }, dependencies);
+    	
+    	filteredList.predicateProperty().bind(predicateBinding);
+    }
+    
+    public void invalidatePredicate() {
+    	predicateBinding.invalidate();
     }
     
     public final ObjectProperty<Predicate<? super ProjectTreeItem>> predicateProperty() {

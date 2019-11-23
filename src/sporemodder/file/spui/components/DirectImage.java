@@ -98,6 +98,9 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 	@Override
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
 			double dw, double dh, Color shadeColor) {
+		if (sx < 0) sx = 0;
+		if (sy < 0) sy = 0;
+		
 		if (image == null) {
 			graphics.setFill(shadeColor);
 			graphics.fillRect(dx, dy, dw, dh);

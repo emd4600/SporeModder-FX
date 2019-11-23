@@ -1324,6 +1324,7 @@ public class ProjectManager extends AbstractManager {
 			// Create the project or override the existing one
 			final Project project = getOrCreateProject(preset.getName());
 			project.setReadOnly(true);
+			project.saveSettings();
 			
 			// The project is passed to set the 'packageSignature' setting, but we don't want that in presets
 			final DBPFUnpackingTask task = new DBPFUnpackingTask(files.values(), project.getFolder(), project, converters);

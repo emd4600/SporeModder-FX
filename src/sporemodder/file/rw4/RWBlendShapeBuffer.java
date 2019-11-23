@@ -46,14 +46,12 @@ public class RWBlendShapeBuffer extends RWObject {
 		for (int i = 0; i < data.length; ++i) {
 			offsets[i] = stream.readLEUInt();
 			if (offsets[i] != 0) endOffsets.add(offsets[i]);
-			if (offsets[i] != 0) System.out.println(offsets[i] + baseOffset);
 		}
 		endOffsets.add((long) sectionInfo.size);
 		shapeCount = stream.readLEInt();
 		vertexCount = stream.readLEInt();
 		unk = stream.readLEInt();
 		boneIndicesCount = stream.readLEInt();
-		System.out.println("vertex count: " + vertexCount);
 		
 		Iterator<Long> it = endOffsets.iterator();
 		it.next();

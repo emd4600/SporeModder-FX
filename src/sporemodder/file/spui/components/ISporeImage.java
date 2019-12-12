@@ -240,4 +240,20 @@ public interface ISporeImage {
 		
 		return sourceBounds;
 	}
+	
+	public static Color multiplyColor(Color color1, Color color2) {
+		System.out.println(color1.getOpacity() + ", " + color2.getOpacity());
+		//System.out.println(color2.toString());
+		/*return new Color(
+				(color1.getRed() / 255.0) * (color2.getRed() / 255.0),
+				(color1.getGreen() / 255.0) * (color2.getGreen() / 255.0),
+				(color1.getBlue() / 255.0) * (color2.getBlue() / 255.0),
+				(color1.getOpacity() / 255.0) * (color2.getOpacity() / 255.0));*/
+		Color newColor = new Color(color1.getRed() * color2.getRed(),
+				color1.getGreen() * color2.getGreen(),
+				color1.getBlue() * color2.getBlue(),
+				color1.getOpacity() * color2.getOpacity());
+		System.out.println(newColor);
+		return newColor;
+	}
 }

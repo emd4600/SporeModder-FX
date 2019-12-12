@@ -226,14 +226,17 @@ public interface ISporeImage {
 	}
 	
 	public static SPUIRectangle getTileArea(IWindow window, ISporeImage image, int tileCount) {
-		int tileIndex = SporeUserInterface.getTileIndex(window);
+		return getTileArea(image, tileCount, SporeUserInterface.getTileIndex(window));
+	}
+	
+	public static SPUIRectangle getTileArea(ISporeImage image, int tileCount, int tileIndex) {
 		float imageWidth = image.getWidth();
 
-		SPUIRectangle sourceBounds = new SPUIRectangle();
+		SPUIRectangle sourceBounds = new SPUIRectangle(0,0,0,0);
 		sourceBounds.setWidth(imageWidth / tileCount);
 		sourceBounds.setHeight(image.getHeight());
 		
-		sourceBounds.translateX(tileIndex * imageWidth/tileCount);
+		sourceBounds.translateX(tileIndex * sourceBounds.getWidth());
 		
 		return sourceBounds;
 	}

@@ -28,22 +28,24 @@ import sporemodder.file.spui.SpuiViewer;
 import sporemodder.file.spui.SpuiViewer.PaintEvent;
 import sporemodder.file.spui.StyleSheetInstance;
 
-public class SubWindow<T extends IWindow> implements IWindow {
-	
-	private final SPUIRectangle area = new SPUIRectangle();
-	private int flags;
-	private int state;
-	private T parent;
+public class SubWindow<T extends IWindow> extends WindowBase {
+	private float offsetX = 0;
+	private float offsetY = 0;
+	//private final SPUIRectangle area = new SPUIRectangle();
+	//private int flags;
+	//private int state;
+	//private T parent;
 	
 	public SubWindow(T parent) {
 		super();
 		this.parent = parent;
+		super.parent = parent;
 	}
 	
-	public void layout(SPUIRectangle area, IWindow parent) {}
-	public void paintComponent(PaintEvent event) {}
+	//public void layout(SPUIRectangle area, IWindow parent) {}
+	//public void paintComponent(PaintEvent event) {}
 
-	@Override
+	/*@Override
 	public boolean handleEvent(SpuiViewer viewer, Event event) {
 		int oldState = state;
 		state = SpuiViewer.getStateFromEvent(this, event);
@@ -58,17 +60,37 @@ public class SubWindow<T extends IWindow> implements IWindow {
 			}
 		}
 		else if (event.getEventType() == SpuiViewer.LAYOUT_EVENT) {
+			realArea.copy(area);
 			if (parent != null) {
-				layout(area, parent);
 				SPUIRectangle parentArea = parent.getRealArea();
-				area.translate(parentArea.x1, parentArea.y1);
+				realArea.translate(parentArea.x1, parentArea.y1);
 			}
 		}
 		
 		return false;
+	}*/
+	
+	@Override
+	public boolean handleEvent(SpuiViewer viewer, Event event) {
+		boolean retVal = super.handleEvent(viewer, event);
+		if (event.getEventType() == SpuiViewer.LAYOUT_EVENT) {
+			//realArea.copy(area);
+			if (parent != null) {
+				//SPUIRectangle parentArea = parent.getRealArea();
+				//realArea.translate(parentArea.x1, parentArea.y1);
+				
+				//return true;
+			}
+			else
+				System.out.println("parent == null");
+			//System.out.println("REAL AREA: " + getRealArea().x1 + ", " + getRealArea().y1);
+			realArea.translateX(getOffsetX());
+			realArea.translateY(getOffsetY());
+		}
+		return retVal;
 	}
 
-	@Override
+	/*@Override
 	public int getFlags() {
 		return flags;
 	}
@@ -77,30 +99,33 @@ public class SubWindow<T extends IWindow> implements IWindow {
 	public void setFlag(int flag, boolean value) {
 		flags &= ~flag;
 		if (value) flags |= flag;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public SPUIRectangle getArea() {
 		return area;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public SPUIRectangle getRealArea() {
 		return area;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public LocalizedText getCaption() {
 		return null;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public void setCaption(LocalizedText text) {
-	}
+	}*/
 
 	@Override
 	public Color getFillColor() {
-		return null;
+		if (parent != null)
+			return parent.getFillColor();
+		else
+			return null;
 	}
 
 	@Override
@@ -144,12 +169,12 @@ public class SubWindow<T extends IWindow> implements IWindow {
 		return FXCollections.emptyObservableList();
 	}
 
-	@Override
+	/*@Override
 	public T getParent() {
 		return parent;
-	}
+	}*/
 
-	@Override
+	/*@Override
 	public int getState() {
 		return state;
 	}
@@ -157,6 +182,21 @@ public class SubWindow<T extends IWindow> implements IWindow {
 	@Override
 	public void setState(int state) {
 		this.state = state;
+	}*/
+
+	public float getOffsetX() {
+		return offsetX;
 	}
 
+	public void setOffsetX(float x) {
+		offsetX = x;
+	}
+
+	public float getOffsetY() {
+		return offsetY;
+	}
+
+	public void setOffsetY(float y) {
+		offsetY = y;
+	}
 }

@@ -512,7 +512,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		duplicateButton.setOnAction(event -> {
 			UIManager.get().tryAction(() -> {
 				duplicateSelectedBlock();	
-			}, "Cannot load SPUI designer.");
+			}, "Cannot duplicate SPUI block.");
 		});
 		editorGroup.getNodes().add(duplicateButton);
 
@@ -520,7 +520,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		exportButton.setOnAction(event -> {
 			UIManager.get().tryAction(() -> {
 				exportBlocks();
-			}, "Cannot load SPUI designer.");
+			}, "Cannot export SPUI part.");
 		});
 		editorGroup.getNodes().add(exportButton);
 		
@@ -528,7 +528,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		importButton.setOnAction(event -> {
 			UIManager.get().tryAction(() -> {
 				importSpui();
-			}, "Cannot load SPUI designer.");
+			}, "Cannot import partial SPUI.");
 		});
 		editorGroup.getNodes().add(importButton);
 

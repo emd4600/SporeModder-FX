@@ -232,7 +232,7 @@ public interface ISporeImage {
 	public static SPUIRectangle getTileArea(ISporeImage image, int tileCount, int tileIndex) {
 		float imageWidth = image.getWidth();
 
-		SPUIRectangle sourceBounds = new SPUIRectangle(0,0,0,0);
+		SPUIRectangle sourceBounds = new SPUIRectangle();
 		sourceBounds.setWidth(imageWidth / tileCount);
 		sourceBounds.setHeight(image.getHeight());
 		

@@ -103,6 +103,7 @@ import sporemodder.file.spui.uidesigner.DesignerClass;
 import sporemodder.file.spui.uidesigner.DesignerProperty;
 import sporemodder.file.spui.uidesigner.InspectorRectangle;
 import sporemodder.util.ProjectItem;
+import sporemodder.view.editors.spui.SpuiLayoutWindow;
 import sporemodder.view.FilterableTreeItem;
 import sporemodder.view.FilterableTreeItem.TreeItemPredicate;
 import sporemodder.view.UserInterface;
@@ -509,34 +510,25 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		
 		RibbonButton duplicateButton = new RibbonButton("Duplicate", UIManager.get().loadIcon("spui-duplicate.png", 0, 48, true));
 		duplicateButton.setOnAction(event -> {
-			try {
-				duplicateSelectedBlock();
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			UIManager.get().tryAction(() -> {
+				duplicateSelectedBlock();	
+			}, "Cannot load SPUI designer.");
 		});
 		editorGroup.getNodes().add(duplicateButton);
 
 		RibbonButton exportButton = new RibbonButton("Export", UIManager.get().loadIcon("spui-export.png", 0, 48, true));
 		exportButton.setOnAction(event -> {
-			try {
+			UIManager.get().tryAction(() -> {
 				exportBlocks();
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			}, "Cannot load SPUI designer.");
 		});
 		editorGroup.getNodes().add(exportButton);
 		
 		RibbonButton importButton = new RibbonButton("Import", UIManager.get().loadIcon("spui-import.png", 0, 48, true));
 		importButton.setOnAction(event -> {
-			try {
+			UIManager.get().tryAction(() -> {
 				importSpui();
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			}, "Cannot load SPUI designer.");
 		});
 		editorGroup.getNodes().add(importButton);
 
@@ -1283,22 +1275,23 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		IWindow iwin = getSelectedWindow();
 		if (iwin != null) {
 			//MemoryStream memstream = new MemoryStream();
-			byte[] raw = new byte[0];
-			try (StreamWriter stream = new MemoryStream()) {
+			//byte[] raw = new byte[0];
+			try (MemoryStream stream = new MemoryStream()) {
 				IWindow selWin = getSelectedWindow();
 				IWindow selParent = selWin.getParent();
 				int windowIndex = selParent.getChildren().indexOf(selWin);
 				selParent.getChildren().remove(selWin);
-				sporemodder.view.editors.spui.SpuiLayoutWindow layoutWindow = new sporemodder.view.editors.spui.SpuiLayoutWindow();
+				SpuiLayoutWindow layoutWindow = new SpuiLayoutWindow();
 				layoutWindow.getChildren().add(selWin);
 				SpuiWriter writer = new SpuiWriter(layoutWindow.getChildren());
 				writer.write(stream);
 				layoutWindow.getChildren().remove(selWin);
 				selParent.getChildren().add(windowIndex, selWin);
 				
-				raw = ((MemoryStream)stream).getRawData();
+				/*raw = ((MemoryStream)stream).getRawData();
 			}
-			try (StreamReader stream = new MemoryStream(raw)) {
+			try (StreamReader stream = new MemoryStream(raw)) {*/
+				stream.seek(0);
 				SporeUserInterface importSpui = new SporeUserInterface();
 				if (stream.length() != 0) {
 					importSpui.read(stream);
@@ -1338,7 +1331,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 					IWindow selParent = selWin.getParent();
 					int windowIndex = selParent.getChildren().indexOf(selWin);
 					selParent.getChildren().remove(selWin);
-					sporemodder.view.editors.spui.SpuiLayoutWindow layoutWindow = new sporemodder.view.editors.spui.SpuiLayoutWindow();
+					SpuiLayoutWindow layoutWindow = new SpuiLayoutWindow();
 					layoutWindow.getChildren().add(selWin);
 					SpuiWriter writer = new SpuiWriter(layoutWindow.getChildren());
 					writer.write(stream);

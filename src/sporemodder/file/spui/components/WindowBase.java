@@ -39,7 +39,7 @@ import sporemodder.file.spui.StyleSheetInstance;
 // We don't make it abstract so we can create it with reflection, as many windows components don't have defined classes
 public class WindowBase extends SpuiElement implements IWindow {
 	
-	private IWindow parent;
+	protected IWindow parent;
 	
 	/** The combination of flags that define the behavior of this window. */
 	protected int windowFlags = FLAG_VISIBLE;

@@ -41,30 +41,40 @@ public class SliderDrawable extends IDrawable {
 		if (images[IMAGE_THUMB_CONTAINER] != null) {
 			Vector2 imageDim = getDimensions(IMAGE_THUMB_CONTAINER);
 			Borders scaleArea = new Borders();
-			SPUIRectangle sliderArea = new SPUIRectangle();
+			SPUIRectangle sliderArea = new SPUIRectangle(area);
 			
-			if (slider.orientation == SporeUserInterface.HORIZONTAL) {
+			/*if (slider.orientation == SporeUserInterface.HORIZONTAL) {
 				scaleArea.left = scaleArea.right = 0.5f - (0.5f - imageDim.getX());
 				
-				sliderArea.x1 = area.x1;
+				//sliderArea.x1 = area.x1;
 				sliderArea.y1 = area.y1 + (area.getHeight() - imageDim.getY()) / 2.0f;
-				sliderArea.setWidth(area.getWidth());
+				//sliderArea.setWidth(area.getWidth());
 				sliderArea.setHeight(imageDim.getY());
 			} else {
 				scaleArea.top = scaleArea.bottom = 0.5f - (0.5f - imageDim.getY());
 				
 				sliderArea.x1 = area.x1 + (area.getWidth() - imageDim.getX()) / 2.0f;
-				sliderArea.y1 = area.y1;
+				//sliderArea.y1 = area.y1;
 				sliderArea.setWidth(imageDim.getY());
-				sliderArea.setHeight(area.getWidth());
-			}
+				//sliderArea.setHeight(area.getWidth());
+			}*/
 			
 			ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), images[IMAGE_THUMB_CONTAINER], false, sliderArea, scaleArea, window.getShadeColor());
 		}
-		
+
 		if (images[IMAGE_THUMB] != null) {
-			SPUIRectangle thumbArea = slider.getThumb().getRealArea();
-			ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(slider.getThumb(), images[IMAGE_THUMB], 4), thumbArea, window.getShadeColor());
+			SPUIRectangle thumbArea = new SPUIRectangle();
+			thumbArea.copy(slider.getThumb().getRealArea());
+			thumbArea.setWidth(images[IMAGE_THUMB].getWidth() / 4);
+			thumbArea.setHeight(images[IMAGE_THUMB].getHeight());
+			if ((window.getFlags() & IWindow.FLAG_ENABLED) == 0)
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(images[IMAGE_THUMB], 4, 0), thumbArea, window.getShadeColor());
+			else if ((window.getState() & IWindow.STATE_FLAG_CLICKED) != 0)
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(images[IMAGE_THUMB], 4, 3), thumbArea, window.getShadeColor());
+			else if ((window.getState() & IWindow.STATE_FLAG_HOVER) != 0)
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(images[IMAGE_THUMB], 4, 2), thumbArea, window.getShadeColor());
+			else
+				ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), images[IMAGE_THUMB], ISporeImage.getTileArea(images[IMAGE_THUMB], 4, 1), thumbArea, window.getShadeColor());
 		} else {
 			new ButtonDrawableStandard().paint(slider.getThumb(), viewer);
 		}

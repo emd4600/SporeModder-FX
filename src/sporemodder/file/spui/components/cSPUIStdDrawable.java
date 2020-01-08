@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.file.spui.components;
 
+import javafx.scene.paint.Color;
 import sporemodder.file.spui.SPUIRectangle;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.file.spui.SpuiViewer;
@@ -64,18 +65,25 @@ public class cSPUIStdDrawable extends StdDrawable {
 			
 			if (image.backgroundImage != null) {
 				//ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, image.backgroundColor);
+				Color newShadeColor = window.getShadeColor();
+				if ((image != null) && (image.backgroundColor != null))
+					newShadeColor = ISporeImage.multiplyColor(image.backgroundColor, window.getShadeColor());
+					/*newShadeColor = new Color(window.getShadeColor().getRed() / image.backgroundColor.getRed(),
+							window.getShadeColor().getGreen() / image.backgroundColor.getGreen(),
+							window.getShadeColor().getBlue() / image.backgroundColor.getBlue(),
+							window.getShadeColor().getOpacity() / image.backgroundColor.getOpacity());*/
 				
 				if (scaleType == STRETCH_IMAGE) {
-					ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, window.getShadeColor());
+					ISporeImage.drawImage(viewer.getGraphicsContext2D(), image.backgroundImage, area, newShadeColor);
 				}
 				else if (scaleType == STRETCH_CENTER) {
-					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, false, area, scaleArea, window.getShadeColor());
+					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, false, area, scaleArea, newShadeColor);
 				}
 				else if (scaleType == TILE_IMAGE) {
-					ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), image.backgroundImage, area, window.getShadeColor());
+					ISporeImage.drawImageTiled(viewer.getGraphicsContext2D(), image.backgroundImage, area, newShadeColor);
 				}
 				else if (scaleType == TILE_CENTER) {
-					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, true, area, scaleArea, window.getShadeColor());
+					ISporeImage.drawImageSliced(viewer.getGraphicsContext2D(), image.backgroundImage, true, area, scaleArea, newShadeColor);
 				}
 			}
 			

@@ -226,15 +226,26 @@ public interface ISporeImage {
 	}
 	
 	public static SPUIRectangle getTileArea(IWindow window, ISporeImage image, int tileCount) {
-		int tileIndex = SporeUserInterface.getTileIndex(window);
+		return getTileArea(image, tileCount, SporeUserInterface.getTileIndex(window));
+	}
+	
+	public static SPUIRectangle getTileArea(ISporeImage image, int tileCount, int tileIndex) {
 		float imageWidth = image.getWidth();
 
 		SPUIRectangle sourceBounds = new SPUIRectangle();
 		sourceBounds.setWidth(imageWidth / tileCount);
 		sourceBounds.setHeight(image.getHeight());
 		
-		sourceBounds.translateX(tileIndex * imageWidth/tileCount);
+		sourceBounds.translateX(tileIndex * sourceBounds.getWidth());
 		
 		return sourceBounds;
+	}
+	
+	public static Color multiplyColor(Color color1, Color color2) {
+		Color newColor = new Color(color1.getRed() * color2.getRed(),
+				color1.getGreen() * color2.getGreen(),
+				color1.getBlue() * color2.getBlue(),
+				color1.getOpacity() * color2.getOpacity());
+		return newColor;
 	}
 }

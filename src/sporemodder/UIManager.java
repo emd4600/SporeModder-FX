@@ -300,6 +300,7 @@ public class UIManager extends AbstractManager {
 	 * @return
 	 */
 	public ImageView loadIcon(String name, double fitWidth, double fitHeight, boolean preserveRatio) {
+		try {
 		Image image = loadImage(name);
 		
 		ImageView imageView = new ImageView();
@@ -311,6 +312,10 @@ public class UIManager extends AbstractManager {
 		imageView.setPreserveRatio(preserveRatio);
 		
 		return imageView;
+		}
+		catch (Exception ex) {
+			return new ImageView();
+		}
 	}
 	
 //	public ImageView loadIconDPI(String name, double fitWidth, double fitHeight, boolean preserveRatio) {

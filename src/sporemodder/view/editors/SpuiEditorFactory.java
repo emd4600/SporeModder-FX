@@ -35,7 +35,7 @@ public class SpuiEditorFactory implements EditorFactory {
 
 	@Override
 	public boolean isSupportedFile(ProjectItem item) {
-		return !item.isFolder() && item.getName().endsWith(".spui");
+		return !item.isFolder() && (item.getName().endsWith(".spui") || item.getName().endsWith(".spui_part"));
 	}
 	
 	@Override

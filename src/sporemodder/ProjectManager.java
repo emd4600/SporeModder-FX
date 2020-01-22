@@ -1151,7 +1151,9 @@ public class ProjectManager extends AbstractManager {
 				}
 			}
 			else {
-				ProjectItem item = createItem(getFile(node.getValue(), name), node.getValue().getProject(), node);
+				File file = getFile(node.getValue(), name);
+				if (file == null) return null;
+				ProjectItem item = createItem(file, node.getValue().getProject(), node);
 				item.setIsMod(hasMod(completeRelativePath));
 				item.setIsSource(hasSource(completeRelativePath));
 				

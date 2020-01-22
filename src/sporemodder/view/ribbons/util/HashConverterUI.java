@@ -156,7 +156,7 @@ public class HashConverterUI implements Controller {
 			
 			value = hasher.getProjectRegistry().getHash(name);
 			if (value != null) {
-				cbRegister.getItems().add(hasher.getFileRegistry().getDescription());
+				cbRegister.getItems().add(hasher.getProjectRegistry().getDescription());
 			}
 			
 			cbRegister.getItems().add(FNV_HASH);

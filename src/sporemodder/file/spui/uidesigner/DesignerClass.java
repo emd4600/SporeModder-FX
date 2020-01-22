@@ -33,10 +33,12 @@ import org.xml.sax.SAXException;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import emord.filestructures.Stream.StringEncoding;
 import javafx.scene.Node;
 import sporemodder.HashManager;
 import sporemodder.file.spui.SpuiElement;
 import sporemodder.file.spui.SpuiWriter;
+import sporemodder.file.LocalizedText;
 import sporemodder.view.editors.SpuiEditor;
 import sporemodder.view.inspector.PropertyPane;
 import sporemodder.file.spui.SporeUserInterface;
@@ -323,10 +325,29 @@ public class DesignerClass implements DesignerNode {
 		
 		for (DesignerProperty property : properties.values()) {
 			if (property.proxyID != -1 && !property.isDeprecated && !writtenProperties.contains(property.proxyID)) {
-				stream.writeLEInt(property.proxyID);
-				property.write(writer, stream, element);
+				boolean proceed = false;
+				if (property.type.getType() == sporemodder.file.spui.SpuiPropertyType.TYPE_TEXT) {
+					/*LocalizedText[] text = (LocalizedText[])property.getValue(element);
+					if (text.length != 0)
+						for (LocalizedText a : text) {
+							if ((a.getTableID() != 0) || (a.getInstanceID() != 0) || (a.getText() != null)) {
+								proceed = true;
+								break;
+							}
+						}*/
+					LocalizedText text = (LocalizedText)property.getValue(element);
+					proceed = (text.getTableID() != 0) || (text.getInstanceID() != 0) || (text.getText() != null);
+				}
+				else {
+					proceed = true;
+				}
 				
-				writtenProperties.add(property.proxyID);
+				if (proceed) {
+					stream.writeLEInt(property.proxyID);
+					property.write(writer, stream, element);
+					
+					writtenProperties.add(property.proxyID);
+				}
 			}
 		}
 	}

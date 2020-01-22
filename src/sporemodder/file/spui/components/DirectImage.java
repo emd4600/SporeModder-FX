@@ -123,11 +123,15 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 				imgHeight = (int) Math.round(image.getHeight() - sourceY);
 
 			PixelReader sourceReader = image.getPixelReader();
+			if (imgWidth < 1)
+				imgWidth = 1;
+			if (imgHeight < 1)
+				imgHeight = 1;
 			WritableImage tintedImage = new WritableImage(imgWidth, imgHeight);
 			PixelWriter tintedWriter = tintedImage.getPixelWriter();
 
 			int[] originalPixels = new int[imgWidth * imgHeight];
-			WritablePixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
+			WritablePixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbInstance();
 			sourceReader.getPixels(sourceX, sourceY, imgWidth, imgHeight, pixelFormat, originalPixels, 0, imgWidth);
 
 			double shadeAlpha = shadeColor.getOpacity();

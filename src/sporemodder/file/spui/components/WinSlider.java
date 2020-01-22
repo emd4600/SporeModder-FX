@@ -35,13 +35,15 @@ public class WinSlider extends WindowBase {
 	public int value;
 	public int minValue;
 	public int maxValue = 1000;
+
+	private float mouseX = 0;
+	private float mouseY = 0;
+	boolean mouseCoordsSet = false;
 	
 	private final SubWindow<WinSlider> thumb = new SubWindow<WinSlider>(this) {
-		private float translation;
-		private float mouseX;
-		private float mouseY;
+		//private float translation;
 		
-		@Override public boolean handleEvent(SpuiViewer viewer, Event event) {
+		/*@Override public boolean handleEvent(SpuiViewer viewer, Event event) {
 			boolean result = super.handleEvent(viewer, event);
 			if (!result) {
 				if ((getState() & STATE_FLAG_CLICKED) != 0 && event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
@@ -158,6 +160,65 @@ public class WinSlider extends WindowBase {
 		}
 		@Override public int getFlags() {
 			return WinSlider.this.getFlags();
+		}*/
+		
+		/*@Override
+		public boolean handleEvent(SpuiViewer viewer, Event event) {
+			if ((event.getEventType() == MouseEvent.MOUSE_DRAGGED) && ((getState() & STATE_FLAG_CLICKED) != 0)) {
+					MouseEvent ev = (MouseEvent)event;
+					float dx = (float) (ev.getX() - mouseX);
+					float dy = (float) (ev.getY() - mouseY);
+					setOffsetX(dx);
+					setOffsetY(dy);
+					mouseX += dx;
+					mouseY += dy;
+					//return true;
+				}
+			return super.handleEvent(viewer, event);*/
+				/*else if (event.getEventType() == SpuiViewer.LAYOUT_EVENT) {
+					if (viewer.mustShowWindow(WinSlider.this)) {
+						realArea.copy(area);
+						SPUIRectangle parentArea = WinSlider.this.getRealArea();
+						realArea.translate(parentArea.x1, parentArea.y1);
+					}
+					/*realArea.translateX(getOffsetX());
+					realArea.translateY(getOffsetY());
+					if (orientation == SporeUserInterface.HORIZONTAL)
+						realArea.translateX(mouseX);
+					else
+						realArea.translateY(mouseY);*
+					//return true;
+				}*/
+			/*else
+				return super.handleEvent(viewer, event);*/
+		//}
+		
+		/*@Override
+		public void setState(int state) {
+			//if ((state == (getState() & IWindow.STATE_FLAG_SELECTED)) && (state == (getState() & ~IWindow.STATE_FLAG_SELECTED)))
+			super.setState(state & ~IWindow.STATE_FLAG_SELECTED);
+		}*/
+		
+		@Override
+		public boolean handleEvent(SpuiViewer viewer, Event event) {
+			boolean retVal = super.handleEvent(viewer, event);
+			if (event.getEventType() == SpuiViewer.LAYOUT_EVENT) {
+				//if (!(WinSlider.this.getFillDrawable() instanceof SliderDrawable)) {
+				if (orientation == SporeUserInterface.HORIZONTAL) {
+					getRealArea().setWidth(WinSlider.this.getRealArea().getHeight() / 3);
+					//getRealArea().setHeight(WinSlider.this.getRealArea().getHeight());
+					getRealArea().y1 = WinSlider.this.getRealArea().y1;
+					getRealArea().y2 = WinSlider.this.getRealArea().y2;
+				}
+				else {
+					//getRealArea().setWidth(WinSlider.this.getRealArea().getWidth());
+					getRealArea().setHeight(WinSlider.this.getRealArea().getWidth() / 3);
+					getRealArea().x1 = WinSlider.this.getRealArea().x1;
+					getRealArea().x2 = WinSlider.this.getRealArea().x2;
+				}	
+				//} 
+			}
+			return retVal;
 		}
 	};
 	
@@ -167,9 +228,29 @@ public class WinSlider extends WindowBase {
 	}
 	
 	@Override public boolean handleEvent(SpuiViewer viewer, Event event) {
-		boolean result = thumb.handleEvent(viewer, event);
-		if (result) return true;
-		else return super.handleEvent(viewer, event);
+		boolean val = super.handleEvent(viewer, event);
+		if ((event.getEventType() == MouseEvent.MOUSE_DRAGGED) && ((getState() & STATE_FLAG_CLICKED) != 0)) {
+			MouseEvent ev = (MouseEvent)event;
+			if (!mouseCoordsSet) {
+				mouseX += ev.getX();
+				mouseY += ev.getY();
+				mouseCoordsSet = true;
+			}
+			else {
+				float dx = (float) (ev.getX() - mouseX);
+				float dy = (float) (ev.getY() - mouseY);
+				if (orientation == SporeUserInterface.HORIZONTAL)
+					thumb.setOffsetX(thumb.getOffsetX() + dx);
+				else
+					thumb.setOffsetY(thumb.getOffsetY() + dy);
+				
+				mouseX += dx;
+				mouseY += dy;
+			}
+		}
+		else if (event.getEventType() == SpuiViewer.LAYOUT_EVENT)// || ((event.getEventType() == MouseEvent.MOUSE_DRAGGED) && ((getState() & STATE_FLAG_CLICKED) != 0)))
+			thumb.handleEvent(viewer, event);
+		return val;
 	}
 	
 	public SubWindow<WinSlider> getThumb() {

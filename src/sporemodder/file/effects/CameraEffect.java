@@ -116,12 +116,12 @@ public class CameraEffect extends EffectComponent {
 			
 			final ArgScriptArguments args = new ArgScriptArguments();
 
-			this.addParser("yaw", ArgScriptParser.create((parser, line) -> {
+			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.yaw.clear();
 					stream.parseFloats(args, effect.yaw);
 				}
-			}));
+			}), "yaw", "heading");
 			
 			this.addParser("pitch", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {

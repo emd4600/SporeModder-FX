@@ -110,10 +110,9 @@ public class VolumeEffect extends EffectComponent {
 			}));
 			
 			this.addParser("material", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFileID(args, 0)) != null) {
-					effect.material.setGroupID(value.intValue());
-					args.addHyperlink(PfxEditor.HYPERLINK_MATERIAL, new String[] {null, args.get(0)}, 0);
+				String[] originals = new String[2];
+				if (line.getArguments(args, 1) && effect.material.parse(args, 0, originals)) {
+					args.addHyperlink(PfxEditor.HYPERLINK_MATERIAL, originals, 0);
 				}
 			}));
 			

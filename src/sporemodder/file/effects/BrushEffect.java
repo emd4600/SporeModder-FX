@@ -132,13 +132,13 @@ public class BrushEffect extends EffectComponent {
 	public float texVary;
 	public float field_74;
 	public float field_78;
-	public float rate;
+	public float rate = 1.0f;
 	public boolean useFilter;
 	public boolean sizeGlobal;
 	public byte filter;
 	public byte filterMode;
 	public float filterValue;
-	@StructureLength.Value(32) public final List<Float> spacing = new ArrayList<Float>(Arrays.asList(1.0f));
+	@StructureLength.Value(32) public final List<Float> spacing = new ArrayList<Float>();
 	public float spacingVary;
 	public byte cond;
 	public float cond_0;
@@ -253,6 +253,7 @@ public class BrushEffect extends EffectComponent {
 
 			this.addParser("ribbon", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
+				effect.useRibbon = true;
 				
 				if (line.hasFlag("cap")) effect.ribbonCap = true;
 				
@@ -416,8 +417,8 @@ public class BrushEffect extends EffectComponent {
 				
 				if (line.getOptionArguments(args, "falloff", 2)) {
 					effect.falloff = 1;
-					effect.falloff_0 = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
-					effect.falloff_1 = Optional.ofNullable(stream.parseFloat(args, 2)).orElse(0.0f);
+					effect.falloff_0 = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+					effect.falloff_1 = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
 				}
 			}));
 			
@@ -438,8 +439,8 @@ public class BrushEffect extends EffectComponent {
 				
 				if (line.getOptionArguments(args, "falloff", 2)) {
 					effect.gradientCondFalloff = 1;
-					effect.gradientCondFalloff_0 = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
-					effect.gradientCondFalloff_1 = Optional.ofNullable(stream.parseFloat(args, 2)).orElse(0.0f);
+					effect.gradientCondFalloff_0 = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+					effect.gradientCondFalloff_1 = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
 				}
 			}));
 			

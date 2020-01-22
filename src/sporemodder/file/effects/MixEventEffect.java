@@ -84,8 +84,7 @@ public class MixEventEffect extends EffectComponent {
 			MixEventEffect effect = new MixEventEffect(data.getEffectDirectory(), FACTORY.getMaxVersion());
 			
 			ArgScriptArguments args = new ArgScriptArguments();
-			
-			// It must not have any arguments
+	
 			if (line.getArguments(args, 1, 3)) {
 				Number value = null;
 				

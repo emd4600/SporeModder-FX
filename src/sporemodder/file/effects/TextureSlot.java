@@ -153,12 +153,19 @@ public class TextureSlot {
 	}
 	
 	public void toArgScript(String keyword, ArgScriptWriter writer) {
-		writer.command(keyword);
-		if (!resource.isDefault()) writer.arguments(resource);
+		toArgScript(keyword, writer, true, true);
+	}
+	
+	public void toArgScript(String keyword, ArgScriptWriter writer, boolean include2nd, boolean includeShadow) {
+		if (keyword != null) {
+			writer.command(keyword);
+			if (!resource.isDefault()) writer.arguments(resource);
+		}
 		
 		if (drawMode == DRAWMODE_NONE && !resource2.isDefault()) {
-			writer.option("texture").arguments(resource2);
-		} else if (drawMode != DRAWMODE_NONE && (drawMode != 0 || !resource2.isDefault())) {
+			if (include2nd) writer.option("texture").arguments(resource2);
+		} 
+		else if (drawMode != DRAWMODE_NONE && (drawMode != 0 || !resource2.isDefault())) {
 			writer.option("draw").arguments(ENUM_DRAWMODE.get(drawMode));
 			if (!resource2.isDefault()) writer.arguments(resource2);
 		}
@@ -168,7 +175,7 @@ public class TextureSlot {
 		
 		writer.flag("light", (drawFlags & DRAWFLAG_LIGHT) == DRAWFLAG_LIGHT);
 		writer.flag("noFog", (drawFlags & DRAWFLAG_NO_FOG) == DRAWFLAG_NO_FOG);
-		writer.flag("shadow", (drawFlags & DRAWFLAG_SHADOW) == DRAWFLAG_SHADOW);
+		writer.flag("shadow", includeShadow && (drawFlags & DRAWFLAG_SHADOW) == DRAWFLAG_SHADOW);
 		writer.flag("noCull", (drawFlags & DRAWFLAG_NO_CULL) == DRAWFLAG_NO_CULL);
 		writer.flag("user1", (drawFlags & DRAWFLAG_USER1) == DRAWFLAG_USER1);
 		writer.flag("user2", (drawFlags & DRAWFLAG_USER2) == DRAWFLAG_USER2);

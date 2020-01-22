@@ -249,7 +249,7 @@ public class TextEffect extends EffectComponent {
 		
 		boolean fontIsDefault = fontID.isDefault();
 		
-		writer.command("string").arguments(string);
+		writer.command("string").literal(string);
 		if (!localeID.isDefault()) writer.option("id").arguments(localeID);
 		// If we write the 'font' command, better put size there
 		if (fontIsDefault) writer.option("size").floats(fontSize);

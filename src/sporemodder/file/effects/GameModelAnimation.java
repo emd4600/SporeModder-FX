@@ -81,7 +81,7 @@ public class GameModelAnimation {
 			speedScale = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
 		}
 		
-		if (line.getOptionArguments(args, "channelID", 1)) {
+		if (line.getOptionArguments(args, "channel", 1)) {
 			channelID = Optional.ofNullable(stream.parseFileID(args, 0)).orElse(0);
 		}
 		
@@ -111,11 +111,17 @@ public class GameModelAnimation {
 		
 		if (curveVary != 0) writer.option("vary").floats(curveVary);
 		if (speedScale != 0) writer.option("speedScale").floats(speedScale);
-		if (channelID != 0) writer.option("channelID").arguments(HashManager.get().getFileName(channelID));
+		if (channelID != 0) writer.option("channel").arguments(HashManager.get().getFileName(channelID));
 		
 		if (lengthRange[0] != 0 || lengthRange[1] != 0) {
-			//TODO Spore does something different here
-			writer.option("length").floats(lengthRange);
+			writer.option("length");
+			if (lengthRange[0] == lengthRange[1]) {
+				writer.floats(lengthRange[0]);
+			}
+			else {
+				float mid = (lengthRange[0] + lengthRange[1]) / 2.0f;
+				writer.floats(mid, lengthRange[1] - mid);
+			}
 		}
 		
 		if (mode == MODE_FLAG_SUSTAIN) writer.option("sustain");

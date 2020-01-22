@@ -100,7 +100,9 @@ public class TerrainScriptEffect extends EffectComponent {
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 			block.blockType = TYPE_CODE;
 			block.parse(stream, line, GroupParser.class);
-			
+	
+			block.component = effect;
+			data.addComponent(effect.toString(), effect);
 			data.getCurrentEffect().blocks.add(block);
 		}
 	}

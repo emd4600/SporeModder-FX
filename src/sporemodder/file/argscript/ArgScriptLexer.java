@@ -1080,6 +1080,9 @@ public class ArgScriptLexer {
 				numbers = parseFloatBinomial("pow");
 				return Math.toDegrees(Math.atan2(numbers[0], numbers[1]));
 				
+			case "NaN":
+				return Float.NaN;
+				
 			default:
 				ArgScriptFunction function = functions.getOrDefault(sb.toString(), null);
 				if (function == null) {

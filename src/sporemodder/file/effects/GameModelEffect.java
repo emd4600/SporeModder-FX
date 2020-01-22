@@ -212,6 +212,8 @@ public class GameModelEffect extends EffectComponent {
 	}
 	
 	@Override public void read(StreamReader in) throws IOException {
+		System.out.println(in.getFilePointer());
+		
 		flags = in.readInt();
 		size = in.readFloat();
 		color.readLE(in);
@@ -306,6 +308,8 @@ public class GameModelEffect extends EffectComponent {
 			else {
 				out.writeInt(0);
 			}
+			
+			split.transform.write(out);
 			
 			out.writeInt(split.splitterIndices.size());
 			for (int i : split.splitterIndices) out.writeInt(i);
@@ -543,7 +547,6 @@ public class GameModelEffect extends EffectComponent {
 			// Add it to the effect
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 			block.blockType = TYPE_CODE;
-			block.parse(stream, line, GameModelEffect.class);
 			
 			data.getCurrentEffect().blocks.add(block);
 			
@@ -589,6 +592,8 @@ public class GameModelEffect extends EffectComponent {
 				data.addComponent(effect.toString(), effect);
 				block.component = effect;
 			}
+			
+			block.parse(stream, line, GameModelEffect.class, args.size() == 0);
 		}
 	}
 	

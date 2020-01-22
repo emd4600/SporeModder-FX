@@ -30,6 +30,7 @@ import emord.filestructures.StructureEndian;
 import emord.filestructures.StructureFieldEndian;
 import emord.filestructures.StructureLength;
 import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
@@ -76,6 +77,11 @@ public class FastParticleEffect extends EffectComponent {
 	public static final int RATE_SIZESCALE = 0x100;  // are we sure ?
 	public static final int RATE_AREASCALE = 0x200;  // are we sure ?
 	public static final int RATE_VOLUMESCALE = 0x400;  // are we sure ?
+	
+	
+	public static final int FLAGMASK = SOURCE_ROUND | EMIT_BASE
+			| FLAG_SUSTAIN | FLAG_INJECT | FLAG_MAINTAIN | RATE_SIZESCALE | RATE_AREASCALE | RATE_VOLUMESCALE;
+	
 	
 	public int flags;  // & 7FF
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] life = new float[2];
@@ -211,6 +217,13 @@ public class FastParticleEffect extends EffectComponent {
 			parseRate();
 			parseMaintain();
 			parseInject();
+			
+			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
+				Number value;
+				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
+					effect.flags |= value.intValue() & ~FLAGMASK;
+				}
+			}));
 		}
 		
 		private void parseSource() {
@@ -294,6 +307,7 @@ public class FastParticleEffect extends EffectComponent {
 					}
 					
 					if (line.getOptionArguments(args, "ellipse", 1) && line.getOptionArguments(args, "ellipsoid", 1)) {
+						effect.flags |= SOURCE_ROUND;
 						float[] array = new float[3];
 						if (stream.parseVector3(args, 0, array)) {
 							min_x -= array[0];
@@ -626,6 +640,11 @@ public class FastParticleEffect extends EffectComponent {
 		writeResource(writer);
 		if (alignMode != 0) writer.command("align").arguments(ENUM_ALIGNMENT.get(alignMode));
 		
+		if ((flags & ~FLAGMASK) != 0) {
+			writer.blankLine();
+			writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
+		}
+		
 		writer.endBlock().commandEND();
 	}
 	
@@ -759,7 +778,19 @@ public class FastParticleEffect extends EffectComponent {
 				writer.option("gravity").floats(-directionForcesSum[2]);
 			}
 			else if (directionForcesSum[0] != 0 || directionForcesSum[1] != 0 || directionForcesSum[2] != 0) {
-				writer.option("wind").vector(directionForcesSum);
+				float[] vec = new float[] {directionForcesSum[0], directionForcesSum[1], directionForcesSum[2]};
+				float length = (float) Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+				
+				float eps = 0.0001f;
+				if (length >= 1.0-eps && length <= 1.0+eps) {
+					writer.option("wind").vector(vec);
+				}
+				else {
+					vec[0] = vec[0] / length;
+					vec[1] = vec[1] / length;
+					vec[2] = vec[2] / length;
+					writer.option("wind").vector(vec).floats(length);
+				}
 			}
 			
 			if (windStrength != 0) writer.option("worldWind").floats(windStrength);

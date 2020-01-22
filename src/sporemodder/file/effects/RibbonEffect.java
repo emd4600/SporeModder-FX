@@ -61,6 +61,8 @@ public class RibbonEffect extends EffectComponent {
 	public static final int FLAG_MAP_FORCE = 0x10000;
 	public static final int FLAG_KILLOUTSIDEMAP = 0x20000;
 	
+	public static final int FLAGMASK = FLAG_ACCEPTCOMPOSITE | FLAG_TEXTURE | FLAG_MAP_ADVECT | FLAG_MAP_FORCE | FLAG_KILLOUTSIDEMAP;
+	
 	
 	public int flags;
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] lifeTime = new float[2];
@@ -481,8 +483,8 @@ public class RibbonEffect extends EffectComponent {
 			
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue();
+				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
+					effect.flags |= value.intValue() & ~FLAGMASK;
 				}
 			}));
 		}
@@ -547,8 +549,7 @@ public class RibbonEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		int bigflag = FLAG_TEXTURE | FLAG_MAP_ADVECT | FLAG_MAP_FORCE | FLAG_ACCEPTCOMPOSITE | FLAG_KILLOUTSIDEMAP;
-		if ((bigflag | flags) != bigflag) writer.command("flags").arguments(HashManager.get().hexToString(flags));
+		if ((flags & ~FLAGMASK) != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
 		
 		if (!writer.isDefaultColor(color)) writer.command("color").colors(color);
 		if (!writer.isDefault(alpha)) writer.command("alpha").floats(alpha);
@@ -591,7 +592,19 @@ public class RibbonEffect extends EffectComponent {
 				writer.option("gravity").floats(-directionForcesSum[2]);
 			}
 			else if (directionForcesSum[0] != 0 || directionForcesSum[1] != 0 || directionForcesSum[2] != 0) {
-				writer.option("wind").vector(directionForcesSum);
+				float[] vec = new float[] {directionForcesSum[0], directionForcesSum[1], directionForcesSum[2]};
+				float length = (float) Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+				
+				float eps = 0.0001f;
+				if (length >= 1.0-eps && length <= 1.0+eps) {
+					writer.option("wind").vector(vec);
+				}
+				else {
+					vec[0] = vec[0] / length;
+					vec[1] = vec[1] / length;
+					vec[2] = vec[2] / length;
+					writer.option("wind").vector(vec).floats(length);
+				}
 			}
 			
 			if (windStrength != 0) writer.option("worldWind").floats(windStrength);

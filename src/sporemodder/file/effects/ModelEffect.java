@@ -157,7 +157,6 @@ public class ModelEffect extends EffectComponent {
 			// Add it to the effect
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 			block.blockType = TYPE_CODE;
-			block.parse(stream, line, ModelEffect.class);
 			data.getCurrentEffect().blocks.add(block);
 			
 			if (line.getArguments(args, 0, 1) && args.size() == 0) {
@@ -199,6 +198,8 @@ public class ModelEffect extends EffectComponent {
 				data.addComponent(effect.toString(), effect);
 				block.component = effect;
 			}
+			
+			block.parse(stream, line, ModelEffect.class, args.size() == 0);
 		}
 	}
 	

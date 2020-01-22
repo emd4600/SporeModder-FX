@@ -48,10 +48,14 @@ public class SoundEffect extends EffectComponent {
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
 	
+	public static final int FLAG_FIELD18 = 1 << 4;
+	public static final int FLAG_LOOP = 0xa;
+	public static final int FLAGMASK = FLAG_FIELD18 | FLAG_LOOP;
+	
 	public int flags;
 	public final ResourceID soundID = new ResourceID();
-	public int field_18;
-	public float field_1C;
+	public int field_18 = 0xCDCDCDCD;  // only used if flags >> 4
+	public float field_1C = 0.05f;
 	public float field_20;
 	public float field_24;
 	
@@ -107,10 +111,11 @@ public class SoundEffect extends EffectComponent {
 			
 			if (line.getOptionArguments(args, "soundFlags", 1)) 
 			{
-				effect.flags = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
+				effect.flags |= Optional.ofNullable(stream.parseInt(args, 0)).orElse(0) & ~FLAG_FIELD18;
 			}
 			if (line.getOptionArguments(args, "field_18", 1)) 
 			{
+				effect.flags |= FLAG_FIELD18;
 				effect.field_18 = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
 			}
 			if (line.getOptionArguments(args, "field_1C", 1)) 
@@ -124,6 +129,9 @@ public class SoundEffect extends EffectComponent {
 			if (line.getOptionArguments(args, "field_24", 1)) 
 			{
 				effect.field_24 = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+			}
+			if (line.hasFlag("loop")) {
+				effect.flags |= FLAG_LOOP;
 			}
 			
 
@@ -194,9 +202,15 @@ public class SoundEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).option("name").arguments(soundID);
 		
-		if (flags != 0) writer.option("soundFlags").arguments("0x" + Integer.toHexString(flags));
-		if (field_18 != 0) writer.option("field_18").arguments(HashManager.get().getFileName(field_18));
-		if (field_1C != 0) writer.option("field_1C").floats(field_1C);
+		if ((flags & FLAG_LOOP) == FLAG_LOOP) {
+			writer.option("loop");
+		}
+		else if ((flags & FLAG_LOOP) != 0 || (flags & ~FLAGMASK) != 0) {
+			writer.option("soundFlags").arguments("0x" + Integer.toHexString(flags & ~FLAG_FIELD18));
+		}
+		
+		if ((flags & FLAG_FIELD18) != 0) writer.option("field_18").arguments(HashManager.get().getFileName(field_18));
+		if (field_1C != 0.05f) writer.option("field_1C").floats(field_1C);
 		if (field_20 != 0) writer.option("field_20").floats(field_20);
 		if (field_24 != 0) writer.option("field_24").floats(field_24);
 	}

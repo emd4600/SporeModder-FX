@@ -477,7 +477,7 @@ public class ScreenEffect extends EffectComponent {
 						filter.parameters.add(line.getOptionArguments(args, "maskTexture", 1) ? sourceParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "maskChannel", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param9") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("invertMask") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "offsetXY", 1) ? vector2Parameter(args, 0) : -1);
 					}));
 					
@@ -499,8 +499,8 @@ public class ScreenEffect extends EffectComponent {
 						filter.parameters.add(line.getOptionArguments(args, "addMul", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "maskTexture", 1) ? sourceParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param7", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param8") ? 1 : 0));
+						filter.parameters.add(line.getOptionArguments(args, "maskChannel", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add((byte) (line.hasFlag("replace") ? 1 : 0));
 					}));
 					
 					this.addParser("colorize", ArgScriptParser.create((parser, line) -> {
@@ -556,6 +556,7 @@ public class ScreenEffect extends EffectComponent {
 						filter.parameters.add(line.getOptionArguments(args, "sourceMul", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "param2", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? vector3Parameter(args, 0) : -1);
 						filter.parameters.add((byte) (line.hasFlag("replace") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "offsetXY", 1) ? vector2Parameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "param7", 1) ? floatParameter(args, 0) : -1);
@@ -576,6 +577,7 @@ public class ScreenEffect extends EffectComponent {
 					this.addParser("customMaterial", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_CUSTOM_MATERIAL);
 						
+						// One of the flags is "depthRender", "timeOfDay"
 						filter.parameters.add(line.getOptionArguments(args, "materialID", 1) ? sourceParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "sampler0", 1) ? sourceParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "sampler1", 1) ? sourceParameter(args, 0) : -1);

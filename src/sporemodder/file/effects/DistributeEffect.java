@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
@@ -55,6 +56,9 @@ public class DistributeEffect extends EffectComponent {
 	}
 	
 	public static final int FLAG_SURFACES = 0x1000;
+	public static final int FLAG_MODEL = 0x100;
+	
+	public static final int FLAGMASK = FLAG_SURFACES | FLAG_MODEL;
 	
 	// 0x40 (1000000b) -> heading, pitch, roll ?
 	// 0x100 (00000001 00000000b) -> model ?
@@ -111,6 +115,7 @@ public class DistributeEffect extends EffectComponent {
 		
 		transform.copy(effect.transform);
 		
+		size.clear();
 		size.addAll(effect.size);
 		sizeVary = effect.sizeVary;
 		pitch.addAll(effect.pitch);
@@ -122,8 +127,10 @@ public class DistributeEffect extends EffectComponent {
 		rollOffset = effect.rollOffset;
 		yawVary = effect.yawVary;
 		yawOffset = effect.yawOffset;
+		color.clear();
 		color.addAll(effect.color);
 		colorVary.copy(effect.colorVary);
+		alpha.clear();
 		alpha.addAll(alpha);
 		alphaVary = effect.alphaVary;
 		
@@ -174,6 +181,7 @@ public class DistributeEffect extends EffectComponent {
 		readTransform(in);
 		
 		count = in.readInt();
+		size.clear();
 		for (int i = 0; i < count; i++) size.add(in.readFloat());
 		sizeVary = in.readFloat();
 		
@@ -193,6 +201,7 @@ public class DistributeEffect extends EffectComponent {
 		rollOffset = in.readFloat();
 		yawOffset = in.readFloat();
 		
+		color.clear();
 		count = in.readInt();
 		for (int i = 0; i < count; i++) {
 			ColorRGB c = new ColorRGB();
@@ -202,6 +211,7 @@ public class DistributeEffect extends EffectComponent {
 		colorVary.readLE(in);
 		
 		count = in.readInt();
+		alpha.clear();
 		for (int i = 0; i < count; i++) alpha.add(in.readFloat());
 		alphaVary = in.readFloat();
 		
@@ -243,17 +253,17 @@ public class DistributeEffect extends EffectComponent {
 		writeTransform(out);
 		
 		out.writeInt(size.size());
-		for (float f : size) out.writeLEFloat(f);
+		for (float f : size) out.writeFloat(f);
 		out.writeFloat(sizeVary);
 		
 		out.writeInt(pitch.size());
-		for (float f : pitch) out.writeLEFloat(f);
+		for (float f : pitch) out.writeFloat(f);
 		
 		out.writeInt(roll.size());
-		for (float f : roll) out.writeLEFloat(f);
+		for (float f : roll) out.writeFloat(f);
 		
 		out.writeInt(yaw.size());
-		for (float f : yaw) out.writeLEFloat(f);
+		for (float f : yaw) out.writeFloat(f);
 		
 		out.writeFloat(pitchVary);
 		out.writeFloat(rollVary);
@@ -269,7 +279,7 @@ public class DistributeEffect extends EffectComponent {
 		colorVary.writeLE(out);
 		
 		out.writeInt(alpha.size());
-		for (float f : alpha) out.writeLEFloat(f);
+		for (float f : alpha) out.writeFloat(f);
 		out.writeFloat(alphaVary);
 		
 		out.writeInt(surfaces.size());
@@ -291,7 +301,7 @@ public class DistributeEffect extends EffectComponent {
 			out.writeInt(field_164);
 			out.writeFloat(rotateVary);
 			out.writeInt(rotate.size());
-			for (float f : rotate) out.writeLEFloat(f);
+			for (float f : rotate) out.writeFloat(f);
 		}
 	}
 
@@ -415,7 +425,12 @@ public class DistributeEffect extends EffectComponent {
 			this.addParser("source", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1)) {
-					effect.sourceType = (byte) ENUM_SOURCE.get(args, 0);
+					if (Character.isDigit(args.get(0).charAt(0))) {
+						effect.sourceType = Optional.ofNullable(stream.parseByte(args, 0)).orElse((byte)0);
+					}
+					else {
+						effect.sourceType = (byte) ENUM_SOURCE.get(args, 0);
+					}
 				}
 				if (line.getOptionArguments(args, "scale", 1) && (value = stream.parseInt(args, 0)) != null) {
 					effect.sourceSize = value.intValue();
@@ -484,6 +499,47 @@ public class DistributeEffect extends EffectComponent {
 					effect.overrideSet = value.intValue();
 				}
 			}));
+
+			this.addParser("model", ArgScriptParser.create((parser, line) -> {
+				effect.resource.drawMode = 0;
+				effect.flags |= FLAG_MODEL;
+				
+				if (line.getArguments(args, 0, 1) && args.size() == 1) {
+					effect.resource.resource.parse(args, 0);
+				}
+				
+				if (line.getOptionArguments(args, "material", 1)) {
+					effect.resource.resource2.parse(args, 0);
+					effect.resource.drawMode = TextureSlot.DRAWMODE_NONE;
+				}
+				
+				Number value = null;
+				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {
+					effect.overrideSet = value.byteValue();
+				}
+				
+				effect.resource.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
+				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+			}));
+			
+			// This is a .smt material, not an effect material
+			this.addParser("material", ArgScriptParser.create((parser, line) -> {
+				Number value = null;
+				effect.resource.drawMode = TextureSlot.DRAWMODE_NONE;
+				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseInt(args, 0)) != null) {
+					effect.overrideSet = value.intValue();
+				}
+			}));
+			
+			
+			this.addParser("resource", ArgScriptParser.create((parser, line) -> {
+				Number value = null;
+				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseInt(args, 0)) != null) {
+					effect.overrideSet = value.intValue();
+				}
+			}));
 			
 			this.addParser("message", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
@@ -527,7 +583,7 @@ public class DistributeEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue();
+					effect.flags |= value.intValue() & ~FLAGMASK;
 				}
 			}));
 		}
@@ -614,7 +670,8 @@ public class DistributeEffect extends EffectComponent {
 			if (start != 1.0f) writer.option("start").floats(start);
 		}
 		
-		writer.command("source").arguments(ENUM_SOURCE.get(sourceType));
+		String src = ENUM_SOURCE.get(sourceType);
+		writer.command("source").arguments(src != null ? src : Integer.toString(sourceType));
 		if (sourceSize != 0.0f) writer.option("scale").ints(sourceSize);
 		
 		if (effect != null) {
@@ -647,10 +704,22 @@ public class DistributeEffect extends EffectComponent {
 		if (!colorMap.isDefault()) writer.command("mapEmitColor").arguments(colorMap);
 		if (!pinMap.isDefault()) writer.command("mapPin").arguments(pinMap);
 		
-		resource.toArgScript("resource", writer);
-		if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
+		if (!resource.isDefault() || overrideSet != 0) {
+			if ((flags & FLAG_MODEL) == FLAG_MODEL) {
+				writer.command("model");
+				if (!resource.resource.isDefault()) writer.arguments(resource.resource);
+				
+				if (!resource.resource2.isDefault()) writer.option("material").arguments(resource.resource2);
+				
+				resource.toArgScript(null, writer, false, false);
+			}
+			else {
+				resource.toArgScript(resource.drawMode == TextureSlot.DRAWMODE_NONE ? "material" : "resource", writer);
+				if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
+			}
+		}
 		
-		if (messageID != 0) writer.arguments(HashManager.get().getFileName(messageID));
+		if (messageID != 0) writer.command("message").arguments(HashManager.get().getFileName(messageID));
 		
 		if (!rotate.isEmpty()) {
 			writer.command("rotate").floats(rotate);
@@ -659,7 +728,7 @@ public class DistributeEffect extends EffectComponent {
 		if (field_160 != 0) writer.command("field_160").ints(field_160);
 		if (field_164 != 0) writer.command("field_164").ints(field_164);
 		if (field_1C != 0) writer.command("field_1C").arguments(HashManager.get().hexToString(field_1C));
-		if (flags != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags));
+		if ((flags & ~FLAGMASK) != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
 		
 		writer.endBlock().commandEND();
 	}

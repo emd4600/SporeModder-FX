@@ -80,7 +80,7 @@ public class ModelAnimation {
 			speedScale = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
 		}
 		
-		if (line.getOptionArguments(args, "channelID", 1)) {
+		if (line.getOptionArguments(args, "channel", 1)) {
 			channelID = Optional.ofNullable(stream.parseByte(args, 0)).orElse((byte) 0);
 		}
 		

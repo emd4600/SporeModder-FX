@@ -457,7 +457,7 @@ public class MetaparticleEffect extends EffectComponent {
 				}
 			}));
 			
-			this.addParser("yaw", ArgScriptParser.create((parser, line) -> {
+			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.yaw.clear();
 					stream.parseFloats(args, effect.yaw);
@@ -469,7 +469,7 @@ public class MetaparticleEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "offset", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.yawOffset = value.floatValue();
 				}
-			}));
+			}), "yaw", "heading");
 			
 			parseSource();
 			parseEmit();
@@ -604,7 +604,8 @@ public class MetaparticleEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
-					effect.flags = value.intValue();
+					effect.flags |= value.intValue() & ~FLAG_MASK;
+					// effect.flags = value.intValue();
 				}
 			}));
 			
@@ -696,7 +697,8 @@ public class MetaparticleEffect extends EffectComponent {
 						max_y += size;
 						max_z += size;
 					}
-					else if (line.getOptionArguments(args, "ellipse", 1) && line.getOptionArguments(args, "ellipsoid", 1)) {
+					else if (line.getOptionArguments(args, "ellipse", 1) || line.getOptionArguments(args, "ellipsoid", 1)) {
+						effect.flags |= SOURCE_ROUND;
 						float[] array = new float[3];
 						if (stream.parseVector3(args, 0, array)) {
 							min_x -= array[0];
@@ -710,7 +712,6 @@ public class MetaparticleEffect extends EffectComponent {
 					else if (line.getOptionArguments(args, "ring", 2) && 
 							(value = stream.parseFloat(args, 0)) != null && 
 							(value2 = stream.parseFloat(args, 1, 0.0f, 1.0f)) != null) {
-						effect.flags |= SOURCE_ROUND;
 						effect.torusWidth = value2.floatValue();
 						float size = value.floatValue();
 						min_x -= size;
@@ -719,7 +720,6 @@ public class MetaparticleEffect extends EffectComponent {
 						max_y += size;
 					}
 					else if (line.getOptionArguments(args, "torus", 2) && (value = stream.parseFloat(args, 1, 0.0f, 1.0f)) != null) {
-						effect.flags |= SOURCE_ROUND;
 						effect.torusWidth = value.floatValue();
 						
 						float[] array = new float[3];
@@ -1433,9 +1433,11 @@ public class MetaparticleEffect extends EffectComponent {
 		writeLife(writer);
 		writeRate(writer);
 		
-		writer.command("effect");
-		if (effect != null) writer.arguments(effect.getName());
-		if (deathEffect != null) writer.option("death").arguments(deathEffect.getName());
+		if (effect != null || deathEffect != null) {
+			writer.command("effect");
+			if (effect != null) writer.arguments(effect.getName());
+			if (deathEffect != null) writer.option("death").arguments(deathEffect.getName());
+		}
 		
 		if (field_12C != 0) writer.command("field_12C").ints(field_12C);
 		if (tractorResetSpeed != 0) writer.command("tractorResetSpeed").floats(tractorResetSpeed);
@@ -1591,7 +1593,19 @@ private void writeSource(ArgScriptWriter writer) {
 				writer.option("gravity").floats(-directionForcesSum[2]);
 			}
 			else if (directionForcesSum[0] != 0 || directionForcesSum[1] != 0 || directionForcesSum[2] != 0) {
-				writer.option("wind").vector(directionForcesSum);
+				float[] vec = new float[] {directionForcesSum[0], directionForcesSum[1], directionForcesSum[2]};
+				float length = (float) Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+				
+				float eps = 0.0001f;
+				if (length >= 1.0-eps && length <= 1.0+eps) {
+					writer.option("wind").vector(vec);
+				}
+				else {
+					vec[0] = vec[0] / length;
+					vec[1] = vec[1] / length;
+					vec[2] = vec[2] / length;
+					writer.option("wind").vector(vec).floats(length);
+				}
 			}
 			
 			if (windStrength != 0) writer.option("worldWind").floats(windStrength);
@@ -1652,7 +1666,7 @@ private void writeSource(ArgScriptWriter writer) {
 	}
 	
 	private static void writeWalk(ArgScriptWriter writer, ParticleRandomWalk randomWalk, String directedKeyword, String keyword) {
-		boolean isDirectedWalk = randomWalk.loopType != 2;
+		boolean isDirectedWalk = !randomWalk.turnOffsetCurve.isEmpty();
 		
 		writer.command(isDirectedWalk ? directedKeyword : keyword).floats(randomWalk.turnOffsetCurve);
 		
@@ -1666,7 +1680,7 @@ private void writeSource(ArgScriptWriter writer) {
 		writer.option("strength").floats(value);
 		if (vary != 0) writer.floats(vary);
 		
-		if (randomWalk.turnRange != 0 || randomWalk.turnOffset != 0) {
+		if (randomWalk.turnRange != 0.25f || randomWalk.turnOffset != 0) {
 			writer.option(isDirectedWalk ? "randomTurn" : "turn").floats(randomWalk.turnRange);
 			if (randomWalk.turnOffset != 0) writer.floats(randomWalk.turnOffset);
 		}

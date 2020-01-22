@@ -18,7 +18,9 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -350,11 +352,16 @@ public class EffectDirectory {
 				
 				String keyword = factories[type].getKeyword();
 				
+				System.out.println(keyword + ": " + stream.getFilePointer());
+				
 				for (int i = 0; i < count; ++i) {
 					EffectComponent component = factories[type].create(this, version);
 					component.setName(keyword + '-' + Integer.toString(i));
 					list.add(component);
 				}
+			}
+			else {
+				System.out.println("0x" + Integer.toHexString(type) + " UNSUPPORTED version " + version + ": " + offset);
 			}
 			
 			stream.seek(offset + size);
@@ -603,17 +610,35 @@ public class EffectDirectory {
 			if (list != null) writtenResources[i] = new boolean[list.size()];
 		}
 		
+		Set<VisualEffect> writtenExporteds = new HashSet<VisualEffect>();
+		
 		for (Map.Entry<String, VisualEffect> export : exports.entrySet()) {
-			ArgScriptWriter writer = new ArgScriptWriter();
-			Set<EffectFileElement> writtenElements = new HashSet<EffectFileElement>();
+			if (writtenExporteds.contains(export.getValue())) {
+				// Just add the renamed export at the end of the file
+				try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputFolder, export.getValue().getName() + ".pfx"), true))) {
+					writer.newLine();
+					if (!export.getKey().equals(export.getValue().getName())) {
+						writer.write("export " + export.getValue().getName() + " " + export.getKey());
+					}
+					else {
+						writer.write("export " + export.getKey());
+					}
+				}
+			}
+			else {
+				ArgScriptWriter writer = new ArgScriptWriter();
+				Set<EffectFileElement> writtenElements = new HashSet<EffectFileElement>();
+				
+				writeEffectsPfxRecursive(export.getValue(), writer, writtenElements, writtenEffects, writtenResources);
 			
-			writeEffectsPfxRecursive(export.getValue(), writer, writtenElements, writtenEffects, writtenResources);
-			
-			// Unlikely case, but possible: the same effect but exported under multiple names
-			//TODO maybe we should check which effects are repeated exports and put them in the same file?
-			writer.command("export").arguments(export.getKey());
-			
-			writer.write(new File(outputFolder, export.getKey() + ".pfx"));
+				writer.command("export").arguments(export.getValue().getName());
+				if (!export.getKey().equals(export.getValue().getName())) {
+					writer.arguments(export.getKey());
+				}
+				writtenExporteds.add(export.getValue());
+				
+				writer.write(new File(outputFolder, export.getValue().getName() + ".pfx"));
+			}
 		}
 		
 		// Write unused effects
@@ -771,8 +796,8 @@ public class EffectDirectory {
 //		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir";
 //		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir.unpacked";
 		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\base.effdir";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\base.effdir.unpacked";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\games.effdir";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\games.effdir.unpacked";
 		
 		long time = System.currentTimeMillis();
 		

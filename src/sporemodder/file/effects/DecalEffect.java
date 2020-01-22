@@ -152,6 +152,13 @@ public class DecalEffect extends EffectComponent {
 				}
 			}), "color255", "colour255");
 			
+			this.addParser("aspect", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+					effect.aspectRatio.clear();
+					stream.parseFloats(args, effect.aspectRatio);
+				}
+			}));
+			
 			this.addParser("alpha", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
@@ -292,6 +299,8 @@ public class DecalEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
+		// One of these is type: terrainCircle, fastTerrain, light, lightRegion
+		
 		if (field_8 != 0) writer.command("field_8").arguments(HashManager.get().hexToString(field_8));
 		if (field_C != 0) writer.command("field_C").ints(field_C);
 		if (field_D != 0) writer.command("field_D").ints(field_D);
@@ -301,11 +310,15 @@ public class DecalEffect extends EffectComponent {
 		writer.command("alpha").floats(alpha);
 		if (alphaVary != 0.0f) writer.option("vary").floats(alphaVary);
 		
-		writer.command("size").floats(alpha);
+		writer.command("size").floats(size);
 		if (sizeVary != 0.0f) writer.option("vary").floats(sizeVary);
 		
-		writer.command("rotate").floats(rotation);
-		if (rotationVary != 0.0f) writer.option("rotate").floats(rotationVary);
+		if (rotation.size() > 1 || (rotation.size() == 1 && rotation.get(0) != 0.0f) || rotationVary != 0.0f) {
+			writer.command("rotate").floats(rotation);
+			if (rotationVary != 0.0f) writer.option("vary").floats(rotationVary);
+		}
+		
+		if (aspectRatio.size() > 1 || (aspectRatio.size() == 1 && aspectRatio.get(0) != 1.0f)) writer.command("aspect").floats(aspectRatio);
 		
 		writer.command("life").floats(lifeTime);
 		

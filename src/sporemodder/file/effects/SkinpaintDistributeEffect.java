@@ -206,7 +206,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						EffectComponent component = getData().getComponent(line.getKeyword(), SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
 						if (component != null) {
 							// -1 cause it's the first split, 0 is the second split
-							line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.particle), component, -1);
+							line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(component), component, -1);
 						}
 						
 						if (component == null) {
@@ -221,6 +221,10 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						
 						effect.particleSelect.add(new ParticleSelectPair(component, prob));
 					}
+					
+					// This adds option warnings, so it must go after being parsed
+					stream.addSyntax(line, false);
+					
 					return true;
 				}
 				
@@ -248,6 +252,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						if (totalProb > 1.00010001659393310546875E0) {
 							tempError.setMessage("Total selection probability is greater than 1.");
 							stream.addError(tempError);
+							stream.endSpecialBlock();
 							return;
 						}
 						
@@ -265,6 +270,8 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 							pair.prob = addedProb;
 						}
 					}
+					
+					stream.endSpecialBlock();
 				}
 			});
 			
@@ -289,6 +296,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 			
 			this.addParser("region", ArgScriptParser.create((parser, line) -> {
 
+				effect.region = 0;
 				if (line.hasFlag("torso")) effect.region |= REGION_TORSO;
 				if (line.hasFlag("limbs")) effect.region |= REGION_LIMBS;
 				if (line.hasFlag("parts")) effect.region |= REGION_PARTS;
@@ -296,15 +304,17 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 				
 				Number value = null;
 				
-				if (line.getOptionArguments(args, "back", 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.regionBack = (float) Math.cos(Math.toRadians(value.floatValue()));
+				if (line.getOptionArguments(args, "back", 1) && (value = stream.parseFloat(args, 0, 0.0f, 2.0f)) != null) {
+					effect.region |= REGION_BACK;
+					effect.regionBack = (float) Math.cos(value.floatValue() * Math.PI / 2.0);
 				}
 				
-				if (line.getOptionArguments(args, "belly", 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.regionBelly = (float) -Math.cos(Math.toRadians(value.floatValue()));
+				if (line.getOptionArguments(args, "belly", 1) && (value = stream.parseFloat(args, 0, 0.0f, 2.0f)) != null) {
+					effect.region |= REGION_BELLY;
+					effect.regionBelly = (float) -Math.cos(value.floatValue() * Math.PI / 2.0);
 				}
 				
-				if (line.getOptionArguments(args, "bodyRange", 2) && (value = stream.parseFloat(args, 1)) != null) {
+				if (line.getOptionArguments(args, "bodyRange", 2) && (value = stream.parseFloat(args, 0)) != null) {
 					
 					effect.regionBodyRange[0] = value.floatValue();
 					
@@ -314,7 +324,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 				}
 				else {
 					effect.regionBodyRange[0] = 0.0f;
-					effect.regionBodyRange[1] = 0.0f;
+					effect.regionBodyRange[1] = 1.0f;
 				}
 				
 				effect.regionInverse = line.hasFlag("inverse");
@@ -385,8 +395,12 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 		if (particle != null) writer.command("particle").arguments(particle.getName());
 		if (!particleSelect.isEmpty()) {
 			writer.command("particleSelect").flag("all", selectAll).startBlock();
-			for (ParticleSelectPair select : particleSelect) {
-				writer.command(select.component.getName()).floats(select.prob);
+			for (int i = 0; i < particleSelect.size(); ++i) {
+				ParticleSelectPair select = particleSelect.get(i);
+				writer.command(select.component.getName());
+				if (select.prob != -1.0f) {
+					writer.option("prob").floats(i == 0 ? select.prob : (select.prob - particleSelect.get(i-1).prob));
+				}
 			}
 			writer.endBlock().commandEND();
 		}

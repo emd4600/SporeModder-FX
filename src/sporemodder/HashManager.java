@@ -163,6 +163,7 @@ public class HashManager extends AbstractManager {
 	 * @param value The value that will be turned into a string.
 	 */
 	public String floatToString(float value) {
+		if (Float.isNaN(value)) return "NaN";
 		return defaultDecimalFormat.format(value);
 	}
 	

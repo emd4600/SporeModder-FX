@@ -162,13 +162,17 @@ public class VisualEffectBlock {
 	}
 	
 	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, Class<?> type) {
+		parse(stream, line, type, true);
+	}
+	
+	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, Class<?> type, boolean isAnonymous) {
 		ArgScriptArguments args = new ArgScriptArguments();
 		
 		Integer iValue = null;
 		Float fValue = null;
 		
 		// Some effects are anonymous and therefore, don't specify a name
-		if (line.getArguments(args, 0, 1) && args.size() == 1) {
+		if (!isAnonymous && line.getArguments(args, 0, 1) && args.size() == 1) {
 			component = stream.getData().getComponent(args.get(0), type, line.getKeyword());
 			
 			if (component == null) {
@@ -361,7 +365,7 @@ public class VisualEffectBlock {
 				// Add it to the effect
 				VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 				block.blockType = typeCode;
-				block.parse(stream, line, type);
+				block.parse(stream, line, type, false);
 				
 				data.getCurrentEffect().blocks.add(block);
 			}

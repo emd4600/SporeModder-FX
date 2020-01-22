@@ -135,7 +135,9 @@ public class TerrainDistributeEffect extends EffectComponent {
 						level = null;
 					}
 					
-					effect.levels[levelIndex] = level;
+					if (level != null) stream.startBlock(this);
+					
+					if (levelIndex >= 0 && levelIndex < 5) effect.levels[levelIndex] = level;
 				}
 				
 				@Override
@@ -247,9 +249,9 @@ public class TerrainDistributeEffect extends EffectComponent {
 			writer.flag("active", (flags & FLAG_ACTIVE) == FLAG_ACTIVE);
 		}
 		
-		for (int i = 0; i < 0; ++i) {
+		for (int i = 0; i < levels.length; ++i) {
 			if (!levels[i].isDefault()) {
-				levels[i].toArgScript(writer, i+1);
+				levels[i].toArgScript(writer, i);
 			}
 		}
 		

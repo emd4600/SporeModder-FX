@@ -101,8 +101,9 @@ public class MapResource extends EffectResource {
 	public byte channel = 4;
 	public byte opType;
 	
-	public final ResourceID[] opArgMaps = new ResourceID[4];
-	public final Vector4[] opArgValues = new Vector4[4];
+	// If we don't instatiate them we get errors
+	public final ResourceID[] opArgMaps = new ResourceID[] {new ResourceID(), new ResourceID(), new ResourceID(), new ResourceID()};
+	public final Vector4[] opArgValues = new Vector4[] {new Vector4(), new Vector4(), new Vector4(), new Vector4()};
 	
 	public MapResource(EffectDirectory effectDirectory, int version) {
 		super(effectDirectory, version);
@@ -198,13 +199,7 @@ public class MapResource extends EffectResource {
 				resource.flags |= ARG_VALUE_1;
 				
 				float[] arr = new float[4];
-				
-				if (args.get(0).contains("(")) {
-					stream.parseVector4(args, 0, arr);
-				}
-				else if ((value = stream.parseFloat(args, 0)) != null) {
-					arr[0] = arr[1] = arr[2] = arr[3] = value.floatValue();
-				}
+				stream.parseVector4(args, 0, arr);
 				
 				resource.opArgValues[1] = new Vector4(arr);
 			}
@@ -213,13 +208,7 @@ public class MapResource extends EffectResource {
 				resource.flags |= ARG_VALUE_2;
 				
 				float[] arr = new float[4];
-				
-				if (args.get(0).contains("(")) {
-					stream.parseVector4(args, 0, arr);
-				}
-				else if ((value = stream.parseFloat(args, 0)) != null) {
-					arr[0] = arr[1] = arr[2] = arr[3] = value.floatValue();
-				}
+				stream.parseVector4(args, 0, arr);
 				
 				resource.opArgValues[2] = new Vector4(arr);
 			}
@@ -228,13 +217,7 @@ public class MapResource extends EffectResource {
 				resource.flags |= ARG_VALUE_3;
 				
 				float[] arr = new float[4];
-				
-				if (args.get(0).contains("(")) {
-					stream.parseVector4(args, 0, arr);
-				}
-				else if ((value = stream.parseFloat(args, 0)) != null) {
-					arr[0] = arr[1] = arr[2] = arr[3] = value.floatValue();
-				}
+				stream.parseVector4(args, 0, arr);
 				
 				resource.opArgValues[3] = new Vector4(arr);
 			}

@@ -33,6 +33,7 @@ import emord.filestructures.StructureFieldMethod;
 import emord.filestructures.StructureLength;
 import emord.filestructures.StructureUnsigned;
 import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
@@ -120,6 +121,12 @@ public class ParticleEffect extends EffectComponent {
 	public static final int FLAG_REPULSEMAP = 0x4000;
 	public static final int FLAG_ADVECTMAP = 0x8000;
 	public static final int FLAG_FORCEMAP = 0x10000;
+	
+	public static final int FLAGMASK = SOURCE_ROUND | SOURCE_SCALEPARTICLES | SOURCE_RESETINCOMING | EMIT_SCALEEXISTING | EMIT_BASE
+			| WARP_SPIRAL | ATTRACTOR_LOCATION | FLAG_RANDOMWALK | RANDOMWALK_WAIT | LIFE_PROPAGATEALWAYS | LIFE_PROPAGATEIFKILLED
+			| FLAG_SUSTAIN | FLAG_HOLD | FLAG_KILL | FLAG_INJECT | FLAG_MAINTAIN | RATE_SIZESCALE | RATE_AREASCALE | RATE_VOLUMESCALE
+			| FLAG_MODEL | FLAG_ACCEPTCOMPOSITE | FLAG_LOOPBOX | EMITMAP_PINTOSURFACE | EMITMAP_HEIGHT | EMITMAP_DENSITY
+			| FLAG_SURFACES | FLAG_COLLIDEMAP | COLLIDE_PINTOMAP | FLAG_KILLOUTSIDEMAP | FLAG_REPULSEMAP | FLAG_ADVECTMAP | FLAG_FORCEMAP;
 	
 	
 	public int unkFlags;
@@ -508,6 +515,13 @@ public class ParticleEffect extends EffectComponent {
 				point.parse(stream, line, effect.pathPoints, effect.pathPoints.size());
 				effect.pathPoints.add(point);
 			}));
+			
+			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
+				Number value;
+				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
+					effect.flags |= value.intValue() & ~FLAGMASK;
+				}
+			}));
 		}
 		
 		private void parseSource() {
@@ -586,6 +600,7 @@ public class ParticleEffect extends EffectComponent {
 						max_z += size;
 					}
 					else if (line.getOptionArguments(args, "ellipse", 1) || line.getOptionArguments(args, "ellipsoid", 1)) {
+						effect.flags |= SOURCE_ROUND;
 						float[] array = new float[3];
 						if (stream.parseVector3(args, 0, array)) {
 							min_x -= array[0];
@@ -599,7 +614,6 @@ public class ParticleEffect extends EffectComponent {
 					else if (line.getOptionArguments(args, "ring", 2) && 
 							(value = stream.parseFloat(args, 0)) != null && 
 							(value2 = stream.parseFloat(args, 1, 0.0f, 1.0f)) != null) {
-						effect.flags |= SOURCE_ROUND;
 						effect.torusWidth = value2.floatValue();
 						float size = value.floatValue();
 						min_x -= size;
@@ -608,7 +622,6 @@ public class ParticleEffect extends EffectComponent {
 						max_y += size;
 					}
 					else if (line.getOptionArguments(args, "torus", 2) && (value = stream.parseFloat(args, 1, 0.0f, 1.0f)) != null) {
-						effect.flags |= SOURCE_ROUND;
 						effect.torusWidth = value.floatValue();
 						
 						float[] array = new float[3];
@@ -1138,7 +1151,7 @@ public class ParticleEffect extends EffectComponent {
 					effect.overrideSet = value.byteValue();
 				}
 				
-				effect.texture.drawMode = (byte) (effect.texture.drawMode | 8);
+				effect.texture.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
 				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_FILE);
 			}));
 		}
@@ -1445,6 +1458,11 @@ public class ParticleEffect extends EffectComponent {
 			}
 		}
 		
+		if ((flags & ~FLAGMASK) != 0) {
+			writer.blankLine();
+			writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
+		}
+		
 		writer.endBlock().commandEND();
 	}
 	
@@ -1550,7 +1568,19 @@ public class ParticleEffect extends EffectComponent {
 				writer.option("gravity").floats(-directionForcesSum[2]);
 			}
 			else if (directionForcesSum[0] != 0 || directionForcesSum[1] != 0 || directionForcesSum[2] != 0) {
-				writer.option("wind").vector(directionForcesSum);
+				float[] vec = new float[] {directionForcesSum[0], directionForcesSum[1], directionForcesSum[2]};
+				float length = (float) Math.sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+				
+				float eps = 0.0001f;
+				if (length >= 1.0-eps && length <= 1.0+eps) {
+					writer.option("wind").vector(vec);
+				}
+				else {
+					vec[0] = vec[0] / length;
+					vec[1] = vec[1] / length;
+					vec[2] = vec[2] / length;
+					writer.option("wind").vector(vec).floats(length);
+				}
 			}
 			
 			if (windStrength != 0) writer.option("worldWind").floats(windStrength);
@@ -1612,7 +1642,9 @@ public class ParticleEffect extends EffectComponent {
 	
 	private void writeWalk(ArgScriptWriter writer) {
 		if ((flags & FLAG_RANDOMWALK) == FLAG_RANDOMWALK) {
-			writer.command("randomWalk").floats(randomWalk.turnOffsetCurve);
+			boolean isDirectedWalk = !randomWalk.turnOffsetCurve.isEmpty();
+			if (isDirectedWalk) writer.command("directedWalk").floats(randomWalk.turnOffsetCurve);
+			else writer.command("randomWalk");
 			
 			float vary = (randomWalk.time[1] - randomWalk.time[0]) / 2;
 			float value = randomWalk.time[0] + vary;
@@ -1699,6 +1731,8 @@ public class ParticleEffect extends EffectComponent {
 			if (!texture.resource.isDefault()) writer.arguments(texture.resource);
 			
 			if (!texture.resource2.isDefault()) writer.option("material").arguments(texture.resource2);
+			
+			texture.toArgScript(null, writer, false, false);
 		}
 		else {
 			if (texture.drawMode == TextureSlot.DRAWMODE_NONE) {

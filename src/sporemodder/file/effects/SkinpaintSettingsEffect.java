@@ -185,8 +185,7 @@ public class SkinpaintSettingsEffect extends EffectComponent {
 			
 			if ((line.getOptionArguments(args, "specExp", 1) || line.getOptionArguments(args, "exponent", 1)) && (value = stream.parseFloat(args, 0)) != null) {
 				effect.flags |= FLAG_SPECEXP;
-				effect.specBump[1] = value.floatValue();
-				effect.specBump[1] = Math.min(Math.max(effect.specBump[0], 1.0f), 60.0f) / 60.0f;
+				effect.specBump[1] = Math.min(Math.max(value.floatValue(), 1.0f), 60.0f) / 60.0f;
 			}
 			
 			if (line.getOptionArguments(args, "gloss", 1) && (value = stream.parseFloat(args, 0)) != null) {

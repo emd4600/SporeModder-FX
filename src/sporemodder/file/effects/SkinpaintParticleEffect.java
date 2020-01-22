@@ -701,9 +701,9 @@ public class SkinpaintParticleEffect extends EffectComponent {
 				
 				Variable variable = new Variable();
 				variable.range[0] = 0.0f;
-				variable.range[1] = 1.0f;
+				variable.range[1] = 0.0f;
 				variable.values[0] = 0.0f;
-				variable.values[1] = 1.0f;
+				variable.values[1] = 0.0f;
 				variable.channel = channel;
 				variable.varModifierIndex = (byte) (effect.varModifiers.size() - 1);
 				// The default operation is 'mult'
@@ -783,8 +783,8 @@ public class SkinpaintParticleEffect extends EffectComponent {
 						line.getOptionArguments(args, "mult", 2) ||
 						line.getOptionArguments(args, "div", 2)) {
 						
-						if ((value = stream.parseFloat(args, 0)) != null) variable.range[0] = value.floatValue();
-						if ((value = stream.parseFloat(args, 1)) != null) variable.range[1] = value.floatValue();
+						if ((value = stream.parseFloat(args, 0)) != null) variable.values[0] = value.floatValue();
+						if ((value = stream.parseFloat(args, 1)) != null) variable.values[1] = value.floatValue();
 					}
 					
 					if (line.hasFlag("open")) variable.flag = 1;

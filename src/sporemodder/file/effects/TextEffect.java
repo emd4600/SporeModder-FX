@@ -261,9 +261,9 @@ public class TextEffect extends EffectComponent {
 		
 		writer.command("life").floats(1.0f / life).flag("sustain", (flags & FLAG_SUSTAIN) == FLAG_SUSTAIN);
 		
-		writer.command("color").colors(color);
-		writer.command("alpha").floats(alpha);
-		writer.command("size").floats(size);
+		if (!color.isEmpty()) writer.command("color").colors(color);
+		if (!alpha.isEmpty()) writer.command("alpha").floats(alpha);
+		if (!size.isEmpty()) writer.command("size").floats(size);
 		
 		writer.endBlock().commandEND();
 	}

@@ -212,8 +212,6 @@ public class GameModelEffect extends EffectComponent {
 	}
 	
 	@Override public void read(StreamReader in) throws IOException {
-		System.out.println(in.getFilePointer());
-		
 		flags = in.readInt();
 		size = in.readFloat();
 		color.readLE(in);

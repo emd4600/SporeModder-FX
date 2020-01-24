@@ -66,7 +66,7 @@ public class UpdateManager {
      */
     public static final TimeZone TIMEZONE = TimeZone.getTimeZone("UTC");
     
-    public final VersionInfo versionInfo = new VersionInfo(2, 1, 8, null);
+    public final VersionInfo versionInfo = new VersionInfo(2, 1, 9, null);
     
     public static UpdateManager get() {
     	return MainApp.get().getUpdateManager();

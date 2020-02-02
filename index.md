@@ -5,6 +5,7 @@
 layout: default
 download_url: https://github.com/Emd4600/SporeModder-FX/releases/download/v2.0.0/SporeModder.FX.zip
 icon_url: https://i.imgur.com/2Q4lPDh.png
+wiki_url: https://github.com/emd4600/SporeModder-FX/wiki
 title: SporeModder FX
 ---
 ## User-friendly

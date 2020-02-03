@@ -32,6 +32,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import sporemodder.MessageManager.MessageType;
+import sporemodder.util.Project;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.EditorPaneUI;
 import sporemodder.view.EditorPaneUI.EditorTab;
@@ -462,7 +463,10 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 				paneUI.setFileLabel(null, relativePath);
 			}
 			else {
-				paneUI.setFileLabel(ProjectManager.get().getProjectByFile(relativePath).getName(), relativePath);
+				Project project = ProjectManager.get().getProjectByFile(relativePath);
+				if (project != null) {
+					paneUI.setFileLabel(project.getName(), relativePath);
+				}
 			}
 		}
 	}

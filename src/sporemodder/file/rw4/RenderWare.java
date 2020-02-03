@@ -22,13 +22,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
@@ -163,11 +166,12 @@ public class RenderWare {
 				// Before getting the position, write the correct alignment
 				writeAlignment(stream, object.sectionInfo.alignment);
 				
-				object.sectionInfo.pData = stream.getFilePointer() - pBufferData;
+				long pos = stream.getFilePointer();
+				object.sectionInfo.pData = pos - pBufferData;
 				
 				object.write(stream);
 				
-				object.sectionInfo.size = (int) (stream.getFilePointer() - object.sectionInfo.pData);
+				object.sectionInfo.size = (int) (stream.getFilePointer() - pos);
 			}
 		}
 		
@@ -420,14 +424,59 @@ public class RenderWare {
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_01.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
 		//String path = "C:\\Users\\Eric\\Desktop\\ShapeKeys.rw4";
-		String path = "C:\\Users\\Eric\\Desktop\\ce_weapon_slasher_04.rw4";
+		//String path = "C:\\Users\\Eric\\Desktop\\ce_weapon_slasher_04.rw4";
+		//String path = "C:\\Users\\Eric\\Downloads\\raw.rw4";
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomPartTutorial\\editor_rigblocks~\\PartTutorial_ce_mouths_test.rw4";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\ve_DI_spikeChest_01.rw4";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\be_details_house_10.rw4";
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\GridProject\\TestModels\\ce_mouth_mandible_carnivore_04.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
+//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\editor_rigblocks~";
 		
-		RenderWare renderWare = RenderWare.fromFile(new File(path));
-		renderWare.printInfo();
+		//RenderWare renderWare = RenderWare.fromFile(new File(path));
+		//renderWare.printInfo();
+		
+		String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL.rw4";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL test.rw4";
+		
+		RenderWare renderWare = RenderWare.fromFile(new File(inputPath));
+	
+		try (FileStream stream = new FileStream(outputPath, "rw")) {
+			renderWare.write(stream);
+		}
+		
+//		Map<Integer, List<String>> nameSet = new HashMap<>();
+//		
+//		for (File file : new File(path).listFiles()) {
+//			if (file.getName().endsWith(".rw4") && file.getName().startsWith("ce_details_")) {
+//				try {
+//					RenderWare renderWare = RenderWare.fromFile(file);
+//					List<RWAnimations> anims = renderWare.getObjects(RWAnimations.class);
+//					if (!anims.isEmpty()) {
+//						for (Integer i : anims.get(0).animations.keySet()) {
+//							List<String> list = nameSet.get(i);
+//							if (list == null) {
+//								list = new ArrayList<>();
+//								nameSet.put(i, list);
+//							}
+//							list.add(file.getName());
+//						}
+//					}
+//				}
+//				catch (Exception e) {
+//					System.err.println("Error reading " + file.getName());
+//				}
+//			}
+//		}
+//		
+//		System.out.println();
+//		System.out.println();
+//		
+//		for (Integer i : nameSet.keySet()) {
+//			System.out.print(HashManager.get().getFileName(i) + "\t - ");
+//			for (String s : nameSet.get(i)) System.out.print(s + " ");
+//			System.out.println();
+//		}
 
 //		List<RWSkeleton> list = renderWare.getObjects(RWSkeleton.class);
 //		if (!list.isEmpty()) {

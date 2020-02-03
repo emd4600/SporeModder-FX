@@ -145,7 +145,7 @@ public class RWKeyframeAnim extends RWObject {
 		}
 		
 		// The amount of padding might be important, keep it just in case
-		padding = (int) (pPaddingEnd - (channelPositions[channelCount-1] + lastChannel.keyframes.size()*channelPoseSizes[channelCount-1]));
+		padding = (int) (pPaddingEnd - (baseOffset + channelPositions[channelCount-1] + lastChannel.keyframes.size()*channelPoseSizes[channelCount-1]));
 	}
 	
 	public static Channel<? extends RWKeyframe> createChannel(int components) {

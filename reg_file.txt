@@ -1,4 +1,4 @@
-﻿CreatureGame
+CreatureGame
 TribalTools
 TribeGame
 ModText
@@ -12385,6 +12385,8 @@ BuildingStairTemplate
 BuildingWindmillTemplate
 BuildingDetailShapeTemplate
 BuildingStructureRoundTemplate
+ce_category_eyes_&_senses
+ce_category_arms_&_legs
 ce_category_detail
 ce_category_feet
 ce_category_mouths
@@ -13460,6 +13462,8 @@ PlantFruitTemplate
 vehicle_editor_palette_items~	0x406B6D3B
 ce_category_graspers
 ce_category_weapons
+cl_category_cell_level_0
+cl_category_all_cell_parts
 ve_page_cockpit
 ve_page_effect
 ve_page_detail

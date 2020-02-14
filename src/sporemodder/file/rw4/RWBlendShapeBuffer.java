@@ -82,7 +82,8 @@ public class RWBlendShapeBuffer extends RWObject {
 		for (int i = 0; i < data.length; ++i) {
 			if (data[i] != null) {
 				long offset = stream.getFilePointer();
-				long alignedOffset = (offset + 16-1) & ~(16-1);
+				//long alignedOffset = (offset + 16-1) & ~(16-1);
+				long alignedOffset = (offset + 4-1) & ~(4-1);
 				offsets[i] = alignedOffset - baseOffset;
 				stream.writePadding((int) (alignedOffset - offset));
 				stream.write(data[i]);

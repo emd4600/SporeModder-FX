@@ -36,6 +36,7 @@ public class RWSkeletonsInK extends RWObject {
 	public RWObject object2;
 	public RWSkeleton skeleton;
 	public final List<RWCompiledState> compiledStates = new ArrayList<RWCompiledState>();
+	public int unk;
 
 	public RWSkeletonsInK(RenderWare renderWare) {
 		super(renderWare);
@@ -55,7 +56,7 @@ public class RWSkeletonsInK extends RWObject {
 			compiledStates.add((RWCompiledState) renderWare.get(stream.readLEInt()));
 		}
 		
-		// After this goes a 0?
+		unk = stream.readLEInt();  // always 0?
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class RWSkeletonsInK extends RWObject {
 			stream.writeLEInt(renderWare.indexOf(compiledState));
 		}
 		
-		// After this goes a 0?
+		stream.writeLEInt(unk);  // always 0?
 	}
 
 	@Override

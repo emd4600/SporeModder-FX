@@ -67,7 +67,7 @@ public class DocumentationManager extends AbstractManager {
 	
 	@Override public void initialize(Properties settings) {
 		try {
-			loadDocLinks(NetworkUtils.getJSON(NetworkUtils.getUrl("http://davoonline.com/sporemodder/emd4600/smfx_docs.json")));
+			loadDocLinks(NetworkUtils.getJSON(NetworkUtils.getUrl("https://raw.githubusercontent.com/emd4600/SporeModder-FX/master/smfx_docs.json")));
 		} 
 		catch (Exception e) {
 			e.printStackTrace();

@@ -100,7 +100,7 @@ public class WordSplitLexer {
 	
 	public static boolean isReadableWord(char c) {
 		return !Character.isWhitespace(c) && 
-		(Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == '-' || c == '~');
+		(Character.isAlphabetic(c) || Character.isDigit(c) || c == '_' || c == '-' || c == '~' || c == '&');
 	}
 	
 	public String nextReadableWord() throws DocumentException {

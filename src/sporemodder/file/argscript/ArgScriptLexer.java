@@ -817,7 +817,8 @@ public class ArgScriptLexer {
 			startIndex = index;
 			
 			StringBuilder sb = new StringBuilder();
-			while (index < array.length && (Character.isAlphabetic(array[index]) || Character.isDigit(array[index]) || array[index] == '_')) {
+			while (index < array.length && (Character.isAlphabetic(array[index]) || Character.isDigit(array[index]) 
+					|| array[index] == '_')) {
 				sb.append(array[index++]);
 			}
 			
@@ -1015,7 +1016,8 @@ public class ArgScriptLexer {
 			startIndex = index;
 			
 			StringBuilder sb = new StringBuilder();
-			while (index < array.length && (Character.isAlphabetic(array[index]) || Character.isDigit(array[index]) || array[index] == '_')) {
+			while (index < array.length && (Character.isAlphabetic(array[index]) || Character.isDigit(array[index]) 
+					|| array[index] == '_')) {
 				sb.append(array[index++]);
 			}
 			

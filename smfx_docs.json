@@ -1,0 +1,211 @@
+{
+	"entries": {
+	"main": [
+	{
+		"name": "",
+		"items": [
+		{
+			"title": "Spore Modding Wiki",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki"
+		},
+		{
+			"title": "Property Lists",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Property-Lists-(.prop)"
+		},
+		{
+			"title": "How to use the Blender add-ons",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to-use-the-SporeModder-Blender-Addons"
+		},
+		{
+			"title": "How to import creations into Blender",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to-import-creations-into-Blender"
+		},
+		{
+			"title": "[FUTURE] Creating custom parts",
+			"url": ""
+		},
+		{
+			"title": "Shaders & Materials",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Shaders-and-Materials"
+		},
+		{
+			"title": "Real-time effect editing",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effects-Editor"
+		}
+		]
+	},
+	{
+		"name": "ModAPI",
+		"items": [
+		{
+			"title": "Spore ModAPI Launcher",
+			"url": "http://davoonline.com/sporemodder/rob55rod/ModAPI/Public/"
+		},
+		{
+			"title": "ModAPI Developer Kit",
+			"url": "https://emd4600.github.io/Spore-ModAPI/"
+		},
+		{
+			"title": "ModAPI & Spore modding Tutorials",
+			"url": "https://sporemodder.wordpress.com/category/tutorials/"
+		}
+		]
+	}
+	],
+	"prop": [
+	{
+		"name": "Property List",
+		"items": [
+		{
+			"title": "PROP Basics",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Property-Lists-(.prop)"
+		},
+		{
+			"title": "ArgScript",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/ArgScript"
+		},
+		{
+			"title": "ArgScript Colors",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/ArgScript-Colors"
+		}
+		]
+	},
+	{
+		"name": "Useful Guides",
+		"items": [
+		{
+			"title": "[FUTURE] Creating custom parts",
+			"url": ""
+		},
+		{
+			"title": "Creating Custom Part Rigblocks",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Creating-Custom-Part-Rigblocks"
+		},
+		{
+			"title": "Saving with custom parts: editor keys",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Saving-with-custom-parts:-editor-keys"
+		},
+		{
+			"title": "Palettes",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Palettes"
+		},
+		{
+			"title": "List of Editor Templates",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/List-of-Editor-Templates"
+		},
+		{
+			"title": "List of Part Capabilities",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/List-of-Part-Capabilities"
+		},
+		{
+			"title": "[FUTURE] Space tools and spices",
+			"url": ""
+		}
+		]
+	}
+	],
+	"pfx": [
+	{
+		"name": "Effects",
+		"items": [
+		{
+			"title": "Effects (.pfx)",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effects-(.pfx)"
+		},
+		{
+			"title": "Effects Directory (.effdir)",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effects-Directory-(.effdir)"
+		},
+		{
+			"title": "Real-time effect editing",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effects-Editor"
+		}
+		]
+	},
+	{
+		"name": "Effect Components",
+		"items": [
+		{
+			"title": "Effect Component",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effect-Component-(Effects)"
+		},
+		{
+			"title": "Particles",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Particles-(Effects)"
+		},
+		{
+			"title": "Metaparticles",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Meta-Particles-(Effects)"
+		},
+		{
+			"title": "Decals",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Decals-(Effects)"
+		},
+		{
+			"title": "Skinpaint Particles",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Skinpaint-Particles-(Effects)"
+		},
+		{
+			"title": "Game Messages",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Game-Message-(Effects)"
+		}
+		]
+	}
+	],
+	"smt": [
+	{
+		"name": "Shaders & Materials",
+		"items": [
+		{
+			"title": "General Overview",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Shaders-and-Materials"
+		},
+		{
+			"title": "FXC, configuring the compiler",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/FXC,-the-shader-compiler"
+		},
+		{
+			"title": "Materials and Compiled States",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Materials-and-Compiled-States-(.smt_t-and-.rw4)"
+		},
+		{
+			"title": "Shader Data",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Shader-Data"
+		},
+		{
+			"title": "Shader Fragments (.vertex_fragment, .pixel_fragment)",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Shader-Fragments-(.vertex_fragment,-.pixel_fragment)"
+		},
+		{
+			"title": "Shader Builders (.shader_builder)",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Shader-Builders-(.shader_builder)"
+		},
+		{
+			"title": "HLSL Reference",
+			"url": "https://docs.microsoft.com/en-us/windows/desktop/direct3dhlsl/dx-graphics-hlsl-reference"
+		}
+		]
+	}
+	],
+	"rw4": [
+	{
+		"name": "Textures & Models",
+		"items": [
+		{
+			"title": "How to export DDS textures",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to:-export-DDS-textures"
+		},
+		{
+			"title": "How to use the Blender addons",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to-use-the-SporeModder-Blender-Addons"
+		}
+		]
+	}
+	]
+	
+	},
+	"redirections": {
+		"hlsl": "smt",
+		"dds": "rw4"
+	}
+}

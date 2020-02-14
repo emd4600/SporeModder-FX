@@ -51,7 +51,7 @@ public class FileManager extends AbstractManager {
 
 	// (*.package, *.db, *.dat, *.pkp, *.pkt, *.pld)
 	public static final ExtensionFilter FILEFILTER_DBPF = new ExtensionFilter("Database Packed File", "*.package",
-			"*.db", "*.dat", "*.pkp", "*.pkt", "*.pld");
+			"*.db", "*.dat", "*.pkp", "*.pkt", "*.pld", "*.spo");
 	
 	private final Set<String> searchableExtensions = new HashSet<String>();
 	

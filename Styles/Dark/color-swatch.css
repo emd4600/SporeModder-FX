@@ -3,7 +3,7 @@
 }
 
 .simple-color-swatch {
-    -fx-background-color: derive(#ececec,26.4%);
+    -fx-background-color: #373b3d;
     -fx-padding: 1.25em;
     -fx-spacing: 1.25em;
     -fx-min-width: 20em;

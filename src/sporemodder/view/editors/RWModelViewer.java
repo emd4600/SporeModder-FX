@@ -39,6 +39,7 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
@@ -193,7 +194,8 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private BoundingBox bbox;
 	private final List<MeshView> meshes = new ArrayList<>();
 	private final List<RWMeshCompiledStateLink> rwMeshes = new ArrayList<>();
-	private final Map<RWRaster, Image> rasterImages = new HashMap<>();
+	private final Map<RWRaster, Image> rasterImages = new HashMap<>();  // with alpha removed
+	private final Map<RWRaster, Image> rasterOriginalImages = new HashMap<>();
 	private final Map<RWRaster, ObjectProperty<Image>> rasterImageProperties = new HashMap<>();
 	
 	double mousePosX, mousePosY, mouseOldX, mouseOldY;
@@ -202,11 +204,12 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private final Pane inspectorPane = new VBox(5);
 	private final ScrollPane propertiesContainer = new ScrollPane();
-	private TreeView<String> treeView = new TreeView<>();
+	private final TreeView<String> treeView = new TreeView<>();
+	private final CheckBox cbIgnoreAlpha = new CheckBox("Ignore alpha");
 	
-	private TreeItem<String> tiMorphs = new TreeItem<String>("Morph Handles");
-	private TreeItem<String> tiTextures = new TreeItem<String>("Textures");
-	private TreeItem<String> tiCompiledStates = new TreeItem<String>("Compiled States");
+	private final TreeItem<String> tiMorphs = new TreeItem<String>("Morph Handles");
+	private final TreeItem<String> tiTextures = new TreeItem<String>("Textures");
+	private final TreeItem<String> tiCompiledStates = new TreeItem<String>("Compiled States");
 	
 	private final Map<String, RWObject> nameMap = new HashMap<>();
 	private final Map<String, TreeItem<String>> itemsMap = new HashMap<>();
@@ -224,7 +227,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		
 		propertiesContainer.setFitToWidth(true);
     	
-    	inspectorPane.getChildren().addAll(treeView, propertiesContainer);
+    	inspectorPane.getChildren().addAll(cbIgnoreAlpha, treeView, propertiesContainer);
     	VBox.setVgrow(propertiesContainer, Priority.ALWAYS);
     	
     	TreeItem<String> rootItem = new TreeItem<>();
@@ -244,6 +247,16 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     			fillPropertiesPane(newValue, newValue.getValue());
     		} else {
     			propertiesContainer.setContent(null);
+    		}
+    	});
+    	
+    	cbIgnoreAlpha.selectedProperty().addListener((obs, oldValue, newValue) -> {
+    		for (Map.Entry<RWRaster, ObjectProperty<Image>> entry : rasterImageProperties.entrySet()) {
+    			if (newValue) {
+    				entry.getValue().set(rasterOriginalImages.get(entry.getKey()));
+    			} else {
+    				entry.getValue().set(rasterImages.get(entry.getKey()));
+    			}
     		}
     	});
     	
@@ -486,7 +499,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
         group.getChildren().add(axesGroup);
 	}
 	
-	private Image removeAlphaChannel(Image original) {
+	private Image removeAlphaChannel(Image original, Color replaceColor) {
 		int width = (int) original.getWidth();
 		int height = (int) original.getHeight();
 		WritableImage newImage = new WritableImage(width, height);
@@ -494,17 +507,14 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		PixelWriter writer = newImage.getPixelWriter();
 		PixelReader reader = original.getPixelReader();
 		
-//		Color testColor = Color.gray(0.62);
-		Color testColor = Color.rgb(206, 212, 175);
-		
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				Color color = reader.getColor(x, y);
 				double alpha = color.getOpacity();
 				writer.setColor(x, y, new Color(
-						color.getRed() * alpha + testColor.getRed() * (1 - alpha),
-						color.getGreen() * alpha + testColor.getGreen() * (1 - alpha),
-						color.getBlue() * alpha + testColor.getBlue() * (1 - alpha),
+						color.getRed() * alpha + replaceColor.getRed() * (1 - alpha),
+						color.getGreen() * alpha + replaceColor.getGreen() * (1 - alpha),
+						color.getBlue() * alpha + replaceColor.getBlue() * (1 - alpha),
 						1.0));
 			}
 		}
@@ -512,17 +522,16 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		return newImage;
 	}
 	
-	private Image imageFromRaster(RWRaster raster) throws IOException {
-		Image image = raster.toJavaFX();
-		// Note: apparently not only SkinPaints. Most cases will use this.
-		return removeAlphaChannel(image);
+	private Image removeAlphaChannel(Image original) {
+		return removeAlphaChannel(original, Color.rgb(206, 212, 175));
 	}
 	
 	private void loadImages() throws IOException {
 		List<RWRaster> rasters = renderWare.getObjects(RWRaster.class);
 		for (RWRaster raster : rasters) {
-			Image image = imageFromRaster(raster);
-			rasterImages.put(raster, image);
+			Image image = raster.toJavaFX();
+			rasterOriginalImages.put(raster, removeAlphaChannel(image, Color.rgb(0, 0, 0)));
+			rasterImages.put(raster, removeAlphaChannel(image));
 		}
 	}
 	
@@ -592,17 +601,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		// Update distance
 		zoom(0);
 		
-//		camera = new PerspectiveCamera(true);
-//		camera.setFieldOfView(FOV);
-//		
-//		camera.getTransforms().addAll(
-//				cameraRotateY,
-//				cameraRotateX,
-//				cameraZoomTranslate);
-		
 		group = new Group();
-		// We have to add the camera here as well
-//		group.getChildren().add(camera);
 		
 		ambientLight = new AmbientLight();
 		
@@ -614,7 +613,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				loadMaterial(rwLink.compiledStates.get(0), meshView);
 				
 				meshView.setCullFace(CullFace.BACK);
-//				meshView.setDrawMode(DrawMode.LINE);
 				
 				meshView.getTransforms().addAll(
 						new Rotate(-90, Rotate.X_AXIS),
@@ -624,12 +622,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				meshes.add(meshView);
 			}, "Cannot load mesh for this RW4 file");
 		}
-		
-//		cameraRotateY.setAngle(-57 + 90*3);
-//		cameraRotateX.setAngle(-28.6 + 90*0);
-//		cameraZoomTranslate.setZ(-bbox.getBiggest()*3.8);
-//		camera.setRotate(0);
-//		
+
 		buildCamera();
 		
 		buildAxes();
@@ -643,37 +636,11 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		mainNode.getChildren().clear();
 		mainNode.getChildren().add(subScene);
 		
-//		mainNode.setOnMousePressed((event) -> {
-//			mouseX = event.getX();
-//			mouseY = event.getY();
-//			
-//			cameraAngleX = cameraRotateX.getAngle();
-//			cameraAngleY = cameraRotateY.getAngle();
-//		});
-//		
-//		mainNode.setOnMouseDragged((event) -> {
-//			
-//			double deltaX = event.getX() - mouseX;
-//			double deltaY = event.getY() - mouseY;
-//			
-//			double newX = cameraAngleX + -deltaY * CAMERA_SPEED;
-//			double newY = cameraAngleY + deltaX * CAMERA_SPEED;
-//			
-//			if (newX < 0) newX = 360 + newX;
-//			else if (newX > 360) newX = newX - 360;
-//			
-//			if (newY < 0) newY = 360 + newY;
-//			else if (newY > 360) newY = newY - 360;
-//			
-//			cameraRotateX.setAngle(newX);
-//			cameraRotateY.setAngle(newY);
-//		});
-		
-		 subScene.setOnMousePressed((MouseEvent me) -> {
-	            mousePosX = me.getSceneX();
-	            mousePosY = me.getSceneY();
-	            mouseOldX = me.getSceneX();
-	            mouseOldY = me.getSceneY();
+		subScene.setOnMousePressed((MouseEvent me) -> {
+            mousePosX = me.getSceneX();
+            mousePosY = me.getSceneY();
+            mouseOldX = me.getSceneX();
+            mouseOldY = me.getSceneY();
         });
         subScene.setOnMouseDragged((MouseEvent me) -> {
             mouseOldX = mousePosX;
@@ -914,7 +881,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		HBox hbox = new HBox(5);
 		hbox.getChildren().addAll(exportButton, importButton);
 		
-		ImageView viewer = new ImageView(rasterImages.get(raster));
+		ImageView viewer = new ImageView(rasterOriginalImages.get(raster));
 		ScrollPane scrollPane = new ScrollPane(viewer);
 		scrollPane.setPrefHeight(300);
 		
@@ -943,7 +910,8 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			if (file != null) {
 				UIManager.get().tryAction(() -> {
 					DDSTexture oldTexture = raster.toDDSTexture();
-					Image oldImage = rasterImages.get(raster);
+					Image oldRemovedAlpha = rasterImages.get(raster);
+					Image oldOriginalImage = rasterOriginalImages.get(raster);
 					byte[] oldData = raster.textureData.data;
 					
 					DDSTexture texture = new DDSTexture();
@@ -951,25 +919,33 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 					raster.fromDDSTexture(texture);
 					raster.textureData.data = texture.getData();
 					
-					Image image = imageFromRaster(raster);
-					viewer.setImage(image);
-					rasterImages.put(raster, image);
-					rasterImageProperties.get(raster).set(image);
+					Image image = raster.toJavaFX();
+					Image originalImage = removeAlphaChannel(image, Color.rgb(0, 0, 0));
+					Image removedAlpha = removeAlphaChannel(image);
+					rasterImages.put(raster, removedAlpha);
+					rasterOriginalImages.put(raster, originalImage);
+					
+					viewer.setImage(originalImage);
+					rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? originalImage : removedAlpha);
 					
 					addEditAction(new RWUndoableAction(name + ": Texture") {
 
 						@Override public void undo() {
 							raster.fromDDSTexture(oldTexture);
 							raster.textureData.data = oldData;
-							rasterImages.put(raster, oldImage);
-							rasterImageProperties.get(raster).set(oldImage);
+							rasterImages.put(raster, oldRemovedAlpha);
+							rasterOriginalImages.put(raster, oldOriginalImage);
+							
+							rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? oldOriginalImage : oldRemovedAlpha);
 						}
 
 						@Override public void redo() {
 							raster.fromDDSTexture(texture);
 							raster.textureData.data = texture.getData();
-							rasterImages.put(raster, image);
-							rasterImageProperties.get(raster).set(image);
+							rasterImages.put(raster, removedAlpha);
+							rasterOriginalImages.put(raster, originalImage);
+							
+							rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? originalImage : removedAlpha);
 						}
 					});
 				}, "Texture could not be imported. Only DDS textures are supported.");

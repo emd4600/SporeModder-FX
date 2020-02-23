@@ -57,6 +57,7 @@ import sporemodder.util.SporeModderPlugin;
 import sporemodder.view.Controller;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
+import sporemodder.view.dialogs.ChooseStyleUI;
 
 /**
  * This class manages everything related with user interface in SporeModder. It contains some utility methods to load images and user interfaces.
@@ -86,6 +87,7 @@ public class UIManager extends AbstractManager {
 		public Controller controller;
 	}
 	
+	private static final String PROPERTY_hasSelectedStyle = "hasSelectedStyle";
 	private static final String PROPERTY_selectedStyle = "selectedStyle";
 	private static final String PROPERTY_isFirstTime = "isFirstTime";
 	
@@ -93,6 +95,7 @@ public class UIManager extends AbstractManager {
 	private String currentStyle = "Default";
 	/** The style that will be saved in the settings. This avoids weird changes while the program is open, if the user changes the style. */
 	private String selectedStyle = currentStyle;
+	private boolean hasSelectedStyle = false;
 	
 	private boolean isShowingOverlay;
 	
@@ -138,6 +141,7 @@ public class UIManager extends AbstractManager {
 		
 		currentStyle = selectedStyle = properties.getProperty(PROPERTY_selectedStyle, "Default");
 		isFirstTime = Boolean.parseBoolean(properties.getProperty(PROPERTY_isFirstTime, "true"));
+		hasSelectedStyle = Boolean.parseBoolean(properties.getProperty(PROPERTY_hasSelectedStyle, "false"));
 		
 		// Load the stylesheets from the plugins
 		for (SporeModderPlugin plugin : PluginManager.get().getPlugins()) {
@@ -161,6 +165,7 @@ public class UIManager extends AbstractManager {
 	@Override public void saveSettings(Properties properties) {
 		properties.put(PROPERTY_selectedStyle, selectedStyle);
 		properties.put(PROPERTY_isFirstTime, Boolean.toString(isFirstTime));
+		properties.put(PROPERTY_hasSelectedStyle, Boolean.toString(hasSelectedStyle));
 	}
 	
 	
@@ -173,7 +178,23 @@ public class UIManager extends AbstractManager {
 		dpiScaling = Font.getDefault().getSize() / 12.0;
 		
 		restoreTitle();
-		primaryStage.getIcons().setAll( programIcon);
+		primaryStage.getIcons().setAll(programIcon);
+		
+		boolean mustSaveSettings = false;
+		if (!hasSelectedStyle) {
+			try {
+				String style = ChooseStyleUI.show(programIcon);
+				if (style != null) {
+					currentStyle = style;
+					selectedStyle = style;
+					hasSelectedStyle = true;
+					mustSaveSettings = true;
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 		userInterface = new UserInterface();
 		userInterface.initialize();
@@ -188,6 +209,10 @@ public class UIManager extends AbstractManager {
 			mainScene.getStylesheets().add(PathManager.get().getStyleFile("color-swatch.css").toURI().toString());
 			
 			mainScene.getStylesheets().addAll(stylesheetsToLoad);
+		}
+		
+		if (mustSaveSettings) {
+			MainApp.get().saveSettings();
 		}
 	}
 	

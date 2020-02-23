@@ -201,12 +201,11 @@ public class HashConverterUI implements Controller {
 		
 		try {
 			hash = parseHash(hashText);
+			tfHash.getStyleClass().remove("text-field-error");
 		} catch (Exception e) {
-			tfHash.setStyle("-fx-background-color: red;");
+			tfHash.getStyleClass().add("text-field-error");
 			return;
 		}
-		
-		tfHash.setStyle(null);
 		
 		String value;
 		cbRegister.getItems().clear();

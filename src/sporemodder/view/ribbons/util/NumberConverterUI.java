@@ -30,6 +30,8 @@ import sporemodder.view.Controller;
 
 public class NumberConverterUI implements Controller {
 	
+	private static final String ERROR_STYLE = "text-field-error";
+	
 	@FXML
 	private Node mainNode;
 	
@@ -82,11 +84,11 @@ public class NumberConverterUI implements Controller {
 					}
 					
 					// Restore the white background in case there had been an error before.
-					tfHexadecimal.setStyle("-fx-control-inner-background: white");
+					tfHexadecimal.getStyleClass().remove(ERROR_STYLE);
 				}
 				catch (Exception e) {
 					// If the format is incorrect, make the background red so the user notices.
-					tfHexadecimal.setStyle("-fx-control-inner-background: red");
+					tfHexadecimal.getStyleClass().add(ERROR_STYLE);
 				}
 				
 				// Once we are finished, allow  firing events again
@@ -111,11 +113,11 @@ public class NumberConverterUI implements Controller {
 					}
 					
 					// Restore the white background in case there had been an error before.
-					tfDecimal.setStyle("-fx-control-inner-background: white");
+					tfDecimal.getStyleClass().remove(ERROR_STYLE);
 				}
 				catch (Exception e) {
 					// If the format is incorrect, make the background red so the user notices.
-					tfDecimal.setStyle("-fx-control-inner-background: red");
+					tfDecimal.getStyleClass().add(ERROR_STYLE);
 				}
 				
 				// Once we are finished, allow  firing events again

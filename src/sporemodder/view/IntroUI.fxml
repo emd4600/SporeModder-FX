@@ -61,7 +61,7 @@
                </children>
             </VBox>
             <VBox id="introUI-projectList" fx:id="recentProjectsList" prefHeight="466.0" prefWidth="384.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Separator id="introUI-projectList-separator" orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <padding>
                   <Insets left="5.0" right="5.0" />
                </padding>

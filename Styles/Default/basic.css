@@ -401,3 +401,8 @@
 	-fx-border-width: 2px 0 0 0;
 	-fx-border-color: #588bdd;
 }
+
+
+.text-field-error {
+	-fx-control-inner-background: red;
+}

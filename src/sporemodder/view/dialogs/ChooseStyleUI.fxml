@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ChooseStyleUI">
+   <top>
+      <Label prefHeight="46.0" prefWidth="482.0" text="SporeModder FX has two styles: light and dark. Choose the one you like more. You can always change this in the program settings." wrapText="true" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" />
+         </BorderPane.margin></Label>
+   </top>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+   <right>
+      <RadioButton fx:id="darkTheme" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" prefHeight="150.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets left="5.0" />
+         </BorderPane.margin>
+      </RadioButton>
+   </right>
+   <center>
+      <RadioButton fx:id="lightTheme" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" prefHeight="150.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets right="5.0" />
+         </BorderPane.margin>
+      </RadioButton>
+   </center>
+</BorderPane>

@@ -444,7 +444,11 @@ public class UIManager extends AbstractManager {
 	 * @return
 	 */
 	public List<String> getAvailableStyles() {
-		return Arrays.asList(PathManager.get().getProgramFile("Styles").list());
+		List<String> list = new ArrayList<>();
+		for (File f : PathManager.get().getProgramFile("Styles").listFiles()) {
+			if (f.isDirectory()) list.add(f.getName()); 
+		}
+		return list;
 	}
 	
 	

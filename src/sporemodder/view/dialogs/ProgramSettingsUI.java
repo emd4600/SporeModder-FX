@@ -30,6 +30,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
@@ -65,6 +66,8 @@ public class ProgramSettingsUI implements Controller {
 	
 	@FXML private TextField fxcPathField;
 	@FXML private Button findFXCButton;
+	
+	@FXML private Label styleWarning;
 	
 	// To set tooltips
 	@FXML private Node gameSettingsPanel;
@@ -204,6 +207,17 @@ public class ProgramSettingsUI implements Controller {
 		
 		stylesBox.getItems().setAll(UIManager.get().getAvailableStyles());
 		stylesBox.getSelectionModel().select(UIManager.get().getSelectedStyle());
+		
+		styleWarning.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 18, 18));
+		styleWarning.setVisible(false);
+		
+		stylesBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+			if (!UIManager.get().getSelectedStyle().equals(newValue)) {
+				styleWarning.setVisible(true);
+			} else {
+				styleWarning.setVisible(false);
+			}
+		});
 		
 		
 		if (FXCompiler.get().getFXCFile() != null) {

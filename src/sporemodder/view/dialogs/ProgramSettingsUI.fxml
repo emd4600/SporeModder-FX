@@ -103,6 +103,11 @@
                            </padding>
                         </Label>
                         <ChoiceBox fx:id="stylesBox" prefWidth="150.0" />
+                        <Label fx:id="styleWarning" text="Changes will be applied upon restart.">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Label>
                      </children>
                   </HBox>
                </children>

@@ -74,7 +74,7 @@
 	-fx-fill: #008b8b;
 }
 .styled-text-area .hlsl-keywords {
-	-fx-fill: rgb(0, 0, 255);
+	-fx-fill: #a470d4;
 	-fx-font-weight: bold;
 }
 .styled-text-area .hlsl-functions {

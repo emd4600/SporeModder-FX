@@ -855,6 +855,8 @@ public class ProjectManager extends AbstractManager {
 		// Project names registry
 		loadNamesRegistry();
 		
+		ItemEditor activeEditor = EditorManager.get().getActiveEditor();
+		if (activeEditor != null) activeEditor.setActive(false);
 		EditorManager.get().clearTabs();
 		
 		UIManager.get().getUserInterface().setStatusFile(null);

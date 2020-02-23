@@ -1,0 +1,361 @@
+* {
+	/** The color used in the ribbon outline that differentiates it from the header area. */
+	-fx-ribbon-outline: #A0A0A0;
+	
+	/** The color used when hovering a control. */
+	-fx-ribbon-hover-base: #002d3b;
+	
+	/** The ribbon background color. */
+	BASE-COLOR: #2f3233;
+	TOP-COLOR: derive(BASE-COLOR, -6%);
+	/*-fx-ribbon-background: linear-gradient(#f3f3f3, derive(#f1f1f1, -3%));*/
+	
+	/*-fx-ribbon-background: linear-gradient(#373e45, derive(#373e45, -6%));*/
+	-fx-ribbon-background: linear-gradient(TOP-COLOR, derive(BASE-COLOR, -18%));
+	
+}
+
+/**
+ * Contains basic settings used by all ribbon classes.
+ */
+.ribbon {
+	/** Default background color. It will be shown in the header area where there are no tabs. */
+	-fx-background: #e6e6e6;
+}
+
+/**
+ * The area that contains the tabs content, that is, all the ribbon groups.
+ */
+.ribbon-content-area {
+    -fx-background-color: -fx-ribbon-background;
+    -fx-background-insets: 0, 0 0 1 0;
+    
+    /** Used to create a slight shadow under the ribbon. */
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: gray;
+
+	/** Add some padding to separate things. Basically top and right so it doesn't collide with window/tab headers. */
+	-fx-padding: 5 10 0 10;
+}
+
+.ribbon-group {
+}
+
+
+/**
+ * The area that contains the tab headers used to select the tab.
+ */
+.ribbon-tab-header-area {
+	/** Add some top padding so that the shadow does not disappear. */
+    -fx-padding: 1px 0.166667em 0em 0.416667em; /* 0 2 5 5 */
+}
+
+.ribbon-tab-header-outline {
+	-fx-border-width: 0 0 1px 0;
+    -fx-border-color: -fx-ribbon-outline;
+}
+
+/** -- Ribbon Tab -- */
+
+.ribbon-tab,
+.ribbon-tab:armed,
+.ribbon-tab:focused
+{
+    /* -fx-padding: 0.083333em 1.25em 0.0769em 1.25em; */
+    /*-fx-padding: 0.35em 1.25em 0.25em 1.25em;*/
+	-fx-padding: 0.1em 1.25em 0.1em 1.25em;
+	-fx-font-size: 1em;
+	-fx-text-fill: white;
+    
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -fx-ribbon-outline;
+}
+
+.ribbon-tab:selected,
+.ribbon-tab:selected:focused,
+.ribbon-tab:selected:hover {
+    /*-fx-background-color: transparent, #cccccc, #5a4e6b;*/ /*linear-gradient(#f1f1f1, derive(#f1f1f1, +2%)*/
+	-fx-background-color: linear-gradient(transparent, TOP-COLOR);
+    -fx-background-radius: 2px 2px 0 0;
+    
+    /** Use border everywhere except bottom */
+    -fx-border-width: 1px 1px 0 1px;
+    -fx-border-color: -fx-ribbon-outline;
+    -fx-border-radius: 2px 2px 0 0;
+}
+
+.ribbon-tab:hover {
+	-fx-background-color: transparent, transparent, -fx-ribbon-hover-base;
+}
+
+.ribbon-group {
+	-fx-padding: 5px 5px 5px 5px;
+}
+
+.ribbon-group > .content > * .label {
+	-fx-text-fill: white;
+}
+
+.ribbon-group-title {
+	-fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 0.85em;
+    -fx-text-fill: white;
+    
+    /** We don't want horizontal and bottom padding, as the ribbon group already has it.
+     *  We only want top padding to separate from group content */
+    -fx-padding: 4px 0 0 0;
+}
+
+/** Just in case anyone wants to style it */
+/*.ribbon-group-separator {
+	-fx-padding: 5px 0 5px 0;
+}*/
+/** Just in case anyone wants to style it */
+.ribbon-group-separator {
+	-fx-padding: 5px 0 5px 0;
+	-fx-background-color: transparent;
+	-fx-border-color: linear-gradient(to bottom, TOP-COLOR 0%, #466573 90%);
+	-fx-border-width: 0 0 0 2px;
+}
+
+.ribbon-group-separator .line {
+	-fx-border-color: transparent;
+	-fx-border-width: 0 0 0 0;
+	-fx-background-color: transparent;
+	-fx-opacity: 0;
+}
+
+/*.ribbon-group-separator .separator:vertical .line {
+	-fx-border-color: #466573;
+}*/
+
+/** -- Program Button -- */
+
+.ribbon-program-button,
+.ribbon-program-button:focused
+{
+	-fx-border-color: transparent;
+    /* If we don't add some (transparent) border, the button moves when becomes the focused object. */
+    -fx-border-width: 2;
+    
+	-fx-background-color: #044861;
+}
+
+.ribbon-program-button:hover,
+.ribbon-program-button:hover:focused,
+.ribbon-program-button:selected:hover {
+	/** We must have this here, otherwise it will move... the entire ribbon */
+	-fx-border-width: 2;
+	
+	-fx-background-color: #77ADBF;
+}
+
+.ribbon-program-button:selected,
+.ribbon-program-button:selected:focused 
+{
+	-fx-background-color: #5EA7BF;
+	
+	/** We must have this here, otherwise it will move... the entire ribbon */
+	-fx-border-width: 2;
+}
+
+/** -- Ribbon Button -- */
+
+.ribbon-button,
+.ribbon-button:default
+{
+	
+    -fx-border-color: transparent;
+    /* If we don't add some (transparent) border, the button moves when becomes the focused object. */
+    -fx-border-width: 2;
+
+    -fx-background-radius: 0;
+
+    -fx-background-color: transparent;
+
+    -fx-font-family:"Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 1em; /* 12 */
+    -fx-text-fill: white;
+}
+
+.ribbon-button > * .label {
+	-fx-text-fill: white;
+}
+.ribbon-expand-arrow {
+	-fx-fill: white;
+}
+
+
+/*.ribbon-button.big
+{
+    -fx-min-width: 50px;
+    -fx-max-width: 50px;
+    -fx-min-height: 100px;
+    -fx-max-height: 100px;
+}*/
+
+.ribbon-button:hover,
+.ribbon-button:showing,  /* for menu buttons */
+.ribbon-button:hover:focused
+{
+    -fx-background-color: -fx-ribbon-hover-base;
+}
+
+.ribbon-button:pressed > .label.glyph-icon {
+    -fx-text-fill: white;
+}
+
+.ribbon-button:pressed, 
+.ribbon-button:pressed:focused,
+.ribbon-button:armed, 
+.ribbon-button:armed:focused,
+.ribbon-button:default:hover:pressed
+{
+    /*-fx-background-color: #AEBDD4;*/
+	-fx-background-color: derive(-fx-ribbon-hover-base, 15%);
+    -fx-text-fill: white;
+}
+
+.ribbon-button:focused
+{
+	-fx-background-color: transparent;
+	
+    -fx-border-color: transparent, black;
+    -fx-border-width: 1, 1;
+    -fx-border-style: solid, segments(1, 2);
+    -fx-border-radius: 0, 0;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+
+.ribbon-button:disabled, 
+.ribbon-button:default:disabled
+{
+    -fx-opacity: 0.4;
+}
+
+/** ------------------------- */
+/** -- Artificial Context Menu -- */
+
+.custom-ribbon-menu 
+{
+	/** We don't use any style here, as we use context-menu style as well. */
+}
+
+
+.custom-ribbon-menu .button {
+    -fx-background-color: transparent;
+    -fx-padding: 0.333333em 0.41777em 0.333333em 0.41777em;  /* 4 5 4 5 */
+}
+
+.custom-ribbon-menu .button:hover {
+    -fx-background: -fx-selection-bar;
+     -fx-background-color: -fx-background;
+     -fx-text-fill:  -fx-text-background-color;
+}
+
+.custom-ribbon-menu .button > .left-container {
+    -fx-padding: 0.458em 0.791em 0.458em 0.458em;
+}
+.custom-ribbon-menu .button-item > .graphic-container {
+    -fx-padding: 0em 0.333em 0em 0em;
+}
+.custom-ribbon-menu .button >.label {
+    -fx-padding: 0em 0.5em 0em 0em;
+    -fx-text-fill: -fx-text-base-color;
+}
+.custom-ribbon-menu .button:focused {
+     -fx-background: -fx-selection-bar;
+     -fx-background-color: -fx-background;
+     -fx-text-fill:  -fx-text-background-color;
+}
+.custom-ribbon-menu .button:focused > .label {
+    -fx-text-fill: -fx-focused-text-base-color;
+}
+.custom-ribbon-menu .button > .right-container {
+    -fx-padding: 0em 0em 0em 0.5em;
+}
+.custom-ribbon-menu .button:show-mnemonics > .mnemonic-underline {
+    -fx-stroke: -fx-text-fill;
+}
+
+
+/** -- Gallery -- **/
+
+.ribbon-gallery {
+	-fx-border: 1px;
+	-fx-border-color: black;
+	-fx-background-color: #474d4f;
+}
+
+.ribbon-gallery-popup {
+	-fx-background-color: #474d4f;
+}
+
+.ribbon-gallery .gallery-buttons-pane {
+	-fx-border: 0 0px 1px 1px;
+	-fx-border-color: #303030;
+	-fx-background-color: #f2f2f2;
+}
+
+.ribbon-gallery .items-pane {
+}
+
+
+.ribbon-gallery .gallery-item {
+	-fx-background-radius: 0;
+    -fx-background-color: transparent;
+	/*-fx-padding: 0em 0.2em 0em 0.2em;*/
+}
+
+.ribbon-gallery .gallery-item:hover {
+    -fx-background-color: #49575c;
+}
+
+.ribbon-gallery .gallery-item:pressed {
+    -fx-background-color: #606060;
+}
+
+
+.gallery-button {
+	-fx-padding: 0.5em 0.5em 0.5em 0.5em;
+    -fx-background-color: #424242;
+}
+
+.ribbon-gallery .gallery-button.disabled, .ribbon-gallery .gallery-button:disabled  {
+    -fx-opacity: 0.6;
+}
+
+.ribbon-gallery .gallery-button:hover {
+    -fx-background-color: #49575c;
+}
+
+.ribbon-gallery .gallery-button:pressed {
+    -fx-background-color: #606060;
+}
+
+.ribbon-gallery .up-button-graphic {
+    -fx-padding: 0.5em 0.666666em 0.0em 0.0em; /* 6 8 0 0 */
+
+    -fx-background-color: white;
+
+    -fx-shape: "M4,17v-2.889l4.124-3.86l4.125,3.86V17l-4.125-3.375L4,17z";
+}
+
+.ribbon-gallery .down-button-graphic {
+    -fx-padding: 0.5em 0.666666em 0.0em 0.0em; /* 6 8 0 0 */
+
+    -fx-background-color: white;
+
+    -fx-shape: "M8.124,13.625l4.125-3.375v2.889l-4.125,3.86L4,13.139V10.25L8.124,13.625z";
+}
+
+.ribbon-gallery .popup-button-graphic {
+    -fx-padding: 0.5em 0.666666em 0.5em 0em; /* 6 8 0 0 */
+
+    -fx-background-color: white;
+
+    -fx-shape: "M8.124,13.625l4.125-3.375v2.889l-4.125,3.86L4,13.139V10.25L8.124,13.625z M12.249,4.625H4v2h8.249V4.625z";
+}

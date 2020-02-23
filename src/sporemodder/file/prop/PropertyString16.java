@@ -141,7 +141,7 @@ public class PropertyString16 extends BaseProperty {
 					return true;
 				}
 				
-				values.add(PropConverter.intoOriginalText(trimmedLine.substring(1, trimmedLine.length() - 2)));
+				values.add(PropConverter.intoOriginalText(trimmedLine.substring(1, trimmedLine.length() - 1)));
 				
 				return true;
 			}

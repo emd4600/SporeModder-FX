@@ -1,0 +1,466 @@
+
+/* Redefine base colors */
+.root {
+	-fx-base: #2d373b;
+	-fx-background: #2f3233;
+	
+	-fx-control-inner-background: #1d2426;
+	
+	-fx-box-border: #084554;
+}
+
+.button:default {
+    -fx-base: #466573;
+	-fx-text-fill: white;
+}
+
+#introUI-projectList-separator .line {
+	-fx-border-color: #466573;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: #466573 transparent transparent transparent,
+        -fx-shadow-highlight-color transparent transparent transparent;
+    -fx-border-insets: 0, 1 0 0 0;
+}
+.separator:vertical .line {
+    -fx-border-color: transparent transparent transparent -fx-shadow-highlight-color,
+        transparent transparent transparent #466573;
+    -fx-border-width: 3, 1;
+    -fx-border-insets: 0, 0 0 0 1;
+}
+
+.text-field {
+	-fx-prompt-text-fill: #8f8f8f;
+}
+
+.context-menu {
+	-fx-background-color: #0f1314;
+}
+
+/**
+ * Some general settings.
+ */
+* {
+}
+
+/**
+*  -- For the introduction UI. --
+*/
+#introUI-projectList {
+	-fx-background-color: derive(-fx-background, 10%);
+	-fx-font-size: 18px;
+}
+
+
+/**
+ * -- The tabbed pane with the file editors. -- 
+ */
+
+#editor_tab_pane {
+	-fx-border-width: 2;
+	-fx-border-color: -fx-box-border;
+}
+
+.main-editor-tab {
+	-fx-background-color: #044861;
+}
+.main-editor-tab:selected {
+	-fx-background-color: derive(#044861, 3%);
+}
+
+/** ------------------- */
+
+.introUI-title {
+	-fx-font-size: 1.5em;
+	-fx-font-weight: bold;
+}
+
+
+/**
+ * -- The text editor. -- 
+ */
+
+.styled-text-area {
+    /* set the entire area's font size to the given size */
+    -fx-font-size: 1.2em;  /*18px;*/
+
+    /* set the blink rate of the area */
+    /* -fx-caret-blink-rate: <duration>; */
+
+    /* set the background color for selected text */
+    /* -fx-highlight-fill: <paint>; */
+	
+	-fx-background-color: #1e1e1e;
+}
+
+/*.styled-text-area*/ .caret {
+	-fx-stroke: white;
+}
+
+.styled-text-area .text {
+	-fx-fill: white;
+}
+
+.lineno {
+	-fx-background-color: #1e1e1e;
+}
+
+.text-editor-tooltip {
+	-fx-background-color: #FFFFE1;
+	-fx-padding: 2 2 2 2;
+	
+	-fx-border-width: 1;
+	-fx-border-color: black;
+}
+
+.text-errors {
+	/* the color of the underline */
+    -rtfx-underline-color: red;
+
+    /* the width of the underline */
+    -rtfx-underline-width: 2;
+
+    /* the underline's dash lengths: allows dot/dash style lines */
+    rtfx-underline-dash-array: 4;
+}
+
+.text-warnings {
+	/* the color of the underline */
+    -rtfx-underline-color: orange;
+
+    /* the width of the underline */
+    -rtfx-underline-width: 2;
+
+    /* the underline's dash lengths: allows dot/dash style lines */
+    rtfx-underline-dash-array: 4;
+}
+
+.text-searched-word {
+	-rtfx-background-color: #C2672F;
+}
+
+/** ------------------- */
+
+
+
+/**
+ * -- The project tree view. -- 
+ */
+ 
+.tree-cell.project_item_mod {
+	-fx-text-fill: #22B1E0;
+} 
+
+.tree-cell.project_item_not_mod {
+	-fx-fill: white;
+}
+
+.tree-cell.project_item_source {
+	-fx-font-weight: normal;
+} 
+
+.tree-cell.project_item_not_source {
+	-fx-font-weight: bold;
+}
+
+.project-tree-context-menu {
+	-fx-font-weight: normal;  /* Otherwise it will show bold on bolded items. */
+}
+
+.search-progress-bar > .bar {
+    -fx-background-insets: 1 1 2 1;
+    -fx-padding: 0.20em;
+}
+ 
+ /** ------------------- */
+ 
+ /**
+  * -- Dialog overlays --
+  */
+  
+.alert-pane {
+	-fx-background-color: #F2F2F2;
+}
+
+.alert-pane-titlebar {
+	/* -fx-background-color: #E0E0E0; */
+	-fx-background-color: white;
+}
+  
+ /** ------------------- */
+ 
+ 
+/**
+* -- Dialog content --
+*/
+
+/* The overlay used to drag the user's attention away from non-dialog content. */
+.dialog-overlay-pane {
+	-fx-background-color: rgba(64, 64, 64, 0.85);
+}
+
+/* It's recommended to use it on the base container of dialog content for consistent styling. */
+.dialog-content {
+	-fx-spacing: 5px; 
+	-fx-padding: 10 10 10 10;
+	
+	/** I feel default text is too small. We shouldn't apply it globally, though. */
+	-fx-font-size: 1em; /*16px;*/
+}
+
+.dialog-pane > .content {
+	/** I feel default text is too small. We shouldn't apply it globally, though. */
+	-fx-font-size: 1em; /*16px;*/
+}
+
+/* Exception informatino show under the "More details" button in error dialogs. */
+.dialog-exception-details {
+	-fx-background-color: #3d3d3d;
+	-fx-text-fill: red;
+}
+
+.dialog-pane > .button-bar > .container > .details-button {
+	-fx-text-fill: white;
+}
+
+ /** ------------------- */
+ 
+ /**
+ * -- Buttons with no background -- 
+ */
+
+.button-no-background {
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+    -fx-font-family:"Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 1em; /* 12 */
+    -fx-text-fill: #828282;
+    
+    -fx-padding: 0px;
+    -fx-border-width: 1, 1;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+
+.button-no-background:hover {
+	-fx-background-color: #AEBDD4; /* #9FD0E0; */
+}
+
+
+.button-no-background:focused {
+    -fx-border-color: transparent, black;
+    -fx-border-style: solid, segments(1, 2);
+    -fx-border-radius: 0, 0;
+}
+
+.button-no-background:pressed {
+    -fx-background-color: #9FD0E0; /* #76B7CC; */
+} 
+
+/* Fake hperlinks that are in fact buttons. We don't want the text color to change. */
+.button-no-background.hyperlink {
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-color: transparent;
+	
+	-fx-text-fill: -fx-accent;
+    
+    -fx-padding: 0px;
+    -fx-border-width: 1, 1;
+    -fx-border-insets: 1 1 1 1, 0;
+}
+.button-no-background.hyperlink:hover {
+	-fx-background-color: #9FD0E0;
+}
+.button-no-background.hyperlink:focused {
+    -fx-border-color: transparent, black;
+    -fx-border-style: solid, segments(1, 2);
+    -fx-border-radius: 0, 0;
+}
+.button-no-background.hyperlink:pressed {
+    -fx-background-color: #76B7CC;
+} 
+
+
+.artificial-menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 0.333333em 0.41777em 0.333333em 0.41777em;  /* 4 5 4 5 */
+}
+
+.artificial-menu-item:hover {
+    -fx-background: -fx-selection-bar;
+     -fx-background-color: -fx-background;
+     -fx-text-fill:  -fx-text-background-color;
+}
+
+.artificial-menu-item > .left-container {
+    -fx-padding: 0.458em 0.791em 0.458em 0.458em;
+}
+.artificial-menu-item-item > .graphic-container {
+    -fx-padding: 0em 0.333em 0em 0em;
+}
+.artificial-menu-item >.label {
+    -fx-padding: 0em 0.5em 0em 0em;
+    -fx-text-fill: -fx-text-base-color;
+}
+.artificial-menu-item:focused {
+     -fx-background: -fx-selection-bar;
+     -fx-background-color: -fx-background;
+     -fx-text-fill:  -fx-text-background-color;
+}
+.artificial-menu-item:focused > .label {
+    -fx-text-fill: -fx-focused-text-base-color;
+}
+.artificial-menu-item > .right-container {
+    -fx-padding: 0em 0em 0em 0.5em;
+}
+.artificial-menu-item:show-mnemonics > .mnemonic-underline {
+    -fx-stroke: -fx-text-fill;
+}
+
+/** ------------------- */
+
+.alert-confirmation {
+    -fx-graphic: url("../images/dialog-confirm.png");
+}
+
+.alert-information {
+    -fx-graphic: url("../images/dialog-information.png");
+}
+
+.alert-error {
+    -fx-graphic: url("../images/dialog-error.png");
+}
+
+.alert-warning {
+    -fx-graphic: url("../images/dialog-warning.png");
+}
+
+/** ------------------------- */
+
+/** -- STATUS BAR -- **/
+
+.status-bar {
+	-fx-pref-height: 30px;
+	-fx-background-color: linear-gradient(-fx-background, derive(-fx-background, -3%));
+	
+	-fx-padding: 4px 10px 4px 10px;
+	
+	-fx-border-width: 3px 0 0 0;
+	-fx-border-color: -fx-box-border;
+}
+
+.status-bar .label {
+	-fx-text-fill: #7C7C7C;
+}
+
+.status-bar:error {
+	-fx-background-color: linear-gradient(#e5854e, derive(#e5854e, -3%));
+}
+.status-separator:error *.line {
+	-fx-background-color: linear-gradient(#e5854e, derive(#e5854e, -3%));
+	
+	-fx-border-color: transparent transparent transparent #686868,
+        transparent transparent transparent #686868;
+}
+.status-bar:error .label {
+	-fx-text-fill: #101010;
+}
+
+/** ------------------------- */
+
+/** -- INSPECTOR -- **/
+
+.inspector-pane-title {
+	-fx-font-size: 1.4em;
+	-fx-font-weight: bold;
+}
+
+.inspector-docs-title {
+	-fx-font-size: 1.3em;
+	-fx-font-weight: bold;
+}
+
+.inspector-docs-link {
+	-fx-font-size: 1.2em;
+	-fx-padding-left: 5px;
+}
+
+
+.inspector-list {
+	-fx-spacing: 5px;
+}
+
+.inspector-list-values {
+	/** Keep in mind that double clicking in the space inserts a new space,
+	so spacing should be big enough for the user to click. */
+	-fx-spacing: 10px;
+	/** Add vertical padding so the user can drag values at the beggining/end of the list. */
+	-fx-padding: 10px 0px 10px 0px;
+}
+
+/** The node used for dragging the items and changing their order. */
+.inspector-list-item-handle {
+	-fx-padding: 0px 5px 0px 5px;
+}
+
+.inspector-list-value {
+	-fx-background-color: #45494a;
+}
+
+/** The pane used temporarily to show where the dragged value will go. */
+.inspector-list-temp-drag {
+	-fx-background-color: white;
+}
+
+/** We leave this here for convenience. */
+.inspector-value {
+}
+
+
+
+.inspector-property-pane {
+	-fx-hgap: 10px;
+	-fx-vgap: 5px;
+	
+	-fx-padding: 5px 0 5px 0px;
+}
+
+.inspector-value-label {
+	-fx-padding: 0 5px 0 5px;
+}
+
+/** -- SPUI Editor -- **/
+
+.spui-editor-item-window-invisible {
+	-fx-font-style: italic;
+}
+
+.spui-editor-item-window {
+	
+}
+
+.spui-editor-ribbon-header {
+	-fx-background-color: rgba(239, 23, 117, 60);
+}
+
+.spui-editor-tree-dropzone {
+	-fx-border-width: 2px;
+	-fx-border-color: #588bdd;
+}
+
+.spui-editor-tree-dropbelow {
+	-fx-border-width: 0 0 2px 0;
+	-fx-border-color: #588bdd;
+}
+
+.spui-editor-tree-dropabove {
+	-fx-border-width: 2px 0 0 0;
+	-fx-border-color: #588bdd;
+}
+
+
+.text-field-error {
+	-fx-control-inner-background: red;
+}

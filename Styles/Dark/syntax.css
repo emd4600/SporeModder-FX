@@ -1,0 +1,83 @@
+/** -- XML -- */
+
+.styled-text-area .xml-cdata {
+	-fx-fill: #808080;
+}
+
+.styled-text-area .xml-attribute {
+	-fx-fill: #FF0000;
+}
+
+.styled-text-area .xml-attribute_value {
+	-fx-fill: #97bfde;
+}
+
+.styled-text-area .xml-pattern {
+	-fx-fill: #d29ae3;
+	-fx-font-weight: bold; 
+}
+
+.styled-text-area .xml-comment {
+	/* -fx-fill: #3F5FBF;*/
+	-fx-fill: green;
+}
+
+
+/** -- ArgScript -- */
+
+.styled-text-area .argscript-comment {
+	-fx-fill: green;
+}
+
+.styled-text-area .argscript-block {
+	-fx-fill: #BA9745;
+	-fx-font-weight: bold;
+}
+
+.styled-text-area .argscript-command {
+	-fx-fill: rgb(176, 176, 0);
+	-fx-font-weight: bold;
+}
+
+.styled-text-area .argscript-option {
+	-fx-fill: rgb(255, 128, 0);
+}
+
+.styled-text-area .argscript-enum {
+	-fx-fill: rgb(128, 0, 0);
+}
+
+.styled-text-area .argscript-variable {
+	-fx-fill: #AA90D4;	
+	-fx-font-style: italic;
+}
+
+/** -- Property Lists (modification from ArgScript) -- */
+
+.styled-text-area .propeditor-property {
+	-fx-font-weight: bold;
+	-fx-fill: #CE81D6;
+}
+
+/** -- HLSL -- */
+
+.styled-text-area .hlsl-comments {
+	-fx-fill: green;
+}
+.styled-text-area .hlsl-enums {
+	-fx-fill: rgb(186, 85, 211);
+}
+.styled-text-area .hlsl-numbers {
+	-fx-fill: #e5af25;
+}
+.styled-text-area .hlsl-types {
+	-fx-fill: #008b8b;
+}
+.styled-text-area .hlsl-keywords {
+	-fx-fill: rgb(0, 0, 255);
+	-fx-font-weight: bold;
+}
+.styled-text-area .hlsl-functions {
+	-fx-fill: #e57402;
+	-fx-font-weight: bold;
+}

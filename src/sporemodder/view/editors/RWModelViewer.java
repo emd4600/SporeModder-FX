@@ -83,6 +83,7 @@ import sporemodder.file.rw4.RWMeshCompiledStateLink;
 import sporemodder.file.rw4.RWMorphHandle;
 import sporemodder.file.rw4.RWObject;
 import sporemodder.file.rw4.RWRaster;
+import sporemodder.file.rw4.RWTextureOverride;
 import sporemodder.file.rw4.RWVertexBuffer;
 import sporemodder.file.rw4.RWVertexElement;
 import sporemodder.file.rw4.RenderWare;
@@ -194,11 +195,12 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private BoundingBox bbox;
 	private final List<MeshView> meshes = new ArrayList<>();
 	private final List<RWMeshCompiledStateLink> rwMeshes = new ArrayList<>();
+	private final List<RWTextureOverride> externalTextures = new ArrayList<>();
 	private final Map<RWRaster, Image> rasterImages = new HashMap<>();  // with alpha removed
 	private final Map<RWRaster, Image> rasterOriginalImages = new HashMap<>();
 	private final Map<RWRaster, ObjectProperty<Image>> rasterImageProperties = new HashMap<>();
 	
-	double mousePosX, mousePosY, mouseOldX, mouseOldY;
+	private double mousePosX, mousePosY, mouseOldX, mouseOldY;
 	
 	// -- Inspector -- //
 	
@@ -209,6 +211,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private final TreeItem<String> tiMorphs = new TreeItem<String>("Morph Handles");
 	private final TreeItem<String> tiTextures = new TreeItem<String>("Textures");
+	private final TreeItem<String> tiExternalTextures = new TreeItem<String>("External Textures");
 	private final TreeItem<String> tiCompiledStates = new TreeItem<String>("Compiled States");
 	
 	private final Map<String, RWObject> nameMap = new HashMap<>();
@@ -237,9 +240,11 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     	
     	rootItem.getChildren().add(tiMorphs);
     	rootItem.getChildren().add(tiTextures);
+    	rootItem.getChildren().add(tiExternalTextures);
     	rootItem.getChildren().add(tiCompiledStates);
     	tiMorphs.setExpanded(true);
     	tiTextures.setExpanded(true);
+    	tiExternalTextures.setExpanded(true);
     	tiCompiledStates.setExpanded(true);
     	
     	treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
@@ -284,8 +289,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		float[] texCoords = buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD] == null ? null : new float[2 * vertexCount];
 		float[] normals = buffer.data[RWBlendShapeBuffer.INDEX_POSITION] == null ? null : new float[3 * vertexCount];
 		
-		//final int shapeIndex = 3;
-		
 		try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_POSITION])) {
 			stream.seek(vertexStart * 16);
 			for (int i = 0; i < vertexCount; ++i) {
@@ -295,16 +298,6 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				stream.skip(4);
 			}
 		}
-		
-//		try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_POSITION])) {
-//			stream.seek(shapeIndex*buffer.vertexCount*16 + vertexStart * 16);
-//			for (int i = 0; i < vertexCount; ++i) {
-//				positions[i * 3 + 0] += stream.readLEFloat();
-//				positions[i * 3 + 1] += stream.readLEFloat();
-//				positions[i * 3 + 2] += stream.readLEFloat();
-//				stream.skip(4);
-//			}
-//		}
 		
 		if (texCoords != null) {
 			try (MemoryStream stream = new MemoryStream(buffer.data[RWBlendShapeBuffer.INDEX_TEXCOORD])) {
@@ -533,6 +526,11 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			rasterOriginalImages.put(raster, removeAlphaChannel(image, Color.rgb(0, 0, 0)));
 			rasterImages.put(raster, removeAlphaChannel(image));
 		}
+		
+		List<RWTextureOverride> overrides = renderWare.getObjects(RWTextureOverride.class);
+		for (RWTextureOverride texture : overrides) {
+			if (texture.name != null) externalTextures.add(texture);
+		}
 	}
 	
 	private void loadMaterial(RWCompiledState compiledState, MeshView meshView) throws IOException {
@@ -547,14 +545,14 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		
 		if (!state.textureSlots.isEmpty()) {
 			RWObject diffuseRaster = state.textureSlots.get(0).raster;
-			if (diffuseRaster != null) {
+			if (diffuseRaster != null && diffuseRaster.getTypeCode() == RWRaster.TYPE_CODE) {
 				rasterImageProperties.put((RWRaster)diffuseRaster, material.diffuseMapProperty());
 				material.setDiffuseMap(rasterImages.get(diffuseRaster));
 			}
 			
 			if (state.textureSlots.size() > 1) {
 				RWObject normalRaster = state.textureSlots.get(1).raster;
-				if (normalRaster != null) {
+				if (normalRaster != null && diffuseRaster.getTypeCode() == RWRaster.TYPE_CODE) {
 					rasterImageProperties.put((RWRaster)normalRaster, material.bumpMapProperty());
 					material.setBumpMap(rasterImages.get(normalRaster));
 				}
@@ -675,6 +673,18 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				tiTextures.getChildren().add(item);
 			}
 			
+			List<RWTextureOverride> overrides = renderWare.getObjects(RWTextureOverride.class);
+			for (RWTextureOverride texture : overrides) {
+				if (texture.name != null) {
+					String name = renderWare.indexOf(texture) + " \"" + texture.name + "\"";
+					nameMap.put(name, texture);
+					
+					TreeItem<String> item = new TreeItem<String>(name);
+					itemsMap.put(name, item);
+					tiExternalTextures.getChildren().add(item);
+				}
+			}
+			
 			List<RWCompiledState> compiledStates = renderWare.getObjects(RWCompiledState.class);
 			for (RWCompiledState compiledState : compiledStates) {
 				String name = renderWare.getName(compiledState);
@@ -770,6 +780,10 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			fillTexturePane(selectedName, (RWRaster) object);
 			return;
 		}
+		else if (object instanceof RWTextureOverride) {
+			fillExternalTexturePane(item, selectedName, (RWTextureOverride) object);
+			return;
+		}
 		else if (object instanceof RWCompiledState) {
 			UIManager.get().tryAction(() -> {
 				showCompiledStateEditor(selectedName);
@@ -778,6 +792,34 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		}
 		
 		propertiesContainer.setContent(null);
+	}
+	
+	private void fillExternalTexturePane(TreeItem<String> item, String name, RWTextureOverride texture) {
+		PropertyPane pane = new PropertyPane();
+		
+		InspectorString nameField = new InspectorString();
+		nameField.setText(texture.name);
+		
+		pane.add("Name", "A name used to identify this texture slot.", nameField);
+		
+		nameField.addValueListener((obs, oldValue, newValue) -> {
+			item.setValue(renderWare.indexOf(texture) + " \"" + newValue + "\"");
+			
+			addEditAction(new RWUndoableAction("External texture: name") {
+
+				@Override public void undo() {
+					texture.name = oldValue;
+					item.setValue(renderWare.indexOf(texture) + " \"" + oldValue + "\"");
+				}
+
+				@Override public void redo() {
+					texture.name = newValue;
+					item.setValue(renderWare.indexOf(texture) + " \"" + newValue + "\"");
+				}
+			});
+		});
+		
+		propertiesContainer.setContent(pane.getNode());
 	}
 	
 	private void fillMorphPane(TreeItem<String> item, String name, RWMorphHandle morph) {
@@ -978,7 +1020,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		--undoRedoIndex;
 		
 		if (action.selectedObject != null) {
-			if (getSelectedName().equals(action.selectedObject)) {
+			if (action.selectedObject.equals(getSelectedName())) {
 				fillPropertiesPane(treeView.getSelectionModel().getSelectedItem(), action.selectedObject);
 			} else {
 				treeView.getSelectionModel().select(itemsMap.get(action.selectedObject));

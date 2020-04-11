@@ -5201,3 +5201,14 @@ ScenarioGAFirstLaunched 0x080d97fe
 ScenarioSpaceGameLaunched 0x080eaa93
 ScenarioCaptainEditorLaunched 0x080d8460
 ScenarioAdventureEditorLaunched 0x080d8470 
+
+modelTexturesLODHi
+modelTexturesLOD0
+modelTexturesLOD1
+modelTexturesLOD2
+modelTexturesLOD3
+modelTexturesLODHiKeys
+modelTexturesLOD0Keys
+modelTexturesLOD1Keys
+modelTexturesLOD2Keys
+modelTexturesLOD3Keys

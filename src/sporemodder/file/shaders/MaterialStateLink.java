@@ -46,6 +46,7 @@ import sporemodder.file.rw4.MaterialStateCompiler.ShaderDataEntry;
 import sporemodder.file.rw4.MaterialStateCompiler.TextureSlot;
 import sporemodder.file.rw4.RWObject;
 import sporemodder.file.rw4.RWRaster;
+import sporemodder.file.rw4.RWTextureOverride;
 import sporemodder.file.rw4.RWVertexDescription;
 import sporemodder.file.rw4.RWVertexElement;
 import sporemodder.file.rw4.RenderWare;
@@ -366,10 +367,10 @@ public class MaterialStateLink {
 							Integer value = null;
 							if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
 								RWObject object = renderWare.get(value);
-								if (object.getTypeCode() == RWRaster.TYPE_CODE) {
-									currentSlot.raster = (RWRaster) object;
+								if (object.getTypeCode() == RWRaster.TYPE_CODE || object.getTypeCode() == RWTextureOverride.TYPE_CODE) {
+									currentSlot.raster = object;
 								} else {
-									stream.addError(line.createErrorForArgument("RWObject at index " + value + " is not a RWRaster.", 0));
+									stream.addError(line.createErrorForArgument("RWObject at index " + value + " is not a RWRaster or a RWTextureOverride.", 0));
 								}
 							}
 						}));

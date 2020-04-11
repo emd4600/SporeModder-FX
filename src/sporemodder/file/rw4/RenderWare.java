@@ -21,6 +21,7 @@ package sporemodder.file.rw4;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,8 @@ import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
+import sporemodder.file.rw4.RWKeyframe.LocRotScale;
+import sporemodder.file.rw4.RWKeyframeAnim.Channel;
 import sporemodder.file.rw4.RWSectionSubReferences.SubReference;
 
 public class RenderWare {
@@ -151,7 +154,7 @@ public class RenderWare {
 			stream.writeLEInt(r.offset);
 		}
 		
-		// I'm not sure if this is needed, but it doesn't hurt
+		// Without this, shape keys crash 
 		stream.writePadding(48);
 		
 		// Now write the BaseResources
@@ -393,6 +396,7 @@ public class RenderWare {
 		case RWKeyframeAnim.TYPE_CODE: return new RWKeyframeAnim(this);
 		case RWBlendShape.TYPE_CODE: return new RWBlendShape(this);
 		case RWBlendShapeBuffer.TYPE_CODE: return new RWBlendShapeBuffer(this);
+		case RWTextureOverride.TYPE_CODE: return new RWTextureOverride(this);
 		default:
 			return null;
 		}
@@ -436,14 +440,33 @@ public class RenderWare {
 		//RenderWare renderWare = RenderWare.fromFile(new File(path));
 		//renderWare.printInfo();
 		
-		String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL.rw4";
+		/*String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL.rw4";
 		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL test.rw4";
 		
 		RenderWare renderWare = RenderWare.fromFile(new File(inputPath));
-	
-		try (FileStream stream = new FileStream(outputPath, "rw")) {
-			renderWare.write(stream);
-		}
+		 */
+		
+		/*String inputPath = "C:\\Users\\Eric\\Downloads\\broken_rw4s\\";
+		String outputPath = "C:\\Users\\Eric\\Desktop\\fixed broken_rw4s";
+		
+		for (String name : new File(inputPath).list()) {
+			RenderWare renderWare = RenderWare.fromFile(new File(inputPath, name));
+			
+			List<RWMorphHandle> handles = renderWare.getObjects(RWMorphHandle.class);
+			for (RWMorphHandle handle : handles) {
+				if (handle.handleID == 0x503283AA) {
+					for (Channel<? extends RWKeyframe> channel : handle.animation.channels) {
+						swapKeyframes(channel);
+					}
+				}
+			}
+
+			try (FileStream stream = new FileStream(new File(outputPath, name), "rw")) {
+				renderWare.write(stream);
+			}
+			
+			System.out.println(name);
+		}*/
 		
 //		Map<Integer, List<String>> nameSet = new HashMap<>();
 //		
@@ -488,5 +511,20 @@ public class RenderWare {
 //				System.out.println();
 //			}
 //		}
+	}
+	
+	private static <T extends RWKeyframe> void swapKeyframes(Channel<T> channel) {
+		float[] times = new float[channel.keyframes.size()];
+		List<T> keyframes = new ArrayList<>();
+		for (int i = 0; i < times.length; ++i) {
+			keyframes.add(channel.keyframes.get(i));
+			times[i] = keyframes.get(i).time;
+		}
+		
+		for (int i = times.length-1; i >= 0; --i) {
+			int index = times.length-1 - i;
+			keyframes.get(i).time = times[index];
+			channel.keyframes.set(index, keyframes.get(i));
+		}
 	}
 }

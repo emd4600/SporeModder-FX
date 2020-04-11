@@ -796,8 +796,8 @@ public class EffectDirectory {
 //		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir";
 //		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir.unpacked";
 		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\games.effdir";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~\\games.effdir.unpacked";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\ep1_effects_3~\\games.effdir";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\ep1_effects_3~\\games.effdir.unpacked";
 		
 		long time = System.currentTimeMillis();
 		

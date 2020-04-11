@@ -39,6 +39,7 @@ import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import sporemodder.FileManager;
 import sporemodder.HashManager;
+import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.shaders.ShaderBuilder.ShaderBuilderEntry;
@@ -470,5 +471,36 @@ public class CompiledShaders {
 		
 		input.delete();
 		output.delete();
+	}
+	
+	public static void main(String[] args) throws IOException {
+		MainApp.testInit();
+		
+		String fragmentsPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shader_fragments~\\0x00000003.smt";
+		String shadersPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shaders~\\0x00000003.smt";
+		
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shaders~\\0x00000003.smt.unpacked\\" + PRECOMPILED_VSH_FILE;
+		
+		try (FileStream fragmentsIn = new FileStream(fragmentsPath, "r");
+				FileStream shadersIn = new FileStream(shadersPath, "r"); 
+				BufferedWriter output = new BufferedWriter(new FileWriter(outputPath)))
+		{
+			ShaderFragments fragments = new ShaderFragments();
+			fragments.read(fragmentsIn, null, null);
+			
+			CompiledShaders shaders = new CompiledShaders();
+			shaders.read(shadersIn);
+			
+			for (CompiledShader shader : shaders.vertexShaders) {
+				StringBuilder sb = new StringBuilder();
+				for (int i : shader.fragmentIndices) {
+					if (i == 0) break;
+					sb.append(Integer.toHexString(i));
+					sb.append(' ');
+				}
+				output.write(sb.toString());
+				output.newLine();
+			}
+		}
 	}
 }

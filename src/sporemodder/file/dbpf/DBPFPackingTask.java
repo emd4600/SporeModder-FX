@@ -277,6 +277,8 @@ public class DBPFPackingTask extends Task<Void> {
 		}
 		finally {
 			if (packer != null) packer.close();
+			
+			for (Converter converter : FormatManager.get().getConverters()) converter.reset();
 		}
 		
 		// Once done, we can disable updating the project registry

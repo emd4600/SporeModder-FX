@@ -62,6 +62,7 @@ import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import sporemodder.FileManager;
 import sporemodder.UIManager;
+import sporemodder.file.bitmaps.BitmapImage;
 import sporemodder.file.dds.DDSTexture;
 import sporemodder.file.raster.RasterTexture;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
@@ -75,7 +76,7 @@ import sporemodder.view.UserInterface;
  */
 public class ImageViewer implements ItemEditor {
 	
-	private static final List<String> SUPPORTED_TYPES = Arrays.asList("png", "jpg", "jpeg", "dds", "rw4", "rast", "raster");
+	private static final List<String> SUPPORTED_TYPES = Arrays.asList("png", "jpg", "jpeg", "bmp", "dds", "rw4", "rast", "raster", "bitImage", "8bitImage", "32bitImage", "48bitImage");
 	
 	private static final double MIN_ZOOM = 0.25;
 	private static final double MAX_ZOOM = 10;
@@ -301,7 +302,9 @@ public class ImageViewer implements ItemEditor {
 		case "png":
 		case "jpg":
 		case "jpeg":
-			return new Image(new FileInputStream(file));
+			try (FileInputStream is = new FileInputStream(file)) {
+				return new Image(is);
+			}
 		case "dds":
 			return SwingFXUtils.toFXImage(DDSTexture.toBufferedImage(file), null);
 		case "rw4":
@@ -309,6 +312,11 @@ public class ImageViewer implements ItemEditor {
 		case "rast":
 		case "raster":
 			return SwingFXUtils.toFXImage(RasterTexture.textureFromFile(file).toBufferedImage(), null);
+		case "bitimage":
+		case "8bitimage":
+		case "32bitimage":
+		case "48bitimage":
+			return BitmapImage.readImage(file).getImage();
 		default:
 			return null;
 		}

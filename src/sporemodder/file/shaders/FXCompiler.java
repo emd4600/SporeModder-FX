@@ -131,10 +131,10 @@ public class FXCompiler extends AbstractManager {
 		
 		String command;
 		if (includePath != null) {
-			command = String.format("\"%s\" /T %s /Fo \"%s\" /I \"%s\" \"%s\"", 
+			command = String.format("\"%s\" /Zi /T %s /Fo \"%s\" /I \"%s\" \"%s\"", 
 					fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), includePath.getAbsolutePath(), sourceHLSL.getAbsolutePath());
 		} else {
-			command = String.format("\"%s\" /T %s /Fo \"%s\" \"%s\"", 
+			command = String.format("\"%s\" /Zi /T %s /Fo \"%s\" \"%s\"", 
 					fxcFile.getAbsolutePath(), targetProfile, outputFile.getAbsolutePath(), sourceHLSL.getAbsolutePath());
 		}
 		
@@ -153,15 +153,25 @@ public class FXCompiler extends AbstractManager {
 	public void getUniformData(byte[] data, List<ShaderDataUniform> dst) throws IOException {
 		
 		try (MemoryStream stream = new MemoryStream(data)) {
-			stream.seek(8);
-			// CTAB
-			if (stream.readInt() != 0x43544142) return;
+			stream.skip(4);
+			
+			while (true) {
+				if (stream.getFilePointer() >= stream.length()) return;
+				stream.skip(2);
+				int size = stream.readLEUShort();
+				// CTAB
+				if (stream.readInt() == 0x43544142) break;
+				stream.skip(size*4 - 4);
+			}
+			
+			long baseOffset = stream.getFilePointer();
+			
 			stream.skip(12);  // Size, Creator, Version
 			int constCount = stream.readLEInt();
 			int constOffset = stream.readLEInt();
 			
 			for (int i = 0; i < constCount; ++i) {
-				stream.seek(constOffset + 12 + i*20);
+				stream.seek(constOffset + baseOffset + i*20);
 				
 				ShaderDataUniform uniform = new ShaderDataUniform();
 				
@@ -173,7 +183,7 @@ public class FXCompiler extends AbstractManager {
 				stream.skip(8);
 				int elements = stream.readLEShort();
 				
-				stream.seek(12 + nameOffset);
+				stream.seek(baseOffset + nameOffset);
 				String name = stream.readCString(StringEncoding.ASCII);
 				if (!ShaderData.hasIndex(name)) {
 					throw new IOException(name + " is not a recognized shader data uniform.");

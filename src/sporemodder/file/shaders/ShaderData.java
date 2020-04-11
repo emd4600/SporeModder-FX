@@ -18,11 +18,15 @@
 ****************************************************************************/
 package sporemodder.file.shaders;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import sporemodder.HashManager;
+import sporemodder.PathManager;
 
 public class ShaderData {
 
@@ -242,6 +246,29 @@ public class ShaderData {
 		
 		for (Map.Entry<String, Integer> entry : nameToIndex.entrySet()) {
 			indexToName.put(entry.getValue(), entry.getKey());
+		}
+	}
+	
+	public static void initialize() {
+		try {
+			File file = PathManager.get().getProgramFile("shader_data.txt");
+			if (file.exists()) {
+				try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						String[] splits = line.trim().split("\\s+");
+						int index = HashManager.get().int32(splits[0]);
+						int dataFlags = splits.length > 2 ? HashManager.get().int32(splits[2]) : 0;
+						
+						nameToIndex.put(splits[1], index);
+						indexToName.put(index, splits[1]);
+						if (dataFlags != 0) flags.put(index, dataFlags);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

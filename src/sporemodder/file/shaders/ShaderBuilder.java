@@ -199,7 +199,7 @@ public class ShaderBuilder extends MaterialShader {
 					if (fragmentsMap != null) {
 						Integer value = fragmentsMap.get(args.get(0));
 						
-						if (value == -1) {
+						if (value == null) {
 							stream.addError(line.createErrorForArgument(args.get(0) + " is not a defined "+ (isVertexShader ? "vertex" : "pixel") + "shader fragment.", 0));
 							return;
 						}

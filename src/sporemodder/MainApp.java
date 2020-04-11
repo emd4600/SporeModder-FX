@@ -32,6 +32,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import sporemodder.MessageManager.MessageType;
 import sporemodder.file.shaders.FXCompiler;
+import sporemodder.file.shaders.ShaderData;
 
 /**
  * The main class of the program.
@@ -205,6 +206,8 @@ public class MainApp extends Application {
 		if (!testInit) documentationManager.initialize(settings);
 		formatManager.initialize(settings);
 		fxCompiler.initialize(settings);
+		
+		ShaderData.initialize();
 		
 		// The plugin must go last, as plugins will use the other managers
 		pluginManager.initialize(settings);

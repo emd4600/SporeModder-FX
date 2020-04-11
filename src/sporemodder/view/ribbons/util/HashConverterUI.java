@@ -117,14 +117,19 @@ public class HashConverterUI implements Controller {
 		HashManager hasher = HashManager.get();
 		
 		if (name.endsWith("~")) {
-			// Special case, only file registry available
+			// Special case, only file and project registry available
+			NameRegistry reg = hasher.getFileRegistry();
 			Integer value = hasher.getFileRegistry().getHash(name);
+			if (value == null) {
+				reg = hasher.getProjectRegistry();
+				value = reg.getHash(name);
+			}
 			if (value == null) {
 				tfHash.setText("");
 				cbRegister.getItems().setAll("Not found");
 				cbRegister.getSelectionModel().select(0);
 			} else {
-				cbRegister.getItems().setAll(hasher.getFileRegistry().getFileName());
+				cbRegister.getItems().setAll(reg.getDescription());
 				cbRegister.getSelectionModel().select(0);
 				
 				tfHash.setText(HashManager.get().hexToStringUC(value));
@@ -191,7 +196,7 @@ public class HashConverterUI implements Controller {
 			tfName.setText("");
 			cbRegister.getItems().setAll("Not found");
 			cbRegister.getSelectionModel().select(0);
-			tfHash.setStyle(null);
+			tfHash.getStyleClass().remove("text-field-error");
 			return;
 		}
 		
@@ -203,7 +208,9 @@ public class HashConverterUI implements Controller {
 			hash = parseHash(hashText);
 			tfHash.getStyleClass().remove("text-field-error");
 		} catch (Exception e) {
-			tfHash.getStyleClass().add("text-field-error");
+			if (!tfHash.getStyleClass().contains("text-field-error")) {
+				tfHash.getStyleClass().add("text-field-error");
+			}
 			return;
 		}
 		
@@ -230,7 +237,7 @@ public class HashConverterUI implements Controller {
 			cbRegister.getItems().add(hasher.getFileRegistry().getDescription());
 		}
 		
-		value = hasher.getFileRegistry().getName(hash);
+		value = hasher.getProjectRegistry().getName(hash);
 		if (value != null) {
 			cbRegister.getItems().add(hasher.getProjectRegistry().getDescription());
 		}

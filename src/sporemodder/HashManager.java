@@ -713,7 +713,11 @@ public class HashManager extends AbstractManager {
 				return hash;
 			} 
 			else {
-				Integer i = fileRegistry.getHash(name.toLowerCase());
+				String lc = name.toLowerCase();
+				Integer i = fileRegistry.getHash(lc);
+				if (i == null) {
+					i = projectRegistry.getHash(lc);
+				}
 				if (i == null) {
 					throw new IllegalArgumentException("Unable to find " + name + " hash.  It does not exist in the reg_file registry.");
 				}

@@ -27,8 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import emord.filestructures.StreamWriter;
 import emord.filestructures.Stream.StringEncoding;
+import emord.filestructures.StreamWriter;
 import sporemodder.HashManager;
 
 /**
@@ -86,7 +86,7 @@ public class NameRegistry {
 	 * @param hash
 	 */
 	public void add(String name, int hash) {
-		hashes.put(name, hash);
+		hashes.put(name.toLowerCase(), hash);
 		names.put(hash, name);
 	}
 	

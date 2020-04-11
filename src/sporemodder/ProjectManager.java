@@ -78,6 +78,7 @@ import sporemodder.util.OmitProjectItemFactory;
 import sporemodder.util.Project;
 import sporemodder.util.ProjectItem;
 import sporemodder.util.ProjectItemFactory;
+import sporemodder.util.ProjectNamesItemFactory;
 import sporemodder.util.ProjectPreset;
 import sporemodder.util.ProjectSearcher;
 import sporemodder.view.ProjectTreeItem;
@@ -150,6 +151,7 @@ public class ProjectManager extends AbstractManager {
 		
 		itemFactories.add(new DefaultProjectItemFactory());
 		itemFactories.add(new OmitProjectItemFactory());
+		itemFactories.add(new ProjectNamesItemFactory());
 		
 		
 		specialItems.add(new EffectEditorItem());

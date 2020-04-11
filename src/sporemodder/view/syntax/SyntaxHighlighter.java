@@ -233,6 +233,10 @@ public class SyntaxHighlighter {
 		}
 	}
 	
+	public int getEntryCount() {
+		return entries.size();
+	}
+	
 	public StyleSpans<Collection<String>> generateStyleSpans() {
 		
 		StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<Collection<String>>();

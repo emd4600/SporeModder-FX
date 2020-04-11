@@ -126,7 +126,7 @@ public class RasterConverter implements Converter {
 		if (!item.isRoot()) {
 			
 			if (item.isMod() && isEncoder(item.getFile())) {
-				MenuItem menuItem = new MenuItem("Convert to DDS");
+				MenuItem menuItem = new MenuItem("Convert to RASTER");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {
 					// This is after isEncoder(), so we can assume it has extension
@@ -151,7 +151,7 @@ public class RasterConverter implements Converter {
 				ResourceKey key = ProjectManager.get().getResourceKey(item);
 				
 				if (isDecoder(key)) {
-					MenuItem menuItem = new MenuItem("Convert to RASTER");
+					MenuItem menuItem = new MenuItem("Convert to DDS");
 					menuItem.setMnemonicParsing(false);
 					menuItem.setOnAction(event -> {
 						final File outputFile = Converter.getOutputFile(key, item.getFile().getParentFile(), "dds");

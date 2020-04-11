@@ -46,10 +46,6 @@ public class RWRaster extends RWObject {
 	public RWRaster(RenderWare renderWare) {
 		super(renderWare);
 	}
-	
-	public void copy(RWRaster other) {
-		
-	}
 
 	@Override
 	public void read(StreamReader stream) throws IOException {

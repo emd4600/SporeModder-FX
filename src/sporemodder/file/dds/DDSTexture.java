@@ -46,17 +46,22 @@ public class DDSTexture {
 
 	private DDSHeader header;
 
-	public DDSTexture(long width, long height, int mipmapCount, int textureType, byte[] data) {
+	public DDSTexture(long width, long height, int mipmapCount, int textureFormat, byte[] data) {
 
-		// Only uncompressed or DXT5 supported
-		long pitchOrLinearSize = textureType == 0x15 ? width*height*4  : width * height;
+		long pitchOrLinearSize;
+		boolean isCompressed;
+		long blockSize = 0;
+		
+		if (textureFormat == DDSPixelFormat.Format.DXT1.getFourCC()) {
+			blockSize = 8;
+		} 
+		else if (textureFormat == DDSPixelFormat.Format.DXT2.getFourCC() ||  textureFormat == DDSPixelFormat.Format.DXT3.getFourCC()
+				|| textureFormat == DDSPixelFormat.Format.DXT4.getFourCC() || textureFormat == DDSPixelFormat.Format.DXT5.getFourCC()) {
+			blockSize = 16;
+		}
+		
 		long depth = 0;
-
-		// Spore uses a special fourCC for uncompressed formats
-		boolean isUncompressed = textureType == 0x15;
-
 		long pfFlags = 0;
-		long fourCC = isUncompressed ? 0 : textureType;
 		long rgbBitCount = 32;
 		long rMask = 0x00FF0000;
 		long gMask = 0x0000FF00;
@@ -66,14 +71,35 @@ public class DDSTexture {
 		long caps2 = 0;
 		long caps3 = 0;
 		long caps4 = 0;
-
-		if (isUncompressed) {
-			pfFlags = DDSPixelFormat.RGB | DDSPixelFormat.ALPHAPIXELS;
-			// Also used to set caps = textureType == 0x15 ? 0x00401008 : 0;, but does not make much sense
+		
+		if (textureFormat == DDSPixelFormat.D3DFMT_A8) {
+			pfFlags |= DDSPixelFormat.ALPHAPIXELS;
+			rgbBitCount = 8;
+			aMask = 0x000000FF;
 		}
+		else if (textureFormat == DDSPixelFormat.D3DFMT_R8G8B8) {
+			pfFlags |= DDSPixelFormat.RGB;
+			rgbBitCount = 24;
+		}
+		else if (textureFormat == DDSPixelFormat.D3DFMT_A8R8G8B8) {
+			pfFlags |= DDSPixelFormat.RGB | DDSPixelFormat.ALPHAPIXELS;
+			rgbBitCount = 32;
+		}
+		
+		if (blockSize != 0) {
+			pitchOrLinearSize = Math.max(1, (width+3) / 4) * blockSize;
+			isCompressed = true;
+		} 
 		else {
-			pfFlags = DDSPixelFormat.FOURCC;
+			// Microsoft documentation says we should use this
+			// but it doesn't work on Gimp
+			// pitchOrLinearSize = ( width * rgbBitCount + 7 ) / 8;
+			pitchOrLinearSize = width * height * rgbBitCount / 8;
+			isCompressed = false;
 		}
+		
+		if (isCompressed) pfFlags |= DDSPixelFormat.FOURCC;
+		long fourCC = isCompressed ? textureFormat : 0;
 
 		DDSPixelFormat pixelFormat = new DDSPixelFormat(DEFAULT_PIXELFORMAT_SIZE, pfFlags, fourCC, rgbBitCount, rMask, gMask, bMask, aMask);
 		header = new DDSHeader(DEFAULT_SIZE, DEFAULT_FLAGS, height, width, pitchOrLinearSize, depth, mipmapCount, pixelFormat, caps, caps2, caps3, caps4, null);
@@ -150,7 +176,8 @@ public class DDSTexture {
 		DDSPixelFormat pixelFormat = header.getPixelFormat();
 		stream.writeLEUInt(pixelFormat.getSize());
 		stream.writeLEUInt(pixelFormat.getFlags());
-		stream.writeLEUInt(pixelFormat.getFormat() == Format.UNCOMPRESSED ? 0x15 : pixelFormat.getFourCC());
+		//stream.writeLEUInt(pixelFormat.getFormat() == Format.UNCOMPRESSED ? 0x15 : pixelFormat.getFourCC());
+		stream.writeLEUInt(pixelFormat.getFourCC());
 		stream.writeLEUInt(pixelFormat.getRgbBitCount());
 		stream.writeLEUInt(pixelFormat.getMaskRed());
 		stream.writeLEUInt(pixelFormat.getMaskGreen());

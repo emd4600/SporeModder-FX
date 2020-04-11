@@ -44,10 +44,13 @@ public class DDSPixelFormat {
 	public static final int YUV = 0x200;
 	public static final int LUMINANCE = 0x20000;
 	public static final int NORMAL = 0x80000000;
+	
+	public static final int D3DFMT_R8G8B8 = 20;
+	public static final int D3DFMT_A8R8G8B8 = 21;
+	public static final int D3DFMT_A8 = 28;
 		
 	//Format
 	public enum Format {
-		PARTICLE ("PARTICLE", 0x15),
 		NOT_SUPPORTED ("NOT A SUPPORTED FORMAT", 0),
 		UNCOMPRESSED("UNCOMPRESSED", 0),
 		DXT1	("DXT1"), //Working

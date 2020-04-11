@@ -129,24 +129,6 @@ public class DDSImageReader extends ImageReader {
 	public BufferedImage read(int imageIndex, ImageReadParam param) throws IOException {
 		readHeader();
 		stream.setByteOrder(ByteOrder.LITTLE_ENDIAN);
-		if (ddsHeader.getFormat() == Format.PARTICLE) {
-			long val = imagePos;
-			int width = (int) ddsHeader.getWidth(imageIndex);
-			int height = (int) ddsHeader.getHeight(imageIndex); 
-			for (int i = 0; i < imageIndex; i++) {
-				val += ddsHeader.getWidth(i)*ddsHeader.getHeight(i)*4;
-			}
-			stream.seek(val);
-			width = (int) ddsHeader.getWidth(imageIndex);
-			height = (int) ddsHeader.getHeight(imageIndex); 
-			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-			for (int i = 0; i < height; i++) {
-				for (int j = 0; j < width; j++) {
-					image.setRGB(j, i, stream.readInt());
-				}
-			}
-			return image;
-		}
 		checkIndex(imageIndex);
 		DDSLineReader ddsLineReader = new DDSLineReader();
 		stream.reset();

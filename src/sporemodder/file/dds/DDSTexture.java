@@ -87,7 +87,10 @@ public class DDSTexture {
 		}
 		
 		if (blockSize != 0) {
-			pitchOrLinearSize = Math.max(1, (width+3) / 4) * blockSize;
+			// Microsoft docs say it's like this:
+			// pitchOrLinearSize = Math.max(1, (width+3) / 4) * blockSize;
+			// But that doesn't work on Gimp. Gimp and Photoshop do this:
+			pitchOrLinearSize = Math.max(1, (width+3) / 4) * Math.max(1, (height+3) / 4) * blockSize;
 			isCompressed = true;
 		} 
 		else {

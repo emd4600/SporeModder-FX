@@ -128,7 +128,7 @@ public class BitmapConverter implements Converter {
 
 	@Override
 	public String getName() {
-		return "Raw Bitmap (.*bitImage)";
+		return "Raw Bitmap (*.bitImage)";
 	}
 
 	@Override

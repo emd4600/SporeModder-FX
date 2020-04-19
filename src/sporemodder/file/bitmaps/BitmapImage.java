@@ -26,21 +26,15 @@ import emord.filestructures.FileStream;
 import emord.filestructures.FixedMemoryStream;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
-import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 import sporemodder.FileManager;
 import sporemodder.HashManager;
-import sporemodder.MainApp;
 
-public class BitmapImage extends Application {
+public class BitmapImage {
 	
 	public static final int TYPE_1BIT = 0x03E421E9;		// channelCount = 0
 	public static final int TYPE_8BIT = 0x03E421EC;		// channelCount = 1
@@ -71,7 +65,10 @@ public class BitmapImage extends Application {
 		}
 		
 		switch(type) {
-		case TYPE_1BIT:	channelCount = 0; break;
+		case TYPE_1BIT:	
+			channelCount = 0; 
+			unknown = width / 8;
+			break;
 		case TYPE_8BIT: channelCount = 1; break;
 		case TYPE_32BIT: channelCount = 2; break;
 		case TYPE_48BIT: channelCount = 3; break;
@@ -209,6 +206,10 @@ public class BitmapImage extends Application {
 		byte[] data = new byte[bufferSize];
 		stream.read(data);
 		
+		if (type == TYPE_1BIT) {
+			unknown = stream.readInt();
+		}
+		
 		try (FixedMemoryStream dataStream = new FixedMemoryStream(data)) {
 			image = new WritableImage(width, height);
 			processImage(dataStream, ((WritableImage)image).getPixelWriter());
@@ -228,6 +229,10 @@ public class BitmapImage extends Application {
 			stream.writeUInt(dataStream.length());
 			stream.write(dataStream.toByteArray());
 		}
+		
+		if (type == TYPE_1BIT) {
+			stream.writeInt(unknown);
+		}
 	}
 	
 	public static BitmapImage readImage(File file) throws FileNotFoundException, IOException {
@@ -243,29 +248,6 @@ public class BitmapImage extends Application {
 			image.read(stream);
 			return image;
 		}
-	}
-	
-	@Override public void start(Stage primaryStage) throws Exception {
-		MainApp.testInit();
-		
-		//String name = "0xDE12103B.bitImage";
-		//String name = "0x361D1E3F.8bitImage";
-		//String name = "0x25A90521.32bitImage";
-		//String name = "reggrid2.32bitImage";
-		String name = "0x7D328FDD.48bitImage";
-		
-		File file = new File("C:\\Users\\Eric\\Desktop\\bitmaps\\" + name);
-		
-		BitmapImage image = readImage(file);
-		ImageView imageView = new ImageView(image.getImage());
-		
-		Scene scene = new Scene(new Pane(imageView), image.getWidth(), image.getHeight());
-		primaryStage.setScene(scene);
-		primaryStage.show();
-	}
-	
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 }

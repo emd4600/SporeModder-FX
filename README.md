@@ -5,7 +5,7 @@ SporeModder FX is a tool for designing modifications for the videogame Spore. So
  - A modern text format to visualize most of the files used by Spore.
  - A "Spore User Interface" editor, that allows you to create and edit the Spore UI.
  - An image and texture viewer that can visualize common images, but also textures used by Spore.
- - A model viewer, still in progress, that can visualize some of the models that are in the Spore format.
+ - A model viewer that can visualize most of the models that are in the Spore format.
  
 The tool is designed to have a simple and user-friendly user interface, so making mods for Spore is easier than ever!
 

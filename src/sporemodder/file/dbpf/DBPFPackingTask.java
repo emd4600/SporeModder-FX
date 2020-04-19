@@ -181,7 +181,7 @@ public class DBPFPackingTask extends Task<Void> {
 		
 		boolean alreadyHasPackageSignature = false;
 		
-		hasher.getProjectRegistry().clear();
+		//hasher.getProjectRegistry().clear();
 		hasher.setUpdateProjectRegistry(true);
 		
 		for (File folder : folders) {

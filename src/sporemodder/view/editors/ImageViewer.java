@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.view.editors;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
 
@@ -120,6 +122,10 @@ public class ImageViewer implements ItemEditor {
 	private String imageType;
 	private File file;
 	
+	// DDS are read as BufferedImages, then converted to JavaFX images
+	// During that process, they lose the color information on transparent pixels, so we keep this here
+	// Not all types use this
+	private BufferedImage bufferedImage;
 	private Image originalImage;
 	private ImageView imageView;
 	private BorderPane imagePane;
@@ -257,38 +263,73 @@ public class ImageViewer implements ItemEditor {
 			int green = cbGreenMask.isSelected() ? 255 : 0;
 			int blue = cbBlueMask.isSelected() ? 255 : 0;
 			
-			if (red == 0 && green == 0 && blue == 0 && cbAlphaMask.isSelected()) {
-				// Special case, only alpha selected: we want to show the alpha channel as a black and white image
+			if ((!cbAlphaMask.isSelected() && red + green + blue == 255) || (cbAlphaMask.isSelected() && red + green + blue == 0))
+			{
+				// Only one channel selected, show it as grayscale
 				
 				int width = (int) originalImage.getWidth();
 				int height = (int) originalImage.getHeight();
 				WritableImage newImage = new WritableImage(width, height);
 				
 				PixelWriter writer = newImage.getPixelWriter();
-				PixelReader reader = originalImage.getPixelReader();
+				
+				BiFunction<Integer, Integer, Double> f;
+				
+				if (bufferedImage != null) {
+					if (red != 0) 			f = (x, y) -> ((bufferedImage.getRGB(x, y) & 0x00FF0000) >> 16) / 255.0;
+					else if (green != 0) 	f = (x, y) -> ((bufferedImage.getRGB(x, y) & 0x0000FF00) >> 8) / 255.0;
+					else if (blue != 0) 	f = (x, y) -> ((bufferedImage.getRGB(x, y) & 0x000000FF) >> 0) / 255.0;
+					else 					f = (x, y) -> ((bufferedImage.getRGB(x, y) & 0xFF000000) >> 24) / 255.0;
+				}
+				else {
+					PixelReader reader = originalImage.getPixelReader();
+					if (red != 0) f = (x, y) -> reader.getColor(x, y).getRed();
+					else if (green != 0) f = (x, y) -> reader.getColor(x, y).getGreen();
+					else if (blue != 0) f = (x, y) -> reader.getColor(x, y).getBlue();
+					else f = (x, y) -> reader.getColor(x, y).getOpacity();
+				}
 				
 				for (int x = 0; x < width; x++) {
 					for (int y = 0; y < height; y++) {
-						writer.setColor(x, y, Color.gray(reader.getColor(x, y).getOpacity()));
+						writer.setColor(x, y, Color.gray(f.apply(x, y)));
 					}
 				}
 				
 				imageView.setImage(newImage);
 			}
 			else {
-				Color blendColor = Color.rgb(red, green, blue, 1.0);
-				
-				Blend blend = new Blend(BlendMode.MULTIPLY,
-						new ImageInput(originalImage),
-						new ColorInput(0, 0, originalImage.getWidth(), originalImage.getHeight(), blendColor));
-				
-				if (!cbAlphaMask.isSelected()) {
-					blend = new Blend(BlendMode.ADD,
-							blend,
-							new ColorInput(0, 0, originalImage.getWidth(), originalImage.getHeight(), new Color(0, 0, 0, 1.0)));
+				if (bufferedImage == null) {
+					Color blendColor = Color.rgb(red, green, blue, 1.0);
+					
+					Blend blend = new Blend(BlendMode.MULTIPLY,
+							new ImageInput(originalImage),
+							new ColorInput(0, 0, originalImage.getWidth(), originalImage.getHeight(), blendColor));
+					
+					if (!cbAlphaMask.isSelected()) {
+						blend = new Blend(BlendMode.ADD,
+								blend,
+								new ColorInput(0, 0, originalImage.getWidth(), originalImage.getHeight(), new Color(0, 0, 0, 1.0)));
+					}
+					
+					imageView.setEffect(blend);
 				}
-				
-				imageView.setEffect(blend);
+				else {
+					int width = (int) originalImage.getWidth();
+					int height = (int) originalImage.getHeight();
+					WritableImage newImage = new WritableImage(width, height);
+					PixelWriter writer = newImage.getPixelWriter();
+					
+					int mask = (red << 16) | (green << 8) | blue;
+					if (cbAlphaMask.isSelected()) mask |= 0xFF000000;
+					
+					for (int x = 0; x < width; x++) {
+						for (int y = 0; y < height; y++) {
+							writer.setArgb(x, y, bufferedImage.getRGB(x, y) & mask);
+						}
+					}
+					
+					imageView.setImage(newImage);
+				}
 			}
 		}
 		
@@ -297,6 +338,7 @@ public class ImageViewer implements ItemEditor {
 	private Image loadImage(ProjectItem item) throws IOException {
 		imageType = item.getSpecificExtension().toLowerCase();
 		file = item.getFile();
+		bufferedImage = null;
 		
 		switch (imageType) {
 		case "png":
@@ -306,12 +348,15 @@ public class ImageViewer implements ItemEditor {
 				return new Image(is);
 			}
 		case "dds":
-			return SwingFXUtils.toFXImage(DDSTexture.toBufferedImage(file), null);
+			bufferedImage = DDSTexture.toBufferedImage(file);
+			return SwingFXUtils.toFXImage(bufferedImage, null);
 		case "rw4":
-			return SwingFXUtils.toFXImage(RenderWare.fromFile(file).toTexture().toBufferedImage(), null);
+			bufferedImage = RenderWare.fromFile(file).toTexture().toBufferedImage();
+			return SwingFXUtils.toFXImage(bufferedImage, null);
 		case "rast":
 		case "raster":
-			return SwingFXUtils.toFXImage(RasterTexture.textureFromFile(file).toBufferedImage(), null);
+			bufferedImage = RasterTexture.textureFromFile(file).toBufferedImage();
+			return SwingFXUtils.toFXImage(bufferedImage, null);
 		case "bitimage":
 		case "8bitimage":
 		case "32bitimage":

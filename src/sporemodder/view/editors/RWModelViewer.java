@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.view.editors;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
 import emord.filestructures.StreamReader;
 import javafx.beans.property.ObjectProperty;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -198,6 +200,9 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private final List<RWTextureOverride> externalTextures = new ArrayList<>();
 	private final Map<RWRaster, Image> rasterImages = new HashMap<>();  // with alpha removed
 	private final Map<RWRaster, Image> rasterOriginalImages = new HashMap<>();
+	// DDS are read as BufferedImages, then converted to JavaFX images
+	// During that process, they lose the color information on transparent pixels, so we keep this here
+	private final Map<RWRaster, BufferedImage> bufferedImages = new HashMap<>();
 	private final Map<RWRaster, ObjectProperty<Image>> rasterImageProperties = new HashMap<>();
 	
 	private double mousePosX, mousePosY, mouseOldX, mouseOldY;
@@ -492,22 +497,41 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
         group.getChildren().add(axesGroup);
 	}
 	
-	private Image removeAlphaChannel(Image original, Color replaceColor) {
+	private Image removeAlphaChannel(BufferedImage original) {
 		int width = (int) original.getWidth();
 		int height = (int) original.getHeight();
 		WritableImage newImage = new WritableImage(width, height);
 		
 		PixelWriter writer = newImage.getPixelWriter();
-		PixelReader reader = original.getPixelReader();
 		
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				Color color = reader.getColor(x, y);
-				double alpha = color.getOpacity();
+				writer.setArgb(x, y, original.getRGB(x, y) | 0xFF000000);
+			}
+		}
+		
+		return newImage;
+	}
+	
+	private Image blendAlphaChannel(BufferedImage original, Color blendColor) {
+		int width = (int) original.getWidth();
+		int height = (int) original.getHeight();
+		WritableImage newImage = new WritableImage(width, height);
+		
+		PixelWriter writer = newImage.getPixelWriter();
+		
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int color = original.getRGB(x, y);
+				double alpha = (((long)color & 0xFF000000L) >> 24) / 255.0;
+				double r = ((color & 0x00FF0000) >> 16) / 255.0;
+				double g = ((color & 0x0000FF00) >> 8) / 255.0;
+				double b = (color & 0x000000FF) / 255.0;
+				
 				writer.setColor(x, y, new Color(
-						color.getRed() * alpha + replaceColor.getRed() * (1 - alpha),
-						color.getGreen() * alpha + replaceColor.getGreen() * (1 - alpha),
-						color.getBlue() * alpha + replaceColor.getBlue() * (1 - alpha),
+						r * alpha + blendColor.getRed() * (1 - alpha),
+						g * alpha + blendColor.getGreen() * (1 - alpha),
+						b * alpha + blendColor.getBlue() * (1 - alpha),
 						1.0));
 			}
 		}
@@ -515,16 +539,17 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 		return newImage;
 	}
 	
-	private Image removeAlphaChannel(Image original) {
-		return removeAlphaChannel(original, Color.rgb(206, 212, 175));
+	private Image blendAlphaChannel(BufferedImage original) {
+		return blendAlphaChannel(original, Color.rgb(206, 212, 175));
 	}
 	
 	private void loadImages() throws IOException {
 		List<RWRaster> rasters = renderWare.getObjects(RWRaster.class);
 		for (RWRaster raster : rasters) {
-			Image image = raster.toJavaFX();
-			rasterOriginalImages.put(raster, removeAlphaChannel(image, Color.rgb(0, 0, 0)));
-			rasterImages.put(raster, removeAlphaChannel(image));
+			BufferedImage buffered = raster.toDDSTexture().toBufferedImage();
+			rasterOriginalImages.put(raster, removeAlphaChannel(buffered));
+			rasterImages.put(raster, blendAlphaChannel(buffered));
+			bufferedImages.put(raster, buffered);
 		}
 		
 		List<RWTextureOverride> overrides = renderWare.getObjects(RWTextureOverride.class);
@@ -710,6 +735,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private void buildCamera() {
 		camera = new PerspectiveCamera(true);
 		camera.setFieldOfView(FOV);
+		camera.setFarClip(1000.0);
 		
 		camera.getTransforms().clear();
 		camera.getTransforms().addAll(
@@ -954,6 +980,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 					DDSTexture oldTexture = raster.toDDSTexture();
 					Image oldRemovedAlpha = rasterImages.get(raster);
 					Image oldOriginalImage = rasterOriginalImages.get(raster);
+					BufferedImage oldBufferedImage = bufferedImages.get(raster);
 					byte[] oldData = raster.textureData.data;
 					
 					DDSTexture texture = new DDSTexture();
@@ -961,11 +988,12 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 					raster.fromDDSTexture(texture);
 					raster.textureData.data = texture.getData();
 					
-					Image image = raster.toJavaFX();
-					Image originalImage = removeAlphaChannel(image, Color.rgb(0, 0, 0));
-					Image removedAlpha = removeAlphaChannel(image);
+					BufferedImage bufferedImage = texture.toBufferedImage();
+					Image originalImage = removeAlphaChannel(bufferedImage);
+					Image removedAlpha = blendAlphaChannel(bufferedImage);
 					rasterImages.put(raster, removedAlpha);
 					rasterOriginalImages.put(raster, originalImage);
+					bufferedImages.put(raster, bufferedImage);
 					
 					viewer.setImage(originalImage);
 					rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? originalImage : removedAlpha);
@@ -977,6 +1005,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 							raster.textureData.data = oldData;
 							rasterImages.put(raster, oldRemovedAlpha);
 							rasterOriginalImages.put(raster, oldOriginalImage);
+							bufferedImages.put(raster, oldBufferedImage);
 							
 							rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? oldOriginalImage : oldRemovedAlpha);
 						}
@@ -986,6 +1015,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 							raster.textureData.data = texture.getData();
 							rasterImages.put(raster, removedAlpha);
 							rasterOriginalImages.put(raster, originalImage);
+							bufferedImages.put(raster, bufferedImage);
 							
 							rasterImageProperties.get(raster).set(cbIgnoreAlpha.isSelected() ? originalImage : removedAlpha);
 						}

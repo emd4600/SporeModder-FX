@@ -26,7 +26,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 import sporemodder.GameManager;
-import sporemodder.PathManager;
 import sporemodder.UIManager;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptStream;
@@ -108,22 +107,35 @@ public class EffectEditor extends PfxEditor {
 			
 			game = GameManager.get().getGame();
 			if (game != null) {
-				try (DBPFPacker packer = new DBPFPacker(new File(game.getDataFolder(), PACKAGE_NAME + ".package"))) {
-					ResourceKey key = new ResourceKey();
-					
-					key.setGroupID("_SporeModder_EffectEditor");
-					key.setInstanceID("main");
-					key.setTypeID(EffectsConverter.TYPE_ID);
-					
-					DebugInformation debugInfo = new DebugInformation(PACKAGE_NAME, getFile().getParentFile().getAbsolutePath());
-					debugInfo.addFile("main.effdir", key);
-					debugInfo.saveInformation(packer);
-					
-					EffectDirectory effdir = new EffectDirectory();
-					packer.writeFile(key, stream -> effdir.write(stream));
-				}
-				catch (Exception e) {
-					UIManager.get().showErrorDialog(e, "Could not set up the effect editor.", true);
+				File packageFile = new File(game.getDataFolder(), PACKAGE_NAME + ".package");
+				
+				if (!packageFile.exists()) {
+					try (DBPFPacker packer = new DBPFPacker(packageFile)) {
+						ResourceKey key = new ResourceKey();
+						
+						key.setGroupID("_SporeModder_EffectEditor");
+						key.setInstanceID("main");
+						key.setTypeID(EffectsConverter.TYPE_ID);
+						
+						DebugInformation debugInfo = new DebugInformation(PACKAGE_NAME, getFile().getParentFile().getAbsolutePath());
+						debugInfo.addFile("main.effdir", key);
+						debugInfo.saveInformation(packer);
+						
+						EffectDirectory effdir = new EffectDirectory();
+						packer.writeFile(key, stream -> effdir.write(stream));
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+						UIManager.get().showErrorDialog(e, "Could not set up the effect editor.", true);
+						
+						// Remove leftover file so we can try again in the future.
+						try {
+							packageFile.delete();
+						}
+						catch (Exception e2) {
+							e2.printStackTrace();
+						}
+					}
 				}
 			}
 		}

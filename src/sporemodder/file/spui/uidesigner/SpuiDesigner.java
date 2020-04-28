@@ -183,16 +183,15 @@ public class SpuiDesigner {
 			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
 			
 			String fileName = File.separatorChar + "SporeUIDesignerProjectCommon.xml";
-			File file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			File projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
-			if (file == null) {
-				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			File file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
 				
-				try (InputStream is = new FileInputStream(file)) {
-					parse(is);
-				}
+			try (InputStream is = new FileInputStream(file)) {
+				parse(is);
 			}
-			else {
+			
+			if (projectFile != null) {
 				String data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
 				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
 					parse(is);
@@ -201,16 +200,16 @@ public class SpuiDesigner {
 			
 
 			fileName = File.separatorChar + "SporeUIDesignerProjectCustom.xml";
-			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
-			if (file == null) {
-				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
-				try (InputStream is = new FileInputStream(file)) {
-					parse(is);
-				}
+			file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			try (InputStream is = new FileInputStream(file)) {
+				parse(is);
 			}
-			else {
-				String data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
+			
+			projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (projectFile != null) {
+				String data = new String(Files.readAllBytes(projectFile.toPath())).replace("&#x10;", "&#10;");
 				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
 					parse(is);
 				}

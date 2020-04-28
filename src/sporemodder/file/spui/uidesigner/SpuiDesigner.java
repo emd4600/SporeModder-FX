@@ -19,16 +19,20 @@
 package sporemodder.file.spui.uidesigner;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -38,7 +42,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import sporemodder.HashManager;
 import sporemodder.PathManager;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.spui.SpuiElement;
 import sporemodder.file.spui.StyleSheet;
@@ -174,16 +180,39 @@ public class SpuiDesigner {
 	
 	public void load() {
 		UIManager.get().tryAction(() -> {
-			File file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCommon.xml");
-			try (InputStream is = new FileInputStream(file)) {
-				parse(is);
-			}
-			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCustom.xml");
-			try (InputStream is = new FileInputStream(file)) {
+			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
+			
+			String fileName = File.separatorChar + "SporeUIDesignerProjectCommon.xml";
+			File file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (file == null)
+				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+
+			String data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
+			try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
 				parse(is);
 			}
 			
-			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "sporeuitextstyles.css");
+
+			fileName = File.separatorChar + "SporeUIDesignerProjectCustom.xml";
+			System.out.println("custom fileName: " + fileName);
+			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (file == null)
+				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			
+			data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
+			try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
+				parse(is);
+			}
+			
+			
+			fileName = File.separatorChar + "sporeuitextstyles.css";
+			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (file == null)
+				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			
 			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 				StyleSheet.setActiveStyleSheet(StyleSheet.readStyleSheet(reader));
 			}

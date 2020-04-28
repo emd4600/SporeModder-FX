@@ -195,7 +195,6 @@ public class SpuiDesigner {
 			
 
 			fileName = File.separatorChar + "SporeUIDesignerProjectCustom.xml";
-			System.out.println("custom fileName: " + fileName);
 			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
 			if (file == null)

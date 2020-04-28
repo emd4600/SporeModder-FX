@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -145,12 +146,14 @@ public class SpuiDesigner {
 					
 					currentClass = new DesignerClass(SpuiDesigner.this, qName.equalsIgnoreCase(DesignerClass.KEYWORD_STRUCT));
 					currentClass.startElement(uri, localName, qName, attributes);
+					//if (!classes.containsKey(currentClass.getName().toLowerCase()))
 					classes.put(currentClass.getName().toLowerCase(), currentClass);
 				}
 				else if (qName.equalsIgnoreCase(DesignerEnum.KEYWORD)) {
 					
 					currentEnum = new DesignerEnum();
 					currentEnum.startElement(uri, localName, qName, attributes);
+					//if (!enums.containsKey(currentEnum.getName().toLowerCase()))
 					enums.put(currentEnum.getName().toLowerCase(), currentEnum);
 				}
 			}
@@ -182,8 +185,28 @@ public class SpuiDesigner {
 		UIManager.get().tryAction(() -> {
 			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
 			
+			File projectDesignerFolder = ProjectManager.get().getFile(projectUiDesignerFolder);
+			if (projectDesignerFolder != null) {
+				File [] xmlFiles = projectDesignerFolder.listFiles(new FilenameFilter() {
+				    @Override
+				    public boolean accept(File dir, String name) {
+				        return name.toLowerCase().endsWith(".xml");
+				    }
+				});
+				
+				for (File xml : xmlFiles) {
+					try (InputStream is = new FileInputStream(xml)) {
+						parse(is);
+					}
+					catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+			
+			
 			String fileName = File.separatorChar + "SporeUIDesignerProjectCommon.xml";
-			File projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			//File projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
 			File file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
 				
@@ -191,12 +214,12 @@ public class SpuiDesigner {
 				parse(is);
 			}
 			
-			if (projectFile != null) {
+			/*if (projectFile != null) {
 				String data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
 				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
 					parse(is);
 				}
-			}
+			}*/
 			
 
 			fileName = File.separatorChar + "SporeUIDesignerProjectCustom.xml";
@@ -206,15 +229,14 @@ public class SpuiDesigner {
 				parse(is);
 			}
 			
-			projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			/*projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
 			if (projectFile != null) {
 				String data = new String(Files.readAllBytes(projectFile.toPath())).replace("&#x10;", "&#10;");
 				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
 					parse(is);
 				}
-			}
-			
+			}*/
 			
 			fileName = File.separatorChar + "sporeuitextstyles.css";
 			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);

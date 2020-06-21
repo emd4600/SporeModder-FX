@@ -39,6 +39,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
@@ -527,6 +528,21 @@ public class UIManager extends AbstractManager {
 	 */
 	public <R> Optional<R> showDialog(Dialog<R> dialog) {
 		return showDialog(dialog, true);
+	}
+	
+	public void showDialog(AlertType type, String text) {
+		Label label = new Label();
+		label.setWrapText(true);
+		
+		label.setText(text);
+		
+		Alert alert = new Alert(type, null, ButtonType.OK);
+		alert.getDialogPane().setContent(label);
+		showDialog(alert);
+	}
+	
+	public void showDialog(String text) {
+		showDialog(AlertType.NONE, text);
 	}
 	
 	

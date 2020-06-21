@@ -208,6 +208,7 @@ public class DesignerClass implements DesignerNode {
 				property.mustUpdateTree = true;
 				property.format = "textonly";
 				properties.put(SpuiElement.EDITOR_TAG_PROXYID, property);
+				properties.put(0x1722b221, property);
 				elements.add(property);
 			}
 		}

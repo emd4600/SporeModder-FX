@@ -281,9 +281,9 @@ public class DesignerProperty extends DesignerElement {
 			if (type.getArrayCount() != 0 && type.getArrayCount() != count) {
 				throw new IOException("Error on property " + HashManager.get().hexToString(proxyID) + ": expected " + type.getArrayCount() + " values but got " + count + '.');
 			}
-		} else if (count != 1) {
+		}/* else if (count != 1) {
 			throw new IOException("Error on property " + HashManager.get().hexToString(proxyID) + ": expected 1 value but got " + count + '.');
-		}
+		}*/
 		
 		if (typeCode == SpuiPropertyType.TYPE_STRUCT) {
 			readStruct(spui, stream, element, count);

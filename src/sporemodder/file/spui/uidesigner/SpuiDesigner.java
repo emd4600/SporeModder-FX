@@ -19,16 +19,21 @@
 package sporemodder.file.spui.uidesigner;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -38,7 +43,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import sporemodder.HashManager;
 import sporemodder.PathManager;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.spui.SpuiElement;
 import sporemodder.file.spui.StyleSheet;
@@ -139,12 +146,14 @@ public class SpuiDesigner {
 					
 					currentClass = new DesignerClass(SpuiDesigner.this, qName.equalsIgnoreCase(DesignerClass.KEYWORD_STRUCT));
 					currentClass.startElement(uri, localName, qName, attributes);
+					//if (!classes.containsKey(currentClass.getName().toLowerCase()))
 					classes.put(currentClass.getName().toLowerCase(), currentClass);
 				}
 				else if (qName.equalsIgnoreCase(DesignerEnum.KEYWORD)) {
 					
 					currentEnum = new DesignerEnum();
 					currentEnum.startElement(uri, localName, qName, attributes);
+					//if (!enums.containsKey(currentEnum.getName().toLowerCase()))
 					enums.put(currentEnum.getName().toLowerCase(), currentEnum);
 				}
 			}
@@ -174,16 +183,67 @@ public class SpuiDesigner {
 	
 	public void load() {
 		UIManager.get().tryAction(() -> {
-			File file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCommon.xml");
-			try (InputStream is = new FileInputStream(file)) {
-				parse(is);
+			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
+			
+			File projectDesignerFolder = ProjectManager.get().getFile(projectUiDesignerFolder);
+			if (projectDesignerFolder != null) {
+				File [] xmlFiles = projectDesignerFolder.listFiles(new FilenameFilter() {
+				    @Override
+				    public boolean accept(File dir, String name) {
+				        return name.toLowerCase().endsWith(".xml");
+				    }
+				});
+				
+				for (File xml : xmlFiles) {
+					try (InputStream is = new FileInputStream(xml)) {
+						parse(is);
+					}
+					catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
 			}
-			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "SporeUIDesignerProjectCustom.xml");
+			
+			
+			String fileName = File.separatorChar + "SporeUIDesignerProjectCommon.xml";
+			//File projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			File file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+				
 			try (InputStream is = new FileInputStream(file)) {
 				parse(is);
 			}
 			
-			file = PathManager.get().getProgramFile(FOLDER_NAME + File.separatorChar + "sporeuitextstyles.css");
+			/*if (projectFile != null) {
+				String data = new String(Files.readAllBytes(file.toPath())).replace("&#x10;", "&#10;");
+				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
+					parse(is);
+				}
+			}*/
+			
+
+			fileName = File.separatorChar + "SporeUIDesignerProjectCustom.xml";
+			
+			file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			try (InputStream is = new FileInputStream(file)) {
+				parse(is);
+			}
+			
+			/*projectFile = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (projectFile != null) {
+				String data = new String(Files.readAllBytes(projectFile.toPath())).replace("&#x10;", "&#10;");
+				try (InputStream is = new ByteArrayInputStream(data.getBytes())) {
+					parse(is);
+				}
+			}*/
+			
+			fileName = File.separatorChar + "sporeuitextstyles.css";
+			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			
+			if (file == null)
+				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);
+			
 			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 				StyleSheet.setActiveStyleSheet(StyleSheet.readStyleSheet(reader));
 			}

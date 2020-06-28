@@ -206,7 +206,9 @@ public class SporeUserInterface {
 //			}
 			
 			if ((propertiesCount & ROOT_FLAG) != 0) {
-				rootWindows.add((IWindow) elements.get(proxyIndex));
+				SpuiElement elm = elements.get(proxyIndex);
+				if (IWindow.class.isAssignableFrom(elm.getClass()))
+					rootWindows.add((IWindow)elm); //TODO: Don't lose root IWinProcs, if any
 			}
 			
 			magic = stream.readLEUShort();

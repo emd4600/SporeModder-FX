@@ -357,10 +357,13 @@ public class SpuiViewer extends Canvas {
 		if (isPreview()) {
 			float width = (float) getWidth();
 			float height = (float) getHeight();
+			
 			layoutWindow.getArea().x1 = 0;
 			layoutWindow.getArea().y1 = 0;
+
 			layoutWindow.getArea().setWidth(width);
 			layoutWindow.getArea().setHeight(height);
+			relayout();
 			
 			// if we don't do this, things like the creature editor won't get scaled
 			if (layoutWindow.getChildren().size() == 1) {
@@ -368,8 +371,6 @@ public class SpuiViewer extends Canvas {
 				area.setWidth(width);
 				area.setHeight(height);
 			}
-			
-			relayout();
 		}
 		else {
 			layoutWindow.getArea().x1 = (float)getContentTranslateX();

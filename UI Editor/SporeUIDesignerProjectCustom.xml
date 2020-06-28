@@ -530,7 +530,8 @@
         <!-- ~~~~~~~~~~~~~~~~~~~ Time Function Periodic ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
         <Class name="TimeOscillator" classname="cSPUIBehaviorTimeFunctionDampedPeriodic" proxy="0x0269a661" base="EventTimeFunctionBase" description="..." >
             <Property name="Type" type="uint32" enum="OscillatorTimeFunction" proxy="0x0269b186" default="1" description="Periodic function type"/>
-            <Property name="Frequency" type="float" proxy="0x0269a919" default="2" description="Hz"/>
+            <Property name="0x0269a916" type="float" proxy="0x0269a916" default="0" description="Unknown"/>
+			<Property name="Frequency" type="float" proxy="0x0269a919" default="2" description="Hz"/>
             <Property name="Damping" type="float" proxy="0x0269a91b" default="0" description="0 - damping is baseed on duration, above 0 - duration is based on damping, below 0 - duration based oscillation with no damping."/>
             <Property name="Ceiling" type="bool" proxy="0x026a02ab" default="false" description="..."/>
         </Class>

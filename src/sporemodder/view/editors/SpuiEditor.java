@@ -84,6 +84,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import sporemodder.EditorManager;
+import sporemodder.FileManager;
 import sporemodder.HashManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
@@ -134,6 +136,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	/** The maximum amount of remembered edit history actions. */
 	private static final int MAX_EDIT_HISTORY = 25;
 
+	private static final KeyCodeCombination CTRL_D = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
 	// EditActionsUI does not set the accelerators automatically, so we have to add/remove them
 	private static final KeyCodeCombination CTRL_Z = new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN);
 	private static final KeyCodeCombination CTRL_Y = new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN);
@@ -191,9 +194,9 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	private double mouseClickX;
 	private double mouseClickY;
 
-	private RibbonTab ribbonTab;
-	private RibbonGallery windowsGallery;
-	private RibbonGallery proceduresGallery;
+	private static RibbonTab ribbonTab;
+	private static RibbonGallery windowsGallery;
+	private static RibbonGallery proceduresGallery;
 
 	/** True if the viewer is being manipulated, and so the inspector shouldn't generate events. */
 	private boolean isEditingViewer;
@@ -203,6 +206,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	// For undo redo:
 	private final Stack<SpuiUndoableAction> editHistory = new Stack<>();
 	private int undoRedoIndex = -1;
+	
+	private static boolean ribbonTabAdded = false;
 
 	// For dragging in the hierarchy tree
 	private FilterableTreeItem<IWindow> draggedItem;
@@ -457,83 +462,112 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		// Add an original action that does nothing:
 		addEditAction(ORIGINAL_ACTION);
 	}
+	
+	private static SpuiEditor getActiveSpuiEditor() {
+		ItemEditor editor = EditorManager.get().getActiveEditor();
+		if (editor != null) {
+			if (editor instanceof SpuiEditor)
+				return (SpuiEditor)editor;
+			else
+				return null;
+		}
+		else
+			return null;
+	}
 
-	private void createRibbonTab() {
-		ribbonTab = new RibbonTab("SPUI Editor");
-		ribbonTab.getStyleClass().add("spui-editor-ribbon-header");
-
-		Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-
-		windowsGallery = new RibbonGallery(ribbon);
-		windowsGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
-		windowsGallery.setColumnCount(3);
-		windowsGallery.setOnItemAction(item -> addWindow(item.getText()));
-
-		proceduresGallery = new RibbonGallery(ribbon);
-		proceduresGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
-		proceduresGallery.setColumnCount(3);
-		proceduresGallery.setOnItemAction(item -> addWinProc(item.getText()));
-
-		for (DesignerClass clazz : SporeUserInterface.getDesigner().getClasses().values()) {
-			if (!clazz.isAbstract()) {
-				if (clazz.implementsInterfaceComplete("IWindow")) {
-					RibbonGalleryItem item = new RibbonGalleryItem();
-					item.setText(clazz.getName());
-					item.setUserData(clazz);
-					item.setDescription(clazz.getDescription());
-					windowsGallery.getItems().add(item);
-				}
-				else if (clazz.implementsInterfaceComplete("IWinProc")) {
-					RibbonGalleryItem item = new RibbonGalleryItem();
-					item.setText(clazz.getName());
-					item.setUserData(clazz);
-					item.setDescription(clazz.getDescription());
-					proceduresGallery.getItems().add(item);
+	private static void createRibbonTab() {
+		if (!ribbonTabAdded) {
+			ribbonTab = new RibbonTab("SPUI Editor");
+			ribbonTab.getStyleClass().add("spui-editor-ribbon-header");
+			//ProjectManager.get().getActive().
+			//FileManager.get().
+			//UIManager.get().getUserInterface().get
+			
+			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
+	
+			windowsGallery = new RibbonGallery(ribbon);
+			windowsGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
+			windowsGallery.setColumnCount(3);
+			windowsGallery.setOnItemAction(item -> {
+				if (getActiveSpuiEditor() != null)
+					getActiveSpuiEditor().addWindow(item.getText());
+			});
+	
+			proceduresGallery = new RibbonGallery(ribbon);
+			proceduresGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
+			proceduresGallery.setColumnCount(3);
+			proceduresGallery.setOnItemAction(item -> {
+				if (getActiveSpuiEditor() != null)
+					getActiveSpuiEditor().addWinProc(item.getText());
+			});
+	
+			for (DesignerClass clazz : SporeUserInterface.getDesigner().getClasses().values()) {
+				if (!clazz.isAbstract()) {
+					if (clazz.implementsInterfaceComplete("IWindow")) {
+						RibbonGalleryItem item = new RibbonGalleryItem();
+						item.setText(clazz.getName());
+						item.setUserData(clazz);
+						item.setDescription(clazz.getDescription());
+						windowsGallery.getItems().add(item);
+					}
+					else if (clazz.implementsInterfaceComplete("IWinProc")) {
+						RibbonGalleryItem item = new RibbonGalleryItem();
+						item.setText(clazz.getName());
+						item.setUserData(clazz);
+						item.setDescription(clazz.getDescription());
+						proceduresGallery.getItems().add(item);
+					}
 				}
 			}
+	
+			//proceduresGallery.setDisable(true);
+			//windowsGallery.setDisable(true);
+	
+			RibbonGroup windowsGroup = new RibbonGroup("Add Windows");
+			RibbonGroup winprocsGroup = new RibbonGroup("Add Window Procedures");
+			RibbonGroup editorGroup = new RibbonGroup("Layout");
+	
+			windowsGroup.getNodes().add(windowsGallery);
+	
+			winprocsGroup.getNodes().add(proceduresGallery);
+	
+			RibbonButton previewButton = new RibbonButton("Preview", UIManager.get().loadIcon("spui-preview.png", 0, 48, true));
+			previewButton.setOnAction(event -> {
+				if (getActiveSpuiEditor() != null)
+					getActiveSpuiEditor().showPreview();
+			});
+			editorGroup.getNodes().add(previewButton);
+			
+			RibbonButton duplicateButton = new RibbonButton("Duplicate", UIManager.get().loadIcon("spui-duplicate.png", 0, 48, true));
+			duplicateButton.setOnAction(event -> {
+				UIManager.get().tryAction(() -> {
+					if (getActiveSpuiEditor() != null)
+						getActiveSpuiEditor().duplicateSelectedBlock();	
+				}, "Cannot duplicate SPUI block.");
+			});
+			editorGroup.getNodes().add(duplicateButton);
+	
+			RibbonButton exportButton = new RibbonButton("Export", UIManager.get().loadIcon("spui-export.png", 0, 48, true));
+			exportButton.setOnAction(event -> {
+				UIManager.get().tryAction(() -> {
+					if (getActiveSpuiEditor() != null)
+						getActiveSpuiEditor().exportBlocks();
+				}, "Cannot export SPUI part.");
+			});
+			editorGroup.getNodes().add(exportButton);
+			
+			RibbonButton importButton = new RibbonButton("Import", UIManager.get().loadIcon("spui-import.png", 0, 48, true));
+			importButton.setOnAction(event -> {
+				UIManager.get().tryAction(() -> {
+					if (getActiveSpuiEditor() != null)
+						getActiveSpuiEditor().importSpui();
+				}, "Cannot import partial SPUI.");
+			});
+			editorGroup.getNodes().add(importButton);
+	
+			ribbonTab.getGroups().addAll(windowsGroup, winprocsGroup, editorGroup);
+			ribbonTabAdded = true;
 		}
-
-		proceduresGallery.setDisable(true);
-		windowsGallery.setDisable(true);
-
-		RibbonGroup windowsGroup = new RibbonGroup("Add Windows");
-		RibbonGroup winprocsGroup = new RibbonGroup("Add Window Procedures");
-		RibbonGroup editorGroup = new RibbonGroup("Layout");
-
-		windowsGroup.getNodes().add(windowsGallery);
-
-		winprocsGroup.getNodes().add(proceduresGallery);
-
-		RibbonButton previewButton = new RibbonButton("Preview", UIManager.get().loadIcon("spui-preview.png", 0, 48, true));
-		previewButton.setOnAction(event -> showPreview());
-		editorGroup.getNodes().add(previewButton);
-		
-		RibbonButton duplicateButton = new RibbonButton("Duplicate", UIManager.get().loadIcon("spui-duplicate.png", 0, 48, true));
-		duplicateButton.setOnAction(event -> {
-			UIManager.get().tryAction(() -> {
-				duplicateSelectedBlock();	
-			}, "Cannot duplicate SPUI block.");
-		});
-		editorGroup.getNodes().add(duplicateButton);
-
-		RibbonButton exportButton = new RibbonButton("Export", UIManager.get().loadIcon("spui-export.png", 0, 48, true));
-		exportButton.setOnAction(event -> {
-			UIManager.get().tryAction(() -> {
-				exportBlocks();
-			}, "Cannot export SPUI part.");
-		});
-		editorGroup.getNodes().add(exportButton);
-		
-		RibbonButton importButton = new RibbonButton("Import", UIManager.get().loadIcon("spui-import.png", 0, 48, true));
-		importButton.setOnAction(event -> {
-			UIManager.get().tryAction(() -> {
-				importSpui();
-			}, "Cannot import partial SPUI.");
-		});
-		editorGroup.getNodes().add(importButton);
-
-		ribbonTab.getGroups().addAll(windowsGroup, winprocsGroup, editorGroup);
-
 	}
 
 	private void addWinProc(String className) {
@@ -878,20 +912,24 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 
 		if (isActive) {
 			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-			ribbon.getTabs().add(ribbonTab);
+			if (!ribbon.getTabs().contains(ribbonTab))
+				ribbon.getTabs().add(ribbonTab);
 
 			// Accelerators
 			Scene scene = UIManager.get().getScene();
 			scene.getAccelerators().put(CTRL_Z, () -> undo());
 			scene.getAccelerators().put(CTRL_Y, () -> redo());
+			scene.getAccelerators().put(CTRL_D, () -> UIManager.get().tryAction(() -> duplicateSelectedBlock(), "Cannot duplicate SPUI block."));
 		} else {
 			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-			ribbon.getTabs().remove(ribbonTab);
+			if (ribbon.getTabs().contains(ribbonTab))
+				ribbon.getTabs().remove(ribbonTab);
 
 			// Accelerators
 			Scene scene = UIManager.get().getScene();
 			scene.getAccelerators().remove(CTRL_Z);
 			scene.getAccelerators().remove(CTRL_Y);
+			scene.getAccelerators().remove(CTRL_D);
 		}
 
 		showInspector(isActive);

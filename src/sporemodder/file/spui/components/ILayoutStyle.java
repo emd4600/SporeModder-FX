@@ -21,13 +21,14 @@ package sporemodder.file.spui.components;
 import javafx.event.Event;
 import sporemodder.file.spui.SPUIRectangle;
 import sporemodder.file.spui.SpuiViewer;
+import sporemodder.view.editors.spui.SpuiLayoutWindow;
 
 public abstract class ILayoutStyle extends IWinProc {
 
 	public abstract void applyLayout(SPUIRectangle destArea, SPUIRectangle parentArea);
 	
 	@Override public boolean handleEvent(SpuiViewer viewer, IWindow window, Event event) {
-		if (event.getEventType() == SpuiViewer.LAYOUT_EVENT && window.getParent() != null) {
+		if (event.getEventType() == SpuiViewer.LAYOUT_EVENT && window.getParent() != null && !(window.getParent() instanceof SpuiLayoutWindow)) {
 			applyLayout(window.getRealArea(), window.getParent().getRealArea());
 		}
 		// If we return true, the event will stop propagating

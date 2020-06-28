@@ -4,3 +4,4 @@ WinMerge
 WinMerge/
 WinMerge/**
 .classpath
+config.properties

@@ -359,8 +359,8 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				}
 			}
 			
-			if (positionElement == null || texcoordElement == null) {
-				throw new IOException("Mesh requires at least POSITION and TEXCOORD vertex elements.");
+			if (positionElement == null) {
+				throw new IOException("Mesh requires at least POSITION vertex element.");
 			}
 			
 			int vertexCount = mesh.vertexCount;
@@ -377,10 +377,15 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				positions[i * 3 + 2] = vertexStream.readLEFloat();
 			}
 			
-			for (int i = 0; i < vertexCount; i++) {
-				vertexStream.seek((vertexStart+i) * buffer.vertexSize + texcoordElement.offset);
-				texCoords[i * 2 + 0] = vertexStream.readLEFloat();
-				texCoords[i * 2 + 1] = vertexStream.readLEFloat();
+			if (texcoordElement != null) {
+				for (int i = 0; i < vertexCount; i++) {
+					vertexStream.seek((vertexStart+i) * buffer.vertexSize + texcoordElement.offset);
+					texCoords[i * 2 + 0] = vertexStream.readLEFloat();
+					texCoords[i * 2 + 1] = vertexStream.readLEFloat();
+				}
+			}
+			else {
+				for (int i = 0; i < texCoords.length; i++) texCoords[i] = 0.5f;
 			}
 			
 			if (normals != null) {

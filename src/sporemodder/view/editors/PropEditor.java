@@ -311,21 +311,10 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 	}
 	
 	@Override protected void onHyperlinkAction(HyperlinkData hyperlink) {
-		super.onHyperlinkAction(currentHyperlink);
-		
-		String path = null;
-		
-		if (hyperlink.type.equals("locale")) {
-			String[] names = (String[]) hyperlink.object;
-			
-			if (names[0] != null) {
-				path = HashManager.get().getTypeName(0x02FABF01) + names[0] + '.' + HashManager.get().getTypeName(0x02FAC0B6);
-			}
-			
-			hyperlinkOpenFile(path);
-			
-		} else if (hyperlink.type.equals("key")) {
+		if (hyperlink.type.equals("key")) {
 			hyperlinkOpenFile((String[]) hyperlink.object);
 		}
+		
+		super.onHyperlinkAction(currentHyperlink);
 	}
 }

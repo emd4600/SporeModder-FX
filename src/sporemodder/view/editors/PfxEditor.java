@@ -35,6 +35,7 @@ import sporemodder.file.effects.EffectComponent;
 import sporemodder.file.effects.EffectFileElement;
 import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.effects.ImportEffect;
+import sporemodder.file.locale.LocaleUnit;
 import sporemodder.view.UserInterface;
 
 public class PfxEditor extends ArgScriptEditor<EffectUnit> {
@@ -47,7 +48,6 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 	public static final String HYPERLINK_FILE = "file";
 	public static final String HYPERLINK_TEXTURE = "file-texture";
 	public static final String HYPERLINK_IMAGEMAP = "file-imagemap";
-	public static final String HYPERLINK_LOCALE = "file-locale";
 	public static final String HYPERLINK_MATERIAL = "material";
 	public static final String HYPERLINK_MAP = "map";
 	public static final String HYPERLINK_SPLITTER = "splitter";
@@ -143,10 +143,12 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 			break;
 			
 		case ArgScriptStream.HYPERLINK_COLOR:
+		case LocaleUnit.HYPERLINK_LOCALE:
 			break;
 			
 		default:
-			moveTo((EffectFileElement) hyperlink.object);
+			if (hyperlink.object instanceof EffectFileElement)
+				moveTo((EffectFileElement) hyperlink.object);
 		}
 	}
 	

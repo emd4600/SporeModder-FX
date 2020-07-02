@@ -20,10 +20,14 @@ package sporemodder.view.editors;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
@@ -44,6 +48,7 @@ import sporemodder.file.DocumentFragment;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
+import sporemodder.file.locale.LocaleUnit;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.ColorRGBA;
 import sporemodder.util.ProjectItem;
@@ -67,6 +72,9 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 	
 	/** The current errors, used in tooltips. */
 	private final List<ErrorInfo> errors = new ArrayList<ErrorInfo>();
+	
+	private final Map<List<String>, LocaleUnit> localeCache = new HashMap<>();
+	private final Map<List<String>, Long> localeCacheTimes = new HashMap<>();
 	
 	protected HyperlinkData currentHyperlink;
 	
@@ -103,16 +111,23 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 			
 			for (HyperlinkData hyperlink : stream.getHyperlinkData()) {
 				int lineStart = stream.getLinePositions().get(hyperlink.line);
-				if (ArgScriptStream.HYPERLINK_COLOR.equals(hyperlink.type) && 
-						index >= lineStart + hyperlink.start && index <= lineStart + hyperlink.end) {
-					
-					ColorRGB value = (ColorRGB) hyperlink.object;
-					
-					Rectangle rect = new Rectangle(0, 0, 80, 25);
-					rect.setFill(value.toColor());
-					rect.setStroke(Color.BLACK);
-					
-					return rect;
+				if (index >= lineStart + hyperlink.start && index <= lineStart + hyperlink.end) {
+					if (ArgScriptStream.HYPERLINK_COLOR.equals(hyperlink.type)) {
+						ColorRGB value = (ColorRGB) hyperlink.object;
+						
+						Rectangle rect = new Rectangle(0, 0, 80, 25);
+						rect.setFill(value.toColor());
+						rect.setStroke(Color.BLACK);
+						
+						return rect;
+					}
+					else if (LocaleUnit.HYPERLINK_LOCALE.equals(hyperlink.type)) {
+						return getLocaleTooltip((String[]) hyperlink.object);
+					}
+					else {
+						Object result = generateHyperlinkTooltip(hyperlink, index);
+						if (result != null) return result;
+					}
 				}
 			}
 			
@@ -160,12 +175,48 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 
         UIManager.get().getScene().addEventFilter(MouseEvent.MOUSE_PRESSED, this::handleColorPickerClick);
 	}
-	
+
 	@Override public void loadFile(ProjectItem item) throws IOException {
 		if (item == null) {
 			UIManager.get().getScene().removeEventFilter(MouseEvent.MOUSE_PRESSED, this::handleColorPickerClick);
 		}
 		super.loadFile(item);
+	}
+	
+	protected Object generateHyperlinkTooltip(HyperlinkData hyperlink, int index) {
+		return null;
+	}
+	
+	protected String getLocaleTooltip(String[] splits) {
+		if (splits.length == 2 && splits[0] != null && splits[1] != null) 
+		{
+			String folderName = HashManager.get().getFileName(0x02FABF01);
+			String extension = '.' + HashManager.get().getTypeName(0x02FAC0B6);
+			File file = ProjectManager.get().getFile(folderName + File.separatorChar + splits[0] + extension);
+			if (file != null) {
+				List<String> key = Arrays.asList(splits);
+				LocaleUnit locale = localeCache.get(key);
+				long time = 0;
+				if (locale != null) {
+					try {
+						time = Files.getLastModifiedTime(file.toPath()).toMillis();
+					} catch (IOException e) {
+						e.printStackTrace();
+						time = Long.MAX_VALUE;
+					}
+					if (time > localeCacheTimes.get(key)) locale = null;
+				}
+				if (locale == null) {
+					locale = LocaleUnit.fromFile(file);
+					localeCache.put(key, locale);
+					localeCacheTimes.put(key, time);
+				}
+				if (locale != null) {
+					return locale.getText(HashManager.get().getFileHash(splits[1]));
+				}
+			}
+		}
+		return null;
 	}
 	
 	private void handleColorPickerClick(MouseEvent event) {
@@ -230,9 +281,17 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 		colorPickerMenu.show(getCodeArea(), bounds.getMinX(), bounds.getMaxY());
 	}
 	
+	protected void onLocaleHyperlink(HyperlinkData hyperlink) {
+		String[] splits = (String[]) hyperlink.object;
+		hyperlinkOpenFile(new String[] { HashManager.get().getFileName(LocaleUnit.GROUP_ID), splits[0], HashManager.get().getTypeName(LocaleUnit.TYPE_ID) });
+	}
+	
 	protected void onHyperlinkAction(HyperlinkData hyperlink) {
 		if (ArgScriptStream.HYPERLINK_COLOR.equals(hyperlink.type)) {
 			onColorHyperlink(hyperlink);
+		}
+		else if (LocaleUnit.HYPERLINK_LOCALE.equals(hyperlink.type)) {
+			onLocaleHyperlink(hyperlink);
 		}
 	}
 	

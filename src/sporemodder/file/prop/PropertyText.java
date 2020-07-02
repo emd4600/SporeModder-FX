@@ -38,6 +38,7 @@ import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.argscript.WordSplitLexer;
 import sporemodder.file.effects.ResourceID;
+import sporemodder.file.locale.LocaleUnit;
 
 public class PropertyText extends BaseProperty {
 	
@@ -195,7 +196,7 @@ public class PropertyText extends BaseProperty {
 						// No need to check "", nextWord removes it
 						value.setText(PropConverter.intoOriginalText(word2));
 						
-						stream.addHyperlink("locale", originals, word1Start, word1End);
+						stream.addHyperlink(LocaleUnit.HYPERLINK_LOCALE, originals, word1Start, word1End);
 					}
 					values.add(value);
 				} 

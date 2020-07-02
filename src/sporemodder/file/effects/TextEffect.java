@@ -37,6 +37,7 @@ import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.locale.LocaleUnit;
 import sporemodder.util.ColorRGB;
 import sporemodder.view.editors.PfxEditor;
 
@@ -106,7 +107,7 @@ public class TextEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "id", 1)) {
 					String[] words = new String[2];
 					effect.localeID.parse(args, 0, words);
-					args.addHyperlink(PfxEditor.HYPERLINK_LOCALE, words, 0);
+					args.addHyperlink(LocaleUnit.HYPERLINK_LOCALE, words, 0);
 				}
 				
 				Number value = null;

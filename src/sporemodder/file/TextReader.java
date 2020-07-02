@@ -17,10 +17,6 @@ public class TextReader {
 		
 	}
 	
-	public TextReader(InputStream stream) {
-		
-	}
-	
 	public String getText() {
 		return text;
 	}

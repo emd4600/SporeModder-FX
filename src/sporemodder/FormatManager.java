@@ -28,6 +28,7 @@ import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.anim.AnimConverter;
 import sporemodder.file.bitmaps.BitmapConverter;
+import sporemodder.file.cnv.CnvConverter;
 import sporemodder.file.dbpf.DBPFConverter;
 import sporemodder.file.effects.EffectsConverter;
 import sporemodder.file.pctp.PCTPConverter;
@@ -57,6 +58,7 @@ public class FormatManager extends AbstractManager {
 		converters.add(new AnimConverter());
 		converters.add(new SmtConverter());
 		converters.add(new RasterConverter());
+		converters.add(new CnvConverter());
 		converters.add(new PCTPConverter());
 		converters.add(new TLSAConverter());
 		converters.add(new EffectsConverter());

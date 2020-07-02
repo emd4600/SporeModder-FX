@@ -127,6 +127,10 @@ public class ResourceKey {
 		return other.instanceID == instanceID && other.typeID == typeID && other.groupID == groupID;
 	}
 	
+	public boolean isZero() {
+		return instanceID == 0 && typeID == 0 && groupID == 0;
+	}
+	
 	/** Returns the given ID that represents the group ID (folder name) of this resource key. */
 	public int getGroupID() {
 		return groupID;

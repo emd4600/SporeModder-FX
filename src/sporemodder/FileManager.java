@@ -62,7 +62,7 @@ public class FileManager extends AbstractManager {
 		searchableExtensions.addAll(Arrays.asList(
 				"prop_t", "xml", "locale", "txt", "trigger", "tlsa_t", 
 				"pctp_t", "pfx", "smt_t", "hlsl", "shader_builder", 
-				"vertex_fragment", "pixel_fragment"));
+				"vertex_fragment", "pixel_fragment", "anim_t", "cnv_t"));
 		
 		protectedPackages.addAll(Arrays.asList("patchdata.package", "spore_audio1.package", "spore_audio2.package", 
 				"spore_content.package", "spore_game.package", "spore_graphics.package", "spore_pack_03.package", 

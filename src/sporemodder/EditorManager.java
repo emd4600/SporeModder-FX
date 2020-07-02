@@ -40,6 +40,7 @@ import sporemodder.view.StatusBar.Status;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
 import sporemodder.view.editors.AnimTextEditorFactory;
+import sporemodder.view.editors.CnvEditorFactory;
 import sporemodder.view.editors.CompiledShaderViewerFactory;
 import sporemodder.view.editors.EditHistoryEditor;
 import sporemodder.view.editors.EditorFactory;
@@ -125,6 +126,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		editorFactories.add(new SmtTextEditorFactory());
 		editorFactories.add(new XmlEditorFactory());
 		editorFactories.add(new AnimTextEditorFactory());
+		editorFactories.add(new CnvEditorFactory());
 		editorFactories.add(new PctpEditorFactory());
 		editorFactories.add(new TlsaEditorFactory());
 		editorFactories.add(new SpuiEditorFactory());

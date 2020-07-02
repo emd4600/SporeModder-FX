@@ -16,40 +16,25 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
-package sporemodder.file.cnv;
+package sporemodder.view.editors;
 
-import java.io.IOException;
+import javafx.scene.Node;
+import sporemodder.util.ProjectItem;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
-import emord.filestructures.Stream.StringEncoding;
+public class CnvEditorFactory implements EditorFactory {
 
-public class Conversation {
+	@Override
+	public ItemEditor createInstance() {
+		return new CnvEditor();
+	}
 
-	public void read(StreamReader stream) throws IOException {
-		
-		int count = stream.readLEInt();
-		
-		for (int i = 0; i < count; i++) {
-			int id = stream.readLEInt();
-			
-			String name = stream.readString(StringEncoding.ASCII, stream.readInt());
-			
-			stream.readBoolean();
-			stream.readBoolean();
-			stream.readBoolean();
-			stream.readBoolean();
-			stream.readBoolean();
-			stream.readLEInt();
-			stream.readInt();
-			stream.readInt();
-			stream.readInt();
-			
-			
-		}
+	@Override
+	public boolean isSupportedFile(ProjectItem item) {
+		return !item.isFolder() && item.getName().endsWith(".cnv_t");
 	}
 	
-	public void write(StreamWriter stream) throws IOException {
-		
+	@Override
+	public Node getIcon(ProjectItem item) {
+		return null;
 	}
 }

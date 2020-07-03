@@ -54,7 +54,7 @@ public class CnvConverter implements Converter {
 	
 	@Override
 	public boolean decode(StreamReader stream, File outputFolder, ResourceKey key) throws Exception {
-		return decode(stream, Converter.getOutputFile(key, outputFolder, "tlsa_t"));
+		return decode(stream, Converter.getOutputFile(key, outputFolder, "cnv_t"));
 	}
 
 	@Override

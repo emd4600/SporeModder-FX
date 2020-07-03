@@ -31,6 +31,10 @@
 		{
 			"title": "Real-time effect editing",
 			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Effects-Editor"
+		},
+		{
+			"title": "Localization: how translations work in Spore",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Localization:-how-translations-work-in-Spore"
 		}
 		]
 	},
@@ -198,6 +202,28 @@
 		{
 			"title": "How to use the Blender addons",
 			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to-use-the-SporeModder-Blender-Addons"
+		}
+		]
+	}
+	],
+	"cnv": [
+	{
+		"name": "Conversation Files",
+		"items": [
+		{
+			"title": "Conversation Files (.cnv)",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Conversation-Files-(.cnv)"
+		}
+		]
+	}
+	],
+	"locale": [
+	{
+		"name": "Locale Tables",
+		"items": [
+		{
+			"title": "Localization: how translations work in Spore",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Localization:-how-translations-work-in-Spore"
 		}
 		]
 	}

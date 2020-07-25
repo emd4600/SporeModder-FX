@@ -147,6 +147,7 @@ public class EffectsConverter implements Converter {
 		return TYPE_ID;
 	}
 	
+	
 	@Override
 	public void generateContextMenu(ContextMenu contextMenu, ProjectItem item) {
 		if (!item.isRoot()) {
@@ -158,7 +159,7 @@ public class EffectsConverter implements Converter {
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {
 					// This is after isEncoder(), so we can assume it has extension
-					final String name = item.getName().substring(0, item.getName().lastIndexOf(".")) + "." + extension;
+					final String name = item.getName().substring(0, item.getName().lastIndexOf(".")) + (isEncoder ? "" : ("." + extension));
 					File file = new File(item.getFile().getParentFile(), name);
 					
 					boolean result = UIManager.get().tryAction(() -> {

@@ -405,6 +405,9 @@ public class MaterialResource extends EffectResource {
 			ArgScriptArguments args = new ArgScriptArguments();
 			if (line.getArguments(args, 1)) {
 				name = args.get(0);
+				if (getData().hasResource(name)) {
+					stream.addError(line.createErrorForArgument("A resource with this name already exists in this file.", 0));
+				}
 				resource.resourceID.parse(args, 0);
 			}
 			

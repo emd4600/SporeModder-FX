@@ -120,6 +120,9 @@ public class MapResource extends EffectResource {
 			
 			if (line.getArguments(args, 1)) {
 				resource.resourceID.parse(args, 0);
+				if (data.hasResource(args.get(0))) {
+					stream.addError(line.createErrorForArgument("A resource with this name already exists in this file.", 0));
+				}
 				data.addResource(args.get(0), resource);
 			}
 			

@@ -43,6 +43,10 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 				name = args.get(0);
 				effect.name = name;
 				
+				if (stream.getData().hasComponent(name)) {
+					stream.addError(line.createErrorForArgument("A component with this name already exists in this file.", 0));
+				}
+				
 				if (args.size() > 1) {
 					if (args.size() != 3 || !args.get(1).equals(":")) {
 						stream.addError(line.createErrorForArgument("Wrong format for effect inheritance. Correct format is `name : parentName`", 2));

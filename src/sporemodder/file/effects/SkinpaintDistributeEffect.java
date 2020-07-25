@@ -201,7 +201,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 					ArgScriptArguments args = new ArgScriptArguments();
 					
 					if (!line.isEmpty()) {
-						float prob = effect.selectAll ? -1.0f : 1.0f;
+						float prob = effect.selectAll ? 1.0f : -1.0f;
 
 						EffectComponent component = getData().getComponent(line.getKeyword(), SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
 						if (component != null) {
@@ -215,7 +215,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						}
 						
 						Number value = null;
-						if (line.getOptionArguments(args, "prob", 1) && (value = stream.parseFloat(args, 0)) != null) {
+						if (line.getOptionArguments(args, "prob", 1) && (value = stream.parseFloat(args, 0, 0.0f, 1.0f)) != null) {
 							prob = value.floatValue();
 						}
 						
@@ -250,7 +250,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						}
 						
 						if (totalProb > 1.00010001659393310546875E0) {
-							tempError.setMessage("Total selection probability is greater than 1.");
+							tempError.setMessage("The sum of probabilities cannot be greater than 1.0");
 							stream.addError(tempError);
 							stream.endSpecialBlock();
 							return;
@@ -398,7 +398,10 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 			for (int i = 0; i < particleSelect.size(); ++i) {
 				ParticleSelectPair select = particleSelect.get(i);
 				writer.command(select.component.getName());
-				if (select.prob != -1.0f) {
+				if (selectAll) {
+					if (select.prob != 1.0f) writer.option("prob").floats(select.prob);
+				}
+				else {
 					writer.option("prob").floats(i == 0 ? select.prob : (select.prob - particleSelect.get(i-1).prob));
 				}
 			}

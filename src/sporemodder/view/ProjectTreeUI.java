@@ -71,6 +71,7 @@ public class ProjectTreeUI implements Controller {
 		
 		tvSpecialItems.setCellFactory(c -> new ProjectTreeCell(true));
 		tvSpecialItems.setEditable(true);
+		tvSpecialItems.setFixedCellSize(30.0);
 		
 		tvProjectTree.setCellFactory(c -> new ProjectTreeCell(true));
 		tvProjectTree.setEditable(true);

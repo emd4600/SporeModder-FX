@@ -38,7 +38,7 @@ import sporemodder.util.ProjectItem;
 
 public class TLSAConverter implements Converter {
 
-	private static final int TYPE_ID = 0x4AEB6BC6;
+	public static final int TYPE_ID = 0x4AEB6BC6;
 	private static String extension = null;
 	
 	private boolean decode(StreamReader stream, File outputFile) throws Exception {

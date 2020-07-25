@@ -86,6 +86,7 @@ import sporemodder.view.ProjectTreeUI;
 import sporemodder.view.dialogs.PackProgressUI;
 import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
 
@@ -155,6 +156,7 @@ public class ProjectManager extends AbstractManager {
 		
 		
 		specialItems.add(new EffectEditorItem());
+		specialItems.add(new AnimEditorItem());
 		
 		// Load all projects
 		File projectsFolder = PathManager.get().getProjectsFolder();
@@ -392,7 +394,7 @@ public class ProjectManager extends AbstractManager {
 			items.add(new ProjectTreeItem(item));
 		}
 		
-		treeUI.getSpecialItems().setPrefHeight(30);
+		treeUI.getSpecialItems().setPrefHeight(treeUI.getSpecialItems().getFixedCellSize() * specialItems.size() + 5);
 		
 		
 		treeUI.getSearchProgressBar().progressProperty().bind(projectSearcher.progressProperty());

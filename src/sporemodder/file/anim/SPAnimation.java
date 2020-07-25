@@ -71,7 +71,8 @@ public class SPAnimation {
 		
 		int id = data.getInt(0x110);
 		
-		// 11Ch: always 0x3D088889 ?
+		// 118h is some flags related to keyframe indices, check sub_99C860
+		// 11Ch: always 0x3D088889 ?  1.0/30.0, keyframe length
 		length = data.getFloat(0x120);
 		
 		// System.out.println("id: " + HashManager.get().getFileName(id) + "\tlength: " + length);

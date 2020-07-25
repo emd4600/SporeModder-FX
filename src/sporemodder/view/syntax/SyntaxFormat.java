@@ -18,6 +18,8 @@
 ****************************************************************************/
 package sporemodder.view.syntax;
 
+import sporemodder.view.editors.TextEditor;
+
 @FunctionalInterface
 public interface SyntaxFormat {
 	/**
@@ -25,4 +27,12 @@ public interface SyntaxFormat {
 	 * @param text The piece of text where syntax highlighting must be computed.
 	 */
 	public void generateStyle(String text, SyntaxHighlighter syntax);
+	
+	default public boolean toggleBlockComment(TextEditor editor, int start, int end) {
+		return false;
+	}
+	
+	default public boolean toggleLineComment(TextEditor editor, int position) {
+		return false;
+	}
 }

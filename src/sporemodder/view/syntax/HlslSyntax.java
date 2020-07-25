@@ -19,11 +19,16 @@
 package sporemodder.view.syntax;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import sporemodder.file.TextUtils;
+import sporemodder.view.editors.TextEditor;
 
 public class HlslSyntax implements SyntaxFormatFactory {
 
@@ -185,5 +190,124 @@ public class HlslSyntax implements SyntaxFormatFactory {
 
 	@Override public boolean isSupportedFile(File file) {
 		return file.isFile() && file.getName().endsWith(".hlsl");
+	}
+	
+	private void removeBlockComment(TextEditor editor, String text, int textStart, int textEnd) {
+		// We use replaceText instead of multiple deleteText so that it goes into a single undoable action
+		text = text.substring(0, textStart) + text.substring(textStart + 2, textEnd - 1) + text.substring(textEnd + 1);
+		editor.getCodeArea().replaceText(text);
+		editor.getCodeArea().selectRange(textStart, textEnd - 3);
+	}
+	
+	@Override public boolean toggleBlockComment(TextEditor editor, int start, int end) {
+		if (end - start <= 0) return true;
+		String text = editor.getText();
+		int textStart = TextUtils.scanNextWordStart(text, start);
+		if (textStart != -1 && textStart + 1 < text.length() && 
+				text.charAt(textStart) == '/')
+		{
+			if (text.charAt(textStart + 1) == '*') 
+			{
+				// If it's a block comment, uncomment
+				int textEnd = TextUtils.scanPreviousWordEnd(text, end);
+				if (textEnd > 1 && text.charAt(textEnd) == '/' && text.charAt(textEnd - 1) == '*') 
+				{
+					removeBlockComment(editor, text, textStart, textEnd);
+					return true;
+				}
+			}
+			else {
+				// Special case: if there are multiple lines with '#', uncomment them
+				List<Integer> lineComments = new ArrayList<>();
+				lineComments.add(textStart);
+				boolean multipleLineComment = true;
+				int pos = textStart;
+				while ((pos = TextUtils.scanNextWordStart(text, TextUtils.scanLineEnd(text, pos))) != -1 && pos < end) {
+					if (!(text.charAt(pos) == '/' && pos + 1 < text.length() && text.charAt(pos + 1) == '/')) {
+						multipleLineComment = false;
+						break;
+					}
+					lineComments.add(pos);
+				}
+				
+				if (multipleLineComment) {
+					StringBuilder sb = new StringBuilder();
+					int lastPos = 0;
+					for (int p : lineComments) {
+						sb.append(text.substring(lastPos, p));
+						lastPos = p + 2;
+					}
+					sb.append(text.substring(lastPos));
+					editor.getCodeArea().replaceText(sb.toString());
+					editor.getCodeArea().selectRange(textStart, end - 2*lineComments.size());
+					return true;
+				}
+				else {
+					// If it's a block comment, uncomment
+					int textEnd = TextUtils.scanPreviousWordEnd(text, end);
+					if (textEnd > 1 && text.charAt(textEnd) == '/' && text.charAt(textEnd - 1) == '*')  {
+						removeBlockComment(editor, text, textStart, textEnd);
+						return true;
+					}
+				}
+			}
+		}
+		
+		editor.getCodeArea().insertText(start, "/*");
+		editor.getCodeArea().insertText(end + 2, "*/");
+		editor.getCodeArea().selectRange(start, end + 4);
+		
+		return true;
+	}
+	
+	
+	@Override public boolean toggleLineComment(TextEditor editor, int position) {
+		int originalPosition = position;
+		String text = editor.getText();
+		
+		if (position >= text.length() || TextUtils.isNewLine(text, position)) position--;
+		position = TextUtils.scanLineStart(text, position);
+		
+		boolean removeComment;
+
+		int wordStart = TextUtils.scanNextWordStart(text, position);
+		if (wordStart == -1) {
+			// end of stream, no text in the line
+			removeComment = false;
+		}
+		else if (wordStart < TextUtils.scanLineEnd(text, position) && wordStart < text.length()) {
+			position = wordStart;
+			removeComment = false;
+			if (text.charAt(wordStart) == '/' && wordStart + 1 < text.length()) {
+				// if it's the beginning of a block comment, comment after that
+				if (text.charAt(wordStart + 1) == '*') {
+					removeComment = false;
+					position += 2;
+				}
+				else if (text.charAt(wordStart + 1) == '/') {
+					removeComment = true;
+				}
+			}
+		}
+		else {
+			// We are on an empty line
+			removeComment = false;
+		}
+		
+		int moveTo = originalPosition;
+		if (removeComment) {
+			editor.getCodeArea().deleteText(position, position + 2);
+			
+			if (originalPosition > wordStart) moveTo -= 2;
+		}
+		else {
+			editor.getCodeArea().insertText(position, "//");
+
+			if (originalPosition > wordStart) moveTo += 2;
+		}
+		
+		editor.getCodeArea().moveTo(moveTo);
+		
+		return true;
 	}
 }

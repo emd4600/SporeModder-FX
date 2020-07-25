@@ -372,6 +372,8 @@ public class ArgScriptStream<T> {
 		errors.clear();
 		warnings.clear();
 		
+		insideBlockComment = false;
+		
 		linePositions.clear();
 		lineEnds.clear();
 		
@@ -428,6 +430,15 @@ public class ArgScriptStream<T> {
 			}
 			
 			if (!isIncluding) currentLineNumber++;
+		}
+		
+		if (!isIncluding && insideBlockComment) {
+			int lineNumber = 0;
+			while (lineNumber < lines.size() && linePositions.get(lineNumber) <= blockCommentStart) 
+				++lineNumber;
+			
+			lineNumber--;
+			this.addError(new DocumentError("Block comment not closed. Close the comment with #>", 0, lines.get(lineNumber).length(), lineNumber));
 		}
 		
 		if (!isFastParsing && !isIncluding) {
@@ -492,6 +503,8 @@ public class ArgScriptStream<T> {
 		
 		commentTracker = new TextPositionMap();
 		text = removeComments(text, commentTracker);
+		
+		if (text == null) return false;
 		
 		// We don't save the trimmed text for syntax highlighting reasons
 		if (text.trim().isEmpty()) {

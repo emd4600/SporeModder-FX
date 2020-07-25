@@ -29,14 +29,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import sporemodder.EditorManager;
@@ -45,6 +49,7 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.DocumentError;
 import sporemodder.file.DocumentFragment;
+import sporemodder.file.TextUtils;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
@@ -445,10 +450,40 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 				UIManager.get().getUserInterface().setStatusInfo(null);
 				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.DEFAULT);
 			} else {
-				Label label = new Label("The file contains " + documentErrors.size() + " error" + (documentErrors.size() == 1 ? "" : "s") + ", cannot be compiled.");
-				label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+				StringBuilder sb = new StringBuilder();
+				sb.append("The file contains ");
+				sb.append(documentErrors.size());
+				sb.append(" error");
+				if (documentErrors.size() > 1) sb.append('s');
+				sb.append(", cannot be compiled. Line");
+				if (documentErrors.size() > 1) sb.append('s');
+				sb.append(": ");
 				
-				UIManager.get().getUserInterface().setStatusInfo(label);
+				
+				HBox hbox = new HBox();
+				hbox.setSpacing(4.0);
+				Label label = new Label(sb.toString());
+				label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+				hbox.getChildren().add(label);
+				
+				for (int i = 0; i < Math.min(documentErrors.size(), 5); ++i) {
+					Hyperlink hyperlink = new Hyperlink(Integer.toString(documentErrors.get(i).getLine() + 1));
+					hyperlink.setMaxHeight(12.0);
+					hyperlink.setPrefHeight(12.0);
+					hyperlink.setPadding(Insets.EMPTY);
+					hbox.getChildren().add(hyperlink);
+					
+					final int index = i;
+					hyperlink.setOnAction(ev -> {
+						ErrorInfo error = errors.get(index);
+						Platform.runLater(() -> getCodeArea().requestFocus());
+						getCodeArea().moveTo(error.position);
+						getCodeArea().selectRange(error.position + error.length, error.position);
+						getCodeArea().requestFollowCaret();
+					});
+				}
+				
+				UIManager.get().getUserInterface().setStatusInfo(hbox);
 				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.ERROR);
 			}
 		}
@@ -482,5 +517,113 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 	@Override public void setDestinationFile(File file) {
 		super.setDestinationFile(file);
 		stream.setFolder(file.getParentFile());
+	}
+	
+	private void removeBlockComment(String text, int textStart, int textEnd) {
+		// We use replaceText instead of multiple deleteText so that it goes into a single undoable action
+		text = text.substring(0, textStart) + text.substring(textStart + 2, textEnd - 1) + text.substring(textEnd + 1);
+		getCodeArea().replaceText(text);
+		getCodeArea().selectRange(textStart, textEnd - 3);
+	}
+	
+	@Override protected void toggleBlockComment(int start, int end) {
+		if (end - start <= 0) return;
+		String text = getText();
+		int textStart = TextUtils.scanNextWordStart(text, start);
+		if (textStart != -1 && text.charAt(textStart) == '#') 
+		{
+			if (textStart + 1 < text.length() && text.charAt(textStart + 1) == '<')
+			{
+				// If it's a block comment, uncomment
+				int textEnd = TextUtils.scanPreviousWordEnd(text, end);
+				if (textEnd > 1 && text.charAt(textEnd) == '>' && text.charAt(textEnd - 1) == '#')  {
+					removeBlockComment(text, textStart, textEnd);
+					return;
+				}
+			}
+			else {
+				// Special case: if there are multiple lines with '#', uncomment them
+				List<Integer> lineComments = new ArrayList<>();
+				lineComments.add(textStart);
+				boolean multipleLineComment = true;
+				int pos = textStart;
+				while ((pos = TextUtils.scanNextWordStart(text, TextUtils.scanLineEnd(text, pos))) != -1 && pos < end) {
+					if (text.charAt(pos) != '#' || (pos + 1 < text.length() && text.charAt(pos + 1) == '<')) {
+						multipleLineComment = false;
+						break;
+					}
+					lineComments.add(pos);
+				}
+				
+				if (multipleLineComment) {
+					StringBuilder sb = new StringBuilder();
+					int lastPos = 0;
+					for (int p : lineComments) {
+						sb.append(text.substring(lastPos, p));
+						lastPos = p + 1;
+					}
+					sb.append(text.substring(lastPos));
+					getCodeArea().replaceText(sb.toString());
+					getCodeArea().selectRange(textStart, end - lineComments.size());
+					return;
+				}
+				else {
+					// If it's a block comment, uncomment
+					int textEnd = TextUtils.scanPreviousWordEnd(text, end);
+					if (textEnd > 1 && text.charAt(textEnd) == '>' && text.charAt(textEnd - 1) == '#')  {
+						removeBlockComment(text, textStart, textEnd);
+						return;
+					}
+				}
+			}
+		}
+		
+		text = text.substring(0, start) + "#<" + text.substring(start, end) + "#>" + text.substring(end);
+		getCodeArea().replaceText(text);
+		getCodeArea().selectRange(start, end + 4);
+	}
+	
+	
+	@Override protected void toggleLineComment(int position) {
+		int originalPosition = position;
+		String text = getText();
+		
+		if (position >= text.length() || TextUtils.isNewLine(text, position)) position--;
+		position = TextUtils.scanLineStart(text, position);
+		
+		boolean removeComment;
+
+		int wordStart = TextUtils.scanNextWordStart(text, position);
+		if (wordStart == -1) {
+			// end of stream, no text in the line
+			removeComment = false;
+		}
+		else if (wordStart < TextUtils.scanLineEnd(text, position) && wordStart < text.length()) {
+			position = wordStart;
+			removeComment = text.charAt(wordStart) == '#';
+			// if it's the beginning of a block comment, comment after that
+			if (removeComment && wordStart + 1 < text.length() && text.charAt(wordStart + 1) == '<') {
+				removeComment = false;
+				position += 2;
+			}
+		}
+		else {
+			// We are on an empty line
+			removeComment = false;
+		}
+		
+		int moveTo = originalPosition;
+		if (removeComment) {
+			getCodeArea().deleteText(position, position + 1);
+			
+			if (originalPosition > wordStart) moveTo--;
+		}
+		else {
+			getCodeArea().insertText(position, "#");
+
+			if (originalPosition > wordStart) moveTo++;
+		}
+		
+		getCodeArea().moveTo(moveTo);
 	}
 }

@@ -133,4 +133,11 @@ public class TextUtils {
 		if (charIndex == text.length()) return -1;
 		else return charIndex;
 	}
+	
+	public static int getLineNumber(String text, int position) {
+		int line = 0;
+		int indexOf = 0;
+		while ((indexOf = text.indexOf('\n', indexOf + 1)) != -1 && indexOf < position) ++line;
+		return line;
+	}
 }

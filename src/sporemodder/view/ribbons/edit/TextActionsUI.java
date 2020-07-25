@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.view.ribbons.edit;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -45,6 +46,10 @@ public class TextActionsUI implements Controller, UIUpdateListener {
 	public TextField getFindField() {
 		return tfFind;
 	}
+	
+	public void focusFindField() {
+		Platform.runLater(() -> tfFind.requestFocus());
+	}
 
 	@Override
 	public Node getMainNode() {
@@ -55,9 +60,6 @@ public class TextActionsUI implements Controller, UIUpdateListener {
 		instance = this;
 		
 		UIManager ui = UIManager.get();
-		
-//		btnFindUp.setGraphic(ui.loadIcon("find-up.png", 26, 26, true));
-//		btnFindDown.setGraphic(ui.loadIcon("find-down.png", 26, 26, true));
 		
 		btnFindUp.setGraphic(ui.loadIcon("find-up.png", 20, 20, true));
 		btnFindDown.setGraphic(ui.loadIcon("find-down.png", 20, 20, true));

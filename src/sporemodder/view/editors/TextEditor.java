@@ -45,6 +45,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Skin;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.Popup;
 import sporemodder.EditorManager;
@@ -57,6 +58,7 @@ import sporemodder.file.TextReader;
 import sporemodder.file.TextUtils;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.UserInterface;
+import sporemodder.view.ribbons.EditRibbonTab;
 import sporemodder.view.syntax.SyntaxFormat;
 import sporemodder.view.syntax.SyntaxHighlighter;
 
@@ -134,6 +136,31 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 			}
 		}));
 		
+		Nodes.addInputMap(codeArea, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN), event -> {
+			UserInterface.get().setActiveRibbonTab(EditRibbonTab.ID);
+			EditRibbonTab tab = (EditRibbonTab) UserInterface.get().getRibbonTabController(EditRibbonTab.ID);
+			if (codeArea.getSelection().getLength() != 0) {
+				tab.getTextActionsUI().getFindField().setText(codeArea.getSelectedText());
+			}
+			tab.getTextActionsUI().focusFindField();
+		}));
+		
+		Nodes.addInputMap(codeArea, InputMap.consume(EventPattern.keyPressed(KeyCode.K, KeyCodeCombination.CONTROL_DOWN), event -> {
+			if (codeArea.getSelection().getLength() != 0) {
+				int start = codeArea.getSelection().getStart();
+				int end = codeArea.getSelection().getEnd();
+				if (syntaxHighlighting == null || !syntaxHighlighting.toggleBlockComment(this, start, end)) {
+					toggleBlockComment(start, end);
+				}
+			} 
+			else {
+				int position = codeArea.getCaretPosition();
+				if (syntaxHighlighting == null || !syntaxHighlighting.toggleLineComment(this, position)) {
+					toggleLineComment(position);
+				}
+			}
+		}));
+		
 		// -- Tooltips -- //
 		popupMsg.getStyleClass().add("tooltip");
 		popup.getContent().add(popupMsg);
@@ -176,6 +203,12 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 		codeArea.caretPositionProperty().addListener((obs, oldText, newText) -> {
 			UIManager.get().notifyUIUpdate(false);
 		});
+	}
+	
+	protected void toggleBlockComment(int start, int end) {
+	}
+	
+	protected void toggleLineComment(int position) {
 	}
 	
 	private void tabulateSelection() {

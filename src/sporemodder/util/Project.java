@@ -159,7 +159,8 @@ public class Project {
 				
 				String[] sourceNames = stringListSplit(PROPERTY_sources);
 				for (String str : sourceNames) {
-					sources.add(projectManager.getProject(str));
+					Project p = projectManager.getProject(str);
+					if (p != null) sources.add(p);
 				}
 				
 				String[] tabPaths = stringListSplit(PROPERTY_fixedTabPaths);

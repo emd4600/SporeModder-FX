@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -41,6 +44,8 @@ import sporemodder.FileManager;
 import sporemodder.view.ProjectTreeItem;
 
 public class ProjectSearcher {
+	private static int TIME_TEST = 0;
+	
 	private int numFilesSearched;
 	private int numItemsSearched;
 	
@@ -200,6 +205,7 @@ public class ProjectSearcher {
 		numFilesSearched = 0;
 		numItemsSearched = 0;
 		progress.set(0.0);
+		TIME_TEST = 0;
 	}
 	
 	public void startSearch(ProjectTreeItem item) {
@@ -244,6 +250,7 @@ public class ProjectSearcher {
 			System.out.println("Files searched: " + numFilesSearched);
 			System.out.println("Items searched: " + numItemsSearched);
 			System.out.println(time + " ms");
+			System.out.println("Time blocked in File.list(): " + TIME_TEST);
 		}
 	}
 	
@@ -363,8 +370,11 @@ public class ProjectSearcher {
 				}
 			} 
 			else {
-				List<FileSearchRecursive> tasks = new ArrayList<FileSearchRecursive>();
-				Set<String> usedNames = new HashSet<String>();
+				
+				//List<FileSearchRecursive> tasks = new ArrayList<FileSearchRecursive>();
+				
+				//Set<String> usedNames = new HashSet<String>();
+				Set<String> usedNames = Collections.synchronizedSet(new HashSet<String>());
 				
 				int numProjects = projectFolders.size();
 				for (int i = 0; i < numProjects; ++i) 
@@ -373,9 +383,51 @@ public class ProjectSearcher {
 					
 					File folder = new File(projectFolders.get(i), relativePath);
 					if (folder.exists()) {
-						String[] names = folder.list();
+						//long t = System.currentTimeMillis();
+						//String[] names = folder.list();
+						//TIME_TEST += System.currentTimeMillis() - t;
 						
-						for (String name : names) {
+						final int index = i;
+						
+						try (Stream<Path> stream = Files.list(folder.toPath())) {
+							stream.forEach(path -> {
+								long t = System.currentTimeMillis();
+								if (!searchFinished.get())
+								{
+									String name = path.getFileName().toString();
+									synchronized(usedNames) {
+										if (!usedNames.contains(name))
+										{
+											// For multiple searched words, some might be in the name and others in the file contents
+											if (searchInNameOptional(name, foundWords)) {
+												searchFinished.set(true);  // Stop searching, we've found a match
+												return;
+											}
+											
+											// If it's the last project (hopefully the big source) you don't need to add anymore
+											if (index != numProjects-1) usedNames.add(name);
+											
+											FileSearchRecursive task = null;
+											File file = new File(folder, name);
+											if (file.isFile()) {
+												task = new FileSearchRecursive(null, file, foundWords, searchFinished);
+											}
+											else {
+												task = new FileSearchRecursive(relativePath + File.separatorChar + name, null, foundWords, searchFinished);
+											}
+											task.fork();
+										}
+									}
+								}
+								TIME_TEST += System.currentTimeMillis() - t;
+							});
+						} 
+						catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						/*for (String name : names) {
 							if (!usedNames.contains(name)) {
 									
 								// For multiple searched words, some might be in the name and others in the file contents
@@ -398,11 +450,11 @@ public class ProjectSearcher {
 								
 								tasks.add(task);
 							}
-						}
+						}*/
 					}
 					
 					// Invoke for every project
-					ForkJoinTask.invokeAll(tasks);
+					//ForkJoinTask.invokeAll(tasks);
 				}
 			}
 			

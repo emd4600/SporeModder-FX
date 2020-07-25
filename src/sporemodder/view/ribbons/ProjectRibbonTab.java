@@ -22,16 +22,41 @@ import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonGroup;
 import emord.javafx.ribbon.RibbonTab;
 import sporemodder.UIManager;
+import sporemodder.view.ribbons.project.BasicActionsUI;
+import sporemodder.view.ribbons.project.ModdingActionsUI;
+import sporemodder.view.ribbons.project.OtherProjectRibbonUI;
 
-public class ProjectRibbonTab {
+public class ProjectRibbonTab extends RibbonTabController {
 	
-	public static void addTab(Ribbon ribbon) {
-		RibbonTab tab = new RibbonTab("Project");
+	public static final String ID = "PROJECT";
+	
+	private BasicActionsUI basicActions;
+	private ModdingActionsUI moddingActions;
+	private OtherProjectRibbonUI otherProjectRibbon;
+	
+	public void addTab(Ribbon ribbon) {
+		tab = new RibbonTab("Project");
 		ribbon.getTabs().add(tab);
 		
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/project/BasicActionsUI").getMainNode());
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/project/ModdingActionsUI").getMainNode());
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/project/OtherProjectRibbonUI").getMainNode());
+		basicActions = UIManager.get().loadUI("ribbons/project/BasicActionsUI");
+		moddingActions = UIManager.get().loadUI("ribbons/project/ModdingActionsUI");
+		otherProjectRibbon = UIManager.get().loadUI("ribbons/project/OtherProjectRibbonUI");
+		
+		tab.getGroups().add((RibbonGroup) basicActions.getMainNode());
+		tab.getGroups().add((RibbonGroup) moddingActions.getMainNode());
+		tab.getGroups().add((RibbonGroup) otherProjectRibbon.getMainNode());
+	}
+
+	public BasicActionsUI getBasicActionsUI() {
+		return basicActions;
+	}
+
+	public ModdingActionsUI getModdingActionsUI() {
+		return moddingActions;
+	}
+
+	public OtherProjectRibbonUI getOtherProjectRibbonUI() {
+		return otherProjectRibbon;
 	}
 
 }

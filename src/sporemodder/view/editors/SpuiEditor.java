@@ -115,6 +115,7 @@ import sporemodder.view.editors.spui.SpuiImageChooser;
 import sporemodder.view.editors.spui.SpuiImageFileChooser;
 import sporemodder.view.editors.spui.SpuiObjectCreatedAction;
 import sporemodder.view.editors.spui.SpuiPropertyAction;
+import sporemodder.view.editors.spui.SpuiRibbonTab;
 import sporemodder.view.editors.spui.SpuiUndoableAction;
 import sporemodder.view.editors.spui.SpuiWindowItemCell;
 import sporemodder.view.inspector.InspectorValue;
@@ -193,10 +194,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 	private double deltaMouseY;
 	private double mouseClickX;
 	private double mouseClickY;
-
-	private static RibbonTab ribbonTab;
-	private static RibbonGallery windowsGallery;
-	private static RibbonGallery proceduresGallery;
+	
+	private static SpuiRibbonTab ribbonTab;
 
 	/** True if the viewer is being manipulated, and so the inspector shouldn't generate events. */
 	private boolean isEditingViewer;
@@ -343,8 +342,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 				boolean disable = newValue == null || newValue != selectedWindow.get();
 
 				// We can't add procedures to the layout window
-				proceduresGallery.setDisable(disable || selectedWindow.get() == viewer.getLayoutWindow());
-				windowsGallery.setDisable(disable);
+				ribbonTab.getProceduresGallery().setDisable(disable || selectedWindow.get() == viewer.getLayoutWindow());
+				ribbonTab.getWindowsGallery().setDisable(disable);
 			} else {
 				propertiesContainer.setContent(null);
 			}
@@ -463,7 +462,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		addEditAction(ORIGINAL_ACTION);
 	}
 	
-	private static SpuiEditor getActiveSpuiEditor() {
+	public static SpuiEditor getActiveSpuiEditor() {
 		ItemEditor editor = EditorManager.get().getActiveEditor();
 		if (editor != null) {
 			if (editor instanceof SpuiEditor)
@@ -477,100 +476,14 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 
 	private static void createRibbonTab() {
 		if (!ribbonTabAdded) {
-			ribbonTab = new RibbonTab("SPUI Editor");
-			ribbonTab.getStyleClass().add("spui-editor-ribbon-header");
-			//ProjectManager.get().getActive().
-			//FileManager.get().
-			//UIManager.get().getUserInterface().get
-			
-			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-	
-			windowsGallery = new RibbonGallery(ribbon);
-			windowsGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
-			windowsGallery.setColumnCount(3);
-			windowsGallery.setOnItemAction(item -> {
-				if (getActiveSpuiEditor() != null)
-					getActiveSpuiEditor().addWindow(item.getText());
-			});
-	
-			proceduresGallery = new RibbonGallery(ribbon);
-			proceduresGallery.setDisplayPriority(GalleryItemDisplay.TEXT_PRIORITY);
-			proceduresGallery.setColumnCount(3);
-			proceduresGallery.setOnItemAction(item -> {
-				if (getActiveSpuiEditor() != null)
-					getActiveSpuiEditor().addWinProc(item.getText());
-			});
-	
-			for (DesignerClass clazz : SporeUserInterface.getDesigner().getClasses().values()) {
-				if (!clazz.isAbstract()) {
-					if (clazz.implementsInterfaceComplete("IWindow")) {
-						RibbonGalleryItem item = new RibbonGalleryItem();
-						item.setText(clazz.getName());
-						item.setUserData(clazz);
-						item.setDescription(clazz.getDescription());
-						windowsGallery.getItems().add(item);
-					}
-					else if (clazz.implementsInterfaceComplete("IWinProc")) {
-						RibbonGalleryItem item = new RibbonGalleryItem();
-						item.setText(clazz.getName());
-						item.setUserData(clazz);
-						item.setDescription(clazz.getDescription());
-						proceduresGallery.getItems().add(item);
-					}
-				}
-			}
-	
-			//proceduresGallery.setDisable(true);
-			//windowsGallery.setDisable(true);
-	
-			RibbonGroup windowsGroup = new RibbonGroup("Add Windows");
-			RibbonGroup winprocsGroup = new RibbonGroup("Add Window Procedures");
-			RibbonGroup editorGroup = new RibbonGroup("Layout");
-	
-			windowsGroup.getNodes().add(windowsGallery);
-	
-			winprocsGroup.getNodes().add(proceduresGallery);
-	
-			RibbonButton previewButton = new RibbonButton("Preview", UIManager.get().loadIcon("spui-preview.png", 0, 48, true));
-			previewButton.setOnAction(event -> {
-				if (getActiveSpuiEditor() != null)
-					getActiveSpuiEditor().showPreview();
-			});
-			editorGroup.getNodes().add(previewButton);
-			
-			RibbonButton duplicateButton = new RibbonButton("Duplicate", UIManager.get().loadIcon("spui-duplicate.png", 0, 48, true));
-			duplicateButton.setOnAction(event -> {
-				UIManager.get().tryAction(() -> {
-					if (getActiveSpuiEditor() != null)
-						getActiveSpuiEditor().duplicateSelectedBlock();	
-				}, "Cannot duplicate SPUI block.");
-			});
-			editorGroup.getNodes().add(duplicateButton);
-	
-			RibbonButton exportButton = new RibbonButton("Export", UIManager.get().loadIcon("spui-export.png", 0, 48, true));
-			exportButton.setOnAction(event -> {
-				UIManager.get().tryAction(() -> {
-					if (getActiveSpuiEditor() != null)
-						getActiveSpuiEditor().exportBlocks();
-				}, "Cannot export SPUI part.");
-			});
-			editorGroup.getNodes().add(exportButton);
-			
-			RibbonButton importButton = new RibbonButton("Import", UIManager.get().loadIcon("spui-import.png", 0, 48, true));
-			importButton.setOnAction(event -> {
-				UIManager.get().tryAction(() -> {
-					if (getActiveSpuiEditor() != null)
-						getActiveSpuiEditor().importSpui();
-				}, "Cannot import partial SPUI.");
-			});
-			editorGroup.getNodes().add(importButton);
-	
-			ribbonTab.getGroups().addAll(windowsGroup, winprocsGroup, editorGroup);
+			ribbonTab = new SpuiRibbonTab();
+			ribbonTab.addTab(UserInterface.get().getRibbon());
+			UserInterface.get().setRibbonTabController(SpuiRibbonTab.ID, ribbonTab);
 			ribbonTabAdded = true;
 		}
 	}
 
-	private void addWinProc(String className) {
+	public SpuiElement addWinProc(String className) {
 		DesignerClass clazz = SporeUserInterface.getDesigner().getClass(className);
 		SpuiElement element = clazz.createInstance();
 		clazz.fillDefaults(this, element);
@@ -600,9 +513,11 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		});
 
 		selectInspectable(element);
+		
+		return element;
 	}
 
-	private void addWindow(String className) {
+	public SpuiElement addWindow(String className) {
 		DesignerClass clazz = SporeUserInterface.getDesigner().getClass(className);
 		SpuiElement childWindow = clazz.createInstance();
 		clazz.fillDefaults(this, childWindow);
@@ -640,6 +555,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		});
 
 		selectInspectable(childWindow);
+		
+		return childWindow;
 	}
 	
 	private void addWindow(SpuiElement childWindow) {
@@ -912,8 +829,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 
 		if (isActive) {
 			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-			if (!ribbon.getTabs().contains(ribbonTab))
-				ribbon.getTabs().add(ribbonTab);
+			if (!ribbon.getTabs().contains(ribbonTab.getTab()))
+				ribbon.getTabs().add(ribbonTab.getTab());
 
 			// Accelerators
 			Scene scene = UIManager.get().getScene();
@@ -922,8 +839,8 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 			scene.getAccelerators().put(CTRL_D, () -> UIManager.get().tryAction(() -> duplicateSelectedBlock(), "Cannot duplicate SPUI block."));
 		} else {
 			Ribbon ribbon = UIManager.get().getUserInterface().getRibbon();
-			if (ribbon.getTabs().contains(ribbonTab))
-				ribbon.getTabs().remove(ribbonTab);
+			if (ribbon.getTabs().contains(ribbonTab.getTab()))
+				ribbon.getTabs().remove(ribbonTab.getTab());
 
 			// Accelerators
 			Scene scene = UIManager.get().getScene();
@@ -1271,7 +1188,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		}
 	}
 
-	private void showPreview() {
+	public void showPreview() {
 
 		Stage stage = new Stage();
 
@@ -1309,7 +1226,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		preview.restoreOriginal();
 	}
 	
-	private void duplicateSelectedBlock() throws Exception {
+	public void duplicateSelectedBlock() throws Exception {
 		IWindow iwin = getSelectedWindow();
 		if (iwin != null) {
 			//MemoryStream memstream = new MemoryStream();
@@ -1357,7 +1274,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		}
 	}
 
-	private void exportBlocks() throws Exception {
+	public void exportBlocks() throws Exception {
 		if (getSelectedWindow() != null) {
 			FileChooser chooser = new FileChooser();
 			chooser.setInitialDirectory(getFile().getParentFile());
@@ -1380,7 +1297,7 @@ public class SpuiEditor extends AbstractEditableEditor implements EditHistoryEdi
 		}
 	}
 	
-	private void importSpui() throws Exception {
+	public void importSpui() throws Exception {
 		FileChooser chooser = new FileChooser();
 		chooser.setInitialDirectory(getFile().getParentFile());
 		chooser.getExtensionFilters().add(new ExtensionFilter("All SPUI files (*.spui, *.spui_part)", "*.spui", "*.spui_part"));

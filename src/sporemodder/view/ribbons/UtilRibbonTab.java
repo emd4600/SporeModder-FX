@@ -23,15 +23,32 @@ import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonGroup;
 import emord.javafx.ribbon.RibbonTab;
 import sporemodder.UIManager;
+import sporemodder.view.ribbons.util.HashConverterUI;
+import sporemodder.view.ribbons.util.NumberConverterUI;
 
-public class UtilRibbonTab {
+public class UtilRibbonTab extends RibbonTabController {
 	
-	public static void addTab(Ribbon ribbon) {
-		RibbonTab tab = new RibbonTab("Utilities");
+	public static final String ID = "UTIL";
+	
+	private NumberConverterUI numberConverter;
+	private HashConverterUI hashConverter;
+	
+	public void addTab(Ribbon ribbon) {
+		tab = new RibbonTab("Utilities");
 		ribbon.getTabs().add(tab);
 		
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/util/NumberConverterUI").getMainNode());
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/util/HashConverterUI").getMainNode());
+		numberConverter = UIManager.get().loadUI("ribbons/util/NumberConverterUI");
+		hashConverter = UIManager.get().loadUI("ribbons/util/HashConverterUI");
+		
+		tab.getGroups().add((RibbonGroup) numberConverter.getMainNode());
+		tab.getGroups().add((RibbonGroup) hashConverter.getMainNode());
 	}
 
+	public NumberConverterUI getNumberConverterUI() {
+		return numberConverter;
+	}
+
+	public HashConverterUI getHashConverterUI() {
+		return hashConverter;
+	}
 }

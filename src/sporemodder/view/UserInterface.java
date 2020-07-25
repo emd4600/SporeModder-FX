@@ -22,6 +22,8 @@ package sporemodder.view;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonProgramButton;
@@ -41,6 +43,7 @@ import sporemodder.view.HideablePane.HideSide;
 import sporemodder.view.ribbons.EditRibbonTab;
 import sporemodder.view.ribbons.ProgramMenu;
 import sporemodder.view.ribbons.ProjectRibbonTab;
+import sporemodder.view.ribbons.RibbonTabController;
 import sporemodder.view.ribbons.UtilRibbonTab;
 
 /**
@@ -80,6 +83,10 @@ public class UserInterface extends RibbonWindow {
 	
 	/** The main menu that is shown in the first tab of the ribbon. */
 	private ProgramMenu programMenu;
+	
+	/** A map to store the controllers of the ribbon tabs. Their identifiers are stored in uppercase. */
+	private final Map<String, RibbonTabController> ribbonTabs = new HashMap<>();
+	private String activeRibbonTab;
 	
 	@Override
 	public String getUserAgentStylesheet() {
@@ -177,9 +184,17 @@ public class UserInterface extends RibbonWindow {
 		//ribbon.setContentHeight(115);
 		ribbon.setContentHeight(UIManager.get().scaleByDpi(92));
 		
-		ProjectRibbonTab.addTab(ribbon);
-		EditRibbonTab.addTab(ribbon);
-		UtilRibbonTab.addTab(ribbon);
+		ProjectRibbonTab projectRibbonTab = new ProjectRibbonTab();
+		projectRibbonTab.addTab(ribbon);
+		ribbonTabs.put(ProjectRibbonTab.ID.toUpperCase(), projectRibbonTab);
+		
+		EditRibbonTab editRibbonTab = new EditRibbonTab();
+		editRibbonTab.addTab(ribbon);
+		ribbonTabs.put(EditRibbonTab.ID.toUpperCase(), editRibbonTab);
+		
+		UtilRibbonTab utilRibbonTab = new UtilRibbonTab();
+		utilRibbonTab.addTab(ribbon);
+		ribbonTabs.put(UtilRibbonTab.ID.toUpperCase(), utilRibbonTab);
 		
 		programMenu = new ProgramMenu();
 		programMenu.initialize(ribbon);
@@ -188,6 +203,28 @@ public class UserInterface extends RibbonWindow {
 		programButton.getStyleClass().add(RibbonTab.DEFAULT_STYLE_CLASS);
 		programButton.setRibbonMenu(programMenu.getMenu());
 		ribbon.setProgramButton(programButton);
+	}
+	
+	public void setRibbonTabController(String id, RibbonTabController controller) {
+		ribbonTabs.put(id, controller);
+	}
+	
+	/** Returns the controller of the ribbon tab identified with the given string. */
+	public RibbonTabController getRibbonTabController(String id) {
+		return ribbonTabs.get(id.toUpperCase());
+	}
+	
+	public void setActiveRibbonTab(String id) {
+		if (id == null || !ribbonTabs.containsKey(id)) 
+			throw new IllegalArgumentException();
+		
+		activeRibbonTab = id;
+		getRibbon().getSelectionModel().select(ribbonTabs.get(id).getTab());
+	}
+	
+	/** Returns the id of the active ribbon tab controller. */
+	public String getActiveRibbonTab() {
+		return activeRibbonTab;
 	}
 
 	

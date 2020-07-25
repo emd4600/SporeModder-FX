@@ -23,15 +23,32 @@ import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonGroup;
 import emord.javafx.ribbon.RibbonTab;
 import sporemodder.UIManager;
+import sporemodder.view.ribbons.edit.EditActionsUI;
+import sporemodder.view.ribbons.edit.TextActionsUI;
 
-public class EditRibbonTab {
+public class EditRibbonTab extends RibbonTabController {
 	
-	public static void addTab(Ribbon ribbon) {
-		RibbonTab tab = new RibbonTab("Edit");
+	public static final String ID = "EDIT";
+	
+	private EditActionsUI editActions;
+	private TextActionsUI textActions;
+	
+	@Override public void addTab(Ribbon ribbon) {
+		tab = new RibbonTab("Edit");
 		ribbon.getTabs().add(tab);
 		
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/edit/EditActionsUI").getMainNode());
-		tab.getGroups().add((RibbonGroup) UIManager.get().loadUI("ribbons/edit/TextActionsUI").getMainNode());
+		editActions = UIManager.get().loadUI("ribbons/edit/EditActionsUI");
+		textActions = UIManager.get().loadUI("ribbons/edit/TextActionsUI");
+		
+		tab.getGroups().add((RibbonGroup) editActions.getMainNode());
+		tab.getGroups().add((RibbonGroup) textActions.getMainNode());
 	}
-
+	
+	public EditActionsUI getEditActionsUI() {
+		return editActions;
+	}
+	
+	public TextActionsUI getTextActionsUI() {
+		return textActions;
+	}
 }

@@ -295,6 +295,9 @@ public class EffectUnit {
 			if (line.getArguments(args, 1)) {
 				ImportEffect effect = new ImportEffect(stream.getData().getEffectDirectory());
 				effect.setName(args.get(0));
+				if (parser.getData().hasComponent(args.get(0))) {
+					stream.addError(line.createErrorForArgument("A component with this name already exists in this file.", 0));
+				}
 				
 				parser.getData().setPosition(effect, stream.getLinePositions().get(stream.getCurrentLine()));
 				parser.getData().addComponent(effect.getName(), effect);

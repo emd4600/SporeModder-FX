@@ -156,7 +156,7 @@ public class ProjectManager extends AbstractManager {
 		
 		
 		specialItems.add(new EffectEditorItem());
-		specialItems.add(new AnimEditorItem());
+		//specialItems.add(new AnimEditorItem());
 		
 		// Load all projects
 		File projectsFolder = PathManager.get().getProjectsFolder();

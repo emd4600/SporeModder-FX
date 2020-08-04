@@ -253,8 +253,8 @@ public class HlslSyntax implements SyntaxFormatFactory {
 			}
 		}
 		
-		editor.getCodeArea().insertText(start, "/*");
-		editor.getCodeArea().insertText(end + 2, "*/");
+		text = text.substring(0, start) + "/*" + text.substring(start, end) + "*/" + text.substring(end);
+		editor.getCodeArea().replaceText(text);
 		editor.getCodeArea().selectRange(start, end + 4);
 		
 		return true;

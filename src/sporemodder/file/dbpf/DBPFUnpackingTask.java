@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	
 	// Cannot use getProgress() as it throws thread exception
 	private double progress = 0;
+	private double[] progressFraction;
 	
 	/** The list of input DBPF files, in order of priority. */
 	private final List<File> inputFiles = new ArrayList<File>();
@@ -75,7 +77,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	private File outputFolder;
 	
 	/** We will keep all files that couldn't be converted here, so that we can keep unpacking the DBPF. */
-	private final HashMap<DBPFItem, Exception> exceptions = new HashMap<DBPFItem, Exception>();
+	private final Map<DBPFItem, Exception> exceptions = new HashMap<>();
 	
 	/** All the converters used .*/
 	private final List<Converter> converters;
@@ -185,7 +187,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		}
 	}
 
-	private void unpackStream(StreamReader packageStream, Map<Integer, Set<ResourceKey>> writtenFiles) throws IOException, InterruptedException {
+	private void unpackStream(StreamReader packageStream, Map<Integer, Set<ResourceKey>> writtenFiles, double progressFraction) throws IOException, InterruptedException {
 		HashManager hasher = HashManager.get();
 			
 		updateMessage("Reading file index...");
@@ -199,16 +201,11 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		
 		System.out.println("File index successfully read, " + index.items.size() + " items.");
 		
-		double inc = 1.0;
-		
-		if (project != null) {
-			incProgress((1.0 - CLEAR_FOLDER_PROGRESS) * INDEX_PROGRESS / inputFiles.size());
-			inc -= CLEAR_FOLDER_PROGRESS;
-		}
+		incProgress(INDEX_PROGRESS * progressFraction);
+		// How much each file adds to the progress
+		double inc = (1.0 - INDEX_PROGRESS) * progressFraction / header.indexCount;
 		
 		updateMessage("Unpacking files...");
-		
-		inc = (inc * (1.0 - INDEX_PROGRESS) / header.indexCount) / inputFiles.size();
 		
 		//First search sporemaster/names.txt, and use it if it exists
 		hasher.getProjectRegistry().clear();
@@ -293,29 +290,37 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		long initialTime = System.currentTimeMillis();
 		
 		if (inputStream != null) {
-			unpackStream(inputStream, null);
+			unpackStream(inputStream, null, 1.0);
 		}
 		else {
-			double progressInc = 1.0;
+			double progressFactor = 1.0;
 			
 			if (project != null) {
 				updateMessage("Clearing folder...");
 				ProjectManager.get().initializeProject(project);
 				incProgress(CLEAR_FOLDER_PROGRESS);
 				
-				progressInc -= CLEAR_FOLDER_PROGRESS;
+				progressFactor -= CLEAR_FOLDER_PROGRESS;
 			}
-			
-			progressInc = progressInc / inputFiles.size();
 			
 			final HashMap<Integer, Set<ResourceKey>> writtenFiles = new HashMap<>();
 			boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
 			
+			long[] fileSizes = new long[inputFiles.size()];
+			long totalFileSize = 0;
+			for (int i = 0; i < fileSizes.length; ++i) {
+				fileSizes[i] = Files.size(inputFiles.get(i).toPath());
+				totalFileSize += fileSizes[i];
+			}
+			
+			int i = 0;
 			for (File inputFile : inputFiles) {
 				System.out.println("## UNPACKNG " + inputFile.getName());
 				
+				double projectProgress = progressFactor * (double)fileSizes[i] / totalFileSize;
+				
 				if (!inputFile.exists()) {
-					incProgress(progressInc);
+					incProgress(projectProgress);
 					failedDBPFs.add(inputFile);
 					continue;
 				}
@@ -323,13 +328,14 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				for (Converter converter : converters) converter.reset();
 				
 				try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
-					unpackStream(packageStream, checkFiles ? writtenFiles : null);
+					unpackStream(packageStream, checkFiles ? writtenFiles : null, projectProgress);
 				}
 				catch (Exception e) {
 					return e;
 				}
 				
 				System.out.println();
+				++i;
 			}
 		}
 		
@@ -348,7 +354,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	 * Returns a Map with all the items that could not be unpacked/converted, mapped to the exception that caused that error.
 	 * @return
 	 */
-	public HashMap<DBPFItem, Exception> getExceptions() {
+	public Map<DBPFItem, Exception> getExceptions() {
 		return exceptions;
 	}
 	

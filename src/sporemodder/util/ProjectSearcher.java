@@ -161,7 +161,9 @@ public class ProjectSearcher {
 						(data[i+j] == wordBytes[wordIndex][j] || data[i+j] == wordBytesUppercase[wordIndex][j])) {
 					++j;
 				}
-				if (j == wordBytes[wordIndex].length) return true;
+				if (j == wordBytes[wordIndex].length) {
+					return true;
+				}
 			}
 		}
 		
@@ -415,7 +417,7 @@ public class ProjectSearcher {
 											else {
 												task = new FileSearchRecursive(relativePath + File.separatorChar + name, null, foundWords, searchFinished);
 											}
-											task.fork();
+											task.invoke();
 										}
 									}
 								}

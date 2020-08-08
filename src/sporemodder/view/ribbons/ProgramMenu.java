@@ -32,6 +32,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -76,6 +77,7 @@ public class ProgramMenu implements UIUpdateListener {
 	private Button openProjectButton;
 	private Button unpackPresetsButton;
 	private Button importOldProject;
+	private Button addExternalProject;
 	
 	private Button packButton;
 	private Button unpackButton;
@@ -208,24 +210,34 @@ public class ProgramMenu implements UIUpdateListener {
 		newProjectButton.setOnAction((event) -> {
 			CreateProjectUI.show();
 		});
+		newProjectButton.setTooltip(new Tooltip("Creates a new empty project to start modding."));
 		
 		openProjectButton = createButton("Open project...", "Ctrl+O");
 		openProjectButton.setOnAction((event) -> {
 			OpenProjectUI.show();
 		});
+		openProjectButton.setTooltip(new Tooltip("Opens an existing project."));
 		
 		unpackPresetsButton = createButton("Unpack Presets", null);
 		unpackPresetsButton.setOnAction((event) -> {
 			UnpackPresetsUI.show(null, false);
 			UIManager.get().setOverlay(false);
 		});
+		unpackPresetsButton.setTooltip(new Tooltip("Unpacks groups of packages that are useful for investigation and modding."));
 		
 		importOldProject = createButton("Import old project", null);
 		importOldProject.setOnAction((event) -> {
 			ProjectManager.get().importOldProject();
 		}); 
+		importOldProject.setTooltip(new Tooltip("Imports a project from older SporeModder versions, converting .prop.xml into the modern .prop.prop_t format."));
 		
-		vbox.getChildren().addAll(newProjectButton, openProjectButton, unpackPresetsButton, importOldProject);
+		addExternalProject = createButton("Add external project", null);
+		addExternalProject.setOnAction((event) -> {
+			ProjectManager.get().addExternalProject();
+		}); 
+		addExternalProject.setTooltip(new Tooltip("Adds an external folder as a project, allowing to use SporeModder FX on it."));
+		
+		vbox.getChildren().addAll(newProjectButton, openProjectButton, unpackPresetsButton, importOldProject, addExternalProject);
 		
 		vbox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 		
@@ -237,11 +249,13 @@ public class ProgramMenu implements UIUpdateListener {
 				}, "Cannot run game.");
 			}
 		});
+		packRunButton.setTooltip(new Tooltip("Packs the contents of the projects into .package file and runs Spore."));
 		
 		packButton = createButton("Pack mod", "Ctrl+P", createIcon("pack.png"));
 		packButton.setOnAction((event) -> {
 			ProjectManager.get().packActive(false);
 		});
+		packButton.setTooltip(new Tooltip("Packs the contents of the projects into .package file."));
 		
 		runButton = createButton("Run game", "F7", createIcon("run-without-pack.png"));
 		runButton.setOnAction(event -> {
@@ -249,16 +263,19 @@ public class ProgramMenu implements UIUpdateListener {
 				GameManager.get().runGame();
 			}, "Cannot run game.");
 		});
+		runButton.setTooltip(new Tooltip("Runs Spore."));
 		
 		unpackButton = createButton("Unpack mod", "Ctrl+U", createIcon("unpack.png"));
 		unpackButton.setOnAction((event) -> {
 			UnpackPackageUI.showChooser();
 		});
+		unpackButton.setTooltip(new Tooltip("Unpacks the contents of a .package file into a new project."));
 		
 		packDebugButton = createButton("Pack mod with debug info", null, createIcon("debug-pack.png"));
 		packDebugButton.setOnAction((event) -> {
 			ProjectManager.get().packActive(true);
 		});
+		packDebugButton.setTooltip(new Tooltip("Packs the contents of the projects into .package file, with debug information for the ModCreatorKit"));
 		
 		vbox.getChildren().addAll(packRunButton, packButton, runButton, unpackButton, packDebugButton);
 		
@@ -266,6 +283,7 @@ public class ProgramMenu implements UIUpdateListener {
 		settingsButton.setOnAction(event -> {
 			ProgramSettingsUI.show();
 		});
+		settingsButton.setTooltip(new Tooltip("Change the program settings."));
 		
 		vbox.getChildren().add(new Separator(Orientation.HORIZONTAL));
 		

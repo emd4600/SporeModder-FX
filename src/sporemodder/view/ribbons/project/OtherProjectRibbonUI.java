@@ -50,7 +50,7 @@ public class OtherProjectRibbonUI implements Controller, UIUpdateListener {
 		btnSettings.setGraphic(ui.loadIcon("config.png", 0, 38, true));
 		
 		btnSettings.setOnAction((event) -> {
-			ProjectSettingsUI.show(ProjectManager.get().getActive());
+			ProjectSettingsUI.show(ProjectManager.get().getActive(), true);
 		});
 		
 		UIManager.get().addListener(this);

@@ -58,6 +58,11 @@
                         <String fx:value="hyperlink" />
                         <String fx:value="button-no-background" />
                      </styleClass></Button>
+                  <Button fx:id="btnAddExternal" layoutX="10.0" layoutY="56.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="192.0" text="Add External Project">
+                     <styleClass>
+                        <String fx:value="hyperlink" />
+                        <String fx:value="button-no-background" />
+                     </styleClass></Button>
                </children>
             </VBox>
             <VBox id="introUI-projectList" fx:id="recentProjectsList" prefHeight="466.0" prefWidth="384.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />

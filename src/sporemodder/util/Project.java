@@ -98,6 +98,8 @@ public class Project {
 	
 	/** The folder that contains the data of the project. */
 	private File folder;
+	/** External projects have a file in the Projects folder that links to the real path. */
+	private File externalLink;
 	
 	private final List<Project> sources = new ArrayList<>();
 	
@@ -120,7 +122,13 @@ public class Project {
 	
 	
 	public Project(String name) {
+		this(name, new File(PathManager.get().getProjectsFolder(), name), null);
+	}
+	
+	public Project(String name, File folder, File externalLink) {
 		this.name = name;
+		this.folder = folder;
+		this.externalLink = externalLink;
 		
 		packPath = GamePathConfiguration.useGame();
 		
@@ -310,8 +318,31 @@ public class Project {
 		return name;
 	}
 	
+	// This method assumes that the name is valid and there aren't any other projects with the name
 	private void onNameChanged(String oldName) {
-		folder = new File(PathManager.get().getProjectsFolder(), name);
+		if (oldName != null && !oldName.equalsIgnoreCase(name)) {
+			if (externalLink != null) {
+				File newFile = new File(externalLink.getParentFile(), name);
+				if (newFile.exists()) {
+					throw new IllegalArgumentException("File " + newFile.getAbsolutePath() + " already exists");
+				}
+				if (!externalLink.renameTo(newFile)) {
+					throw new IllegalArgumentException("Could not rename project external link file");
+				}
+				externalLink = newFile;
+			}
+			else {
+				File newFolder = new File(PathManager.get().getProjectsFolder(), name);
+				if (newFolder.exists()) {
+					throw new IllegalArgumentException("Folder " + newFolder.getAbsolutePath() + " already exists");
+				}
+				if (!folder.renameTo(newFolder)) {
+					throw new IllegalArgumentException("Could not rename project folder");
+				}
+				folder.renameTo(newFolder);
+				folder = newFolder;
+			}
+		}
 		
 		// Keep the package name if it was not generated automatically
 		if (oldName == null || packageName == getDefaultPackageName(oldName)) {
@@ -324,6 +355,7 @@ public class Project {
 		return name;
 	}
 	
+	/** Changes the name of this project. This also renames the project folder or external link file. */
 	public void setName(String name) {
 		String oldName = this.name;
 		this.name = name;
@@ -376,5 +408,10 @@ public class Project {
 	 */
 	public Map<String, Object> getExtraProperties() {
 		return extraProperties;
+	}
+
+	/** For projects that are not stored in the standard Projects folder, this sets the file that links to the real folder. */
+	public void setExternalLinkFile(File linkFile) {
+		this.externalLink = linkFile;
 	}
 }

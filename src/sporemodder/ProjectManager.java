@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,6 +86,7 @@ import sporemodder.view.ProjectTreeItem;
 import sporemodder.view.ProjectTreeUI;
 import sporemodder.view.dialogs.PackProgressUI;
 import sporemodder.view.dialogs.ProgressDialogUI;
+import sporemodder.view.dialogs.ProjectSettingsUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
 import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
@@ -165,9 +167,32 @@ public class ProjectManager extends AbstractManager {
 		File[] children = projectsFolder.listFiles();
 		
 		for (File folder : children) {
+			Project project = null;
 			if (folder.isDirectory()) {
-				
-				Project project = new Project(folder.getName());
+				project = new Project(folder.getName());
+			}
+			else {
+				try {
+					List<String> lines = Files.readAllLines(folder.toPath());
+					
+					if (lines.size() != 1) {
+						System.err.println("File " + folder.getAbsolutePath() + " doesn't follow external project link format");
+					}
+					else {
+						File externalFolder = new File(lines.get(0).trim());
+						if (externalFolder.isDirectory()) {
+							project = new Project(folder.getName(), externalFolder, folder);
+						}
+						else {
+							System.err.println("Error reading external project link " + folder.getName() + ": folder " + externalFolder.getAbsolutePath() + " does not exist.");
+						}
+					}
+				} 
+				catch (IOException e) {
+					System.err.println("Error reading external project link " + folder.getAbsolutePath());
+				}
+			}
+			if (project != null) {
 				projects.put(project.getName().toLowerCase(), project);
 			}
 		}
@@ -811,7 +836,7 @@ public class ProjectManager extends AbstractManager {
 	public void rename(Project project, String name) {
 		Project existing = getProject(name);
 		if (existing == null || existing == project) {
-			projects.remove(project.getName());
+			projects.remove(project.getName().toLowerCase());
 			
 			project.setName(name);
 			
@@ -819,6 +844,7 @@ public class ProjectManager extends AbstractManager {
 			
 			if (project == activeProject) {
 				rootItem.getValue().setName(name);
+				getTreeView().refresh();
 			}
 		}
 	}
@@ -2071,6 +2097,49 @@ public class ProjectManager extends AbstractManager {
 		UIManager.get().setOverlay(false);
 		
 		setActive(project);
+		
+		return true;
+	}
+	
+	public boolean addExternalProject() {
+		UIManager.get().setOverlay(true);
+		
+		DirectoryChooser chooser = new DirectoryChooser();
+		File sourceFolder = chooser.showDialog(UIManager.get().getScene().getWindow());
+		
+		if (sourceFolder == null) {
+			UIManager.get().setOverlay(false);
+			return false;
+		}
+		
+		boolean loadedCorrectly = true;
+		final Project project = new Project(sourceFolder.getName(), sourceFolder, null);
+		project.loadSettings();
+		if (ProjectSettingsUI.show(project, false)) {
+			File linkFile = new File(PathManager.get().getProjectsFolder(), project.getName());
+			
+			if (!UIManager.get().tryAction(() -> {
+				Files.write(linkFile.toPath(), Collections.singletonList(sourceFolder.getAbsolutePath()), StandardOpenOption.CREATE_NEW);
+				project.setExternalLinkFile(linkFile);
+				project.saveSettings();
+				
+				projects.put(project.getName().toLowerCase(), project);
+			}, "Error adding external project")) {
+				loadedCorrectly = false;
+			}
+		}
+		else {
+			loadedCorrectly = false;
+		}
+		
+		UIManager.get().setOverlay(false);
+		
+		if (loadedCorrectly) {
+			setActive(project);
+			
+			// Update the UI
+			UIManager.get().notifyUIUpdate(false);
+		}
 		
 		return true;
 	}

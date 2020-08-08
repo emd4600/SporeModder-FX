@@ -50,6 +50,7 @@ public class IntroUI implements Controller {
 	@FXML private Button btnPresets;
 	@FXML private Button btnUnpack;
 	@FXML private Button btnImport;
+	@FXML private Button btnAddExternal;
 
 	@Override
 	public Node getMainNode() {
@@ -89,6 +90,11 @@ public class IntroUI implements Controller {
 			ProjectManager.get().importOldProject();
 		});
 		btnImport.setTooltip(new Tooltip("Imports a project from older SporeModder versions, converting .prop.xml into the modern .prop.prop_t format."));
+		
+		btnAddExternal.setOnAction(event -> {
+			ProjectManager.get().addExternalProject();
+		});
+		btnAddExternal.setTooltip(new Tooltip("Adds an external folder as a project, allowing to use SporeModder FX on it."));
 		
 		List<Project> recentProjects = ProjectManager.get().getRecentProjects(RECENT_COUNT);
 		recentProjectsList.getChildren().clear();

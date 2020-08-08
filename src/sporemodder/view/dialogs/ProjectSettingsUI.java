@@ -20,6 +20,7 @@ package sporemodder.view.dialogs;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -182,10 +183,10 @@ public class ProjectSettingsUI implements Controller {
 		return mainNode;
 	}
 	
-	private void saveSettings() {
+	private void saveSettings(boolean saveSettingsOnExit) {
 		boolean nameChanged = !tfName.getText().equals(project.getName());
 		
-		if (nameChanged) {
+		if (saveSettingsOnExit && nameChanged) {
 			ProjectManager.get().rename(project, tfName.getText());
 		}
 		
@@ -223,16 +224,18 @@ public class ProjectSettingsUI implements Controller {
 		
 		project.setPackageSignature(signatureBox.getSelectionModel().getSelectedItem());
 		
-		project.saveSettings();
-		
-		UIManager.get().notifyUIUpdate(false);
-		
-		if (sourcesChanged) {
-			ProjectManager.get().refreshProjectTree();
+		if (saveSettingsOnExit) {
+			project.saveSettings();
+			
+			UIManager.get().notifyUIUpdate(false);
+			
+			if (sourcesChanged) {
+				ProjectManager.get().refreshProjectTree();
+			}
 		}
 	}
 	
-	private void showInternal() {
+	private boolean showInternal(boolean saveSettingsOnExit) {
 		dialog.setTitle("Project Settings (" + project.getName() + ")");
 		
 		dialog.getDialogPane().setContent(mainNode);
@@ -265,17 +268,20 @@ public class ProjectSettingsUI implements Controller {
 		});
 
 		
-		UIManager.get().showDialog(dialog).ifPresent(result -> {
-			if (result == ButtonType.APPLY) {
-				saveSettings();
-			}
-		});
+		Optional<ButtonType> result = UIManager.get().showDialog(dialog);
+		if (result.isPresent() && result.get() == ButtonType.APPLY) {
+			UIManager.get().tryAction(() -> saveSettings(saveSettingsOnExit), "Couldn't save project settings");
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
-	public static void show(Project project) {
+	public static boolean show(Project project, boolean saveSettingsOnExit) {
 		ProjectSettingsUI node = UIManager.get().loadUI("dialogs/ProjectSettingsUI");
 		node.dialog = new Dialog<ButtonType>();
 		node.project = project;
-		node.showInternal();
+		return node.showInternal(saveSettingsOnExit);
 	}
 }

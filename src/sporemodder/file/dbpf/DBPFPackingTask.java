@@ -262,11 +262,16 @@ public class DBPFPackingTask extends Task<Void> {
 		
 		long time = System.currentTimeMillis();
 		
-		DBPFPacker packer;
-		if (outputStream != null) packer = new DBPFPacker(outputStream, false);
-		else packer = new DBPFPacker(outputFile);
-		
 		try {
+			DBPFPacker packer;
+			if (outputStream != null) packer = new DBPFPacker(outputStream, false);
+			else {
+				if (!Files.isWritable(outputFile.getParentFile().toPath())) {
+					throw new Exception("Access denied. Open the program using SporeModderFX.exe to have access permissions.");
+				}
+				packer = new DBPFPacker(outputFile);
+			}
+			
 			this.packer = packer;
 			
 			pack();

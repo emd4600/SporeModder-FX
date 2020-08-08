@@ -88,6 +88,7 @@ import sporemodder.view.dialogs.PackProgressUI;
 import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.ProjectSettingsUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.editors.AbstractEditableEditor;
 import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
@@ -1097,6 +1098,17 @@ public class ProjectManager extends AbstractManager {
 	 * the operation is finished.
 	 */
 	public boolean pack(Project project, boolean storeDebugInformation) {
+		if (project == activeProject) {
+			ItemEditor editor = EditorManager.get().getActiveEditor();
+			if (editor != null && editor.isEditable()) {
+				AbstractEditableEditor editable = (AbstractEditableEditor)editor;
+				if (!editable.isSaved()) {
+					editable.setActive(false);
+					editable.setActive(true);
+				}
+			}
+		}
+		
 		File outputPackage = project.getOutputPackage();
 		if (outputPackage == null) {
 			UIManager.get().showDialog(new Alert(AlertType.ERROR, "The specified output folder does not exist."));

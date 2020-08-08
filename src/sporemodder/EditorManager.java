@@ -187,6 +187,15 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		return activeEditorTab == null ? null : activeEditorTab.item;
 	}
 	
+	/** Returns whether any editor has opened the given item. */
+	public boolean hasItem(ProjectItem item) {
+		for (Tab tab : paneUI.getTabPane().getTabs()) {
+			EditorTab t = (EditorTab) tab;
+			if (t.item == item) return true;
+		}
+		return true;
+	}
+	
 	/**
 	 * Loads the given item into the main editor tab, making it visible if it was closed. 
 	 * This will choose the appropriate editor and edit this file with it.

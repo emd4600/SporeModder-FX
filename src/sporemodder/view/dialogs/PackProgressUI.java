@@ -121,8 +121,13 @@ public class PackProgressUI implements Controller {
 				ProjectItem item = ProjectManager.get().getItem(relativePath);
 				EditorManager mgr = EditorManager.get();
 				try {
-					mgr.loadFile(item);
-					mgr.moveFileToNewTab(item);
+					if (mgr.hasItem(item)) {
+						mgr.loadFile(item);
+					}
+					else {
+						mgr.loadFile(item);
+						mgr.moveFileToNewTab(item);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

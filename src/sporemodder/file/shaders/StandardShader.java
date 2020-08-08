@@ -28,6 +28,7 @@ import java.util.TreeMap;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
+import sporemodder.file.dbpf.DBPFPacker;
 
 public class StandardShader extends MaterialShader {
 	public static class StandardShaderEntry {
@@ -108,15 +109,19 @@ public class StandardShader extends MaterialShader {
 		out.writeUByte(0xFF);
 	}
 	
-	public void compile(StandardShaderEntry entry, File sourceVertexFile, File sourcePixelFile, File includeFolder) throws IOException, InterruptedException {
+	public void compile(StandardShaderEntry entry, File sourceVertexFile, File sourcePixelFile, File includeFolder, DBPFPacker packer) throws IOException, InterruptedException {
 		FXCompiler fxc = FXCompiler.get();
+		if (packer != null) packer.setCurrentFile(sourceVertexFile);
 		File compiledVShader = fxc.compile(FXCompiler.VS_PROFILE, sourceVertexFile, includeFolder);
+		if (packer != null) packer.setCurrentFile(sourcePixelFile);
 		File compiledPShader = fxc.compile(FXCompiler.PS_PROFILE, sourcePixelFile, includeFolder);
 		
 		entry.vertexShader = Files.readAllBytes(compiledVShader.toPath());
 		entry.pixelShader = Files.readAllBytes(compiledPShader.toPath());
 		
+		if (packer != null) packer.setCurrentFile(sourceVertexFile);
 		fxc.getUniformData(entry.vertexShader, entry.vertexShaderData);
+		if (packer != null) packer.setCurrentFile(sourcePixelFile);
 		fxc.getUniformData(entry.pixelShader, entry.pixelShaderData);
 		
 		compiledVShader.delete();

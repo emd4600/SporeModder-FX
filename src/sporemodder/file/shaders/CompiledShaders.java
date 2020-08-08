@@ -301,7 +301,7 @@ public class CompiledShaders {
 				throw new IOException("Missing pixel shader for '" + stdName + "'");
 			}
 			
-			shader.compile(entry, sourceVertexFile, sourcePixelFile, sourceFolder);
+			shader.compile(entry, sourceVertexFile, sourcePixelFile, sourceFolder, packer);
 		}
 		
 		if (precompiledVSHFile != null) {

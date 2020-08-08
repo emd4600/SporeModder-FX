@@ -191,12 +191,25 @@ public class ProjectItem {
 		if (file != null) {
 			// The project is not always the same as in folder
 			// A workaround: relativize with Projects folder
-			Path path;
+			Path filePath = file.toPath();
+			Path path = null;
 			if (project != null) {
-				path = project.getFolder().getParentFile().toPath().relativize(file.toPath());
+				Path projectParentPath = project.getFolder().getParentFile().toPath();
+				if (filePath.startsWith(projectParentPath)) {
+					path = projectParentPath.relativize(filePath);
+				}
+				else {
+					for (Project p : project.getSources()) {
+						projectParentPath = p.getFolder().getParentFile().toPath();
+						if (filePath.startsWith(projectParentPath)) {
+							path = projectParentPath.relativize(filePath);
+							break;
+						}
+					}
+				}
 			}
 			else {
-				path = PathManager.get().getProjectsFolder().toPath().relativize(file.toPath());
+				path = PathManager.get().getProjectsFolder().toPath().relativize(filePath);
 			}
 			return path.subpath(1, path.getNameCount()).toString();
 		}

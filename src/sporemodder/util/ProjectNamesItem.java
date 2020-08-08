@@ -98,7 +98,7 @@ public class ProjectNamesItem extends ProjectItem {
 			int lineIndex = 0;
 			for (String line : text.split("\n")) {
 				int indexOf = line.indexOf('~');
-				if (indexOf != -1) {
+				if (indexOf != -1 && !(indexOf + 1 < line.length() && !Character.isWhitespace(indexOf + 1))) {
 					if (indexOf == 0 || !(
 							Character.isAlphabetic(line.charAt(indexOf - 1)) || Character.isDigit(line.charAt(indexOf - 1)) 
 							|| line.charAt(indexOf - 1) == '_' 

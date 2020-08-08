@@ -149,8 +149,7 @@ public class NameRegistry {
 		
 		for (Map.Entry<Integer, String> entry : names.entrySet()) {
 			String name = entry.getValue();
-			int hash = hashManager.fnvHash(name);
-			if (hash != entry.getKey()) {
+			if (name.endsWith("~") || hashManager.fnvHash(name) != entry.getKey()) {
 				stream.writeString(name + "\t0x" + Integer.toHexString(entry.getKey()) + eol, StringEncoding.ASCII);
 			} else {
 				stream.writeString(name + eol, StringEncoding.ASCII);

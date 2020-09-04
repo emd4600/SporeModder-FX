@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -89,7 +90,6 @@ import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.ProjectSettingsUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
 import sporemodder.view.editors.AbstractEditableEditor;
-import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
 
@@ -211,7 +211,7 @@ public class ProjectManager extends AbstractManager {
 				},
 				"EP1_PatchData", "Spore_EP1_Data", "PatchData", "Spore_Game", "Spore_Graphics") {
 			
-			@Override public void getFiles(HashMap<String, File> files) {
+			@Override public void getFiles(Map<String, File> files) {
 				if (GameManager.get().hasGalacticAdventures()) {
 					File folder = GameManager.get().getGalacticAdventures().getDataFolder();
 					files.put("EP1_PatchData", new File(folder, "EP1_PatchData.package"));
@@ -233,7 +233,7 @@ public class ProjectManager extends AbstractManager {
 				},
 				"EP1_PatchData", "Spore_Audio1", "Spore_Audio2") {
 			
-			@Override public void getFiles(HashMap<String, File> files) {
+			@Override public void getFiles(Map<String, File> files) {
 				if (GameManager.get().hasGalacticAdventures()) {
 					File folder = GameManager.get().getGalacticAdventures().getDataFolder();
 					files.put("EP1_PatchData", new File(folder, "EP1_PatchData.package"));
@@ -249,7 +249,7 @@ public class ProjectManager extends AbstractManager {
 		presets.add(new ProjectPreset("Player Creations", "The packages that contain data about player creations.", false, null,
 				"GraphicsCache", "EditorSaves", "Pollination") {
 			
-			@Override public void getFiles(HashMap<String, File> files) {
+			@Override public void getFiles(Map<String, File> files) {
 				File folder = GameManager.get().getAppDataFolder();
 				if (GameManager.get().hasGalacticAdventures()) {
 					files.put("GraphicsCache", new File(folder, "GraphicsCache.package"));
@@ -1359,11 +1359,11 @@ public class ProjectManager extends AbstractManager {
 		for (int progressIndex = 0; progressIndex < presets.size(); progressIndex++) {
 			ProjectPreset preset = presets.get(progressIndex);
 			
-			HashMap<String, File> files = new HashMap<String, File>();
+			Map<String, File> files = new LinkedHashMap<String, File>();
 			preset.getFiles(files);
 			
-			HashMap<File, String> fileToName = new HashMap<File, String>();
-			for (HashMap.Entry<String, File> entry : files.entrySet()) {
+			Map<File, String> fileToName = new HashMap<File, String>();
+			for (Map.Entry<String, File> entry : files.entrySet()) {
 				fileToName.put(entry.getValue(), entry.getKey());
 			}
 			
@@ -2203,13 +2203,4 @@ public class ProjectManager extends AbstractManager {
 			return false;
 		}
 	}
-	
-//	public static void main(String[] args) throws IOException {
-//		MainApp.testInit();
-//		
-//		File file = new File("C:\\Users\\Eric\\Downloads\\DI_ItemDrop.prop.xml");
-//		File destFolder = new File("C:\\Users\\Eric\\Desktop");
-//		
-//		ProjectManager.get().importFile(file, destFolder);
-//	}
 }

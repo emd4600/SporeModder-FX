@@ -19,7 +19,7 @@
 package sporemodder.util;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Map;
 
 import javafx.scene.control.Tooltip;
 import sporemodder.file.dbpf.DBPFUnpackingTask.DBPFItemFilter;
@@ -73,7 +73,7 @@ public abstract class ProjectPreset {
 		return projectNames;
 	}
 	
-	public abstract void getFiles(HashMap<String, File> files);
+	public abstract void getFiles(Map<String, File> files);
 	
 	public boolean isRecommendable() {
 		return isRecommendable;

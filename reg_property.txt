@@ -5207,8 +5207,5 @@ modelTexturesLOD0
 modelTexturesLOD1
 modelTexturesLOD2
 modelTexturesLOD3
-modelTexturesLODHiKeys
-modelTexturesLOD0Keys
-modelTexturesLOD1Keys
-modelTexturesLOD2Keys
-modelTexturesLOD3Keys
+
+paletteItemUIClassId

@@ -77973,3 +77973,28 @@ kCnvMission~	0x7B1F7D82
 kCnvCityBuyAcceptedHigh~	0x6668560E
 kCnvCityBuyAccepted~	0x8650BD5B
 kCnvEndTradeRoute~	0x8A43C6D9
+TriggerConfigScenarioEdit
+TriggerConfigWASDScenarioEdit_fr-fr
+UIMachineScenarioEdit
+strokestyle1
+AlphaTestDissolveMat
+AddInkLines
+AndyWarholMaterialRuntime
+CompressDayNightMaterial
+ContrastDayNightMaterial
+DOFBlurMaterial
+DOF2Material
+depthCopyToAlpha1
+depthCopyMaterial
+depthEdgeMaterial
+crayonEdgeMaterial
+inkEdgeMaterial
+effectStarMaterial
+galacticStar_material
+ImageLighting
+GenNMap
+MakeHeightMap
+planetSimpleGrassWave_material
+RenderThresholdMaterial1
+RenderThresholdMaterial2
+SSAO

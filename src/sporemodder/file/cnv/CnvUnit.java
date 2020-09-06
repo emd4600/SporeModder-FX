@@ -25,6 +25,9 @@ import java.util.List;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import sporemodder.HashManager;
+import sporemodder.PathManager;
+import sporemodder.UIManager;
+import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptLine;
@@ -33,8 +36,19 @@ import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.cnv.CnvAnimation.CnvAnimationVariation;
 import sporemodder.file.cnv.CnvDialog.CnvDialogResponse;
+import sporemodder.util.NameRegistry;
 
 public class CnvUnit {
+	
+	public static NameRegistry FLAGS_REGISTRY;
+	
+	public static void loadNameRegistry() {
+		FLAGS_REGISTRY = new NameRegistry(HashManager.get(), "Conversation flags registry", "reg_cnv.txt");
+		
+		UIManager.get().tryAction(() -> {
+			FLAGS_REGISTRY.read(PathManager.get().getProgramFile(FLAGS_REGISTRY.getFileName()));
+		}, "The conversation flags registry (reg_cnv.txt) is corrupt or missing.");
+	}
 	
 	public final List<CnvAnimation> animations = new ArrayList<>();
 	public final List<CnvDialog> dialogs = new ArrayList<>();
@@ -57,7 +71,9 @@ public class CnvUnit {
 					writer.command(name);
 					added = true;
 				}
-				writer.arguments(i);
+				String str = FLAGS_REGISTRY.getName(i);
+				if (str != null) writer.arguments(str);
+				else writer.arguments(i);
 			}
 		}
 		return added;
@@ -71,10 +87,34 @@ public class CnvUnit {
 					writer.option(name);
 					added = true;
 				}
-				writer.arguments(i);
+				String str = FLAGS_REGISTRY.getName(i);
+				if (str != null) writer.arguments(str);
+				else writer.arguments(i);
 			}
 		}
 		return added;
+	}
+	
+	protected static void parseFlags(ArgScriptStream<CnvUnit> stream, ArgScriptArguments args, boolean[] flags) {
+		Integer value;
+		for (int i = 0; i < args.size(); ++i) {
+			String arg = args.get(i);
+			if (Character.isDigit(arg.charAt(0))) {
+				if ((value = stream.parseInt(args, i)) != null) {
+					flags[value] = true;
+				}
+			}
+			else {
+				value = FLAGS_REGISTRY.getHash(arg);
+				if (value == null) {
+					stream.addError(new DocumentError("Unrecognised flag name",
+							args.getRealPosition(args.getPosition(i)), args.getRealPosition(args.getEndPosition(i))));
+				}
+				else {
+					flags[value] = true;
+				}
+			}
+		}
 	}
 
 	public void read(StreamReader stream) throws IOException {
@@ -261,30 +301,30 @@ public class CnvUnit {
 						dialog.value1 = value.booleanValue();
 					}
 				}));
-				this.addParser("value2", ArgScriptParser.create((parser, line) -> {
+				this.addParser(ArgScriptParser.create((parser, line) -> {
 					Boolean value = null;
 					if (line.getArguments(args, 1) && (value = stream.parseBoolean(args, 0)) != null) {
-						dialog.value2 = value.booleanValue();
+						dialog.showAccept = value.booleanValue();
 					}
-				}));
-				this.addParser("value3", ArgScriptParser.create((parser, line) -> {
+				}), "value2", "showAccept");
+				this.addParser(ArgScriptParser.create((parser, line) -> {
 					Boolean value = null;
 					if (line.getArguments(args, 1) && (value = stream.parseBoolean(args, 0)) != null) {
-						dialog.value3 = value.booleanValue();
+						dialog.showDecline = value.booleanValue();
 					}
-				}));
+				}), "value3", "showDecline");
 				this.addParser("value4", ArgScriptParser.create((parser, line) -> {
 					Boolean value = null;
 					if (line.getArguments(args, 1) && (value = stream.parseBoolean(args, 0)) != null) {
 						dialog.value4 = value.booleanValue();
 					}
 				}));
-				this.addParser("value5", ArgScriptParser.create((parser, line) -> {
+				this.addParser(ArgScriptParser.create((parser, line) -> {
 					Boolean value = null;
 					if (line.getArguments(args, 1) && (value = stream.parseBoolean(args, 0)) != null) {
-						dialog.value5 = value.booleanValue();
+						dialog.showStatic = value.booleanValue();
 					}
-				}));
+				}), "value5", "showStatic");
 				this.addParser("action", ArgScriptParser.create((parser, line) -> {
 					Integer value = null;
 					if (line.getArguments(args, 1, 2)) {
@@ -337,26 +377,30 @@ public class CnvUnit {
 							response.texts.add(text);
 						}));
 						
-						this.addParser("flags1", ArgScriptParser.create((parser, line) -> {
-							final List<Integer> flags = new ArrayList<>();
-							if (line.getArguments(args, 1, Integer.MAX_VALUE) && parser.getStream().parseInts(args, flags))
-								for (int i : flags) response.flags1[i] = true; 
-						}));
-						this.addParser("flags2", ArgScriptParser.create((parser, line) -> {
-							final List<Integer> flags = new ArrayList<>();
-							if (line.getArguments(args, 1, Integer.MAX_VALUE) && parser.getStream().parseInts(args, flags))
-								for (int i : flags) response.flags2[i] = true; 
-						}));
-						this.addParser("flags3", ArgScriptParser.create((parser, line) -> {
-							final List<Integer> flags = new ArrayList<>();
-							if (line.getArguments(args, 1, Integer.MAX_VALUE) && parser.getStream().parseInts(args, flags))
-								for (int i : flags) response.flags3[i] = true; 
-						}));
-						this.addParser("flags4", ArgScriptParser.create((parser, line) -> {
-							final List<Integer> flags = new ArrayList<>();
-							if (line.getArguments(args, 1, Integer.MAX_VALUE) && parser.getStream().parseInts(args, flags))
-								for (int i : flags) response.flags4[i] = true; 
-						}));
+						this.addParser(ArgScriptParser.create((parser, line) -> {
+							for (int i = 0; i < response.requireFlags.length; ++i) response.requireFlags[i] = false;
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+								parseFlags(stream, args, response.requireFlags);
+							}
+						}), "flags1", "require");
+						this.addParser(ArgScriptParser.create((parser, line) -> {
+							for (int i = 0; i < response.excludeFlags.length; ++i) response.excludeFlags[i] = false;
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+								parseFlags(stream, args, response.excludeFlags);
+							}
+						}), "flags2", "exclude");
+						this.addParser(ArgScriptParser.create((parser, line) -> {
+							for (int i = 0; i < response.enableRequireFlags.length; ++i) response.enableRequireFlags[i] = false;
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+								parseFlags(stream, args, response.enableRequireFlags);
+							}
+						}), "flags3", "enableRequire");
+						this.addParser(ArgScriptParser.create((parser, line) -> {
+							for (int i = 0; i < response.enableExcludeFlags.length; ++i) response.enableExcludeFlags[i] = false;
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+								parseFlags(stream, args, response.enableExcludeFlags);
+							}
+						}), "flags4", "enableExclude");
 						this.addParser("ints1", ArgScriptParser.create((parser, line) -> {
 							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
 						}));

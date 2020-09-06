@@ -13,10 +13,10 @@ import sporemodder.file.argscript.ArgScriptWriter;
 
 public class CnvDialog {
 	public static class CnvDialogResponse {
-		public final boolean[] flags1 = new boolean[154];
-		public final boolean[] flags2 = new boolean[154];
-		public final boolean[] flags3 = new boolean[154];
-		public final boolean[] flags4 = new boolean[154];
+		public final boolean[] requireFlags = new boolean[154];
+		public final boolean[] excludeFlags = new boolean[154];
+		public final boolean[] enableRequireFlags = new boolean[154];
+		public final boolean[] enableExcludeFlags = new boolean[154];
 		public int action;
 		public final ResourceKey key = new ResourceKey();
 		public final List<CnvText> texts = new ArrayList<>();
@@ -29,10 +29,10 @@ public class CnvDialog {
 	public int id;
 	public String name;
 	public boolean value1;
-	public boolean value2;
-	public boolean value3;
+	public boolean showAccept;
+	public boolean showDecline;
 	public boolean value4;
-	public boolean value5;
+	public boolean showStatic;
 	public int action = -1;
 	public final ResourceKey key = new ResourceKey();
 	public final List<CnvText> texts = new ArrayList<>();
@@ -43,10 +43,10 @@ public class CnvDialog {
 		name = stream.readString(StringEncoding.ASCII, stream.readInt());
 		
 		value1 = stream.readBoolean();
-		value2 = stream.readBoolean();
-		value3 = stream.readBoolean();
+		showAccept = stream.readBoolean();
+		showDecline = stream.readBoolean();
 		value4 = stream.readBoolean();
-		value5 = stream.readBoolean();
+		showStatic = stream.readBoolean();
 		action = stream.readLEInt();
 		key.setGroupID(stream.readInt());
 		key.setTypeID(stream.readInt());
@@ -64,10 +64,10 @@ public class CnvDialog {
 			CnvDialogResponse response = new CnvDialogResponse();
 			responses.add(response);
 			
-			stream.readBooleans(response.flags1);
-			stream.readBooleans(response.flags2);
-			stream.readBooleans(response.flags3);
-			stream.readBooleans(response.flags4);
+			stream.readBooleans(response.requireFlags);
+			stream.readBooleans(response.excludeFlags);
+			stream.readBooleans(response.enableRequireFlags);
+			stream.readBooleans(response.enableExcludeFlags);
 			response.action = stream.readLEInt();
 			response.key.setGroupID(stream.readInt());
 			response.key.setTypeID(stream.readInt());
@@ -100,10 +100,10 @@ public class CnvDialog {
 		stream.writeString(name, StringEncoding.ASCII);
 		
 		stream.writeBoolean(value1);
-		stream.writeBoolean(value2);
-		stream.writeBoolean(value3);
+		stream.writeBoolean(showAccept);
+		stream.writeBoolean(showDecline);
 		stream.writeBoolean(value4);
-		stream.writeBoolean(value5);
+		stream.writeBoolean(showStatic);
 		stream.writeLEInt(action);
 		stream.writeInt(key.getGroupID());
 		stream.writeInt(key.getTypeID());
@@ -114,10 +114,10 @@ public class CnvDialog {
 		
 		stream.writeLEInt(responses.size());
 		for (CnvDialogResponse r : responses) {
-			stream.writeBooleans(r.flags1);
-			stream.writeBooleans(r.flags2);
-			stream.writeBooleans(r.flags3);
-			stream.writeBooleans(r.flags4);
+			stream.writeBooleans(r.requireFlags);
+			stream.writeBooleans(r.excludeFlags);
+			stream.writeBooleans(r.enableRequireFlags);
+			stream.writeBooleans(r.enableExcludeFlags);
 			stream.writeLEInt(r.action);
 			stream.writeInt(r.key.getGroupID());
 			stream.writeInt(r.key.getTypeID());
@@ -150,20 +150,20 @@ public class CnvDialog {
 			writer.command("value1").arguments(value1);
 			blankLine = true;
 		}
-		if (value2) {
-			writer.command("value2").arguments(value2);
+		if (showAccept) {
+			writer.command("showAccept").arguments(showAccept);
 			blankLine = true;
 		}
-		if (value3) {
-			writer.command("value3").arguments(value3);
+		if (showDecline) {
+			writer.command("showDecline").arguments(showDecline);
 			blankLine = true;
 		}
 		if (value4) {
 			writer.command("value4").arguments(value4);
 			blankLine = true;
 		}
-		if (value5) {
-			writer.command("value5").arguments(value5);
+		if (showStatic) {
+			writer.command("showStatic").arguments(showStatic);
 			blankLine = true;
 		}
 		if (action != -1) {
@@ -185,19 +185,19 @@ public class CnvDialog {
 			
 			blankLine = false;
 			
-			if (CnvUnit.addArgScriptFlagCommand(writer, "flags1", response.flags1) && !blankLine) {
+			if (CnvUnit.addArgScriptFlagCommand(writer, "require", response.requireFlags) && !blankLine) {
 				writer.blankLine();
 				blankLine = true;
 			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "flags2", response.flags2) && !blankLine) {
+			if (CnvUnit.addArgScriptFlagCommand(writer, "exclude", response.excludeFlags) && !blankLine) {
 				writer.blankLine();
 				blankLine = true;
 			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "flags3", response.flags3) && !blankLine) {
+			if (CnvUnit.addArgScriptFlagCommand(writer, "enableRequire", response.enableRequireFlags) && !blankLine) {
 				writer.blankLine();
 				blankLine = true;
 			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "flags4", response.flags4) && !blankLine) {
+			if (CnvUnit.addArgScriptFlagCommand(writer, "enableExclude", response.enableExcludeFlags) && !blankLine) {
 				writer.blankLine();
 				blankLine = true;
 			}

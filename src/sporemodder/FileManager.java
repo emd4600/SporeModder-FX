@@ -89,11 +89,11 @@ public class FileManager extends AbstractManager {
 	 * Deletes all the contents of a directory. If the directory does not exist,
 	 * this method does nothing.
 	 * 
-	 * @throws UnsupportedOperationException
+	 * @throws IOException
 	 *             If there was an error while deleting the contents of the folder.
 	 * @param dir
 	 */
-	public void deleteDirectory(File dir) {
+	public void deleteDirectory(File dir) throws IOException {
 		if (!dir.exists())
 			return;
 
@@ -123,11 +123,9 @@ public class FileManager extends AbstractManager {
 					return FileVisitResult.CONTINUE;
 				}
 			});
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
-			throw new UnsupportedOperationException(e);
+		}
+		catch (Exception e) {
+			throw new IOException(e);
 		}
 	}
 	

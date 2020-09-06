@@ -297,7 +297,15 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			
 			if (project != null) {
 				updateMessage("Clearing folder...");
-				ProjectManager.get().initializeProject(project);
+				try {
+					ProjectManager.get().initializeProject(project);
+				}
+				catch (Exception e) {
+					for (File inputFile : inputFiles) {
+						failedDBPFs.add(inputFile);
+					}
+					return e;
+				}
 				incProgress(CLEAR_FOLDER_PROGRESS);
 				
 				progressFactor -= CLEAR_FOLDER_PROGRESS;

@@ -80,8 +80,11 @@ public class CreateProjectUI implements Controller {
 					}
 				}
 				
-				projectManager.initializeProject(project);
-				projectManager.setActive(project);
+				if (UIManager.get().tryAction(() -> projectManager.initializeProject(project), 
+						"Cannot initialize project. Try manually deleting the project folder in SporeModder FX\\Projects\\"))
+				{
+					projectManager.setActive(project);
+				}
 			}
 		});
 	}

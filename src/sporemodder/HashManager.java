@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
 
+import sporemodder.file.cnv.CnvUnit;
 import sporemodder.util.NameRegistry;
 
 /**
@@ -95,6 +96,8 @@ public class HashManager extends AbstractManager {
 		UIManager.get().tryAction(() -> {
 			simulatorRegistry.read(PathManager.get().getProgramFile(simulatorRegistry.getFileName()));
 		}, "The simulator attributes registry (reg_simulator.txt) is corrupt or missing.");
+		
+		CnvUnit.loadNameRegistry();
 		
 		registries.put(fileRegistry.getFileName(), fileRegistry);
 		registries.put(typeRegistry.getFileName(), typeRegistry);

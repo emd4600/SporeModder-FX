@@ -1148,7 +1148,7 @@ public class ProjectManager extends AbstractManager {
 	 * Be aware, this operation cannot be reverted.
 	 * @param project
 	 */
-	public void deleteProject(Project project) {
+	public void deleteProject(Project project) throws IOException {
 		FileManager.get().deleteDirectory(project.getFolder());
 		
 		projects.remove(project.getName().toLowerCase());
@@ -1162,7 +1162,7 @@ public class ProjectManager extends AbstractManager {
 	 * for it. It will delete any previously existing contents in the folder.
 	 * @param project
 	 */
-	public void initializeProject(Project project) {
+	public void initializeProject(Project project) throws IOException {
 		if (project.getFolder().exists()) {
 			// Ensure there isn't such folder
 			FileManager.get().deleteDirectory(project.getFolder());
@@ -2065,7 +2065,11 @@ public class ProjectManager extends AbstractManager {
 		}
 		
 		Project project = getOrCreateProject(projectName);
-		initializeProject(project);
+		if (!UIManager.get().tryAction(() -> initializeProject(project),
+				"Cannot initialize project. Try manually deleting the project folder in SporeModder FX\\Projects\\")) {
+			UIManager.get().setOverlay(false);
+			return false;
+		}
 		
 		HashManager hasher = HashManager.get();
 		hasher.setUpdateProjectRegistry(true);

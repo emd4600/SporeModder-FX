@@ -51,6 +51,8 @@ public class DirectImage extends InspectableObject implements ISporeImage {
 	private Image image;
 
 	public DirectImage(Image image, ResourceKey key) {
+		//System.out.println("key: " + key.toString() + "\nimage != null: " + (image != null));
+		//throw new Exception("AAA");
 		this.image = image;
 		this.key = key;
 	}

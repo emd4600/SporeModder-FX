@@ -78812,3 +78812,42 @@ planetScripts~	0x4084B000
 planetScriptsT1~	0x4084B100
 planetScriptsT2~	0x4084B200
 planetScriptsT3~	0x4084B300
+ScenarioEditIcon
+cursor-talktoGoal
+cursor-target-creature-friend
+cursor-target-creature-enemy
+ScenarioBehaviorEntry
+ScenarioEditBehaviorDialog_ClassPopupItem
+cursor-add-color
+cursor-no-strata
+cursor-object-scale
+cursor-translate-Z
+cursor-translate-XY
+UIMachineScenarioEdit
+TriggerConfigWASDScenarioEdit_fr-fr
+TriggerConfigScenarioEdit
+RO_CastPalErrorHeader
+RO_CastPalErrorComplexityIcon
+RO_CastPalErrorDescription
+RO_CastPalItemStance
+RO_CastPalItemTeam
+BehaviorUIObject
+ScenarioGameplaySkinning
+ScenarioEditModeBehaviorChatter
+ScenarioTalkGoalEntry
+ScenarioEditModeTextDialog3
+ScenarioChatterEntry
+SpeechBubble
+UIMachineScenarioMode
+ep1_teleporter_exit
+ep1_powerup_skinned_supporting
+Chain4
+Collection_Agent
+Collection_Controls
+Collection_CreaturePlacardSmall
+Collection_SquadControls
+ContextMenu
+cur-pickup
+cursor-combat_ready
+LoadingScreen
+cScenarioSummarizer

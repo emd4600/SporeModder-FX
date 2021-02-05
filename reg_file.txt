@@ -78851,3 +78851,13 @@ cur-pickup
 cursor-combat_ready
 LoadingScreen
 cScenarioSummarizer
+ScenarioUnset
+ScenarioGenreTemplate
+ScenarioGenreSocialize
+ScenarioGenreAttack
+ScenarioGenreDefend
+ScenarioGenreExplore
+ScenarioGenreQuest
+ScenarioGenreStory
+ScenarioGenreCollect
+ScenarioGenrePuzzle

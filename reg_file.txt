@@ -78861,3 +78861,16 @@ ScenarioGenreQuest
 ScenarioGenreStory
 ScenarioGenreCollect
 ScenarioGenrePuzzle
+uI_basic_click_a
+uI_basic_click_c
+uI_basic_rollover_a
+uI_basic_rollover_b
+uI_basic_rollover_c
+uI_basic_rollover_d
+uI_basic_rollover_e
+uI_basic_close
+crystalfpo3
+crystalfpo4
+crystalfpo5
+crystalfpo6
+icon_ravager

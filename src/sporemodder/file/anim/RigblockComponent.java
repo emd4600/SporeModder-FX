@@ -47,7 +47,7 @@ public class RigblockComponent implements AbstractComponentKeyframe {
 		RIGBLOCK_DEFORMS.put("gest", Arrays.asList(0x89E06A31, 0x998BBF67));
 		RIGBLOCK_DEFORMS.put("mout", Arrays.asList(0x89E06A31, 0x5D8D0055, 0x892788C6, 0xDD0DCEF4));
 		RIGBLOCK_DEFORMS.put("eye", Arrays.asList(0x89E06A31, 0x9891EEC7, 0x30EE8F49));
-		RIGBLOCK_DEFORMS.put("wing", Arrays.asList(0xAC04E296, 0x47F0B3D));
+		RIGBLOCK_DEFORMS.put("wing", Arrays.asList(0xAC04E296, 0x47F0B3DC));
 		RIGBLOCK_DEFORMS.put("slsh", Arrays.asList(0x998BBF67));
 		RIGBLOCK_DEFORMS.put("ear", Arrays.asList(0x39E912E1));
 		RIGBLOCK_DEFORMS.put("foot", Arrays.asList(0x47F0B3DC));
@@ -144,7 +144,7 @@ public class RigblockComponent implements AbstractComponentKeyframe {
 				compData.flags = TYPE;
 				channelParser.channel.components.add(compData);
 				
-				if (!line.hasFlag("disable")) compData.flags |= AnimationComponentData.FLAG_USED;
+				compData.parseFlags(line);
 				
 				if (line.getArguments(args, 1)) {
 					
@@ -153,7 +153,7 @@ public class RigblockComponent implements AbstractComponentKeyframe {
 					if (id != null) {
 						compData.id = id;
 						
-						String cap = channelParser.channel.getCapability();
+						String cap = channelParser.channel.primaryContext.getCapability();
 						if (cap == null) cap = "";
 						List<Integer> deforms = RIGBLOCK_DEFORMS.get(cap);
 						if (deforms == null) {

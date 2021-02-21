@@ -108,9 +108,9 @@ public class RotComponent implements AbstractComponentKeyframe {
 				compData.id = HEADER;
 				channelParser.channel.components.add(compData);
 				
-				if (!line.hasFlag("disable")) compData.flags |= AnimationComponentData.FLAG_USED;
-				
 				line.getArguments(args, 0);
+				
+				compData.parseFlags(line);
 				
 				Number value;
 				if (line.getOptionArguments(args, "flags", 1) &&

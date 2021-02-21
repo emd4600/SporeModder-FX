@@ -19,12 +19,16 @@
 package sporemodder.file.anim;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import emord.filestructures.FileStream;
 import emord.filestructures.MemoryStream;
@@ -33,6 +37,7 @@ import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
+import sporemodder.file.anim.AnimationEvent.Selector;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
@@ -47,10 +52,11 @@ public class SPAnimation {
 	
 	public final List<AnimationChannel> channels = new ArrayList<>();
 	public float length;
-	public final List<AnimationVFX> vfxList = new ArrayList<>();
+	public final List<AnimationEvent> eventList = new ArrayList<>();
+	public final AnimationPredicate predicate = new AnimationPredicate();
 	
 	// Used for parsing
-	public final Map<String, AnimationVFX> vfxMap = new HashMap<>();
+	public final Map<String, AnimationEvent> eventMap = new HashMap<>();
 	
 	public void read(StreamReader stream) throws IOException {
 		int magic = stream.readLEInt();
@@ -81,13 +87,16 @@ public class SPAnimation {
 		// 12Ch: number of animation loaded, doesn't matter
 		// 130h: version
 		
-		int vfxCount = data.getInt(0x13C);
-		long vfxPtr = data.getUInt(0x140);
+		int eventCount = data.getInt(0x13C);
+		long eventPtr = data.getUInt(0x140);
 		int channelCount = data.getInt(0x144);
 		long channelPtr = data.getUInt(0x148);
 		
 		// 14Ch: number of end pointers
 		// 150h: pointer to an array pointers, at the end of the file (but before vfx). They point to all the pointers?
+		
+		stream.seek(0x154);
+		predicate.read(stream);
 		
 		for (int i = 0; i < channelCount; ++i) {
 			data.setPointer(channelPtr);
@@ -99,12 +108,12 @@ public class SPAnimation {
 			channels.add(channel);
 		}
 		
-		for (int i = 0; i < vfxCount; ++i) {
-			data.setPointer(vfxPtr + i*0x60);
+		for (int i = 0; i < eventCount; ++i) {
+			stream.seek(eventPtr + i*0x60);
 			
-			AnimationVFX vfx = new AnimationVFX();
-			vfx.read(data);
-			vfxList.add(vfx);
+			AnimationEvent event = new AnimationEvent();
+			event.read(stream);
+			eventList.add(event);
 		}
 		
 		fixVersion(version);
@@ -118,7 +127,7 @@ public class SPAnimation {
 	
 	public void write(StreamWriter stream, String path, int id) throws IOException {
 		// They point to:
-		// - vfxPtr (0x140), if present
+		// - eventPtr (0x140), if present
 		// - channelPtr (0x148)
 		// - the pointers at channelPtr 
 		// - the pointers to Animation* at channel+04h
@@ -126,7 +135,7 @@ public class SPAnimation {
 		// - the component metadata ptr in channels
 		List<Long> offsets = new ArrayList<>();
 		
-		if (!vfxList.isEmpty()) offsets.add(0x140L);
+		offsets.add(0x140L);
 		offsets.add(0x148L);
 		
 		stream.writeLEInt(MAGIC);
@@ -146,14 +155,16 @@ public class SPAnimation {
 		stream.writeLEFloat(length);
 		stream.writePadding(0x13C - 0x124);
 		
-		stream.writeLEInt(vfxList.size());
-		stream.writeLEInt(0);  // vfx ptr,
+		stream.writeLEInt(eventList.size());
+		stream.writeLEInt(0);  // event ptr,
 		stream.writeLEInt(channels.size());
 		stream.writeLEInt(0);  // channels ptr,
 		stream.writeLEInt(0);  // offsets count,
 		stream.writeLEInt(0);  // offsets ptr,
 		
-		stream.writePadding(0x200 - 0x154);
+		predicate.write(stream);
+		
+		stream.writePadding(0x200 - 0x15C);
 		
 		long[] channelPtrs = new long[channels.size()];
 		long channelPtrsOffset = stream.getFilePointer();
@@ -170,27 +181,27 @@ public class SPAnimation {
 		}
 		
 		long offsetsOffset = stream.getFilePointer();
-		// One pointer per vfx
-		long vfxOffset = stream.getFilePointer() + 4 * (offsets.size() + vfxList.size());
-		for (int i = 0; i < vfxList.size(); ++i) {
+		// One pointer per event
+		long eventOffset = stream.getFilePointer() + 4 * (offsets.size() + eventList.size());
+		for (int i = 0; i < eventList.size(); ++i) {
 			// The pointer to the name is at 0x40; it's only written if ID != 0
-			if (vfxList.get(i).id != 0) {
-				offsets.add(vfxOffset + 0x60*i + 0x40);
+			if (eventList.get(i).id != 0) {
+				offsets.add(eventOffset + 0x60*i + 0x40);
 			}
 		}
 		
 		for (long offset : offsets) stream.writeLEUInt(offset);
 		
-		if (!vfxList.isEmpty()) {
-			long vfxNamesOffset = vfxOffset + vfxList.size()*0x60;
+		if (!eventList.isEmpty()) {
+			long eventNamesOffset = eventOffset + eventList.size()*0x60;
 			
-			for (AnimationVFX vfx : vfxList) {
-				vfx.write(stream, vfxNamesOffset);
-				vfxNamesOffset += vfx.name.length() + 1;
+			for (AnimationEvent event : eventList) {
+				event.write(stream, eventNamesOffset);
+				eventNamesOffset += event.name.length() + 1;
 			}
 			
-			for (AnimationVFX vfx : vfxList) {
-				stream.writeCString(vfx.name, StringEncoding.ASCII);
+			for (AnimationEvent event : eventList) {
+				stream.writeCString(event.name, StringEncoding.ASCII);
 			}
 		}
 		
@@ -204,25 +215,29 @@ public class SPAnimation {
 		
 		// Fix the header pointers
 		stream.seek(0x13C);
-		stream.writeLEInt(vfxList.size());
-		stream.writeLEUInt(vfxOffset);
+		stream.writeLEInt(eventList.size());
+		stream.writeLEUInt(eventOffset);
 		stream.writeLEInt(channels.size());
 		stream.writeLEUInt(channelPtrsOffset);
 		stream.writeLEInt(offsets.size());
 		stream.writeLEUInt(offsetsOffset);
 	}
 	
-	public String toArgScript() throws IOException {
+	public ArgScriptWriter toArgScript() throws IOException {
 		ArgScriptWriter writer = new ArgScriptWriter();
 		
 		// We don't write it because it doesn't matter, Spore replaces it with the file ID
 		//writer.command("id").arguments(HashManager.get().getFileName(id));
 		writer.command("length").floats(length);
+		if (!predicate.isDefault()) {
+			writer.command("branchPredicate");
+			predicate.toArgScript(writer);
+		}
 		writer.blankLine();
 		
-		if (!vfxList.isEmpty()) {
-			for (int i = 0; i < vfxList.size(); ++i) {
-				vfxList.get(i).toArgScript(writer, "vfx" + i);
+		if (!eventList.isEmpty()) {
+			for (int i = 0; i < eventList.size(); ++i) {
+				eventList.get(i).toArgScript(writer, "event" + i);
 			}
 			writer.blankLine();
 		}
@@ -232,13 +247,16 @@ public class SPAnimation {
 			writer.blankLine();
 		}
 		
-		return writer.toString();
+		return writer;
 	}
 	
 	public void clear() {
 		length = 0;
 		channels.clear();
-		vfxList.clear();
+		eventList.clear();
+		eventMap.clear();
+		predicate.flags1 = 0;
+		predicate.flags2 = 0;
 	}
 	
 	public ArgScriptStream<SPAnimation> generateStream() {
@@ -246,7 +264,7 @@ public class SPAnimation {
 		stream.setData(this);
 		stream.addDefaultParsers();
 		
-		AnimationVFX.addParser(stream);
+		AnimationEvent.addParser(stream);
 		
 		stream.addParser("length", ArgScriptParser.create((parser, line) -> {
 			ArgScriptArguments args = new ArgScriptArguments();
@@ -254,6 +272,18 @@ public class SPAnimation {
 			
 			if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
 				length = value.floatValue();
+			}
+		}));
+		
+		stream.addParser("branchPredicate", ArgScriptParser.create((parser, line) -> {
+			ArgScriptArguments args = new ArgScriptArguments();
+			if (line.getArguments(args, 2, 6)) {
+				if ((args.size() % 2) != 0) {
+					stream.addError(line.createErrorForOption("branchPredicate", "Must specify an even number of arguments"));
+				}
+				else {
+					predicate.parse(args, stream);
+				}
 			}
 		}));
 		
@@ -331,9 +361,100 @@ public class SPAnimation {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		unpackTest();
+		//unpackTest();
 		//packTest();
 		//versionFind(VERSION);
+		
+		PrintStream out = new PrintStream(new FileOutputStream("C:\\Users\\Eric\\Desktop\\test.txt"));
+		System.setOut(out);
+		
+		MainApp.testInit();
+		
+		String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Animations\\animations~";
+		
+		Set<String> names = new TreeSet<>();
+		
+		for (String fileName : new File(inputPath).list())
+		{
+			if (fileName.endsWith(".animation")) 
+			{
+				System.out.println("--  " + fileName);
+				File file = new File(inputPath, fileName);
+				try (MemoryStream stream = new MemoryStream(Files.readAllBytes(file.toPath()))) {
+					
+					SPAnimation animation = new SPAnimation();
+					animation.read(stream);
+					
+					animation.toArgScript();  //.write(new File(outputPath, fileName + ".anim_t"));
+					
+					
+					if (animation.predicate.flags1 != 0 || animation.predicate.flags2 != 0) {
+						System.out.println("predicate 0x" + Integer.toHexString(animation.predicate.flags1) + "  0x" + Integer.toHexString(animation.predicate.flags2));
+					}
+					
+					boolean hasVFX0 = false;
+					boolean hasVFX6 = false;
+					
+					for (AnimationEvent vfx : animation.eventList) {
+						if ((vfx.flags & 0x40) == 0) {
+							System.out.println("no vfx flag 0x40");
+						}
+						
+						int type = (vfx.flags & AnimationEvent.FLAG_TYPE_MASK);
+						if (type == 4) {
+							System.out.println("vfx type 4");
+							//if (vfx.name != null) names.add(vfx.name);
+						}
+						
+						if (type != 1 && type != 3) {
+							if (vfx.selectors[0].flags != Selector.TYPE_DEFAULT) System.out.println("selector1");
+							if (vfx.selectors[1].flags != Selector.TYPE_DEFAULT) System.out.println("selector2");
+							if (vfx.selectors[2].flags != Selector.TYPE_DEFAULT) System.out.println("selector3");
+						}
+						
+						if (vfx.archetype != null) names.add(vfx.archetype);
+						
+						if (type == 0) hasVFX0 = true;
+						if (type == 6) hasVFX6 = true;
+						
+						if (vfx.selectors[3].flags != 0 && type != 3) {
+							System.out.println("unk vfx thing: " + vfx.name);
+						}
+						
+						if ((vfx.flags & 0x400) != 0) {
+							System.out.println("vfx flag 0x400");
+						}
+						
+						if ((vfx.flags & AnimationEvent.FLAG_PARAMETER0_MASK) != 0) {
+							System.out.println("vfx parameter 0x" + Integer.toHexString(vfx.flags & AnimationEvent.FLAG_PARAMETER0_MASK));
+						}
+						if ((vfx.flags & AnimationEvent.FLAG_PARAMETER1_MASK) != 0) {
+							System.out.println("vfx parameter 0x" + Integer.toHexString(vfx.flags & AnimationEvent.FLAG_PARAMETER1_MASK));
+						}
+						
+						for (Selector s : vfx.selectors) {
+							if ((s.flags & (AnimationEvent.Selector.FLAG_PREFILTER_2D4_MASK | AnimationEvent.Selector.FLAG_PREFILTER_2D5_MASK | AnimationEvent.Selector.FLAG_PREFILTER_2D6_MASK)) != 0) {
+								System.out.println("vfx prefilter");
+							}
+							if ((s.flags & ~AnimationEvent.Selector.FLAG_MASK) != 0) {
+								System.out.println("unk vfx flags");
+							}
+							
+							if ((s.flags & AnimationEvent.Selector.FLAG_TYPE_MASK) == 6) {
+								System.out.println("vfx selector type 6");
+							}
+						}
+					}
+					
+					if (hasVFX0 && hasVFX6) {
+						System.out.println("double VFX sound");
+					}
+				}
+			}
+		}
+		
+		for (String name : names) System.err.println(name);
 	}
 }
 

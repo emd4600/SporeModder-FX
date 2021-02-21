@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
-import sporemodder.HashManager;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptLine;
@@ -39,26 +38,27 @@ public class InfoComponent implements AbstractComponentKeyframe {
 	// Always < animation.length
 	public int time;
 	// 4 bytes, unknown. Maybe index of channel in whole game?
-	public int vfxStartIndex;  // int16
-	public int vfxCount;  // int8
+	public int eventStartIndex;  // int16
+	public int eventCount;  // int8
 	// 1 byte padding
 	public int flags;
 	// 4 bytes padding ?
 
 	@Override public void read(StreamReader stream) throws IOException {
-		time = stream.readLEInt();
-		stream.skip(4);
-		vfxStartIndex = stream.readLEUShort();
-		vfxCount = stream.readUByte();
+		time = stream.readLEInt();  // 0x0
+		stream.skip(4);  // 0x4
+		eventStartIndex = stream.readLEUShort();  // 0x8
+		eventCount = stream.readUByte();  // 0xA
 		stream.skip(1);
-		flags = stream.readLEInt();
+		flags = stream.readLEInt();  // 0xC
 	}
 
 	@Override public void write(StreamWriter stream) throws IOException {
+		System.out.println(stream.getFilePointer());
 		stream.writeLEInt(time);
 		stream.writeLEInt(0);  // ?
-		stream.writeLEUShort(vfxStartIndex);
-		stream.writeUByte(vfxCount);
+		stream.writeLEUShort(eventStartIndex);
+		stream.writeUByte(eventCount);
 		stream.writePadding(1);
 		stream.writeLEInt(flags);
 		stream.writePadding(4);
@@ -69,10 +69,10 @@ public class InfoComponent implements AbstractComponentKeyframe {
 		if (flags != 0) {
 			writer.option("flags").arguments("0x" + Integer.toHexString(flags));
 		}
-		if (vfxCount > 0) {
-			writer.option("vfx");
-			for (int i = 0; i < vfxCount; ++i) {
-				writer.arguments("vfx" + (vfxStartIndex+i));
+		if (eventCount > 0) {
+			writer.option("event");
+			for (int i = 0; i < eventCount; ++i) {
+				writer.arguments("event" + (eventStartIndex+i));
 			}
 		}
 	}
@@ -103,6 +103,8 @@ public class InfoComponent implements AbstractComponentKeyframe {
 				channelParser.channel.components.add(compData);
 				
 				line.getArguments(args, 0);
+				
+				compData.parseFlags(line);
 				
 				Number value;
 				if (line.getOptionArguments(args, "flags", 1) &&
@@ -135,17 +137,17 @@ public class InfoComponent implements AbstractComponentKeyframe {
 					c.flags |= value.intValue();
 				}
 				
-				if (l.getOptionArguments(args, "vfx", 1, Integer.MAX_VALUE)) {
-					c.vfxStartIndex = stream.getData().vfxList.size();
-					c.vfxCount = args.size();
+				if (l.getOptionArguments(args, "event", 1, Integer.MAX_VALUE)) {
+					c.eventStartIndex = stream.getData().eventList.size();
+					c.eventCount = args.size();
 					
-					for (int i = 0; i < c.vfxCount; ++i) {
-						AnimationVFX vfx = stream.getData().vfxMap.get(args.get(i));
-						if (vfx != null) {
-							stream.getData().vfxList.add(vfx);
+					for (int i = 0; i < c.eventCount; ++i) {
+						AnimationEvent event = stream.getData().eventMap.get(args.get(i));
+						if (event != null) {
+							stream.getData().eventList.add(event);
 						} 
 						else {
-							stream.addError(l.createErrorForOptionArgument("vfx", args.get(i) + " is not a defined vfx.", 1 + i));
+							stream.addError(l.createErrorForOptionArgument("event", args.get(i) + " is not a defined event.", 1 + i));
 						}
 					}
 				}

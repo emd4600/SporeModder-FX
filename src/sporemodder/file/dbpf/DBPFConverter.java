@@ -148,6 +148,10 @@ public class DBPFConverter implements Converter {
 				}
 			});
 			
+			progressUI.setOnFailed(() -> {
+				UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
+			});
+			
 			
 			// Show progress
 			progressUI.getProgressBar().progressProperty().bind(task.progressProperty());

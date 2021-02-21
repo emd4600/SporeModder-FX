@@ -48,6 +48,7 @@ import emord.filestructures.StreamWriter;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.concurrent.Worker.State;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -90,6 +91,7 @@ import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.ProjectSettingsUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
 import sporemodder.view.editors.AbstractEditableEditor;
+import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
 
@@ -159,7 +161,7 @@ public class ProjectManager extends AbstractManager {
 		
 		
 		specialItems.add(new EffectEditorItem());
-		//specialItems.add(new AnimEditorItem());
+		specialItems.add(new AnimEditorItem());
 		
 		// Load all projects
 		File projectsFolder = PathManager.get().getProjectsFolder();
@@ -1370,7 +1372,8 @@ public class ProjectManager extends AbstractManager {
 			// Create the project or override the existing one
 			final Project project = getOrCreateProject(preset.getName());
 			project.setReadOnly(true);
-			project.saveSettings();
+			// We don't need to save the settings here, as the unpacking task will call initializeProject()
+			// project.saveSettings();
 			
 			// The project is passed to set the 'packageSignature' setting, but we don't want that in presets
 			final DBPFUnpackingTask task = new DBPFUnpackingTask(files.values(), project.getFolder(), project, converters);
@@ -1385,14 +1388,22 @@ public class ProjectManager extends AbstractManager {
 			progressUI.getProgressBar().progressProperty().bind(task.progressProperty());
 			progressUI.getLabel().textProperty().bind(task.messageProperty());
 			
+			progressUI.setOnFailed(() -> {
+				UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
+				
+				for (String str : fileToName.values()) {
+					failedPackages.add(str);
+				}
+			});
+			
 			UIManager.get().showDialog(progressDialog);
 			
-			if (task.isCancelled()) {
+			if (task.isCancelled() || task.getState() == State.FAILED) {
 				// The task was cancelled, don't continue unpacking presets
 				return;
 			} else {
 				List<File> fails = task.getFailedDBPFs();
-				for (File fail : fails ) {
+				for (File fail : fails) {
 					failedPackages.add(fileToName.get(fail));
 				}
 			}

@@ -1119,7 +1119,7 @@ public class ParticleEffect extends EffectComponent {
 				
 				if (line.getOptionArguments(args, "tile", 1, 2) && (value = stream.parseByte(args, 0)) != null) {
 					effect.tileCount[0] = value.byteValue();
-					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 0) : null).orElse((byte) 1);
+					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 1) : null).orElse((byte) 1);
 				}
 				
 				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {

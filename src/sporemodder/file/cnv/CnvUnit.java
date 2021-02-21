@@ -405,13 +405,13 @@ public class CnvUnit {
 							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
 						}));
 						this.addParser("ints2", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints2);
 						}));
 						this.addParser("ints3", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints3);
 						}));
 						this.addParser("ints4", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints4);
 						}));
 					}
 				});

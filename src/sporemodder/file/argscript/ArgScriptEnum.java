@@ -20,13 +20,14 @@ package sporemodder.file.argscript;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 import sporemodder.file.DocumentError;
 
 public final class ArgScriptEnum {
 
-	private final HashMap<String, Integer> textToValue = new HashMap<String, Integer>();
-	private final HashMap<Integer, String> valueToText = new HashMap<Integer, String>();
+	private final Map<String, Integer> textToValue = new HashMap<String, Integer>();
+	private final Map<Integer, String> valueToText = new HashMap<Integer, String>();
 	
 	public final void add(int value, String text) {
 		valueToText.put(value, text);

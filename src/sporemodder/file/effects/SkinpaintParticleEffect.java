@@ -300,7 +300,8 @@ public class SkinpaintParticleEffect extends EffectComponent {
 			this.addParser("chain", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.chainParticles = data.getComponent(args, 0, SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
-					args.addHyperlink(PfxEditor.getHyperlinkType(effect.chainParticles), effect.chainParticles, 0);
+					if (effect.chainParticles != null)
+						args.addHyperlink(PfxEditor.getHyperlinkType(effect.chainParticles), effect.chainParticles, 0);
 				}
 			}));
 			

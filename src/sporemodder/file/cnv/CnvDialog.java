@@ -183,54 +183,24 @@ public class CnvDialog {
 			if (!response.key.isZero()) writer.arguments(response.key);
 			for (CnvText text : response.texts) text.toArgScript(writer);
 			
-			blankLine = false;
-			
-			if (CnvUnit.addArgScriptFlagCommand(writer, "require", response.requireFlags) && !blankLine) {
-				writer.blankLine();
-				blankLine = true;
-			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "exclude", response.excludeFlags) && !blankLine) {
-				writer.blankLine();
-				blankLine = true;
-			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "enableRequire", response.enableRequireFlags) && !blankLine) {
-				writer.blankLine();
-				blankLine = true;
-			}
-			if (CnvUnit.addArgScriptFlagCommand(writer, "enableExclude", response.enableExcludeFlags) && !blankLine) {
-				writer.blankLine();
-				blankLine = true;
-			}
+			CnvUnit.addArgScriptFlagCommand(writer, "require", response.requireFlags);
+			CnvUnit.addArgScriptFlagCommand(writer, "exclude", response.excludeFlags);
+			CnvUnit.addArgScriptFlagCommand(writer, "enableRequire", response.enableRequireFlags);
+			CnvUnit.addArgScriptFlagCommand(writer, "enableExclude", response.enableExcludeFlags);
 			
 			if (!response.ints1.isEmpty()) {
-				if (!blankLine) {
-					writer.blankLine();
-					blankLine = true;
-				}
 				writer.command("ints1");
 				for (int i : response.ints1) writer.arguments(HashManager.get().getFileName(i));
 			}
 			if (!response.ints2.isEmpty()) {
-				if (!blankLine) {
-					writer.blankLine();
-					blankLine = true;
-				}
 				writer.command("ints2");
 				for (int i : response.ints2) writer.arguments(HashManager.get().getFileName(i));
 			}
-			if (!response.ints1.isEmpty()) {
-				if (!blankLine) {
-					writer.blankLine();
-					blankLine = true;
-				}
+			if (!response.ints3.isEmpty()) {
 				writer.command("ints3");
 				for (int i : response.ints3) writer.arguments(HashManager.get().getFileName(i));
 			}
 			if (!response.ints4.isEmpty()) {
-				if (!blankLine) {
-					writer.blankLine();
-					blankLine = true;
-				}
 				writer.command("ints4");
 				for (int i : response.ints4) writer.arguments(HashManager.get().getFileName(i));
 			}

@@ -20,7 +20,7 @@ package sporemodder.file.anim;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamReader;
 
 /**
  * A convenience class used to read data from a file without any order. It is meant

@@ -18,8 +18,8 @@
 ****************************************************************************/
 package sporemodder.file.simulator.attributes;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public interface SimulatorAttribute {
 

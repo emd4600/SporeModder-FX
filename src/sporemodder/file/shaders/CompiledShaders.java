@@ -33,10 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.FileManager;
 import sporemodder.HashManager;
 import sporemodder.MainApp;

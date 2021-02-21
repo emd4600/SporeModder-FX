@@ -27,8 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 
 /**

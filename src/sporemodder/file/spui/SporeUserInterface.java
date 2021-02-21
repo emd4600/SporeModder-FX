@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
 import javafx.scene.image.Image;
 import sporemodder.HashManager;
 import sporemodder.MainApp;

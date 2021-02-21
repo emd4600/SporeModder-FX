@@ -21,9 +21,9 @@ package sporemodder.file.dbpf;
 
 import java.io.IOException;
 
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 
 public class DBPFItem {

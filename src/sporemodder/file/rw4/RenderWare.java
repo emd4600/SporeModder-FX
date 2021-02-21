@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.dds.DDSTexture;
@@ -436,9 +436,11 @@ public class RenderWare {
 		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\GridProject\\TestModels\\ce_mouth_mandible_carnivore_04.rw4";
 		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
 //		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\editor_rigblocks~";
+		//String path = "C:\\Users\\Eric\\Downloads\\ce_cubesUpdated_drone_02_B(1).rw4";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\PartTesting\\editor_rigblocks~\\ce_cubesUpdated_drone_02_B.rw4";
 		
-		//RenderWare renderWare = RenderWare.fromFile(new File(path));
-		//renderWare.printInfo();
+		RenderWare renderWare = RenderWare.fromFile(new File(path));
+		renderWare.printInfo();
 		
 		/*String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL.rw4";
 		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL test.rw4";

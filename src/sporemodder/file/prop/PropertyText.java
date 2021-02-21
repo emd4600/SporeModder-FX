@@ -24,9 +24,9 @@ import java.util.List;
 
 import org.xml.sax.Attributes;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.DocumentException;
 import sporemodder.file.LocalizedText;

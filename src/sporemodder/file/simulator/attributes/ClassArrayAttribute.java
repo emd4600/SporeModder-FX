@@ -22,8 +22,8 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.simulator.SimulatorClass;
 
 public class ClassArrayAttribute<T extends SimulatorClass> implements SimulatorAttribute {

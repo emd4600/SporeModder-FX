@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import emord.filestructures.MemoryStream;
+import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.rw4.Direct3DEnums.D3DPRIMITIVETYPE;

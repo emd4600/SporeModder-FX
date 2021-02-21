@@ -20,8 +20,8 @@ package sporemodder.file.simulator.attributes;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 
 public class Int64Attribute implements SimulatorAttribute {

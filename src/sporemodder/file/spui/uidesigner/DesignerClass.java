@@ -31,9 +31,9 @@ import java.util.Set;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
-import emord.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
 import javafx.scene.Node;
 import sporemodder.HashManager;
 import sporemodder.file.spui.SpuiElement;

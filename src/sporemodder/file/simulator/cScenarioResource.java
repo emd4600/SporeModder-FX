@@ -21,10 +21,10 @@ package sporemodder.file.simulator;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFItem;

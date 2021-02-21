@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.spui.components.AtlasImage;
 import sporemodder.file.spui.components.DirectImage;

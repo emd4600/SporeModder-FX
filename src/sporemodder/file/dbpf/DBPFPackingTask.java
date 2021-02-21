@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.concurrent.Task;
 import sporemodder.FormatManager;
 import sporemodder.HashManager;

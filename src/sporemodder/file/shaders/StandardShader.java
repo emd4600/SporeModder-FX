@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.dbpf.DBPFPacker;
 
 public class StandardShader extends MaterialShader {

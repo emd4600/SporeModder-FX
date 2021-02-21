@@ -29,7 +29,7 @@ import java.util.TreeSet;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;

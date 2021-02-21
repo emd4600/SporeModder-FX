@@ -20,9 +20,9 @@ package sporemodder.file.tlsa;
 
 import java.io.IOException;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class TLSAAnimation {
 	public int id;

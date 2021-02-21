@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;

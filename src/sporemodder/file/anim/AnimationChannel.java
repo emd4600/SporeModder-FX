@@ -230,10 +230,6 @@ public class AnimationChannel {
 		secondaryContext.field_8 = stream.getInt(0xA4);
 		secondaryContext.field_C = stream.getInt(0xA8);
 		
-		if ((secondaryContext.flags & 0x100003) == 0x100003) {
-			System.out.println("secondary " + HashManager.get().getFileName(secondaryContext.id));
-		}
-		
 		bindFlags = stream.getInt(0xAC);
 		
 		keyframeCount = stream.getInt(0xD4);  // ?
@@ -478,13 +474,6 @@ public class AnimationChannel {
 		if (field_88_ != 0) {
 			writer.option("movementFlags").arguments("0x" + Integer.toHexString(field_88_));
 		}
-		if (field_88_ != 0) {
-			System.out.println("field_88_: 0x" + Integer.toHexString(field_88_) + "\tsecondary: " + ((movementFlags & MOVEMENT_FLAG_SECONDARY) == 0));
-		}
-		
-		if ((primaryContext.flags & SELECT_TYPE_FLAG_MASK) == 3) {
-			System.out.println("primaryContext.flags:  0x" + Integer.toHexString(primaryContext.flags));
-		}
 		
 		if ((bindFlags & BIND_FLAG_INTERPOLATE) == 0) writer.option("noInterpolate");
 		
@@ -493,10 +482,6 @@ public class AnimationChannel {
 		if ((bindFlags & BIND_FLAG_MIRRORING_MASK) != 0) {
 			String mirroring = ENUM_MIRRORING.get(bindFlags & BIND_FLAG_MIRRORING_MASK);
 			writer.option("mirroring").arguments(mirroring);
-			
-			if (mirroring == null) {
-				System.out.println("unknown mirroring 0x" + Integer.toHexString(bindFlags & BIND_FLAG_MIRRORING_MASK));
-			}
 		}
 		
 		writer.option("blendGroup").ints((bindFlags & 0x00FF0000) >> 16);
@@ -509,15 +494,10 @@ public class AnimationChannel {
 			int flags = bindFlags & ~(BIND_FLAG_INTERPOLATE | BIND_FLAG_EVENT | BIND_FLAG_REQUIRE | BIND_FLAG_MIRRORING_MASK | 0xFFFF0000);
 			
 			if (flags != 0) writer.option("bindFlags").arguments("0x" + Integer.toHexString(flags));
-			
-			if (flags != 0) {
-				System.out.println("bindFlags: 0x" + Integer.toHexString(bindFlags));
-			}
 		}
 		
 		if (secondaryContext.flags != 2 && (movementFlags & MOVEMENT_FLAG_SECONDARY) == 0) {
 			writer.option("field_9C").arguments("0x" + Integer.toHexString(secondaryContext.flags));
-			System.out.println("unk field_9C 0x" + Integer.toHexString(secondaryContext.flags));
 		}
 		
 		writer.startBlock();
@@ -553,11 +533,6 @@ public class AnimationChannel {
 			}
 			
 			if ((comp.flags & AnimationComponentData.FLAG_RELATIVE) != 0) writer.option("relative");
-			else {
-				if (type == RotComponent.TYPE) {
-					System.out.println("absolute rot");
-				}
-			}
 			int scale = comp.flags & AnimationComponentData.FLAG_SCALE_MASK;
 			if (scale != 0) writer.option("scaleMode").arguments(AnimationComponentData.ENUM_SCALE.get(scale));
 			

@@ -312,16 +312,9 @@ public class AnimationEvent {
 		parameter1 = stream.readLEInt();
 		predicate.read(stream);
 		
-		if (id == 0xF291E6D9) {
-			System.out.println("aa");
-		}
-		
 		if (id != 0) {
 			stream.seek(offset);
 			name = stream.readCString(StringEncoding.ASCII);
-		}
-		else {
-			System.out.println("id 0, offset: " + offset);
 		}
 	}
 	

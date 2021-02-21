@@ -18,26 +18,15 @@
 ****************************************************************************/
 package sporemodder.file.anim;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
 import emord.filestructures.Stream.StringEncoding;
 import emord.filestructures.StreamReader;
 import emord.filestructures.StreamWriter;
-import sporemodder.HashManager;
-import sporemodder.MainApp;
-import sporemodder.file.anim.AnimationEvent.Selector;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
@@ -290,171 +279,6 @@ public class SPAnimation {
 		stream.addParser(AnimationChannel.KEYWORD, new AnimChannelParser());
 		
 		return stream;
-	}
-	
-	public static void versionFind(int version) throws IOException {
-		//String path = "E:\\Eric\\SporeModder\\Projects\\Spore_Game.package.unpacked\\animations~";
-		//String path = "E:\\Eric\\SporeModder\\Projects\\Spore_EP1_Data.package.unpacked\\animations~";
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~";
-		
-		MainApp.testInit();
-		
-		for (File file : new File(path).listFiles()) {
-			if (file.getName().endsWith(".animation")) {
-				try (FileStream stream = new FileStream(file, "r")) {
-					stream.readInt();
-					stream.readInt();
-					
-					if (stream.readLEInt() == version) {
-						System.out.println(file.getName().substring(0, file.getName().indexOf(".")));
-					}
-				}
-			}
-		}
-	}
-	
-	public static void unpackTest() throws IOException {
-		//String path = "C:\\Users\\Eric\\Desktop\\0x30EF4216.animation";
-		//String path = "C:\\Users\\Eric\\Desktop\\baby_born_02.animation";
-		String path = "C:\\Users\\Eric\\Desktop\\ec_vi_cnv_01c_nog.animation";
-		//String path = "C:\\Users\\Eric\\Desktop\\com_punch.animation";
-		//String path = "C:\\Users\\Eric\\Desktop\\ep1_trader_jumpjet_land.animation";
-		//String path = "E:\\Eric\\SporeModder\\Projects\\Spore_Game.package.unpacked\\animations~\\csa_actn_jumphit.animation";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~\\0x30EF4216.animation";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomAnimations\\animations~\\csa_actn_jumphit_COPY.animation";
-		MainApp.testInit();
-		
-		try (MemoryStream stream = new MemoryStream(Files.readAllBytes(new File(path).toPath()))) {
-			
-			SPAnimation animation = new SPAnimation();
-			animation.read(stream);
-			
-			System.out.println(animation.toArgScript());
-		}
-	}
-	
-	public static void packTest() throws IOException {
-		MainApp.testInit();
-		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomAnimations\\animations~";
-		
-		String fileName = "csa_actn_jumphit.animation";
-		
-		File output = new File(path, fileName);
-		
-		SPAnimation anim = new SPAnimation();
-		anim.generateStream().process(new File(path, fileName + ".anim_t"));
-		
-		try (FileStream stream = new FileStream(output, "rw")) {
-			anim.write(stream, output.getAbsolutePath(), 
-					HashManager.get().getFileHash("csa_actn_jumphit"));
-		}
-		
-		
-		try (MemoryStream stream = new MemoryStream(Files.readAllBytes(output.toPath()))) {
-			
-			SPAnimation animation = new SPAnimation();
-			animation.read(stream);
-			
-			System.out.println(animation.toArgScript());
-		}
-	}
-	
-	public static void main(String[] args) throws IOException {
-		//unpackTest();
-		//packTest();
-		//versionFind(VERSION);
-		
-		PrintStream out = new PrintStream(new FileOutputStream("C:\\Users\\Eric\\Desktop\\test.txt"));
-		System.setOut(out);
-		
-		MainApp.testInit();
-		
-		String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\animations~";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Animations\\animations~";
-		
-		Set<String> names = new TreeSet<>();
-		
-		for (String fileName : new File(inputPath).list())
-		{
-			if (fileName.endsWith(".animation")) 
-			{
-				System.out.println("--  " + fileName);
-				File file = new File(inputPath, fileName);
-				try (MemoryStream stream = new MemoryStream(Files.readAllBytes(file.toPath()))) {
-					
-					SPAnimation animation = new SPAnimation();
-					animation.read(stream);
-					
-					animation.toArgScript();  //.write(new File(outputPath, fileName + ".anim_t"));
-					
-					
-					if (animation.predicate.flags1 != 0 || animation.predicate.flags2 != 0) {
-						System.out.println("predicate 0x" + Integer.toHexString(animation.predicate.flags1) + "  0x" + Integer.toHexString(animation.predicate.flags2));
-					}
-					
-					boolean hasVFX0 = false;
-					boolean hasVFX6 = false;
-					
-					for (AnimationEvent vfx : animation.eventList) {
-						if ((vfx.flags & 0x40) == 0) {
-							System.out.println("no vfx flag 0x40");
-						}
-						
-						int type = (vfx.flags & AnimationEvent.FLAG_TYPE_MASK);
-						if (type == 4) {
-							System.out.println("vfx type 4");
-							//if (vfx.name != null) names.add(vfx.name);
-						}
-						
-						if (type != 1 && type != 3) {
-							if (vfx.selectors[0].flags != Selector.TYPE_DEFAULT) System.out.println("selector1");
-							if (vfx.selectors[1].flags != Selector.TYPE_DEFAULT) System.out.println("selector2");
-							if (vfx.selectors[2].flags != Selector.TYPE_DEFAULT) System.out.println("selector3");
-						}
-						
-						if (vfx.archetype != null) names.add(vfx.archetype);
-						
-						if (type == 0) hasVFX0 = true;
-						if (type == 6) hasVFX6 = true;
-						
-						if (vfx.selectors[3].flags != 0 && type != 3) {
-							System.out.println("unk vfx thing: " + vfx.name);
-						}
-						
-						if ((vfx.flags & 0x400) != 0) {
-							System.out.println("vfx flag 0x400");
-						}
-						
-						if ((vfx.flags & AnimationEvent.FLAG_PARAMETER0_MASK) != 0) {
-							System.out.println("vfx parameter 0x" + Integer.toHexString(vfx.flags & AnimationEvent.FLAG_PARAMETER0_MASK));
-						}
-						if ((vfx.flags & AnimationEvent.FLAG_PARAMETER1_MASK) != 0) {
-							System.out.println("vfx parameter 0x" + Integer.toHexString(vfx.flags & AnimationEvent.FLAG_PARAMETER1_MASK));
-						}
-						
-						for (Selector s : vfx.selectors) {
-							if ((s.flags & (AnimationEvent.Selector.FLAG_PREFILTER_2D4_MASK | AnimationEvent.Selector.FLAG_PREFILTER_2D5_MASK | AnimationEvent.Selector.FLAG_PREFILTER_2D6_MASK)) != 0) {
-								System.out.println("vfx prefilter");
-							}
-							if ((s.flags & ~AnimationEvent.Selector.FLAG_MASK) != 0) {
-								System.out.println("unk vfx flags");
-							}
-							
-							if ((s.flags & AnimationEvent.Selector.FLAG_TYPE_MASK) == 6) {
-								System.out.println("vfx selector type 6");
-							}
-						}
-					}
-					
-					if (hasVFX0 && hasVFX6) {
-						System.out.println("double VFX sound");
-					}
-				}
-			}
-		}
-		
-		for (String name : names) System.err.println(name);
 	}
 }
 

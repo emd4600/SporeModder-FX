@@ -239,7 +239,7 @@ public class CnvUnit {
 							if (args.size() == 2) {
 								var.id = stream.parseFileID(args, 1);
 							} else {
-								var.id = HashManager.get().getFileHash(anim.name);
+								var.id = HashManager.get().getFileHash(var.name);
 							}
 						}
 						

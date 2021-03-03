@@ -673,6 +673,8 @@ public class ProjectManager extends AbstractManager {
 	 * @param item
 	 */
 	public void generateContextMenu(ProjectItem item) {
+		MenuItem itemName = new MenuItem(item.getName());
+		
 		MenuItem itemCopyName = new MenuItem("Copy name");
 		MenuItem itemCopyPath = new MenuItem("Copy file path");
 		MenuItem itemCopyKey = new MenuItem("Copy resource key");
@@ -706,6 +708,11 @@ public class ProjectManager extends AbstractManager {
 		
 		itemCopyKey.setOnAction(event -> {
 			String key = item.getName();
+			String[] splits = key.split("\\.");
+			// Remove extra extension such as prop_t
+			if (splits.length >= 3) {
+				key = splits[0] + "." + splits[1];
+			}
 			
 			TreeItem<ProjectItem> parentItem = item.getTreeItem().getParent();
 			// The root node does not count
@@ -732,6 +739,7 @@ public class ProjectManager extends AbstractManager {
 			Clipboard.getSystemClipboard().setContent(content);
 		});
 		
+		itemName.setOnAction(event -> UIManager.get().tryAction(() -> selectItem(item), "Cannot select file"));
 		itemNewFile.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFile(), "Cannot create new file."));
 		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFolder(), "Cannot create new folder."));
 		itemRename.setOnAction(event -> UIManager.get().tryAction(() -> item.renameItem(), "Cannot rename item."));
@@ -745,6 +753,7 @@ public class ProjectManager extends AbstractManager {
 		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(() -> item.openModFolder(), "Cannot open mod folder."));
 		
 		contextMenu.getItems().clear();
+		contextMenu.getItems().addAll(itemName, new SeparatorMenuItem());
 		contextMenu.getItems().addAll(itemCopyName, itemCopyPath, itemCopyKey, itemCopyID, new SeparatorMenuItem());
 		contextMenu.getItems().addAll(itemNewFile, itemNewFolder, itemRename, itemRemove, itemModify, itemImportFiles, itemRefresh, new SeparatorMenuItem());
 		
@@ -1939,7 +1948,7 @@ public class ProjectManager extends AbstractManager {
 				
 				PropertyList list = new PropertyList();
 				list.read(stream);
-				Files.write(dest.toPath(), list.toArgScript().getBytes("US-ASCII"));
+				list.toArgScript().write(dest);
 				
 				stream.close();
 			} catch (ParserConfigurationException | SAXException e) {

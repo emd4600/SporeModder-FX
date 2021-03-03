@@ -54,7 +54,6 @@ public class InfoComponent implements AbstractComponentKeyframe {
 	}
 
 	@Override public void write(StreamWriter stream) throws IOException {
-		System.out.println(stream.getFilePointer());
 		stream.writeLEInt(time);
 		stream.writeLEInt(0);  // ?
 		stream.writeLEUShort(eventStartIndex);

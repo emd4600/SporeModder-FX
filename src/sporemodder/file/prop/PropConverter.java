@@ -55,11 +55,7 @@ public class PropConverter implements Converter {
 	private boolean decode(StreamReader stream, File outputFile) throws IOException {
 		PropertyList list = new PropertyList();
 		list.read(stream);
-		
-		try (PrintWriter out = new PrintWriter(outputFile)) {
-		    out.println(list.toArgScript());
-		}
-		
+		list.toArgScript().write(outputFile);
 		return true;
 	}
 

@@ -74,6 +74,7 @@ public class ScenarioToGameplay {
 		scriptsFolder.mkdir();
 		themesFolder.mkdir();
 		
+		createGameplayPlanetScript().toArgScript().write(outputFile);
 		try (PrintWriter writer = new PrintWriter(new File(scriptsFolder, outputName + ".prop.prop_t"))) {
 			writer.write(createGameplayPlanetScript().toArgScript());
 		}

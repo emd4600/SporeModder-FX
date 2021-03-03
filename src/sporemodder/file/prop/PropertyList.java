@@ -106,7 +106,7 @@ public class PropertyList {
 		}
 	}
 	
-	public String toArgScript() {
+	public ArgScriptWriter toArgScript() {
 		removeAutolocales();
 		
 		ArgScriptWriter writer = new ArgScriptWriter();
@@ -150,7 +150,7 @@ public class PropertyList {
 			}
 		}
 		
-		return writer.toString();
+		return writer;
 	}
 	
 	public BaseProperty get(int id) {

@@ -132,7 +132,7 @@ public class ImportProjectTask extends ResumableTask<Void> {
 						
 						PropertyList list = new PropertyList();
 						list.read(stream);
-						Files.write(dest, list.toArgScript().getBytes("US-ASCII"));
+						list.toArgScript().write(dest);
 						
 						stream.close();
 					} 

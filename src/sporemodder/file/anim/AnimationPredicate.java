@@ -63,11 +63,4 @@ public class AnimationPredicate {
 			else flags2 &= ~flag;
 		}
 	}
-	
-	public static void main(String[] args) {
-		
-		for (int i = 0; i < 0xFF; ++i) {
-			System.out.println("0x" + Integer.toHexString(i) + "\t0x" + Integer.toHexString(i & (-i)));
-		}
-	}
 }

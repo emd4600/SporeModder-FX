@@ -18,6 +18,7 @@
 ****************************************************************************/
 package sporemodder.view.editors.spui;
 
+import javafx.collections.ObservableList;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
@@ -46,8 +47,23 @@ public class SpuiImageFileChooser extends Dialog<ButtonType> {
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
 			updateButtons();
 			if (isValidImage(newValue)) {
-				Image image = new Image(ProjectManager.get().getFile(newValue.getValue().getRelativePath()).toURI().toString());
-				imageView.setImage(image);
+				if (!newValue.getValue().getFile().isDirectory()) {
+					Image image = new Image(ProjectManager.get().getFile(newValue.getValue().getRelativePath()).toURI().toString());
+					imageView.setImage(image);
+				}
+				else {
+					String newValName = newValue.getValue().getFile().getName();
+					ObservableList<TreeItem<ProjectItem>> children = newValue.getChildren();
+					for (int ch = 0; ch < children.size(); ch++) {
+						ProjectItem child = children.get(ch).getValue();
+						
+						if (newValName == child.getFile().getName()) {
+							Image chImage = new Image(ProjectManager.get().getFile(child.getRelativePath()).toURI().toString());
+							imageView.setImage(chImage);
+							break;
+						}
+					}
+				}
 			} else {
 				imageView.setImage(null);
 			}

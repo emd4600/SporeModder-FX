@@ -312,12 +312,10 @@ public class SporeUserInterface {
 	}
 	
 	private Image loadImage(ResourceKey key) {
-		System.out.println("Yeehawn't");
 		HashManager hasher = HashManager.get();
 		String fileName = hasher.getFileName(key.getInstanceID()) + '.' + hasher.getTypeName(key.getTypeID());
-		System.out.println("fileName: " + fileName);
+		
 		String path = hasher.getFileName(key.getGroupID()) + File.separatorChar + fileName;
-		System.out.println("path: " + path);
 		
 		String uri = null;
 		if (projectFolder != null) {

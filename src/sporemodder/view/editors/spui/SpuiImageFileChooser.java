@@ -56,8 +56,9 @@ public class SpuiImageFileChooser extends Dialog<ButtonType> {
 					ObservableList<TreeItem<ProjectItem>> children = newValue.getChildren();
 					for (int ch = 0; ch < children.size(); ch++) {
 						ProjectItem child = children.get(ch).getValue();
-						
-						if (newValName == child.getFile().getName()) {
+						String childName = child.getFile().getName();
+
+						if (newValName.equalsIgnoreCase(childName)) {
 							Image chImage = new Image(ProjectManager.get().getFile(child.getRelativePath()).toURI().toString());
 							imageView.setImage(chImage);
 							break;

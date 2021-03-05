@@ -81677,3 +81677,8 @@ Palace
 Slumhouse
 Elevated Hall
 Adamant
+
+cSPScenarioBrushItemUI
+cSPScenarioPaintItemUI
+cSPScenarioSwatchItemUI
+cSPScenarioSwatchEditItemUI

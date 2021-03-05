@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
 import javafx.beans.property.ObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.AmbientLight;

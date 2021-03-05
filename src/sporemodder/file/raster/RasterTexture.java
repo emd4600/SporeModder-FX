@@ -21,9 +21,9 @@ package sporemodder.file.raster;
 import java.io.File;
 import java.io.IOException;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.dds.DDSTexture;
 
 public class RasterTexture {

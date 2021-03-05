@@ -30,8 +30,8 @@ import java.util.function.Consumer;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;

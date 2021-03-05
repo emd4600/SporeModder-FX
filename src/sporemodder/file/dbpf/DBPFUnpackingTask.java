@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,9 +36,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
 import sporemodder.HashManager;
 import sporemodder.MessageManager;
 import sporemodder.ProjectManager;
@@ -62,7 +63,6 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	
 	// Cannot use getProgress() as it throws thread exception
 	private double progress = 0;
-	private double[] progressFraction;
 	
 	/** The list of input DBPF files, in order of priority. */
 	private final List<File> inputFiles = new ArrayList<File>();
@@ -211,6 +211,11 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		hasher.getProjectRegistry().clear();
 		findNamesFile(index.items, packageStream);
 		
+		// Sometimes, reading the file data goes faster than the tasks, so we end up
+		// loading almost all the package into memory and that causes an OutOfMemory exception
+		// We must limit how many tasks we want running simultaneously.
+		int maxTasks = ForkJoinPool.getCommonPoolParallelism();
+		
 		int itemIndex = -1;
 		CountDownLatch latch = new CountDownLatch(index.items.size());
 		for (DBPFItem item : index.items) {
@@ -254,8 +259,8 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 			
 			FileConvertAction action = new FileConvertAction(item, folder, item.processFile(packageStream), inc, latch);
 			if (isParallel) {
-				if (itemIndex == index.items.size() - 1) {
-					// Execute in same thread if it's the last item
+				if (itemIndex == index.items.size() - 1 || ForkJoinPool.commonPool().getQueuedSubmissionCount() >= maxTasks) {
+					// Execute in same thread if it's the last item or if we have many tasks waiting
 					ForkJoinPool.commonPool().invoke(action);
 				}
 				else {
@@ -301,6 +306,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 					ProjectManager.get().initializeProject(project);
 				}
 				catch (Exception e) {
+					e.printStackTrace();
 					for (File inputFile : inputFiles) {
 						failedDBPFs.add(inputFile);
 					}
@@ -311,24 +317,24 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				progressFactor -= CLEAR_FOLDER_PROGRESS;
 			}
 			
+			
 			final HashMap<Integer, Set<ResourceKey>> writtenFiles = new HashMap<>();
 			boolean checkFiles = inputFiles.size() > 1;  // only check already existing files if we are unpacking more than one package at once
 			
 			long[] fileSizes = new long[inputFiles.size()];
 			long totalFileSize = 0;
 			for (int i = 0; i < fileSizes.length; ++i) {
-				fileSizes[i] = Files.size(inputFiles.get(i).toPath());
-				totalFileSize += fileSizes[i];
+				if (inputFiles.get(i).exists()) {
+					fileSizes[i] = Files.size(inputFiles.get(i).toPath());
+					totalFileSize += fileSizes[i];
+				}
 			}
 			
 			int i = 0;
 			for (File inputFile : inputFiles) {
-				System.out.println("## UNPACKNG " + inputFile.getName());
-				
 				double projectProgress = progressFactor * (double)fileSizes[i] / totalFileSize;
 				
 				if (!inputFile.exists()) {
-					incProgress(projectProgress);
 					failedDBPFs.add(inputFile);
 					continue;
 				}

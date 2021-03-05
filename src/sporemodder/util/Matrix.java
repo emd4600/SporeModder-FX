@@ -20,8 +20,8 @@ package sporemodder.util;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class Matrix {
 	public float[][] m = new float[3][3];

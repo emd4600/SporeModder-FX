@@ -69,6 +69,11 @@ public class EffectEditorItem extends ProjectItem {
 		return true;
 	}
 	
+	public boolean isRoot() {
+		// This avoids exceptions when right-clicking the item
+		return true;
+	}
+	
 	public boolean canRemoveItem() {
 		return false;
 	}

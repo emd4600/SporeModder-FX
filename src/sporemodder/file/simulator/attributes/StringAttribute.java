@@ -18,9 +18,9 @@
 ****************************************************************************/
 package sporemodder.file.simulator.attributes;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
-import emord.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
 
 public class StringAttribute implements SimulatorAttribute {
 	public String value;

@@ -21,9 +21,9 @@ package sporemodder.file.dbpf;
 import java.io.File;
 import java.io.IOException;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 
 /**

@@ -24,10 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonButton;
 import emord.javafx.ribbon.RibbonGallery;

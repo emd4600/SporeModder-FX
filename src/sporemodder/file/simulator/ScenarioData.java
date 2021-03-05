@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.simulator.attributes.ClassArrayAttribute;
 import sporemodder.file.simulator.attributes.ClassAttribute;

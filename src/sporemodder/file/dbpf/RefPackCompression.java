@@ -20,7 +20,7 @@ package sporemodder.file.dbpf;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamReader;
 
 public class RefPackCompression {
 

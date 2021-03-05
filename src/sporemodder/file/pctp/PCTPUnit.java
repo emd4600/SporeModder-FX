@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;

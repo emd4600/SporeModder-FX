@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptWriter;
@@ -33,60 +33,153 @@ public class AnimationChannel {
 	private final static int MAGIC = 0x4E414843;
 	public static final String KEYWORD = "channel";
 	
+	// Selects parent spine and NOT the object itself, 0xC00 is apparently the same??
+	// limb modifier
+	public static final int SELECT_PARENT_SPINE = 0x1000; 
+	
+	public static final int SELECT_TYPE_FLAG_MASK = 0x100003;
+	public static final int SELECT_TYPE_NOCAP = 0x100002;
+	public static final int SELECT_TYPE_FRAME_ROOT = 0x100001;
+	public static final int SELECT_TYPE_FRAME = 0x100000;
+	public static final int SELECT_TYPE_NONE = 2;
+	public static final int SELECT_TYPE_ROOT = 1;
+	public static final int SELECT_TYPE_CAP = 0;
+	
 	public static final int SELECTX_FLAGS = 0x2000C;
 	public static final int SELECTX_LEFT = 0x4;
 	public static final int SELECTX_RIGHT = 0x8;
-	public static final int SELECTX_MIDDLE = 0xC;
+	public static final int SELECTX_CENTER = 0xC;
 	public static final int SELECTX_LEFT2 = 0x20000;
 	public static final int SELECTX_RIGHT2 = 0x20004;
-	public static final int SELECTX_MIDDLE2 = 0x20008;
+	public static final int SELECTX_CENTER2 = 0x20008;
 	
 	public static final int SELECTY_FLAGS = 0x40030;
 	public static final int SELECTY_FRONT = 0x10;
 	public static final int SELECTY_BACK = 0x20;
-	public static final int SELECTY_MIDDLE = 0x30;
+	public static final int SELECTY_CENTER = 0x30;
 	public static final int SELECTY_FRONT2 = 0x40000;
 	public static final int SELECTY_BACK2 = 0x40010;
-	public static final int SELECTY_MIDDLE2 = 0x40020;
+	public static final int SELECTY_CENTER2 = 0x40020;
 	
 	public static final int SELECTZ_FLAGS = 0x800C0;
 	public static final int SELECTZ_TOP = 0x40;
 	public static final int SELECTZ_BOTTOM = 0x80;
-	public static final int SELECTZ_MIDDLE = 0xC0;
+	public static final int SELECTZ_CENTER = 0xC0;
 	public static final int SELECTZ_TOP2 = 0x80000;
 	public static final int SELECTZ_BOTTOM2 = 0x80040;
-	public static final int SELECTZ_MIDDLE2 = 0x80080;
+	public static final int SELECTZ_CENTER2 = 0x80080;
+	
+	public static final int EXTENT_LEFTMOST = 0x2000;
+	public static final int EXTENT_RIGHTMOST = 0x4000;
+	public static final int EXTENT_FRONTMOST = 0x6000;
+	public static final int EXTENT_BACKMOST = 0x8000;
+	public static final int EXTENT_TOPMOST = 0xA000;
+	public static final int EXTENT_BOTTOMMOST = 0xC000;
+	public static final int EXTENT_MASK = 0xE000;
+	
+	public static final int SELECT_LIMB_MASK = 0x801C00;
+	
+	public static final int BIND_FLAG_INTERPOLATE = 1;
+	public static final int BIND_FLAG_REQUIRE = 4;
+	public static final int BIND_FLAG_EVENT = 8;
+	public static final int BIND_FLAG_MIRRORING_MASK = 0x32;
+	
+	public static final int MOVEMENT_FLAG_SECONDARY = 1;
+	public static final int MOVEMENT_FLAG_SECONDARY_DIRECTIONAL_ONLY = 2;
+	public static final int MOVEMENT_FLAG_LOOKAT = 8;
+	// Rescales the Z axis so that 0 is the rest position, and 1 is the ground
+	// Only works for relative movement
+	public static final int MOVEMENT_FLAG_GROUND_RELATIVE = 0x10;
+	// 0x200 in 
 	
 	public static final ArgScriptEnum ENUM_SELECTX = new ArgScriptEnum();
 	static {
 		ENUM_SELECTX.add(SELECTX_LEFT, "left");
 		ENUM_SELECTX.add(SELECTX_RIGHT, "right");
-		ENUM_SELECTX.add(SELECTX_MIDDLE, "middle");
+		ENUM_SELECTX.add(SELECTX_CENTER, "middle");
 		ENUM_SELECTX.add(SELECTX_LEFT2, "left2");
 		ENUM_SELECTX.add(SELECTX_RIGHT2, "right2");
-		ENUM_SELECTX.add(SELECTX_MIDDLE2, "middle2");
+		ENUM_SELECTX.add(SELECTX_CENTER2, "middle2");
+		// These are the good names, we keep the olds for compatiblity
+		ENUM_SELECTX.add(SELECTX_CENTER, "center");
+		ENUM_SELECTX.add(SELECTX_LEFT2, "localLeft");
+		ENUM_SELECTX.add(SELECTX_RIGHT2, "localRight");
+		ENUM_SELECTX.add(SELECTX_CENTER2, "localCenter");
 	}
 	public static final ArgScriptEnum ENUM_SELECTY = new ArgScriptEnum();
 	static {
 		ENUM_SELECTY.add(SELECTY_FRONT, "front");
 		ENUM_SELECTY.add(SELECTY_BACK, "back");
-		ENUM_SELECTY.add(SELECTY_MIDDLE, "middle");
+		ENUM_SELECTY.add(SELECTY_CENTER, "middle");
 		ENUM_SELECTY.add(SELECTY_FRONT2, "front2");
 		ENUM_SELECTY.add(SELECTY_BACK2, "back2");
-		ENUM_SELECTY.add(SELECTY_MIDDLE2, "middle2");
+		ENUM_SELECTY.add(SELECTY_CENTER2, "middle2");
+		// These are the good names, we keep the olds for compatiblity
+		ENUM_SELECTY.add(SELECTY_CENTER, "center");
+		ENUM_SELECTY.add(SELECTY_FRONT2, "localFront");
+		ENUM_SELECTY.add(SELECTY_BACK2, "localBack");
+		ENUM_SELECTY.add(SELECTY_CENTER2, "localCenter");
 	}
 	public static final ArgScriptEnum ENUM_SELECTZ = new ArgScriptEnum();
 	static {
 		ENUM_SELECTZ.add(SELECTZ_TOP, "top");
 		ENUM_SELECTZ.add(SELECTZ_BOTTOM, "bottom");
-		ENUM_SELECTZ.add(SELECTZ_MIDDLE, "middle");
+		ENUM_SELECTZ.add(SELECTZ_CENTER, "middle");
 		ENUM_SELECTZ.add(SELECTZ_TOP2, "top2");
 		ENUM_SELECTZ.add(SELECTZ_BOTTOM2, "bottom2");
-		ENUM_SELECTZ.add(SELECTZ_MIDDLE2, "middle2");
+		ENUM_SELECTZ.add(SELECTZ_CENTER2, "middle2");
+		// These are the good names, we keep the olds for compatiblity
+		ENUM_SELECTZ.add(SELECTZ_CENTER, "center");
+		ENUM_SELECTZ.add(SELECTZ_TOP2, "localTop");
+		ENUM_SELECTZ.add(SELECTZ_BOTTOM2, "localBottom");
+		ENUM_SELECTZ.add(SELECTZ_CENTER2, "localCenter");
+	}
+	public static final ArgScriptEnum ENUM_EXTENT = new ArgScriptEnum();
+	static {
+		ENUM_EXTENT.add(EXTENT_LEFTMOST, "leftMost");
+		ENUM_EXTENT.add(EXTENT_RIGHTMOST, "rightMost");
+		ENUM_EXTENT.add(EXTENT_FRONTMOST, "frontMost");
+		ENUM_EXTENT.add(EXTENT_BACKMOST, "backMost");
+		ENUM_EXTENT.add(EXTENT_TOPMOST, "topMost");
+		ENUM_EXTENT.add(EXTENT_BOTTOMMOST, "bottomMost");
+	}
+	public static final ArgScriptEnum ENUM_MIRRORING = new ArgScriptEnum();
+	static {
+		ENUM_MIRRORING.add(0, "default");
+		ENUM_MIRRORING.add(2, "left");  // mirrors for positive Xs
+		ENUM_MIRRORING.add(0x10, "right");  // mirrors for negative Xs
+		ENUM_MIRRORING.add(0x12, "reverseDefault");
+		ENUM_MIRRORING.add(0x20, "never");
+	}
+	
+	public static class ContextSelector
+	{
+		int flags;
+		String capability;
+		int id;  // same field as capability
+		int field_8;
+		int field_C;
+		
+		public String getCapability() {
+			switch (flags & SELECT_TYPE_FLAG_MASK) {
+			case SELECT_TYPE_ROOT:
+				return "root";
+			case SELECT_TYPE_FRAME_ROOT:
+				return "frameRoot";
+			case SELECT_TYPE_FRAME:
+				return "frame";
+			case SELECT_TYPE_CAP:
+			case 3:
+				return capability;
+			case SELECT_TYPE_NOCAP:
+			default:
+				return null;
+			}
+		}
 	}
 	
 	public String name;
-	public int field_88;
+	public int movementFlags;
 	// Actually, a struct of size 10h 
 	/*
 	 * {
@@ -97,14 +190,18 @@ public class AnimationChannel {
 	 * }
 	 */
 	// Used by sub_9B22B0
-	public int field_8C;
-	// Similar flags to field_8C, doesn't seem to be important
-	public int field_9C = 2;
+	public final ContextSelector primaryContext = new ContextSelector();
+	// Usually flags is 2 when not used
+	public final ContextSelector secondaryContext = new ContextSelector();
 	// Actually, short, byte (index of channel, not used), byte (an index?)
-	public int field_AC;
-	public String capability;
+	public int bindFlags;
 	public int keyframeCount;
 	public final List<AnimationComponentData> components = new ArrayList<>();
+	
+	public AnimationChannel() {
+		// secondary context has none by default
+		secondaryContext.flags = SELECT_TYPE_NONE;
+	}
 
 	public void read(DataStructure stream) throws IOException {
 		stream.getStream().seek(stream.getPointer());
@@ -117,21 +214,28 @@ public class AnimationChannel {
 		stream.getStream().skip(4);  // this will be a pointer to the Animation*, so it can be 0
 		name = stream.getStream().readCString(StringEncoding.ASCII);
 		
-		field_88 = stream.getInt(0x88);
-		field_8C = stream.getInt(0x8C);  // 1 for root, usually 0 for the rest
+		movementFlags = stream.getInt(0x88);
+		
+		primaryContext.flags = stream.getInt(0x8C);
 		stream.getStream().seek(stream.getPointer() + 0x90);
-		capability = stream.getStream().readString(StringEncoding.ASCII, 4);
-		// 90h is wpch, eycl, etc -> capability fourCC in pctp file. 'root' doesn't use it
+		primaryContext.capability = stream.getStream().readString(StringEncoding.ASCII, 4);
+		primaryContext.id = stream.getInt(0x90);
+		primaryContext.field_8 = stream.getInt(0x94);
+		primaryContext.field_C = stream.getInt(0x98);
 		
-		field_9C = stream.getInt(0x9C);
+		secondaryContext.flags = stream.getInt(0x9C);
+		stream.getStream().seek(stream.getPointer() + 0xA0);
+		secondaryContext.capability = stream.getStream().readString(StringEncoding.ASCII, 4);
+		secondaryContext.id = stream.getInt(0xA0);
+		secondaryContext.field_8 = stream.getInt(0xA4);
+		secondaryContext.field_C = stream.getInt(0xA8);
 		
-		field_AC = stream.getInt(0xAC);
+		bindFlags = stream.getInt(0xAC);
 		
 		keyframeCount = stream.getInt(0xD4);  // ?
 		long keyframePtr = stream.getUInt(0xD8);
 		int count = stream.getInt(0xDC);
 		long ptr = stream.getUInt(0xE0);
-		System.out.println(name + "  " + field_8C + "\tkeyframes[" + keyframeCount + "] 0x" + Integer.toHexString(stream.getInt(0xD8)));
 		
 		// each item of size 32
 		
@@ -150,8 +254,6 @@ public class AnimationChannel {
 				comp.keyframes.add(keyframe);
 			}
 		}
-		
-		System.out.println();
 	}
 	
 	public void write(StreamWriter stream, List<Long> offsets) throws IOException {
@@ -162,19 +264,29 @@ public class AnimationChannel {
 		stream.writeString(name, StringEncoding.ASCII);
 		stream.writePadding(0x80 - name.length());
 		
-		stream.writeLEInt(field_88);
-		stream.writeLEInt(field_8C);
-		if (capability == null) {
+		stream.writeLEInt(movementFlags);
+		
+		stream.writeLEInt(primaryContext.flags);
+		if (primaryContext.capability == null) {
 			stream.writePadding(4);
 		} else {
-			stream.writeString(capability, StringEncoding.ASCII);
-			stream.writePadding(4 - capability.length());
+			stream.writeString(primaryContext.capability, StringEncoding.ASCII);
+			stream.writePadding(4 - primaryContext.capability.length());
 		}
-		stream.writeLEInt(0);  // field_94 ?
-		stream.writeLEInt(0);  // field_98 ?
-		stream.writeLEInt(field_9C);
-		stream.writePadding(12);
-		stream.writeLEInt(field_AC);
+		stream.writeLEInt(primaryContext.field_8);
+		stream.writeLEInt(primaryContext.field_C);
+		
+		stream.writeLEInt(secondaryContext.flags);
+		if (secondaryContext.capability == null) {
+			stream.writePadding(4);
+		} else {
+			stream.writeString(secondaryContext.capability, StringEncoding.ASCII);
+			stream.writePadding(4 - secondaryContext.capability.length());
+		}
+		stream.writeLEInt(secondaryContext.field_8);
+		stream.writeLEInt(secondaryContext.field_C);
+		
+		stream.writeLEInt(bindFlags);
 		stream.writePadding(0xD4 - 0xB0);
 		
 		stream.writeLEInt(keyframeCount);
@@ -236,16 +348,16 @@ public class AnimationChannel {
 			}
 		}
 		else if (version == 0x13) {
-			field_8C &= ~0x10300;
-			field_9C &= ~0x10300;
+			primaryContext.flags &= ~0x10300;
+			secondaryContext.flags &= ~0x10300;
 			
 			for (AnimationComponentData comp : components) {
 				if (comp.getType() == RotComponent.TYPE) {
 					int flags = 0;
 					
-					if ((field_88 & 1) != 0 && (field_88 & 6) != 0) {
-						if (field_88 == 2 || (comp.flags & 0x40) != 0) {
-							flags = field_88 + 0x40;
+					if ((movementFlags & 1) != 0 && (movementFlags & 6) != 0) {
+						if (movementFlags == 2 || (comp.flags & 0x40) != 0) {
+							flags = movementFlags + 0x40;
 						}
 					}
 					else if ((comp.flags & 0x20) != 0) flags = 0x20;
@@ -263,7 +375,7 @@ public class AnimationChannel {
 			// Version 0x17 includes all 6 possible deforms (without its names), 
 			// even for capabilities that don't use them
 			
-			List<Integer> deforms = RigblockComponent.getDeforms(getCapability());
+			List<Integer> deforms = RigblockComponent.getDeforms(primaryContext.getCapability());
 			int rbIndex = 0;
 			for (AnimationComponentData comp : components) {
 				int type = comp.getType();
@@ -281,7 +393,7 @@ public class AnimationChannel {
 					++rbIndex;
 				}
 				else if (type == PosComponent.TYPE) {
-					if ((field_88 & 1) != 0) {
+					if ((movementFlags & 1) != 0) {
 						comp.flags &= ~0xC0;
 					}
 				}
@@ -291,7 +403,7 @@ public class AnimationChannel {
 		}
 		else if (version == 0x18) {
 			
-			if ((field_8C & 0x100003) == 1 || (field_8C == 0 && capability == "root")) {
+			if ((primaryContext.flags & SELECT_TYPE_FLAG_MASK) == 1 || (primaryContext.flags == 0 && primaryContext.capability == "root")) {
 				for (AnimationComponentData comp : components) {
 					if (comp.getType() == InfoComponent.TYPE) {
 						for (AbstractComponentKeyframe k : comp.keyframes) {
@@ -305,46 +417,102 @@ public class AnimationChannel {
 		}
 	}
 	
-	public void toArgScript(ArgScriptWriter writer, SPAnimation animation) throws IOException {
-		writer.command(KEYWORD);
-		if (name.contains(" ")) writer.literal(name);
-		else writer.arguments(name);
-		//TODO probably more elaborate?
-		if (getCapability() != null) {
-			writer.arguments(getCapability());
+	public static void selectorToArgScript(ArgScriptWriter writer, ContextSelector context, boolean isSecondary) {
+		if (isSecondary) {
+			if ((context.flags & SELECT_TYPE_FLAG_MASK) == 0x100003) {
+				writer.ints(context.id);
+			}
+			else if (context.getCapability() != null) {
+				writer.arguments(context.getCapability());
+			}
 		}
-		if (field_8C != 0) {
-			String selectX = ENUM_SELECTX.get(field_8C & SELECTX_FLAGS);
-			String selectY = ENUM_SELECTY.get(field_8C & SELECTY_FLAGS);
-			String selectZ = ENUM_SELECTZ.get(field_8C & SELECTZ_FLAGS);
+		else if (context.getCapability() != null) {
+			writer.arguments(context.getCapability());
+		}
+		
+		if (context.flags == SELECT_TYPE_NONE) {
+			writer.option("noSelect");
+		}
+		else if (context.flags != 0) {
+			String selectX = ENUM_SELECTX.get(context.flags & SELECTX_FLAGS);
+			String selectY = ENUM_SELECTY.get(context.flags & SELECTY_FLAGS);
+			String selectZ = ENUM_SELECTZ.get(context.flags & SELECTZ_FLAGS);
+			String extent = ENUM_EXTENT.get(context.flags & EXTENT_MASK);
 			
 			if (selectX != null) writer.option("selectX").arguments(selectX);
 			if (selectY != null) writer.option("selectY").arguments(selectY);
 			if (selectZ != null) writer.option("selectZ").arguments(selectZ);
+			if (extent != null) writer.option("extent").arguments(extent);
+			
+			if ((context.flags & SELECT_LIMB_MASK) != 0) {
+				writer.option("limb").arguments("0x" + Integer.toHexString(context.flags & SELECT_LIMB_MASK));
+			}
 		
-			int flags = field_8C & ~(SELECTY_FLAGS | SELECTY_FLAGS | SELECTZ_FLAGS);
-			if (flags != 0) writer.option("field_8C").arguments("0x" + Integer.toHexString(flags));
+			int flags = context.flags & ~(SELECTX_FLAGS | SELECTY_FLAGS | SELECTZ_FLAGS | EXTENT_MASK | SELECT_TYPE_ROOT | SELECT_TYPE_FLAG_MASK | SELECT_LIMB_MASK);
+			if (flags != 0) writer.option("selectFlags").arguments("0x" + Integer.toHexString(flags));
+		}
+	}
+	
+	public void toArgScript(ArgScriptWriter writer, SPAnimation animation) throws IOException {
+		writer.command(KEYWORD);
+		if (name.contains(" ")) writer.literal(name);
+		else writer.arguments(name);
+		
+		selectorToArgScript(writer, primaryContext, false);
+		
+		if ((movementFlags & MOVEMENT_FLAG_GROUND_RELATIVE) != 0) {
+			writer.option("groundRelative");
+		}
+		if ((movementFlags & MOVEMENT_FLAG_SECONDARY_DIRECTIONAL_ONLY) != 0) {
+			writer.option("secondaryDirectionalOnly");
+		}
+		if ((movementFlags & MOVEMENT_FLAG_LOOKAT) != 0) {
+			writer.option("rotRelativeExtTarg");
 		}
 		
-		if (field_9C != 2) {
-			writer.option("field_9C").arguments("0x" + Integer.toHexString(field_9C));
+		int field_88_ = movementFlags & ~(MOVEMENT_FLAG_SECONDARY | MOVEMENT_FLAG_GROUND_RELATIVE | MOVEMENT_FLAG_SECONDARY_DIRECTIONAL_ONLY | MOVEMENT_FLAG_LOOKAT);
+		if (field_88_ != 0) {
+			writer.option("movementFlags").arguments("0x" + Integer.toHexString(field_88_));
 		}
 		
-		if (field_AC != 0) {
-			writer.option("field_AC").arguments("0x" + Integer.toHexString(field_AC));
+		if ((bindFlags & BIND_FLAG_INTERPOLATE) == 0) writer.option("noInterpolate");
+		
+		if ((bindFlags & BIND_FLAG_REQUIRE) != 0) writer.option("require");
+		
+		if ((bindFlags & BIND_FLAG_MIRRORING_MASK) != 0) {
+			String mirroring = ENUM_MIRRORING.get(bindFlags & BIND_FLAG_MIRRORING_MASK);
+			writer.option("mirroring").arguments(mirroring);
 		}
 		
-		if (field_88 != 0) {
-			writer.option("field_88").ints(field_88);
+		writer.option("blendGroup").ints((bindFlags & 0x00FF0000) >> 16);
+		
+		if (bindFlags != 0) {
+			if ((bindFlags & 0xFF000000) != 0) {
+				writer.option("variantGroup").ints((bindFlags & 0xFF000000) >> 24);
+			}
+			
+			int flags = bindFlags & ~(BIND_FLAG_INTERPOLATE | BIND_FLAG_EVENT | BIND_FLAG_REQUIRE | BIND_FLAG_MIRRORING_MASK | 0xFFFF0000);
+			
+			if (flags != 0) writer.option("bindFlags").arguments("0x" + Integer.toHexString(flags));
+		}
+		
+		if (secondaryContext.flags != 2 && (movementFlags & MOVEMENT_FLAG_SECONDARY) == 0) {
+			writer.option("field_9C").arguments("0x" + Integer.toHexString(secondaryContext.flags));
 		}
 		
 		writer.startBlock();
+		
+		if ((movementFlags & MOVEMENT_FLAG_SECONDARY) != 0) {
+			writer.command("secondary");
+			
+			selectorToArgScript(writer, secondaryContext, true);
+		}
 		
 		for (int i = 0; i < components.size(); ++i) {
 			AnimationComponentData comp = components.get(i);
 
 			int type = (comp.flags & 0xF);
-			int flags = (comp.flags & ~0xF) & ~AnimationComponentData.FLAG_USED;
+			int flags = (comp.flags & ~0xF) & ~AnimationComponentData.FLAG_MASK;
 			
 			// If it's not used and not INFO (they don't require the flag), skip it
 			if (type != InfoComponent.TYPE && (comp.flags & AnimationComponentData.FLAG_USED) == 0) {
@@ -364,6 +532,10 @@ public class AnimationChannel {
 				writer.command(RigblockComponent.KEYWORD).arguments(HashManager.get().getFileName(comp.id));
 			}
 			
+			if ((comp.flags & AnimationComponentData.FLAG_RELATIVE) != 0) writer.option("relative");
+			int scale = comp.flags & AnimationComponentData.FLAG_SCALE_MASK;
+			if (scale != 0) writer.option("scaleMode").arguments(AnimationComponentData.ENUM_SCALE.get(scale));
+			
 			if (flags != 0) {
 				writer.option("flags").arguments("0x" + Integer.toHexString(flags));
 			}
@@ -379,11 +551,5 @@ public class AnimationChannel {
 		}
 		
 		writer.endBlock().commandEND();
-	}
-	
-	public String getCapability() {
-		if ((field_8C & 0x100003) == 0) return capability;
-		else if ((field_8C & 0x100003) == 1) return "root";
-		else return null;
 	}
 }

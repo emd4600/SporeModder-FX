@@ -20,8 +20,8 @@ package sporemodder.file.simulator.attributes;
 
 import java.lang.reflect.Constructor;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.simulator.SimulatorClass;
 
 public class ClassAttribute<T extends SimulatorClass> implements SimulatorAttribute {

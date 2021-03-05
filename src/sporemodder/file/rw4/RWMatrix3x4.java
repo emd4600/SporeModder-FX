@@ -20,8 +20,8 @@ package sporemodder.file.rw4;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.Matrix;
 import sporemodder.util.Vector3;
 

@@ -21,10 +21,10 @@ package sporemodder.file.simulator;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFItem;
@@ -36,9 +36,9 @@ public class cScenarioResource {
 	// for testing
 	private byte[] propData;
 	
-	private final PropertyList propertyList = new PropertyList();
-	private MemoryStream dataStream;
-	private final cScenarioResourceAttributes scenario = new cScenarioResourceAttributes();
+	public final PropertyList propertyList = new PropertyList();
+	public MemoryStream dataStream;
+	public final cScenarioResourceAttributes scenario = new cScenarioResourceAttributes();
 	
 	public void read(StreamReader stream) throws Exception {
 		
@@ -167,6 +167,7 @@ public class cScenarioResource {
 			
 			cScenarioResource resource = new cScenarioResource();
 			resource.read(stream);
+			
 			
 			try (PrintWriter writer = new PrintWriter(outputPath + "planet.prop.prop_t")) {
 				writer.write(resource.propertyList.toArgScript());

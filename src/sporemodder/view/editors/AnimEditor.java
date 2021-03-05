@@ -20,11 +20,14 @@ package sporemodder.view.editors;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import emord.filestructures.FileStream;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import sporemodder.GameManager;
 import sporemodder.HashManager;
 import sporemodder.UIManager;
@@ -34,6 +37,7 @@ import sporemodder.file.anim.SPAnimation;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.dbpf.DebugInformation;
+import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.tlsa.TLSAAnimation;
 import sporemodder.file.tlsa.TLSAAnimationChoice;
 import sporemodder.file.tlsa.TLSAAnimationGroup;
@@ -46,6 +50,9 @@ import sporemodder.view.dialogs.ProgramSettingsUI;
 public class AnimEditor extends AnimTextEditor {
 	
 	private static final String PACKAGE_NAME = "_SporeModderFX_AnimEditor";
+	
+	private Timer timer;
+	private long lastModified;
 
 	@Override protected File getFile(ProjectItem item) {
 		// We want to return _anim_editor.anim.anim_t (create it if it does not exist).
@@ -74,10 +81,79 @@ public class AnimEditor extends AnimTextEditor {
 		return new File(folder, "_SporeModder_AnimEditor.animation");
 	}
 	
+	private class ReloadTask extends TimerTask
+	{
+		private void reload() {
+			Platform.runLater(() -> {
+				UIManager.get().tryAction(() -> {
+					loadFile(item);
+					saveAnimData();
+				}, "Error reloading file");
+				
+				timer = new Timer();
+				timer.scheduleAtFixedRate(new ReloadTask(), 0L, 2000L);
+			});
+		}
+		
+		@Override
+		public void run() {
+			if (item != null) {
+				File file = getFile(item);
+				if (file != null) {
+					long newLastModified = file.lastModified();
+					if (newLastModified > lastModified) {
+						lastModified = newLastModified;
+						
+						// Stop the timer until we reload
+						timer.cancel();
+
+						// if the user is using the editor, ask for permission
+						if (getCodeArea().isFocused()) {
+						    Platform.runLater(() -> {
+					        	Dialog<ButtonType> dialog = new Dialog<ButtonType>();
+								dialog.setTitle("Reload file?");
+								
+								dialog.getDialogPane().setHeaderText("The file has been modified by an external program. Do you want to reload it? (the current contents will be lost)");
+								
+								dialog.getDialogPane().getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+								
+								if (UIManager.get().showDialog(dialog).orElse(ButtonType.NO) == ButtonType.YES) {
+									reload();
+								}
+						    });
+						}
+						else {
+							reload();
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Override public void setActive(boolean active) {
+		super.setActive(active);
+		
+		if (active) {
+			timer = new Timer();
+			timer.scheduleAtFixedRate(new ReloadTask(), 0L, 2000L);
+		}
+		else {
+			timer.cancel();
+			timer.purge();
+		}
+	}
+	
 	@Override protected void saveData() throws Exception {
 		// We want to save the file but also the .animation
 		super.saveData();
 		
+		lastModified = getFile(item).lastModified();
+		
+		saveAnimData();
+	}
+	
+	private void saveAnimData() throws IOException {
 		SPAnimation anim = new SPAnimation();
 
 		ArgScriptStream<SPAnimation> stream = anim.generateStream();
@@ -94,7 +170,18 @@ public class AnimEditor extends AnimTextEditor {
 	@Override public void loadFile(ProjectItem item) throws IOException {
 		super.loadFile(item);
 		
-		if (item != null) {
+		if (item == null) {
+			timer.cancel();
+			timer.purge();
+		}
+		else {
+			File textFile = getFile(item);
+			if (textFile != null) {
+				lastModified = textFile.lastModified();
+			}
+			
+			saveAnimData();
+			
 			SporeGame game = GameManager.get().getGalacticAdventures();
 			
 			if (game == null) {

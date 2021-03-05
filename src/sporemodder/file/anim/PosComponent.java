@@ -20,8 +20,8 @@ package sporemodder.file.anim;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptLine;
@@ -65,7 +65,9 @@ public class PosComponent implements AbstractComponentKeyframe {
 	
 	@Override public void toArgScript(ArgScriptWriter writer, SPAnimation animation) {
 		writer.vector3(pos);
-		if (weight != 1.0f) writer.floats(weight);
+		if (weight != 1.0f) {
+			writer.floats(weight);
+		}
 		
 		for (int i = 0; i < interpolators.length; ++i) {
 			if (!interpolators[i].isDefault()) {
@@ -99,9 +101,9 @@ public class PosComponent implements AbstractComponentKeyframe {
 				compData.id = HEADER;
 				channelParser.channel.components.add(compData);
 				
-				if (!line.hasFlag("disable")) compData.flags |= AnimationComponentData.FLAG_USED;
-				
 				line.getArguments(args, 0);
+				
+				compData.parseFlags(line);
 				
 				Number value;
 				if (line.getOptionArguments(args, "flags", 1) &&

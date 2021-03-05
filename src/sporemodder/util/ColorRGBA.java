@@ -20,8 +20,8 @@ package sporemodder.util;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.paint.Color;
 import sporemodder.HashManager;
 

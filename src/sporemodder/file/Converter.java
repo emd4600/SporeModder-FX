@@ -20,8 +20,8 @@ package sporemodder.file;
 
 import java.io.File;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
 import sporemodder.HashManager;
 import sporemodder.file.dbpf.DBPFPacker;

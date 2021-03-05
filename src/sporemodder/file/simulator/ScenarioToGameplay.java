@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;
@@ -74,6 +74,7 @@ public class ScenarioToGameplay {
 		scriptsFolder.mkdir();
 		themesFolder.mkdir();
 		
+		createGameplayPlanetScript().toArgScript().write(outputFile);
 		try (PrintWriter writer = new PrintWriter(new File(scriptsFolder, outputName + ".prop.prop_t"))) {
 			writer.write(createGameplayPlanetScript().toArgScript());
 		}

@@ -28,9 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
 import javafx.scene.image.Image;
 import sporemodder.HashManager;
+import sporemodder.MainApp;
 import sporemodder.ProjectManager;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.spui.components.DirectImage;
@@ -328,14 +330,19 @@ public class SporeUserInterface {
 				uri = file.toURI().toString();
 			}
 		} else {
-			File file = ProjectManager.get().getFile(path);
-			if (file.isDirectory()) {
-				file = new File(file, fileName);
-			}
-			else if (file == null) {
-				unloadedFiles.add(path);
+      File file = null;
+      if (ProjectManager.get().getActive() != null) {
+        file = ProjectManager.get().getFile(path);
+      }
+      if (file != null) {
+        if (file.isDirectory()) {
+				  file = new File(file, fileName);
+			  }
+      }
+      else {
+        unloadedFiles.add(path);
 				return null;
-			}
+      }
 			
 			uri = file.toURI().toString();
 		}
@@ -407,5 +414,33 @@ public class SporeUserInterface {
 		SpuiElement element = clazz.createInstance();
 		clazz.fillDefaults(editor, element);
 		return element;
+	}
+	
+	public static void main(String[] args) throws IOException
+	{
+		MainApp.testInit();
+		
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\layouts_atlas~";
+		
+		for (File file : new File(path).listFiles()) {
+			if (file.getName().endsWith(".spui"))
+			{
+				try (FileStream stream = new FileStream(file, "r"))
+				{
+					SporeUserInterface spui = new SporeUserInterface();
+					spui.read(stream);
+					
+					for (SpuiElement element : spui.getElements()) {
+						if (element.getDesignerClass().getProxyID() == 0x0f0b8b73) {
+							System.out.println(file.getName());
+							break;
+						}
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

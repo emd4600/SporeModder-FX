@@ -26,10 +26,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageInputStream;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import sporemodder.file.dds.DDSPixelFormat.Format;

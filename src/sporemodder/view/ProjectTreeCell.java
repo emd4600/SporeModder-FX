@@ -49,6 +49,10 @@ public class ProjectTreeCell extends TreeCell<ProjectItem> {
 					!getDisclosureNode().getBoundsInParent().contains(e.getX(), e.getY())) {
 				e.consume();
 			}
+			
+			if (projectBehaviour && e.getButton() == MouseButton.SECONDARY && !isEmpty() && getItem() != null) {
+				e.consume();
+			}
 		});
 		
 		if (projectBehaviour) addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {

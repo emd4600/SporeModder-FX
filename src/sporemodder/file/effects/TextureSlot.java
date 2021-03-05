@@ -18,9 +18,9 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import emord.filestructures.Structure;
-import emord.filestructures.StructureEndian;
-import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptLine;

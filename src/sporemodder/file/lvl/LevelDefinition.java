@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
 

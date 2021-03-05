@@ -18,7 +18,7 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import emord.filestructures.StructureIgnore;
+import sporemodder.file.filestructures.StructureIgnore;
 
 public abstract class EffectComponent implements EffectFileElement {
 	

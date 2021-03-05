@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import emord.filestructures.Stream.StringEncoding;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.paint.Color;
 import sporemodder.HashManager;
 import sporemodder.file.LocalizedText;

@@ -20,8 +20,8 @@ package sporemodder.file.anim;
 
 import java.io.IOException;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptWriter;

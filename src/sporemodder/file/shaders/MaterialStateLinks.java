@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.effects.ResourceID;

@@ -44,6 +44,7 @@ public class ProgressDialogUI implements Controller {
 	private ProgressBar progressBar;
 	
 	private Runnable onCancelled;
+	private Runnable onFailed;
 	private Runnable onSucceeded;
 	
 	@Override
@@ -65,6 +66,10 @@ public class ProgressDialogUI implements Controller {
 	
 	public void setOnSucceeded(Runnable onSucceeded) {
 		this.onSucceeded = onSucceeded;
+	}
+	
+	public void setOnFailed(Runnable onFailed) {
+		this.onFailed = onFailed;
 	}
 	
 	public Label getLabel() {
@@ -130,6 +135,12 @@ public class ProgressDialogUI implements Controller {
 			progressDialog.close();
 			
 			if (onCancelled != null) onCancelled.run();
+		});
+		task.setOnFailed(ev2 -> {
+			forceClose.set(true);
+			progressDialog.close();
+			
+			if (onFailed != null) onFailed.run();
 		});
 		
 		return progressDialog;

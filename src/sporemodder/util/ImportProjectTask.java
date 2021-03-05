@@ -32,9 +32,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -132,7 +132,7 @@ public class ImportProjectTask extends ResumableTask<Void> {
 						
 						PropertyList list = new PropertyList();
 						list.read(stream);
-						Files.write(dest, list.toArgScript().getBytes("US-ASCII"));
+						list.toArgScript().write(dest);
 						
 						stream.close();
 					} 
@@ -191,24 +191,30 @@ public class ImportProjectTask extends ResumableTask<Void> {
 			}
 		});
 		
+		progressUI.setOnSucceeded(() -> {
+			File settingsFile = new File(sourceFolder, "config.properties");
+			if (settingsFile.exists()) {
+				try {
+					Files.copy(new File(destination.getFolder(), Project.SETTINGS_FILE_NAME).toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					destination.loadSettings();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			destination.updateLastTimeUsed();
+			destination.saveSettings();
+		});
+		
+		progressUI.setOnFailed(() -> {
+			UIManager.get().showErrorDialog(getException(), "Fatal error, project could not be imported", true);
+		});
+		
 		// Show progress
 		progressUI.getProgressBar().progressProperty().bind(progressProperty());
 		progressUI.getLabel().textProperty().bind(messageProperty());
 		
 		UIManager.get().showDialog(progressDialog);
-		
-		File settingsFile = new File(sourceFolder, "config.properties");
-		if (settingsFile.exists()) {
-			try {
-				Files.copy(new File(destination.getFolder(), Project.SETTINGS_FILE_NAME).toPath(), settingsFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				destination.loadSettings();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		destination.updateLastTimeUsed();
-		destination.saveSettings();
 	}
 	
 	private void showErrorDialog(Path source) {

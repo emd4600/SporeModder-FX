@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.prop.PropertyKey;
 import sporemodder.file.prop.PropertyList;

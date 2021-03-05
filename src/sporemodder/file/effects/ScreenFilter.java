@@ -21,8 +21,8 @@ package sporemodder.file.effects;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.StructureLength;
-import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 public class ScreenFilter {
 	

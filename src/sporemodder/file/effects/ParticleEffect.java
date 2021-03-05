@@ -24,15 +24,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
-import emord.filestructures.Structure;
-import emord.filestructures.StructureEndian;
-import emord.filestructures.StructureFieldEndian;
-import emord.filestructures.StructureFieldMethod;
-import emord.filestructures.StructureLength;
-import emord.filestructures.StructureUnsigned;
-import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureFieldMethod;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.StructureUnsigned;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -1119,7 +1119,7 @@ public class ParticleEffect extends EffectComponent {
 				
 				if (line.getOptionArguments(args, "tile", 1, 2) && (value = stream.parseByte(args, 0)) != null) {
 					effect.tileCount[0] = value.byteValue();
-					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 0) : null).orElse((byte) 1);
+					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 1) : null).orElse((byte) 1);
 				}
 				
 				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {

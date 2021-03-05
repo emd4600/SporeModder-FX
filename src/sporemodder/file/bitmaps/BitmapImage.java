@@ -22,10 +22,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.FixedMemoryStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.FixedMemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;

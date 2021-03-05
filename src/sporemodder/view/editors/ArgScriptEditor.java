@@ -408,6 +408,8 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 	private void setErrorInfo(SyntaxHighlighter syntax) {
 		errors.clear();
 		
+		Map<DocumentError, ErrorInfo> errorsMap = new HashMap<>();
+		
 		// Store some information about the errors for tooltips
 		List<DocumentError> documentErrors = stream.getErrors();
 		for (DocumentError error : documentErrors) {
@@ -420,6 +422,7 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 			errorInfo.position = startPosition;
 			errorInfo.length = endPosition - startPosition;
 			
+			errorsMap.put(error, errorInfo);
 			errors.add(errorInfo);
 		}
 		
@@ -475,7 +478,7 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 					
 					final int index = i;
 					hyperlink.setOnAction(ev -> {
-						ErrorInfo error = errors.get(index);
+						ErrorInfo error = errorsMap.get(documentErrors.get(index));
 						Platform.runLater(() -> getCodeArea().requestFocus());
 						getCodeArea().moveTo(error.position);
 						getCodeArea().selectRange(error.position + error.length, error.position);

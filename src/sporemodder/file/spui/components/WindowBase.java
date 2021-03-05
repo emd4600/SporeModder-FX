@@ -231,7 +231,8 @@ public class WindowBase extends SpuiElement implements IWindow {
 	
 	protected boolean shouldUseFillColor() {
 		// Only generic windows use fill color
-		if (getDesignerClass().getProxyID() == 0x4ec1b8d8) {
+		// Subwindows don't have designer class
+		if (getDesignerClass() != null && getDesignerClass().getProxyID() == 0x4ec1b8d8) {
 			return true;
 		} else {
 			return false;

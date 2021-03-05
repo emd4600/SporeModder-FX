@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.StreamWriter;
-import sporemodder.HashManager;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptEnum;
+import sporemodder.file.argscript.ArgScriptLine;
 
 public class AnimationComponentData {
 	
@@ -31,6 +33,17 @@ public class AnimationComponentData {
 	
 	/** If this flag is not present, the component is ignored. INFO component does not need this. */
 	public static final int FLAG_USED = 0x10;
+	public static final int FLAG_RELATIVE = 0x20;
+	public static final int SCALE_CREATURESIZE = 0x40;
+	public static final int SCALE_LIMBLENGTH = 0x80;
+	public static final int FLAG_SCALE_MASK = 0xC0;
+	public static final int FLAG_MASK = FLAG_USED | FLAG_RELATIVE | FLAG_SCALE_MASK;
+	
+	public static final ArgScriptEnum ENUM_SCALE = new ArgScriptEnum();
+	static {
+		ENUM_SCALE.add(SCALE_CREATURESIZE, "CreatureSize");
+		ENUM_SCALE.add(SCALE_LIMBLENGTH, "LimbLength");
+	}
 
 	public int flags;
 	public int id;
@@ -52,9 +65,6 @@ public class AnimationComponentData {
 		keyframeStride = stream.getInt(12);
 		index = stream.getInt(16);
 		
-		System.out.println("\t0x" + Long.toHexString(dataPtr + keyframeOffset) + "\tid: " + HashManager.get().getFileName(id) + 
-				"\tflags: 0x" + Integer.toHexString(flags) + "\tstride: 0x" + Integer.toHexString(keyframeStride) + "\t" + stream.getInt(16));
-		
 	}
 	
 	public void write(StreamWriter stream) throws IOException {
@@ -75,6 +85,16 @@ public class AnimationComponentData {
 		case RigblockComponent.TYPE: return new RigblockComponent();
 		default: throw new UnsupportedOperationException("Anim component " + type + " is not supported.");
 		}
-			
+	}
+	
+	public void parseFlags(ArgScriptLine line) {
+		if (!line.hasFlag("disable")) flags |= AnimationComponentData.FLAG_USED;
+		if (line.hasFlag("relative")) flags |= AnimationComponentData.FLAG_RELATIVE;
+		
+		final ArgScriptArguments args = new ArgScriptArguments();
+		
+		if (line.getOptionArguments(args, "scaleMode", 1)) {
+			flags |= ENUM_SCALE.get(args, 0);
+		}
 	}
 }

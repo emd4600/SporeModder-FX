@@ -27,7 +27,7 @@ import sporemodder.util.ProjectItem;
 
 public class AnimEditorItem extends ProjectItem {
 	
-	public static final String FOLDER_NAME = "Anim Editor";
+	public static final String FOLDER_NAME = "Animation Editor";
 	public static final String RELATIVE_PATH = "../" + FOLDER_NAME;
 	
 	private static Image icon;
@@ -39,15 +39,15 @@ public class AnimEditorItem extends ProjectItem {
 	}
 	
 	@Override public Node getIcon() {
-		return null;
-		/*if (icon == null) {
-			icon = UIManager.get().loadImage("item-icon-effects.png");
+		//return null;
+		if (icon == null) {
+			icon = UIManager.get().loadImage("anim-icon.png");
 		}
 		
 		ImageView imageView = new ImageView(icon);
 		imageView.setFitWidth(24);
 		imageView.setFitHeight(18);
-		return imageView;*/
+		return imageView;
 	}
 
 	@Override
@@ -67,6 +67,11 @@ public class AnimEditorItem extends ProjectItem {
 	
 	// So it reacts properly to AbstractEditableEditor save
 	public boolean isMod() {
+		return true;
+	}
+	
+	public boolean isRoot() {
+		// This avoids exceptions when right-clicking the item
 		return true;
 	}
 	

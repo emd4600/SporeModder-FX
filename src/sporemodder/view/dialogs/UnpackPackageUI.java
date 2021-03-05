@@ -160,6 +160,9 @@ public class UnpackPackageUI implements Controller {
 					}
 				});
 				
+				progressUI.setOnFailed(() -> {
+					UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
+				});
 				
 				// Show progress
 				progressUI.getProgressBar().progressProperty().bind(task.progressProperty());
@@ -170,7 +173,7 @@ public class UnpackPackageUI implements Controller {
 				// Ensure the overlay is not showing
 				UIManager.get().setOverlay(false);
 				
-				if (!task.isCancelled()) {
+				if (!task.isCancelled() && task.getException() == null) {
 					ProjectManager.get().setActive(project);
 				}
 			}

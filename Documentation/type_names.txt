@@ -16,9 +16,12 @@
 .jpg=JPEG Image
 .jpeg=JPEG Image
 .gif=GIF Image
+.ico=Windows Icon
+.cur=Windows Cursor
 .raster=Creation Rasterized Texture
 .rw4=RenderWare4 Model/Texture/Material
 .lvl=Game Level
+.lua=Lua Script
 .cll=Cell Creation
 .crt=Creature Creation
 .bld=Building Creation

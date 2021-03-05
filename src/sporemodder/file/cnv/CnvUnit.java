@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.PathManager;
 import sporemodder.UIManager;
@@ -239,7 +239,7 @@ public class CnvUnit {
 							if (args.size() == 2) {
 								var.id = stream.parseFileID(args, 1);
 							} else {
-								var.id = HashManager.get().getFileHash(anim.name);
+								var.id = HashManager.get().getFileHash(var.name);
 							}
 						}
 						
@@ -405,13 +405,13 @@ public class CnvUnit {
 							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
 						}));
 						this.addParser("ints2", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints2);
 						}));
 						this.addParser("ints3", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints3);
 						}));
 						this.addParser("ints4", ArgScriptParser.create((parser, line) -> {
-							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints1);
+							if (line.getArguments(args, 1, Integer.MAX_VALUE)) parser.getStream().parseFileIDs(args, response.ints4);
 						}));
 					}
 				});

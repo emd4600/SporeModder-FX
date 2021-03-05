@@ -66,7 +66,7 @@ public class UpdateManager {
      */
     public static final TimeZone TIMEZONE = TimeZone.getTimeZone("UTC");
     
-    public final VersionInfo versionInfo = new VersionInfo(2, 1, 20, null);
+    public final VersionInfo versionInfo = new VersionInfo(2, 1, 22, null);
     
     public static UpdateManager get() {
     	return MainApp.get().getUpdateManager();
@@ -169,6 +169,10 @@ public class UpdateManager {
 		    			closeProgram.set(true);
 	    			}, "Updater could not be executed.");
 	    		});
+	    		
+	    		progressUI.setOnFailed(() -> {
+					UIManager.get().showErrorDialog(task.getException(), "Fatal error", true);
+				});
 	    		
 	    		UIManager.get().showDialog(progressDialog, false);
 			} 

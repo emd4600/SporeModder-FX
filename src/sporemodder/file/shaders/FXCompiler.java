@@ -25,8 +25,8 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Properties;
 
-import emord.filestructures.MemoryStream;
-import emord.filestructures.Stream.StringEncoding;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.AbstractManager;
 import sporemodder.MainApp;
 import sporemodder.util.WinRegistry;

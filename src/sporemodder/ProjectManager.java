@@ -42,12 +42,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.concurrent.Worker.State;
 import javafx.scene.Cursor;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -90,6 +91,7 @@ import sporemodder.view.dialogs.ProgressDialogUI;
 import sporemodder.view.dialogs.ProjectSettingsUI;
 import sporemodder.view.dialogs.UnpackPresetsUI;
 import sporemodder.view.editors.AbstractEditableEditor;
+import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
 import sporemodder.view.editors.ItemEditor;
 
@@ -159,7 +161,7 @@ public class ProjectManager extends AbstractManager {
 		
 		
 		specialItems.add(new EffectEditorItem());
-		//specialItems.add(new AnimEditorItem());
+		specialItems.add(new AnimEditorItem());
 		
 		// Load all projects
 		File projectsFolder = PathManager.get().getProjectsFolder();
@@ -671,6 +673,8 @@ public class ProjectManager extends AbstractManager {
 	 * @param item
 	 */
 	public void generateContextMenu(ProjectItem item) {
+		MenuItem itemName = new MenuItem(item.getName());
+		
 		MenuItem itemCopyName = new MenuItem("Copy name");
 		MenuItem itemCopyPath = new MenuItem("Copy file path");
 		MenuItem itemCopyKey = new MenuItem("Copy resource key");
@@ -704,6 +708,11 @@ public class ProjectManager extends AbstractManager {
 		
 		itemCopyKey.setOnAction(event -> {
 			String key = item.getName();
+			String[] splits = key.split("\\.");
+			// Remove extra extension such as prop_t
+			if (splits.length >= 3) {
+				key = splits[0] + "." + splits[1];
+			}
 			
 			TreeItem<ProjectItem> parentItem = item.getTreeItem().getParent();
 			// The root node does not count
@@ -730,6 +739,7 @@ public class ProjectManager extends AbstractManager {
 			Clipboard.getSystemClipboard().setContent(content);
 		});
 		
+		itemName.setOnAction(event -> UIManager.get().tryAction(() -> selectItem(item), "Cannot select file"));
 		itemNewFile.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFile(), "Cannot create new file."));
 		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFolder(), "Cannot create new folder."));
 		itemRename.setOnAction(event -> UIManager.get().tryAction(() -> item.renameItem(), "Cannot rename item."));
@@ -743,6 +753,7 @@ public class ProjectManager extends AbstractManager {
 		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(() -> item.openModFolder(), "Cannot open mod folder."));
 		
 		contextMenu.getItems().clear();
+		contextMenu.getItems().addAll(itemName, new SeparatorMenuItem());
 		contextMenu.getItems().addAll(itemCopyName, itemCopyPath, itemCopyKey, itemCopyID, new SeparatorMenuItem());
 		contextMenu.getItems().addAll(itemNewFile, itemNewFolder, itemRename, itemRemove, itemModify, itemImportFiles, itemRefresh, new SeparatorMenuItem());
 		
@@ -1370,7 +1381,8 @@ public class ProjectManager extends AbstractManager {
 			// Create the project or override the existing one
 			final Project project = getOrCreateProject(preset.getName());
 			project.setReadOnly(true);
-			project.saveSettings();
+			// We don't need to save the settings here, as the unpacking task will call initializeProject()
+			// project.saveSettings();
 			
 			// The project is passed to set the 'packageSignature' setting, but we don't want that in presets
 			final DBPFUnpackingTask task = new DBPFUnpackingTask(files.values(), project.getFolder(), project, converters);
@@ -1385,14 +1397,22 @@ public class ProjectManager extends AbstractManager {
 			progressUI.getProgressBar().progressProperty().bind(task.progressProperty());
 			progressUI.getLabel().textProperty().bind(task.messageProperty());
 			
+			progressUI.setOnFailed(() -> {
+				UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
+				
+				for (String str : fileToName.values()) {
+					failedPackages.add(str);
+				}
+			});
+			
 			UIManager.get().showDialog(progressDialog);
 			
-			if (task.isCancelled()) {
+			if (task.isCancelled() || task.getState() == State.FAILED) {
 				// The task was cancelled, don't continue unpacking presets
 				return;
 			} else {
 				List<File> fails = task.getFailedDBPFs();
-				for (File fail : fails ) {
+				for (File fail : fails) {
 					failedPackages.add(fileToName.get(fail));
 				}
 			}
@@ -1928,7 +1948,7 @@ public class ProjectManager extends AbstractManager {
 				
 				PropertyList list = new PropertyList();
 				list.read(stream);
-				Files.write(dest.toPath(), list.toArgScript().getBytes("US-ASCII"));
+				list.toArgScript().write(dest);
 				
 				stream.close();
 			} catch (ParserConfigurationException | SAXException e) {

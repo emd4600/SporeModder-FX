@@ -34,8 +34,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import emord.filestructures.MemoryStream;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 
 public class XmlPropParser extends DefaultHandler {

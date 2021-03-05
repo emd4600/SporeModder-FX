@@ -5209,3 +5209,11 @@ modelTexturesLOD2
 modelTexturesLOD3
 
 paletteItemUIClassId
+
+MaxNotes
+AmbienceIcons
+BeatIcons
+InstrumentIcons
+
+cSPScenarioBrushItemUI  0x3ca760f2
+cSPScenarioPaintItemUI  0xd1c304c2

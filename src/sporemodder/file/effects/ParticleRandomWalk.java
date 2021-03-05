@@ -21,11 +21,11 @@ package sporemodder.file.effects;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.Structure;
-import emord.filestructures.StructureEndian;
-import emord.filestructures.StructureFieldEndian;
-import emord.filestructures.StructureLength;
-import emord.filestructures.metadata.StructureMetadata;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class ParticleRandomWalk {

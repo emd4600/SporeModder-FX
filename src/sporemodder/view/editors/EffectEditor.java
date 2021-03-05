@@ -21,7 +21,7 @@ package sporemodder.view.editors;
 import java.io.File;
 import java.io.IOException;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;

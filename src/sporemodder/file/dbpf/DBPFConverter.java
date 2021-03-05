@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import emord.filestructures.FileStream;
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -146,6 +146,10 @@ public class DBPFConverter implements Converter {
 				else {
 					UnpackPackageUI.showErrorDialog(task);
 				}
+			});
+			
+			progressUI.setOnFailed(() -> {
+				UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
 			});
 			
 			

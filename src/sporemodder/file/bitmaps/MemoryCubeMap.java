@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import emord.filestructures.FileStream;
+import sporemodder.file.filestructures.FileStream;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;

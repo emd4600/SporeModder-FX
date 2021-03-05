@@ -21,8 +21,8 @@ package sporemodder.file.simulator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import emord.filestructures.StreamReader;
-import emord.filestructures.StreamWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.simulator.attributes.SimulatorAttribute;
 

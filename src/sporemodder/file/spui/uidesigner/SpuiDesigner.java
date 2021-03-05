@@ -183,23 +183,27 @@ public class SpuiDesigner {
 	
 	public void load() {
 		UIManager.get().tryAction(() -> {
+			boolean hasProject = ProjectManager.get().getActive() != null;
 			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
 			
-			File projectDesignerFolder = ProjectManager.get().getFile(projectUiDesignerFolder);
-			if (projectDesignerFolder != null) {
-				File [] xmlFiles = projectDesignerFolder.listFiles(new FilenameFilter() {
-				    @Override
-				    public boolean accept(File dir, String name) {
-				        return name.toLowerCase().endsWith(".xml");
-				    }
-				});
-				
-				for (File xml : xmlFiles) {
-					try (InputStream is = new FileInputStream(xml)) {
-						parse(is);
-					}
-					catch (Exception ex) {
-						ex.printStackTrace();
+			if (hasProject)
+			{
+				File projectDesignerFolder = ProjectManager.get().getFile(projectUiDesignerFolder);
+				if (projectDesignerFolder != null) {
+					File [] xmlFiles = projectDesignerFolder.listFiles(new FilenameFilter() {
+					    @Override
+					    public boolean accept(File dir, String name) {
+					        return name.toLowerCase().endsWith(".xml");
+					    }
+					});
+					
+					for (File xml : xmlFiles) {
+						try (InputStream is = new FileInputStream(xml)) {
+							parse(is);
+						}
+						catch (Exception ex) {
+							ex.printStackTrace();
+						}
 					}
 				}
 			}
@@ -239,7 +243,8 @@ public class SpuiDesigner {
 			}*/
 			
 			fileName = File.separatorChar + "sporeuitextstyles.css";
-			file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
+			file = null;
+			if (hasProject) file = ProjectManager.get().getFile(projectUiDesignerFolder + fileName);
 			
 			if (file == null)
 				file = PathManager.get().getProgramFile(FOLDER_NAME + fileName);

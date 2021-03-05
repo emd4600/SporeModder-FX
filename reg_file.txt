@@ -81521,3 +81521,159 @@ zeal_neutral_v6
 zeal_sad_v1
 zeal_urgnt_v1
 zeal_urgnt_v2
+Magic8Ball
+Airmer
+Esgeon
+AceOfSpace
+Crust Buster
+Scrambler
+Plitinian_Stinger
+Pipes
+Sleeper
+Exploser
+Christmas Cannon
+Junk Saucer
+Jetwook
+Falconer_Q16
+Taupriberia
+Pileon
+Cargo Hold
+V-Fighter
+Kabutomushi
+Fildor
+Starter
+Toro
+Space Fighter
+Kriktosian_Slayer
+Long Tail
+Psygnus
+Double Saucer
+Chaetar
+Omega R2v6
+Defenser
+Queston
+Alizarinite
+Patamahawk
+Fandancer
+Business Jet
+Pluto
+WaponiWoo
+From Sea To Space
+Pengu
+Bronzefly
+ColorOfMoney
+Blackbird
+The Arkimedes
+Pick-Up Truck
+Smasher
+Spirit
+Freight Jet
+Clipper
+FabergeYacht
+Mystery
+Speed Trading
+Flapper
+Soul Rally
+Intrepid Informer
+The Illuminator
+Zaladern
+Destroyer
+Swamp Mafia
+Water Hawk
+Golden Ship
+Speeder
+Irksome Inquisitor
+Sky Trade
+Penitent Prophet
+Sequester
+Floral Skiff
+Mustang
+TowerOfAirship
+ShockAndAwe
+Wasp
+Blood Skipper
+Music Airship
+Carkal
+HolyAvatar
+Valkyrie
+Righteous Roamer
+Hill Climber
+Regal Rainbow
+Amphiblingan
+Trading Slip
+LossLeader
+Tankette
+Vroom Bless
+Frigate
+Painted Lady
+Sting Ray Ship
+Tiphany
+TheInspector
+RubelliteFighter
+Paddleplane
+WillowWanderer
+Scuba Tank
+Quadriprop
+Delivery Truck
+Milifish
+Trading Shrimp
+Drone
+State Sanctionned
+Swamp Skipper
+OShuttle
+Merry Monk
+Harmonious Helper
+Viking Drums
+Vulture
+Scootastic
+Green Tank
+YoHoHo
+AdultSupervision
+Battleship
+Mighty Slip Ship
+Soparin
+Mangrove Floater
+Crosshair
+Cool Rod
+Nessie
+Death Metal
+Sigma Seas
+Spy Coupe
+Holy Harbinger
+F-100
+VerdeVentura
+Creme Brulee Pick-up
+Ghoul
+Carrack
+Steel Wasp
+Skatinator
+Enduracer
+AirTrout
+Aqua Militia
+AirMinistry
+Daulle
+Tarreza
+Pipe Tank
+RamjetHornet
+Notable Blaster
+party flying ship
+Field Trip
+YankeeClipper
+Money Bug
+Cream Sedan
+Personal Castle
+Elevated Mill
+House of Piety
+Thistle Tower
+Jollyblot Bar
+Perched Hall
+Stortion
+Future City Center
+Sellistery
+Purtratis
+FunFun
+Hellios
+Palace
+Slumhouse
+Elevated Hall
+Adamant

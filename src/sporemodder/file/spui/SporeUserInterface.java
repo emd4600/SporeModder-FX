@@ -330,19 +330,19 @@ public class SporeUserInterface {
 				uri = file.toURI().toString();
 			}
 		} else {
-      File file = null;
-      if (ProjectManager.get().getActive() != null) {
-        file = ProjectManager.get().getFile(path);
-      }
-      if (file != null) {
-        if (file.isDirectory()) {
-				  file = new File(file, fileName);
-			  }
-      }
-      else {
-        unloadedFiles.add(path);
+			File file = null;
+			if (ProjectManager.get().getActive() != null) {
+				file = ProjectManager.get().getFile(path);
+			}
+			if (file != null) {
+				if (file.isDirectory()) {
+					file = new File(file, fileName);
+				}
+			}
+			else {
+				unloadedFiles.add(path);
 				return null;
-      }
+			}
 			
 			uri = file.toURI().toString();
 		}

@@ -81780,3 +81780,6 @@ fish_idle_nog
 soc_didger01_loop_b_nog
 soc_shakern02_start_nog
 shaker_idle_01_nog
+mv_grasper_norm
+mv_glide_norm
+mv_energy_norm

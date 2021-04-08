@@ -126,6 +126,7 @@ public class AnimationEvent {
 		public static final int FLAG_TYPE_MASK = 0xF;
 		public static final ArgScriptEnum ENUM_TYPE = new ArgScriptEnum();
 		static {
+			ENUM_TYPE.add(0, "none");
 			ENUM_TYPE.add(TYPE_UNK1, "unk1");
 			ENUM_TYPE.add(TYPE_DEFAULT, "default");
 			ENUM_TYPE.add(TYPE_UNK3, "unk3");

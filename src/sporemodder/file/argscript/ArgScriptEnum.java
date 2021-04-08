@@ -31,7 +31,7 @@ public final class ArgScriptEnum {
 	
 	public final void add(int value, String text) {
 		valueToText.put(value, text);
-		textToValue.put(text, value);
+		textToValue.put(text.toLowerCase(), value);
 	}
 	
 	public Collection<Integer> getValues() {
@@ -47,7 +47,7 @@ public final class ArgScriptEnum {
 	}
 	
 	public final int get(String key) {
-		Integer value = textToValue.get(key);
+		Integer value = textToValue.get(key.toLowerCase());
 		if (value == null) return -1;
 		else return value;
 	}
@@ -60,8 +60,9 @@ public final class ArgScriptEnum {
 	 * @return
 	 */
 	public final int get(ArgScriptArguments args, int index) {
-		if (textToValue.containsKey(args.get(index))) {
-			return textToValue.get(args.get(index));
+		String str = args.get(index).toLowerCase();
+		if (textToValue.containsKey(str)) {
+			return textToValue.get(str);
 		}
 		else {
 			args.stream.addError(new DocumentError(String.format("The keyword '%s' is not part of the enum.", args.get(index)), args.getPosition(index), args.getEndPosition(index)));

@@ -66,7 +66,7 @@ public class RigblockComponent implements AbstractComponentKeyframe {
 	}
 	
 	public static List<Integer> getDeforms(String capability) {
-		if (capability == null) return Collections.emptyList();
+		if (capability == null || !RIGBLOCK_DEFORMS.containsKey(capability)) return Collections.emptyList();
 		List<Integer> list = RIGBLOCK_DEFORMS.get(capability);
 		if (list == null) {
 			throw new UnsupportedOperationException(capability + " is not a supported deformable capability");

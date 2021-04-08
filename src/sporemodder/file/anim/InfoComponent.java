@@ -136,7 +136,7 @@ public class InfoComponent implements AbstractComponentKeyframe {
 					c.flags |= value.intValue();
 				}
 				
-				if (l.getOptionArguments(args, "event", 1, Integer.MAX_VALUE)) {
+				if (l.getOptionArguments(args, "event", 1, Integer.MAX_VALUE) || l.getOptionArguments(args, "events", 1, Integer.MAX_VALUE)) {
 					c.eventStartIndex = stream.getData().eventList.size();
 					c.eventCount = args.size();
 					

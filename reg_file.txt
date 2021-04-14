@@ -10748,15 +10748,15 @@ hal3
 hal4
 nuance1
 nuance2
-npc_small_social
-npc_medium_social
-npc_combat
-npc_small_combat
-npc_large_social
-npc_medium_combat
-npc_large_combat
-npc_social
-npc_any
+NPC_Small_Social
+NPC_Medium_Social
+NPC_Combat
+NPC_Small_Combat
+NPC_Large_Social
+NPC_Medium_Combat
+NPC_Large_Combat
+NPC_Social
+NPC_Any
 toolgather1
 toolgather2
 toolgather3
@@ -47909,15 +47909,15 @@ seashell
 soundtable
 toolobject
 TribeFoodMat
-crg_startercreature
-cvg_starterCreature
-trg_starterCreature
-spg_starterCreature
-epic_carcass
-spg_herbivore
-spg_carnivore
-spg_spacetech
-npc_miniboss
+CRG_StarterCreature
+CVG_StarterCreature
+TRG_StarterCreature
+SPG_StarterCreature
+Epic_Carcass
+SPG_Herbivore
+SPG_Carnivore
+SPG_Spacetech
+NPC_MiniBoss
 isMiniboss
 PlayerCity
 cell_add_eye
@@ -53203,24 +53203,24 @@ spacegame_badges
 badge1
 badge_0
 PC
-npc_miniboss-easy~	0xB00D6E60
-npc_miniboss-hard~	0xA246FA3F
-npc_small_combat-easy~	0x6A66B1F6
-npc_small_combat-hard~	0x1DEFD4F5
-npc_small_social-hard~	0xC3F4E770
-npc_small_social-easy~	0x7C8E0147
-npc_medium_combat-hard~	0x2BBB43BF
-npc_medium_combat-easy~	0x8184976E
-npc_medium_social-hard~	0x07819272
-npc_medium_social-easy~	0x4D33414F
-npc_large_social-hard~	0xECA32D14
-npc_large_social-easy~	0x1E5F813B
-npc_large_combat-hard~	0x33F63511
-npc_large_combat-easy~	0xB6D59AF2
-npc_social-easy~	0x96C4679F
-npc_social-hard~	0x46A49424
-npc_combat-easy~	0x1A20F1FE
-npc_combat-hard~	0x53CEBCE1
+NPC_MiniBoss-easy~	0xB00D6E60
+NPC_MiniBoss-hard~	0xA246FA3F
+NPC_Small_Combat-easy~	0x6A66B1F6
+NPC_Small_Combat-hard~	0x1DEFD4F5
+NPC_Small_Social-hard~	0xC3F4E770
+NPC_Small_Social-easy~	0x7C8E0147
+NPC_Medium_Combat-hard~	0x2BBB43BF
+NPC_Medium_Combat-easy~	0x8184976E
+NPC_Medium_Social-hard~	0x07819272
+NPC_Medium_Social-easy~	0x4D33414F
+NPC_Large_Social-hard~	0xECA32D14
+NPC_Large_Social-easy~	0x1E5F813B
+NPC_Large_Combat-hard~	0x33F63511
+NPC_Large_Combat-easy~	0xB6D59AF2
+NPC_Social-easy~	0x96C4679F
+NPC_Social-hard~	0x46A49424
+NPC_Combat-easy~	0x1A20F1FE
+NPC_Combat-hard~	0x53CEBCE1
 requiredFood
 FeaturePopup_PaintLikeThis
 tt_pile_destroyed
@@ -81804,3 +81804,9 @@ Schminkel
 Klatu
 Lizzey
 Beaky
+NPC_Night_Predator
+NPC_Epic_Predator
+TRG_Food_Scavenger
+TRG_NPC_Epic_Predator
+CVG_NPC_Epic_Predator
+SPG_NPC_Epic_Predator

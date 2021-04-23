@@ -81904,3 +81904,30 @@ ability_firetempest_support
 ability_noct_hopper_jump
 ability_nomaddrag_taunt
 ability_pipebomb
+com_strike_bd_lvl03
+com_strike_bd_lvl02
+com_strike_bd_lvl05
+com_strike_bd_lvl04
+ep1_shaman_mindmeld_nog
+soc_shakern_idle_wait02_nog
+ep1_greet_trg_v03_nog
+ep1_epic_com_strike_v1_nog
+EP1_powerup_armor
+adventurePlayerStats~	0x408AE500
+captainStats~	0x4062E500
+creatureImages~	0x40626201
+Trialtofullback
+trialtofullbuttonoff
+trialtofullbuttonon
+upsellbullet
+creatureprofile
+friendslist
+helix
+reportplayer
+upsell
+PatcherValidateButtonActive
+PatcherValidateButtonOnClick
+planetImages~	0x4084B001
+planetImagesT1~	0x4084B101
+planetImagesT2~	0x4084B201
+planetImagesT3~	0x4084B301

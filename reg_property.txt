@@ -5217,3 +5217,28 @@ InstrumentIcons
 
 cSPScenarioBrushItemUI  0x3ca760f2
 cSPScenarioPaintItemUI  0xd1c304c2
+
+DisplayFilterUI
+AssetGridBorderSize
+GridScrollButtonPixelsPerSecond
+ScrollCatchupSpeed
+MaxNumAssetsLoaded
+AssetGridVerticalSpacer
+AssetLoadInterval
+ScrollSingleChunkAmount
+MakeNewButtonSizeOffset
+FeedListScrollButtonPixelsPerSecond
+DisabledCardColor
+CardMovementSoundProgressThreshold
+CardMovementThreshold
+FeedTextColorRolloverSelected
+FeedTextColorRollover
+FeedColorRolloverSelected
+FeedColorRollover
+FeedTextColorDefault
+FeedTextColorSelected
+FeedColorDefault
+FeedColorSelected
+FeedItemSelectedHeightOffset
+NetworkSpinnyColor
+FeedItemNameAndCountGapPixels

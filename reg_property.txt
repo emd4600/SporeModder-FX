@@ -5242,3 +5242,10 @@ FeedColorSelected
 FeedItemSelectedHeightOffset
 NetworkSpinnyColor
 FeedItemNameAndCountGapPixels
+SearchPauseTimeMS
+globalFindPercentageMultiplier
+findPercentageLevelMultiplier
+unlocksPerLevel
+rampOffsetStartDistance
+avatarCenterCloseUpDistFromCenter
+eyeEffectEnabled

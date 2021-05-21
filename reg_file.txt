@@ -79546,12 +79546,10 @@ jump
 lay_egg
 letterbox_fade_in
 mahnamahna_25sec
-mahnamahna_loop_25sec
 music_csa_dance
 nestclaim
 no_VOX_needed
 order
-physical_chorus_30sec
 play_effect
 plye_afraid_v1
 plye_angry_v1

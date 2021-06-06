@@ -5215,9 +5215,6 @@ AmbienceIcons
 BeatIcons
 InstrumentIcons
 
-cSPScenarioBrushItemUI
-cSPScenarioPaintItemUI
-
 DisplayFilterUI
 AssetGridBorderSize
 GridScrollButtonPixelsPerSecond

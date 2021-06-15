@@ -82991,3 +82991,27 @@ AutoAttack4
 AutoAttack5
 MilitaryVehicleEditorStats
 planetScriptsGameplay~	0x4084A100
+asymmetry_icon
+civ_accessory_editor_playmode_pedastal
+space_accessory_editor_playmode_pedastal
+btn-walk-off
+btn-run-off
+btn-walk-norm
+btn-run-norm
+btn-walk-hl
+btn-run-hl
+btn-walk-act
+btn-run-act
+Patcher_MustLogInToPatch
+AssetBrowser_AlreadyDownloaded
+AssetBrowser_XHTMLError
+AssetBrowser_RemoveBuddyFailed
+AssetBrowser_SubscriptionFailed
+Editor_Publish
+Editor_PublishFailed
+Editor_AlreadyPublished
+Editor_PublishSuccess
+Shopping_PollinationConfirmed
+AssetBrowser_AddBuddyFailed
+AssetBrowser_ConfirmAddBuddy
+CoreCredits

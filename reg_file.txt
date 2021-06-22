@@ -83056,3 +83056,8 @@ FE_rivers2_Mp
 FE_rivers2_Sp
 FE_rivers3_Sp
 FE_rivers3_Mp
+FE_cube3_Mp2
+FE_cube3_Sp2
+FE_mushroom1_Mp2
+FE_mushroom2_Mp3
+FE_mushroom3_Mp

@@ -419,9 +419,9 @@ ashtray_massiverock2_pile
 ashtray_resource_pile
 asiasdnrea
 asiatkea
-assetbrowser
-assetbrowserassetgrid
-assetviewlarge
+AssetBrowser
+AssetBrowserAssetGrid
+AssetViewLarge
 asteroid
 astonish120_1
 astonish120_2
@@ -45546,8 +45546,8 @@ hutstyles
 toolfish1
 toolheal3
 SG_ufo_radar_incoming_neutral
-assetbrowserfeedlist
-assetbrowserfeedlistcategory
+AssetBrowserFeedList
+AssetBrowserFeedListCategory
 h
 spacebadges_category
 spacerares_category
@@ -83297,3 +83297,12 @@ EDT_currency_text_cell_buyItem
 EDT_currency_text_cell_sellItem
 CSAContentPackNotify
 App_ReallyQuit
+AssetBrowserSearch
+AssetBrowserFeedListItem
+AssetBrowserFeedFilter
+SpaceNames
+CSAEntry
+CSABuySpore
+T0A2_T0
+T0A2_T1
+T0A2_T1_01

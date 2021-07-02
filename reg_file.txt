@@ -47968,7 +47968,7 @@ mars
 moon
 venus
 mercury
-allplanets
+AllPlanets
 ad_Ashtray
 ad_crableg
 ad_craters
@@ -83015,7 +83015,7 @@ Shopping_PollinationConfirmed
 AssetBrowser_AddBuddyFailed
 AssetBrowser_ConfirmAddBuddy
 CoreCredits
-ep1_allplanets
+EP1_AllPlanets
 TerrainEditorUI
 btn-download-off
 btn-download-norm
@@ -83306,3 +83306,5 @@ CSABuySpore
 T0A2_T0
 T0A2_T1
 T0A2_T1_01
+EP1_Ecologist
+ScenarioGameTuning

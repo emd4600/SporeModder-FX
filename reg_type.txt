@@ -99,10 +99,12 @@ bitImage	0x3e421e9
 blockdata	0x5caa5e28
 db	0x6d7728c3
 blend	0xe96b3b72
+blend1	0xe5ce9447
 XA	0x59770944
 rdx	0x3b72d4f1
 rdx9	0x86c5375a
 pcaw	0x2cb4f2f
+pnd	0x477764f5
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838

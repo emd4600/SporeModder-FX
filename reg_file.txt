@@ -393,7 +393,7 @@ apentemasd6
 apentemasd7
 apentemasd8
 apentemasd9
-appproperties
+AppProperties
 archetypeswitch-1
 archetypeswitch-2
 archetypeswitch-3
@@ -5350,11 +5350,11 @@ planecrash3
 planecrash4
 planecrash5
 planecrash6
-planet
-planet_civ
-planet_creature
-planet_space
-planet_tribe
+Planet
+Planet_Civ
+Planet_Creature
+Planet_Space
+Planet_Tribe
 planetbusterbomb
 PlanetCapture
 PlanetConversion
@@ -38572,7 +38572,7 @@ GGENewGameFlowUIv1
 GlobalUIGGE-9-EP1
 GGENewScenariov3
 GGENewScenariov2
-GGEZoomPanelv2
+GGEZoomPanelV2
 igc_TalkTo
 scenario
 ep1_ambience
@@ -83334,3 +83334,7 @@ Commscreen_Knight
 Commscreen_Wanderer
 ScenarioTemplate
 AdventureFilterButtons
+ShipAppProperties
+planetAtmoImpostor
+AdventureRating
+SortByAdventureRating

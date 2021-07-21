@@ -392,3 +392,14 @@ cStarRecord	0x3E4353C
 cPlanetRecord	0x3E434E2
 
 gfx	0x278CF8F2
+
+cilia	0x83324b49
+flagella	0x77fbb925
+chemical	0x0dae69d1
+filter	0x77b380c3
+jaw	0x2e8647bd
+poker	0x6ed040f4
+electric	0xc1b86f04
+spike	0x002ae8e9
+jet	0x2a86410a
+skinned	0x81b07013

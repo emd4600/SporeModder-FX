@@ -83338,3 +83338,9 @@ ShipAppProperties
 planetAtmoImpostor
 AdventureRating
 SortByAdventureRating
+AdventureSporepoints
+SortByAdventureSporepoints
+AdventureDifficulty
+SortByAdventureDifficulty
+SaveAreaCreatures~	0x011AC199
+loading_placeholder_boat

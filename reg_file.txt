@@ -83344,3 +83344,17 @@ AdventureDifficulty
 SortByAdventureDifficulty
 SaveAreaCreatures~	0x011AC199
 loading_placeholder_boat
+pirate
+invalid_model
+snowflake
+RockTemplate
+gears
+SolidSkinMeshWeighted
+cellskin_alpharamp
+AnimCreatureBabyThumbnail
+EditorComplexityMeter
+EditorEPControls
+AssetBrowserVerbs
+cursor-lay-egg
+cursor-sleep
+cursor-social

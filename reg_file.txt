@@ -83338,8 +83338,8 @@ ShipAppProperties
 planetAtmoImpostor
 AdventureRating
 SortByAdventureRating
-AdventureSporepoints
-SortByAdventureSporepoints
+AdventureSporePoints
+SortByAdventureSporePoints
 AdventureDifficulty
 SortByAdventureDifficulty
 SaveAreaCreatures~	0x011AC199
@@ -83363,3 +83363,9 @@ EP1_SaveDataFolders
 ModelViewer
 spg_colonize_star
 mvj
+AdventureLockedAvatar
+SortByAdventureLockedAvatar
+AdventurePlayCount
+SortByAdventurePlayCount
+AdventureRecentlyPlayed
+SortByAdventureRecentlyPlayed

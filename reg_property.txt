@@ -5321,3 +5321,4 @@ initialDistance
 VerbButtonGap
 cameraRotateScaleKeyboard
 cameraZoomScaleKeyboard
+ScenarioStarEffectsEnabled	0x08069A6C

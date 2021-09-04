@@ -83424,3 +83424,11 @@ hand
 planetImpostor
 icon_editor_eyes_20x20
 friendsprofile
+Delirious_Designer
+Delirious_Designer_disabled
+EP1_EffectsTemplate
+pickles
+harvester
+trg-allies
+HintsEDI
+HintsALG

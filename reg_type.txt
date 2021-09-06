@@ -19,49 +19,49 @@ hm	0x376c3da
 htra	0x472329b
 xhtml	0x65266b7
 raster	0x2f4e681c
-jpg
+jpg	0x3f8662ea
 jpeg	0x2f7d0002
 png	0x2f7d0004
 bmp	0x2f7d0005
 tga	0x2f7d0006
 gif	0x2f7d0007
-ico
+ico	0x14885d1c
 tlsa	0x4aeb6bc6
 pctp	0x7c19aa7a
 xml	0xcf6c21b8
 layout	0xefbda3ff
-dat
+dat	0x12952634
 bem	0x1a99b06b
 bat	0x1e99b626
-xls
-bld
-vcl
-spui
-gait
-txt
-crt
-vp6
-cfg
-psd
-mcl
-cll
-ani
-flr
-hkx
-ufo
-pfx
-density
-py
-pd
-world
-cell
-animation
+xls	0x1f639d98
+bld	0x2399be55
+vcl	0x24682294
+spui	0x250fe9a2
+gait	0x25df0112
+txt	0x2b6cab5f
+crt	0x2b978c46
+vp6	0x376840d7
+cfg	0x37979f71
+psd	0x3c77532e
+mcl	0x3c7e0f63
+cll	0x3d97a8e4
+ani	0x3f9c28b5
+flr	0x438f6347
+hkx	0x448ae7e2
+ufo	0x476a98c7
+pfx	0x497767b9
+density	0x5c74d18b
+py	0x617715c4
+pd	0x617715d9
+world	0x9b8e862f
+cell	0xdfad9f51
+animation	0xee17c6ad
 cnv	0x55ada24
 rw4	0x2f4e681b
-physx_bin
-physx_xml
+physx_bin	0x76e1259d
+physx_xml	0x7eab18fd
 cfx	0x278cf8f2
-dds
+dds	0x17952e6c
 snr	0x1a527db
 sns	0x1eef63a
 smt	0x469a3f7
@@ -74,39 +74,39 @@ snd	0x42c9cbb
 submix	0x2c9eff2
 voice	0x29e333b
 lvl	0x47b8300
-structure
-populate
-advect
-loottable
-backgroundmap
-random_creature
-look_table
-effectmap
-globals
-creaturedata
+structure	0x4b9ef6dc
+populate	0xda141c1b
+advect	0x4805684
+loottable	0xd92af091
+backgroundmap	0x612b3191
+random_creature	0xf9c3d770
+look_table	0x8c042499
+effectmap	0x433fb70c
+globals	0x2a3ce5b7
+creaturedata	0xf43029a
 geo	0x76a8f7d8
 cur	0x2393756
 effdir	0xea5118b0
-html
+html	0xdd6233d6
 xml	0x1e639c34
-animstate
-bmdl
-lua
+animstate	0x339479
+bmdl	0x72047de2
+lua	0x3681d755
 bitImage	0x3e421e9
 8bitImage	0x3e421ec
 32bitImage	0x3e421ed
 48bitImage	0x3e421ef
-blockdata
-db
-blend
-blend1
-XA
-rdx
-rdx9
+blockdata	0x5caa5e28
+db	0x6d7728c3
+blend	0xe96b3b72
+blend1	0xe5ce9447
+XA	0x59770944
+rdx	0x3b72d4f1
+rdx9	0x86c5375a
 pcaw	0x2cb4f2f
-pdn
-log
-bak
+pnd	0x477764f5
+log	0x2081b4f5
+bak	0x1e99b639
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838
@@ -393,43 +393,43 @@ cPlantCargoInfo	0x384EF2A
 cStarRecord	0x3E4353C
 cPlanetRecord	0x3E434E2
 
-gfx
+gfx	0x278CF8F2
 
-cilia
-flagella
-chemical
-filter
-jaw
-poker
-electric
-spike
-jet
-skinned
-xaxis
-yaxis
-zaxis
-flag
-gear
-light
-roof
-center
-sign
-wall
-windmill
-rounddormer
-roundskylight
-squareskylight
-ball
-stalk
-omnivore
-carnivore
-herbivore
-air
-land
-space
-water
-rear
-side
-wheel
-fixed
-flapping
+cilia	0x83324b49
+flagella	0x77fbb925
+chemical	0x0dae69d1
+filter	0x77b380c3
+jaw	0x2e8647bd
+poker	0x6ed040f4
+electric	0xc1b86f04
+spike	0x002ae8e9
+jet	0x2a86410a
+skinned	0x81b07013
+xaxis	0x067489dc
+yaxis	0x3bc16bcd
+zaxis	0x01d369ee
+flag	0xaeb95d5b
+gear	0x45e82e50
+light	0x735cf023
+roof	0x7bd05f63
+center	0x76822486
+sign	0x26fea3be
+wall	0x7db16db9
+windmill	0x22cac325
+rounddormer	0x28016132
+roundskylight	0xa28487b6
+squareskylight	0x55accff5
+ball	0x69f9e3f6
+stalk	0x4a66de36
+omnivore	0x5cd23f68
+carnivore	0xa28a67e8
+herbivore	0x2dfb4f9f
+air	0x3e9c273b
+land	0x28346586
+space	0xf83e63C9
+water	0x9e3c3dfa
+rear	0x99c183c7
+side	0x29fea8ec
+wheel	0xac6ea6b2
+fixed	0x299bc2f9
+flapping	0x54d42f94

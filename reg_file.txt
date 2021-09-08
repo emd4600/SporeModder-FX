@@ -83434,3 +83434,17 @@ HintsEDI
 HintsALG
 CVG-CamRotate-MAC
 clg_Template
+SporeGuide_Template
+Link_FindSporecast
+Link_MySporePage
+Link_Template
+Link_FindBuddy
+Link_SporeStore
+Link_Achievements
+Link_SearchAndDownload
+telemetry_CreatureGame
+telemetry_CellGame
+telemetry_TribeGame
+telemetry_CivGame
+telemetry_SpaceGame
+MyGame

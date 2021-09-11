@@ -83520,3 +83520,12 @@ cityplanner_page_civicobjects_parts
 be_category_windows_&_doors
 be_category_walls_&_roofs
 cl_category_cell_paint
+ScenarioCreature
+ScenarioBuilding
+ScenarioVehicle
+ScenarioFixedObject
+ScenarioFixedObjectEffect
+ScenarioFixedObjectGameplay
+atk_axe
+atk_spears
+atk_torch

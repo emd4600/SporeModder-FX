@@ -83516,7 +83516,6 @@ cityplanner_category_civicobjects
 cityplanner_page_civicobjects_parts
 
 
-
 be_category_windows_&_doors
 be_category_walls_&_roofs
 cl_category_cell_paint
@@ -83529,3 +83528,6 @@ ScenarioFixedObjectGameplay
 atk_axe
 atk_spears
 atk_torch
+CSA_SavePublish
+TemplateBrush
+TerrainModelTemplate

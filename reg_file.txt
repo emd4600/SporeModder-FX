@@ -83531,3 +83531,10 @@ atk_torch
 CSA_SavePublish
 TemplateBrush
 TerrainModelTemplate
+ItemPlannerTurret
+ItemPlannerBuilding
+ItemPlannerVehicle
+ItemPlannerCityStyle
+ItemPlannerCivicObject
+ScenarioEpicSpit
+ScenarioEpicStomp

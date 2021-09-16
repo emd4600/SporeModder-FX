@@ -83538,3 +83538,10 @@ ItemPlannerCityStyle
 ItemPlannerCivicObject
 ScenarioEpicSpit
 ScenarioEpicStomp
+ItemPlannerOutfit
+CellMovementTemplate
+CityEditorStats
+HarvesterVehicleEditorStats
+CellEditorStats
+VehicleEditorStats
+CulturalVehicleEditorStats

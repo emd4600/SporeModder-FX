@@ -83645,3 +83645,17 @@ EP1_tt_heal_home_01_LOD2
 ep1_tt_heal_home_02_LOD2
 EP1_tt_recruit_home_01_LOD2
 EP1_tt_recruit_home_02_LOD2
+CIP_TABS_CityOutfitter
+CIP_TABS_Vehicles
+CIP_TABS_Decorations
+CIP_TABS_CityMusic
+CIP_TABS_Buildings
+telemetry_Scans
+telemetry_Relationships
+telemetry_Timeline
+CRG_GoalCards
+TRG_GoalCards
+citymusicshopper
+AutoAttackTemplate
+colony_locked_vehicle
+cell_omnivore

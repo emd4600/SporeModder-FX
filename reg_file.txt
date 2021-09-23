@@ -23709,7 +23709,7 @@ ui_gge_level_rollover
 ui_gge_level_select
 ui_gge_lock
 ui_gge_lock1
-ui_gge_login
+ui_GGE_login
 ui_gge_make_stuff
 ui_gge_make_stuff1
 ui_gge_make_stuff_exit
@@ -40415,10 +40415,10 @@ GLaDOS_body2
 GLaDOS_cables
 GLaDOS_cable
 CustomPlanetaryTheme_dark
-regionFilter_ve_body
-regionFilter_ve_locomotion
-regionFilter_be_structure
-regionFilter_ve_details
+RegionFilter_VE_Body
+RegionFilter_VE_Locomotion
+RegionFilter_BE_Structure
+RegionFilter_VE_Details
 bardadventure02
 diplomatadventure01
 ecologistadventure01
@@ -47933,7 +47933,7 @@ BE_theme_insect
 BE_theme_orc
 Concrete
 lines
-regionFilter_be_details
+RegionFilter_BE_Details
 TemplatePaletteCategory
 TemplatePaletteDefinition
 TemplatepalettePaintCategory
@@ -83659,3 +83659,10 @@ citymusicshopper
 AutoAttackTemplate
 colony_locked_vehicle
 cell_omnivore
+CSA_Credits_Names
+casual_flash
+casual_galaxy_background_galaxies
+casual_galaxy
+Casual_center_star
+modalUIBackgroundBlur
+RegionFilter_BE_WindowDoor

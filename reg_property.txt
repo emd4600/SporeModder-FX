@@ -5322,3 +5322,5 @@ VerbButtonGap
 cameraRotateScaleKeyboard
 cameraZoomScaleKeyboard
 ScenarioStarEffectsEnabled	0x08069A6C
+ENTER_KeyButtonIDs
+ESC_KeyButtonIDs

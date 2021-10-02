@@ -83666,3 +83666,12 @@ casual_galaxy
 Casual_center_star
 modalUIBackgroundBlur
 RegionFilter_BE_WindowDoor
+FeedItemTelemetry
+FeedItemMessage
+FeedItemOTDB
+FeedItemCreateSporecast
+FeedItemWebpage
+FeedItemSporeGuide
+msg_Template
+msg_Options
+msg_SaveGame

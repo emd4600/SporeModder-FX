@@ -83675,3 +83675,5 @@ FeedItemSporeGuide
 msg_Template
 msg_Options
 msg_SaveGame
+planetImagesGameplay~	0x4084a101
+ItemPlannerTribalTool

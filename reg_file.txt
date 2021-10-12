@@ -83677,3 +83677,10 @@ msg_Options
 msg_SaveGame
 planetImagesGameplay~	0x4084a101
 ItemPlannerTribalTool
+feed_MaxisSporecasts
+OTDBQueryAll
+OTDBQueryMyCreations
+OTDBQueryRecentDownloads
+SortByAdventureTemplate
+AbilitiesREADME
+Condition_AllyHasEnergyDamage

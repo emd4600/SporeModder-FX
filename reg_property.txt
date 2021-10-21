@@ -5325,3 +5325,4 @@ ScenarioStarEffectsEnabled	0x08069A6C
 ENTER_KeyButtonIDs
 ESC_KeyButtonIDs
 ObjectType
+scenarioObjectType

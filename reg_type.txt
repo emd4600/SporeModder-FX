@@ -109,6 +109,7 @@ log	0x2081b4f5
 bak	0x1e99b639
 bin	0x2699c284
 bfx	0x1999ae0b
+cmp	0x04f684a4
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838
@@ -138,6 +139,7 @@ detail	0x5f0a4b8a
 round	0x543c4f0f
 square	0x6c619018
 origin	0xa659762b
+png.png	0xb275d7e9
 
 kGameData	0x17F243B
 kCheatObject	0x2A37E35

@@ -44,3 +44,5 @@
 .pshader.hlsl=HLSL Pixel Shader File
 .vertex_fragment=Vertex Shader Fragment
 .pixel_fragment=Pixel Shader Fragment
+.bem=Binary Editor Model
+.cmp=City Music (Planner)

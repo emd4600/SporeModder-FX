@@ -46,6 +46,8 @@ public class DBPFPackingTask extends Task<Void> {
 	private File inputFolder;
 	private File outputFile;
 	
+	private int compressionThreshold = -1;
+	
 	private StreamWriter outputStream;
 	
 	/** The total progress (in [0, 1]). */
@@ -66,6 +68,7 @@ public class DBPFPackingTask extends Task<Void> {
 		this.inputFolder = project.getFolder();
 		this.outputFile = project.getOutputPackage();
 		this.packageSignature = project.getPackageSignature();
+		this.compressionThreshold = project.getCompressionThresholdIfUseCompression();
 		this.outputStream = null;
 		
 		if (storeDebugInformation) {
@@ -273,6 +276,7 @@ public class DBPFPackingTask extends Task<Void> {
 			}
 			
 			this.packer = packer;
+			this.packer.setCompressThreshold(compressionThreshold);
 			
 			pack();
 		}

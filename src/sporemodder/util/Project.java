@@ -89,6 +89,8 @@ public class Project {
 	private static final String PROPERTY_packageSignature = "embeddedEditorPackages";  // for compatibility
 	private static final String PROPERTY_isReadOnly = "isReadOnly";
 	private static final String PROPERTY_showOnlyModded = "showOnlyModded";
+	private static final String PROPERTY_compressSizeThreshold = "compressSizeThreshold";
+	private static final String PROPERTY_useCompression = "useCompression";
 
 	/** The name of the project, which is taken from the folder name. */
 	private String name;
@@ -297,6 +299,31 @@ public class Project {
 	public void setShowOnlyModded(boolean value) {
 		settings.setProperty(PROPERTY_showOnlyModded, Boolean.toString(value));
 	}
+	
+	
+	public boolean getUseCompression() {
+		String compress = settings.getProperty(PROPERTY_useCompression);
+		return (compress != null)? Boolean.parseBoolean(compress) : false;
+	}
+	
+	public void setUseCompression(boolean value) {
+		settings.setProperty(PROPERTY_useCompression, Boolean.toString(value));
+	}
+	
+	
+	public int getCompressionThreshold() {
+		String threshold = settings.getProperty(PROPERTY_compressSizeThreshold);
+		return (threshold != null)? Integer.parseInt(threshold) : 0;
+	}
+	
+	public int getCompressionThresholdIfUseCompression() {
+		return getUseCompression() ? getCompressionThreshold() : -1;
+	}
+	
+	public void setCompressionThreshold(int value) {
+		settings.setProperty(PROPERTY_compressSizeThreshold, Integer.toString(value));
+	}
+	
 
 	/**
 	 * Returns the last time this project was active in the program, in milliseconds.

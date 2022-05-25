@@ -108,22 +108,26 @@
                                     <Insets top="20.0" />
                                  </VBox.margin>
                               </CheckBox>
-                         	<HBox fx:id="compressionThresholdBox" disable="true" alignment="CENTER_LEFT">
-                                 <children>
-                         			<Label text="Compress files larger than " />
-                         			<Spinner fx:id="compressionThresholdSpinner" editable="true" />
-                         			<!--TextField fx:id="compressionThresholdField" /-->
-                                    <Label text=" bytes" />
-                     			</children>
-                                 <VBox.margin>
-                                    <Insets top="5.0" />
-                                 </VBox.margin>
-                 			</HBox>
-                 			<Label text="Tip: You can type 'kb', 'mb', or 'gb' after a number for automatic conversion.">
-	                             <VBox.margin>
-	                                <Insets top="5.0" />
-	                             </VBox.margin>
-                             </Label>
+                         	<VBox fx:id="compressionThresholdBox" disable="true" alignment="CENTER_LEFT">
+                         		<children>
+		                         	<HBox alignment="CENTER_LEFT">
+		                                 <children>
+		                         			<Label text="Compress files larger than " />
+		                         			<Spinner fx:id="compressionThresholdSpinner" editable="true" />
+		                         			<!--TextField fx:id="compressionThresholdField" /-->
+		                                    <Label text=" bytes" />
+		                     			</children>
+		                                 <VBox.margin>
+		                                    <Insets top="5.0" />
+		                                 </VBox.margin>
+		                 			</HBox>
+		                 			<Label text="Tip: You can type 'kb' or 'mb' after a number for automatic conversion.">
+			                             <VBox.margin>
+			                                <Insets top="5.0" />
+			                             </VBox.margin>
+		                             </Label>
+	                             </children>
+                             </VBox>
                            </children>
                         </VBox>
                      </content>

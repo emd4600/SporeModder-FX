@@ -31,7 +31,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Label;
@@ -72,7 +72,7 @@ public class ProjectSettingsUI implements Controller {
 	@FXML private ChoiceBox<PackageSignature> signatureBox;
 	
 	@FXML private CheckBox cbPackageCompression;
-	@FXML private HBox compressionThresholdBox;
+	@FXML private Pane compressionThresholdBox;
 	@FXML private Spinner compressionThresholdSpinner; //TextField compressionThresholdField;
 	
 	private Dialog<ButtonType> dialog;
@@ -363,8 +363,8 @@ public class ProjectSettingsUI implements Controller {
 								mult = 1024;
 							else if (newValSuffix.equalsIgnoreCase("mb") || newValSuffix.equalsIgnoreCase("megabytes"))
 								mult = 1024 * 1024;
-							else if (newValSuffix.equalsIgnoreCase("gb") || newValSuffix.equalsIgnoreCase("gigabytes"))
-								mult = 1024 * 1024 * 1024;
+							/*else if (newValSuffix.equalsIgnoreCase("gb") || newValSuffix.equalsIgnoreCase("gigabytes"))
+								mult = 1024 * 1024 * 1024;*/
 							
 							valueRaw = Integer.parseInt(newValL.substring(0, newValL.length() - newValSuffix.length()));
 							

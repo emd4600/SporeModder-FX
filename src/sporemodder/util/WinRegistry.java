@@ -62,6 +62,7 @@ public class WinRegistry {
     private static Method regSetValueEx = null;
     private static Method regDeleteKey = null;
     private static Method regDeleteValue = null;
+    private static boolean canAccessRegistry = false;
 
     static {
         try {
@@ -85,9 +86,11 @@ public class WinRegistry {
             regDeleteValue.setAccessible(true);
             regDeleteKey = userClass.getDeclaredMethod("WindowsRegDeleteKey", new Class[] {int.class, byte[].class});  
             regDeleteKey.setAccessible(true);
+            canAccessRegistry = true;
         }
         catch (Exception e) {
             e.printStackTrace();
+            canAccessRegistry = false;
         }
     }
 
@@ -482,5 +485,9 @@ public class WinRegistry {
         if(ret.charAt(ret.length()-1) == '\0')
             return ret.substring(0, ret.length()-1);
         return ret;
+    }
+    
+    public static boolean isRegistryAccessible() {
+    	return canAccessRegistry;
     }
 }  

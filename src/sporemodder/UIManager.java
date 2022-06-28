@@ -31,7 +31,9 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 
 import javafx.animation.FadeTransition;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -39,6 +41,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
@@ -511,6 +514,11 @@ public class UIManager extends AbstractManager {
 		
 		dialog.initModality(Modality.APPLICATION_MODAL);
 		dialog.initOwner(primaryStage);
+		
+		if (System.getProperty("os.name").toLowerCase().startsWith("windows") && (!dialog.isResizable())) {
+			dialog.setResizable(true);
+		}
+		
 		Optional<R> result = dialog.showAndWait();
 		
 		// Don't disable the overlay if there was another dialog showing

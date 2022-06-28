@@ -170,11 +170,23 @@ public class GameManager extends AbstractManager {
 			gameToExecute = GamePathType.GALACTIC_ADVENTURES;
 		}
 		
-		Map<GameType, SporeGame> map = autoDetectPaths();
+		try {
+			String _ = getFromRegistry(GameType.GA);
+			Map<GameType, SporeGame> map = autoDetectPaths();
 		
-		ga = map.get(GameType.GA);
-		spore = map.get(GameType.SPORE);
-		cc = map.get(GameType.CC);
+			ga = map.get(GameType.GA);
+			spore = map.get(GameType.SPORE);
+			cc = map.get(GameType.CC);
+		}
+		
+		
+		catch (Exception e) {
+			if (e instanceof NoSuchMethodException) { //we're not running on Windows or WINE, so there's no registry to auto-detect from
+				//MethodNotFoundException
+				
+				
+			}	
+		}
 		
 		// Read paths from settings
 		String path = properties.getProperty(PROPERTY_pathSpore, "AUTO");
@@ -406,7 +418,12 @@ public class GameManager extends AbstractManager {
 
 	private static String getRegistryValue(int hkey, String key, String value) {
 		try {
-			return WinRegistry.valueForKey(hkey, key, value);
+			if (WinRegistry.isRegistryAccessible()) {
+				return WinRegistry.valueForKey(hkey, key, value);
+			}
+			else {
+				return null;
+			}
 		} catch (Exception e) {
 			return null;
 		}

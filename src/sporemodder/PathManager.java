@@ -44,15 +44,43 @@ public class PathManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
-		// First we try to get the program folder from two different sources
-		programFolder = new File(System.getProperty("user.dir"));
-		if (programFolder == null || !programFolder.exists())
-		{
+		if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+			// First we try to get the program folder from two different sources
+			programFolder = new File(System.getProperty("user.dir"));
+			if (programFolder == null || !programFolder.exists())
+			{
+				try {
+					programFolder = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
 			try {
 				programFolder = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath());
+				System.out.println("programFolder path 1: " + programFolder.getPath());
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				
+				try {
+					String newPath = getClass().getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+					System.out.println("newPath: " + (newPath != null) + ", " + newPath);
+					programFolder = new File(newPath).getParentFile();
+					System.out.println("programFolder path 2: " + programFolder.getPath());
+				
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					
+					programFolder = new File(System.getProperty("user.dir"));
+					System.out.println("programFolder path 3: " + programFolder.getPath());
+				}
+			}
+			
+			if (!new File(programFolder, "SporeModderFX.jar").exists()) {
+				programFolder = programFolder.getParentFile();
+				System.out.println("programFolder path 4: " + programFolder.getPath());
 			}
 		}
 		

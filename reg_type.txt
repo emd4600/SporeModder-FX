@@ -30,6 +30,7 @@ tlsa	0x4aeb6bc6
 pctp	0x7c19aa7a
 xml	0xcf6c21b8
 layout	0xefbda3ff
+layout_bin	0x050f4731
 dat	0x12952634
 bem	0x1a99b06b
 bat	0x1e99b626
@@ -110,6 +111,8 @@ bak	0x1e99b639
 bin	0x2699c284
 bfx	0x1999ae0b
 cmp	0x04f684a4
+js	0x67771f5c
+ini	0x1f886ead
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838
@@ -140,6 +143,10 @@ round	0x543c4f0f
 square	0x6c619018
 origin	0xa659762b
 png.png	0xb275d7e9
+bnk	0x0a4d8d09
+json	0x0a98eaf0
+er2	0x08068aec
+eapdPixie	0x0330a65e
 
 kGameData	0x17F243B
 kCheatObject	0x2A37E35
@@ -512,6 +519,7 @@ FixedObjectFloraMedium	0x28c176eb
 FixedObjectFloraSmall	0xdb5cad8b
 FixedObjectGameplay	0x41b55d34
 FixedObjectRock	0x27100213
+FixedObjectCanBeHeld	0xa20b0db0
 FixedObjects	0x61265923
 FixedObjectStaticObject	0xe782b1b7
 LoadableAdventurerCreatures	0xd2050cb7

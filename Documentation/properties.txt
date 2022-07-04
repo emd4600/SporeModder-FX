@@ -4154,3 +4154,5 @@ LargeImage=[string16] Used in Discord Rich Presence mod for large icon name.
 SmallImage=[string16] Used in Discord Rich Presence mod for small icon name.
 SmallHoverName=[texts] Used in Discord Rich Presence mod for small image tooltip.
 LargeHoverName=[texts] Used in Discord Rich Presence mod for large image tooltip.
+replacementList=[string8s] Used in Universal Property Enhancer mod for property replacement.
+postinitList=[string8s] Used in Universal Property Enhancer mod.

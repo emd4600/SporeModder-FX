@@ -115,7 +115,7 @@ public class CompiledShaders {
 		out.writeString(name, StringEncoding.ASCII);
 	}
 	
-	public ShaderBuilder getSelector(int id) {
+	public ShaderBuilder getBuilder(int id) {
 		for (ShaderBuilder shader : shaderBuilders) if (shader.id == id) return shader;
 		return null;
 	}
@@ -479,11 +479,12 @@ public class CompiledShaders {
 		String fragmentsPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shader_fragments~\\0x00000003.smt";
 		String shadersPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shaders~\\0x00000003.smt";
 		
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shaders~\\0x00000003.smt.unpacked\\" + PRECOMPILED_VSH_FILE;
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Materials\\materials_shaders~\\0x00000003.smt.unpacked\\";
 		
 		try (FileStream fragmentsIn = new FileStream(fragmentsPath, "r");
 				FileStream shadersIn = new FileStream(shadersPath, "r"); 
-				BufferedWriter output = new BufferedWriter(new FileWriter(outputPath)))
+//				BufferedWriter output = new BufferedWriter(new FileWriter(outputPath))
+				)
 		{
 			ShaderFragments fragments = new ShaderFragments();
 			fragments.read(fragmentsIn, null, null);
@@ -491,16 +492,23 @@ public class CompiledShaders {
 			CompiledShaders shaders = new CompiledShaders();
 			shaders.read(shadersIn);
 			
-			for (CompiledShader shader : shaders.vertexShaders) {
-				StringBuilder sb = new StringBuilder();
-				for (int i : shader.fragmentIndices) {
-					if (i == 0) break;
-					sb.append(Integer.toHexString(i));
-					sb.append(' ');
-				}
-				output.write(sb.toString());
-				output.newLine();
-			}
+			shaders.unpack(new File(outputPath), fragments);
+			
+			ShaderBuilder builder = shaders.getBuilder(0x80000003);
+			ArgScriptWriter writer = new ArgScriptWriter();
+			builder.toArgScript(writer, builder.entries.get(10), fragments);
+			System.out.println(writer.toString());
+			
+//			for (CompiledShader shader : shaders.vertexShaders) {
+//				StringBuilder sb = new StringBuilder();
+//				for (int i : shader.fragmentIndices) {
+//					if (i == 0) break;
+//					sb.append(Integer.toHexString(i));
+//					sb.append(' ');
+//				}
+//				output.write(sb.toString());
+//				output.newLine();
+//			}
 		}
 	}
 }

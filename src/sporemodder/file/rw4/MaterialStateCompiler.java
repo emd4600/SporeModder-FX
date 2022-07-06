@@ -624,6 +624,8 @@ public class MaterialStateCompiler {
 			writer.command("primitiveType").arguments(primitiveType.toString());
 		}
 		
+		if (modelToWorld != null) writer.command("transformMatrix");
+		
 		if (materialColor != null) writer.command("materialColor").colorsRGBA(materialColor);
 		if (ambientColor != null) writer.command("ambientColor").color(ambientColor);
 		

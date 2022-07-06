@@ -193,6 +193,14 @@ public class MaterialStateLink {
 					}
 				}));
 				
+				addParser("transformMatrix", ArgScriptParser.create((parser, line) -> {
+					if (line.getArguments(args, 0)) {
+						float[][] matrix = new float[4][4];
+						matrix[0][0] = matrix[1][1] = matrix[2][2] = matrix[3][3] = 1.0f;
+						currentState.modelToWorld = matrix;
+					}
+				}));
+				
 				addParser("shaderData", ArgScriptParser.create((parser, line) -> {
 					if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 						ShaderDataEntry entry = new ShaderDataEntry();

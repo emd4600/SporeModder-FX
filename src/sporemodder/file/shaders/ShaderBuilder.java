@@ -50,6 +50,10 @@ public class ShaderBuilder extends MaterialShader {
 		
 		while ((index = in.readUByte()) != 0xFF) {
 			
+			if (id == 0x80000004 && index == 10) {
+				System.out.println(in.getFilePointer());
+			}
+			
 			ShaderBuilderEntry entry = new ShaderBuilderEntry();
 			entries.put(index, entry);
 			
@@ -152,6 +156,18 @@ public class ShaderBuilder extends MaterialShader {
 			}
 			
 			lastFlags = s.flags;
+		}
+		
+		// We have to write the accumulated ones in a new group
+		if (!list.isEmpty()) {
+			writer.blankLine();
+			writer.command("group").arguments("0x" + Integer.toHexString(lastFlags)).startBlock();
+			for (ShaderFragmentSelector listS : list) {
+				toArgScript(writer, fragments, listS, "select");
+			}
+			writer.endBlock().commandEND();
+			list.clear();
+			needsBlankLine = true;
 		}
 	}
 	

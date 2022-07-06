@@ -76,6 +76,9 @@ public class ShaderFragmentSelector {
 		else if (checkType == CHECK_ADD_DATA) {
 			writer.option("array").arguments(ShaderData.getName(data[0]));
 		}
+		else if (checkType == CHECK_ADD_DATA_2) {
+			writer.option("array").arguments(ShaderData.getName(data[0]), ShaderData.getName(data[1]));
+		}
 		else if (checkType == CHECK_DATA_2) {
 			writer.option("hasData").arguments(ShaderData.getName(data[0]), ShaderData.getName(data[1]));
 		}
@@ -136,11 +139,16 @@ public class ShaderFragmentSelector {
 				data[0] = value.shortValue();
 			}
 		}
-		else if (line.getOptionArguments(args, "array", 1)) {
-			checkType = CHECK_ADD_DATA;
+		else if (line.getOptionArguments(args, "array", 1, 2)) {
+			checkType = args.size() == 1 ? CHECK_ADD_DATA : CHECK_ADD_DATA_2;
 			
 			data[0] = tryShaderDataName(line, args, "array", 0);
 			if (data[0] == -1) return;
+			
+			if (args.size() == 2) {
+				data[1] = tryShaderDataName(line, args, "array", 1);
+				if (data[1] == -1) return;
+			}
 		}
 		else if (line.getOptionArguments(args, "compareData", 2)) {
 			checkType = CHECK_DATA_EQUAL;

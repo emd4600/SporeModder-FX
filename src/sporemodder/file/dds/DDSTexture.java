@@ -193,6 +193,10 @@ public class DDSTexture {
 		stream.writeLEUInt(header.getCaps4());
 		stream.writePadding(4);
 	}
+	
+	public DDSHeader getHeader() {
+		return header;
+	}
 
 	public void read(StreamReader stream) throws IOException {
 		readHeader(stream);

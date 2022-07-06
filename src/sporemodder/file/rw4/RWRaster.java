@@ -23,6 +23,7 @@ import java.io.IOException;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.image.Image;
+import sporemodder.file.dds.DDSPixelFormat;
 import sporemodder.file.dds.DDSTexture;
 
 public class RWRaster extends RWObject {
@@ -106,6 +107,21 @@ public class RWRaster extends RWObject {
 		width = (int) texture.getWidth();
 		height = (int) texture.getHeight();
 		mipmapLevels = (int) texture.getMipmapCount();
+		
+		if (textureFormat == 0) {
+			long flags = texture.getHeader().getPixelFormat().getFlags();
+			if ((flags & DDSPixelFormat.RGB) != 0) {
+				if ((flags & DDSPixelFormat.ALPHAPIXELS) != 0 || (flags & DDSPixelFormat.ALPHA) != 0) {
+					textureFormat = DDSPixelFormat.D3DFMT_A8R8G8B8;
+				}
+				else {
+					textureFormat = DDSPixelFormat.D3DFMT_R8G8B8;
+				}
+			}
+			else if ((flags & DDSPixelFormat.ALPHAPIXELS) != 0 || (flags & DDSPixelFormat.ALPHA) != 0) {
+				textureFormat = DDSPixelFormat.D3DFMT_A8;
+			} 
+		}
 	}
 	
 	public Image toJavaFX() throws IOException {

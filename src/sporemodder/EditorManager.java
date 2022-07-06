@@ -46,6 +46,7 @@ import sporemodder.view.editors.EditHistoryEditor;
 import sporemodder.view.editors.EditorFactory;
 import sporemodder.view.editors.ImageViewer;
 import sporemodder.view.editors.ItemEditor;
+import sporemodder.view.editors.LvlEditorFactory;
 import sporemodder.view.editors.PctpEditorFactory;
 import sporemodder.view.editors.PfxEditorFactory;
 import sporemodder.view.editors.PropEditorFactory;
@@ -120,6 +121,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new LvlEditorFactory());
 		editorFactories.add(new CompiledShaderViewerFactory());
 		editorFactories.add(new ShaderBuilderEditorFactory());
 		editorFactories.add(new ShaderFragmentEditorFactory());

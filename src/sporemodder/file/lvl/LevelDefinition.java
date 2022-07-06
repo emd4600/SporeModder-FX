@@ -18,14 +18,24 @@
 ****************************************************************************/
 package sporemodder.file.lvl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.file.filestructures.FileStream;
-import sporemodder.file.filestructures.StreamReader;
 import sporemodder.HashManager;
 import sporemodder.MainApp;
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptLine;
+import sporemodder.file.argscript.ArgScriptParser;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.util.Vector3;
+import sporemodder.util.Vector4;
 
 /**
  * A level definition is the representation of a .lvl file, which contains gameplay markers. Gameplay markers are used by Spore to determine gameplay aspects of planets,
@@ -45,32 +55,134 @@ public class LevelDefinition {
 		
 		for (int i = 0; i < count; i++) {
 			GameplayMarker marker = new GameplayMarker();
-			
-			marker.getOffset().readBE(stream);
-			marker.getOrientation().readBE(stream);
-			stream.readUInts(marker.getIds());
-			
-			//if version == 2, do something
-			//TODO, we ignored it as Spore only has version 3 files
-			
-			byte[] data = new byte[dataSize];
-			stream.read(data);
-			
+			marker.read(stream, version, dataSize);
 			markers.add(marker);
 		}
+	}
+	
+	public void write(StreamWriter stream) throws IOException {
+		stream.writeInt(3);
+		stream.writeInt(markers.size());
+		stream.writeUShort(GameplayMarker.DATA_SIZE);
+		for (GameplayMarker marker : markers) {
+			marker.write(stream);
+		}
+	}
+	
+	public void clear() {
+		markers.clear();
+	}
+	
+	public void toArgScript(ArgScriptWriter writer) {
+		for (GameplayMarker marker : markers) {
+			marker.toArgScript(writer);
+			writer.blankLine();
+		}
+	}
+	
+	public ArgScriptWriter toArgScript() {
+		ArgScriptWriter writer = new ArgScriptWriter();
+		toArgScript(writer);
+		return writer;
+	}
+	
+	public ArgScriptStream<LevelDefinition> generateStream() {
+		ArgScriptStream<LevelDefinition> stream = new ArgScriptStream<LevelDefinition>();
+		stream.setData(this);
+		stream.addDefaultParsers();
+		
+		stream.addParser("marker", new ArgScriptBlock<LevelDefinition>() {
+			GameplayMarker marker;
+			
+			@Override
+			public void parse(ArgScriptLine line) {
+				final ArgScriptArguments args = new ArgScriptArguments();
+				Number value = null;
+				
+				marker = new GameplayMarker();
+				markers.add(marker);
+				
+				if (line.getArguments(args, 1) && (value = stream.parseFileID(args, 0)) != null) {
+					marker.type = value.intValue();
+					
+					marker.data = marker.createData();
+					
+					if (marker.data != null) {
+						marker.data.addParsers(this, stream);
+					}
+				}
+				
+				if (line.getOptionArguments(args, "id", 2) && (value = stream.parseFileID(args, 0)) != null) {
+					marker.id = value.intValue();
+					
+					if ((value = stream.parseFileID(args, 1)) != null) marker.definitionID = value.intValue();
+				}
+				
+				stream.startBlock(this);
+			}
+			
+			@Override
+			public void setData(ArgScriptStream<LevelDefinition> stream_, LevelDefinition data) {
+				super.setData(stream_, data);
+				
+				final ArgScriptArguments args = new ArgScriptArguments();
+				
+				addParser("position", ArgScriptParser.create((parser, line) -> {
+					float[] value = new float[3];
+					if (line.getArguments(args, 1) && stream.parseVector3(args, 0, value)) {
+						marker.offset.set(new Vector3(value));
+					}
+				}));
+				addParser("orientation", ArgScriptParser.create((parser, line) -> {
+					float[] value = new float[4];
+					if (line.getArguments(args, 1) && stream.parseVector4(args, 0, value)) {
+						marker.orientation.set(new Vector4(value));
+					}
+				}));
+				addParser("group", ArgScriptParser.create((parser, line) -> {
+					Number value = null;
+					if (marker.data != null && line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
+						marker.data.group = value.intValue();
+					}
+				}));
+				addParser("propertyCount", ArgScriptParser.create((parser, line) -> {
+					Number value = null;
+					if (marker.data != null && line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
+						marker.data.propertyCount = value.intValue();
+					}
+				}));
+			}
+		});
+		
+		return stream;
 	}
 	
 	public static void main(String[] args) throws IOException {
 		MainApp.testInit();
 		
-		String path = "E:\\Eric\\SporeModder\\Projects\\Spore_Game.package.unpacked\\LevelEditor_Saves~\\bumpy.lvl";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\LevelEditor_Saves~\\";
+		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Levels\\LevelEditor_Saves~";
 		
-		try (FileStream stream = new FileStream(path, "r")) {
-			LevelDefinition lvl = new LevelDefinition();
-			lvl.read(stream);
-			
-			for (GameplayMarker marker : lvl.markers) {
-				System.out.println(HashManager.get().getFileName((int) marker.getIds()[0]));
+		File outputFolder = new File(outputPath);
+		File folder = new File(path);
+		for (File file : folder.listFiles())
+		{
+			if (file.getName().endsWith(".lvl"))
+			{
+				System.out.println(file.getName());
+				try (FileStream stream = new FileStream(file, "r")) {
+					LevelDefinition lvl = new LevelDefinition();
+					lvl.read(stream);
+					
+					lvl.toArgScript().write(new File(outputFolder, file.getName() + ".lvl_t"));
+					
+					for (GameplayMarker marker : lvl.markers) {
+						System.out.println(marker.pos + 
+								"     type: " + HashManager.get().getFileName(marker.type) + 
+								"     id: " + HashManager.get().getFileName(marker.id) + 
+								"     definitionID: " + HashManager.get().getFileName(marker.definitionID));
+					}
+				}
 			}
 		}
 	}

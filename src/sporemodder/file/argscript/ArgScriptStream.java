@@ -1840,7 +1840,7 @@ public class ArgScriptStream<T> {
 	 * Same as {@link #parseColorRGBs(ArgScriptArguments, List)}, but this method expects numbers to be in
 	 * the [0, 255] range.
 	 * @param args
-	 * @param index
+	 * @param number
 	 * @param dst
 	 * @return
 	 */

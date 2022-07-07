@@ -96204,6 +96204,7 @@ cursor-spg-atmospheric-off
 cursor-spg-color-off
 cursor-spg-drop-off
 edt-button-partialTheme-hit
+captainStats~	0x4062E500
 
 cell_editorModelConfig~	0x4061E500
 creature_editorModelConfig~	0x4062E500
@@ -96373,3 +96374,19 @@ BuildingScenario
 WaterVehicle
 LandVehicle
 AirVehicle
+palette_editorModelConfig~	0x406BE500
+planet_asset~	0x40842000
+cell_editorModel~	0x40616200
+building_editorModel~	0x40636200
+vehicle_editorModel~	0x40646200
+ufo_editorModel~	0x40656200
+flora_editorModel~	0x40666200
+creature_rigblock~	0x40626000
+editor_rigblock~	0x40606000
+tool_rigblock~	0x40686000
+building_rigblock~	0x40636000
+vehicle_rigblock~	0x40646000
+flora_rigblock~	0x40666000
+skinpaint_filter~	0x406A6F00
+skinPaint_script~	0x406A0200
+editor_limbTuning~	0x40606500

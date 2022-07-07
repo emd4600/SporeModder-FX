@@ -1,7 +1,7 @@
 .prop.prop_t=Property List
 .prop.xml=XML Property List
 .prop=Property List (Unconverted)
-.gmdl=Creation Game Model
+.gmdl=In-game Baked Model
 .gmsh=Game Mesh
 .trigger=Text File/Script
 .txt=Text File
@@ -22,12 +22,14 @@
 .rw4=RenderWare4 Model/Texture/Material
 .lvl=Game Level
 .lua=Lua Script
-.cll=Cell Creation
-.crt=Creature Creation
-.bld=Building Creation
-.vcl=Vehicle Creation
-.ufo=UFO Creation
-.flr=Flora Creation
+.bem=Binary Editor Model
+.cll=Cell Creation Model
+.crt=Creature Creation Model
+.bld=Building Creation Model
+.vcl=Vehicle Creation Model
+.ufo=UFO Creation Model
+.flr=Flora Creation Model
+.cmp=City Music (Planner) Model
 .pctp=Part Capabilities PCTP
 .smt=Spore Materials (Unconverted)
 .smt.unpacked=Unpacked Spore Materials
@@ -44,3 +46,4 @@
 .pshader.hlsl=HLSL Pixel Shader File
 .vertex_fragment=Vertex Shader Fragment
 .pixel_fragment=Pixel Shader Fragment
+.bnk=Wwise SoundBank

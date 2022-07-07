@@ -5580,3 +5580,9 @@ groundCoverRadius
 groundCoverAlpha
 FeedColorNewAssets
 postinitList
+powerupDoorColor
+powerupModelOpen
+Palette_EditorModelType
+Palette_EditorConfig
+Palette_CategoryID
+MyCaptainLevels

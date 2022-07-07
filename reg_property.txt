@@ -4547,7 +4547,7 @@ adventureHealthMultipliers	0x18e2c617
 powerupType	0x1EA08337
 powerupModel	0xdc3866c6
 useEffect	0x48A2C509
-useEffect_OnPlayer	0x72AEEDA0
+useEffect_onPlayer
 powerupDuration	0xAAC3B137
 powerupAmount	0x6219412B
 powerupRadius	0x15321D59
@@ -5099,7 +5099,7 @@ AwarenessRangeMedium
 MinNumEyesMediumAwareness
 physicsProp
 physicsPropSkinned
-useEffect_OnNPC
+useEffect_onNPC
 powerupModelTriggered
 powerupModelExit
 usesObjectRadiusForExplosion

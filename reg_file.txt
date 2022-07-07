@@ -96361,3 +96361,15 @@ brush_crack_center
 brush_ripples
 brush_dune_smallpatch
 TRG_NPC_TribeCreature_Omnivore
+sg_pickup_loot
+sculpting
+DefaultProjectile
+DefaultBeam
+DefaultToolStrategy
+DefaultAOE
+ConstantSpeed
+nuclear
+BuildingScenario
+WaterVehicle
+LandVehicle
+AirVehicle

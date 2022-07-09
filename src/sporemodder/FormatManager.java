@@ -31,6 +31,7 @@ import sporemodder.file.bitmaps.BitmapConverter;
 import sporemodder.file.cnv.CnvConverter;
 import sporemodder.file.dbpf.DBPFConverter;
 import sporemodder.file.effects.EffectsConverter;
+import sporemodder.file.lvl.LvlConverter;
 import sporemodder.file.pctp.PCTPConverter;
 import sporemodder.file.prop.PropConverter;
 import sporemodder.file.raster.RasterConverter;
@@ -53,6 +54,7 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new LvlConverter());
 		converters.add(new BitmapConverter());
 		converters.add(new DBPFConverter());
 		converters.add(new AnimConverter());

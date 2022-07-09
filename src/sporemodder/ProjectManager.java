@@ -674,6 +674,7 @@ public class ProjectManager extends AbstractManager {
 	 */
 	public void generateContextMenu(ProjectItem item) {
 		MenuItem itemName = new MenuItem(item.getName());
+		itemName.setMnemonicParsing(false);
 		
 		MenuItem itemCopyName = new MenuItem("Copy name");
 		MenuItem itemCopyPath = new MenuItem("Copy file path");

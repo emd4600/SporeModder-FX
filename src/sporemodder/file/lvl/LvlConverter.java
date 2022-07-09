@@ -1,29 +1,8 @@
-/****************************************************************************
-* Copyright (C) 2019 Eric Mor
-*
-* This file is part of SporeModder FX.
-*
-* SporeModder FX is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-****************************************************************************/
-package sporemodder.file.pctp;
+package sporemodder.file.lvl;
 
 import java.io.File;
 import java.io.PrintWriter;
 
-import sporemodder.file.filestructures.FileStream;
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import sporemodder.HashManager;
@@ -34,18 +13,22 @@ import sporemodder.file.DocumentException;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.dbpf.DBPFPacker;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.ProjectItem;
 
-public class PCTPConverter implements Converter {
-
+public class LvlConverter implements Converter {
+	
+	private static final int TYPE_ID = 0x47b8300;
 	private static String extension = null;
 	
 	private boolean decode(StreamReader stream, File outputFile) throws Exception {
-		PCTPUnit pctp = new PCTPUnit();
-		pctp.read(stream);
+		LevelDefinition level = new LevelDefinition();
+		level.read(stream);
 		
 		try (PrintWriter out = new PrintWriter(outputFile)) {
-		    out.println(pctp.toArgScript());
+		    out.println(level.toArgScript());
 		}
 		
 		return true;
@@ -53,24 +36,24 @@ public class PCTPConverter implements Converter {
 	
 	@Override
 	public boolean decode(StreamReader stream, File outputFolder, ResourceKey key) throws Exception {
-		return decode(stream, Converter.getOutputFile(key, outputFolder, "pctp_t"));
+		return decode(stream, Converter.getOutputFile(key, outputFolder, "lvl_t"));
 	}
 
 	@Override
 	public boolean encode(File input, StreamWriter output) throws Exception {
-		PCTPUnit pctp = new PCTPUnit();
-		ArgScriptStream<PCTPUnit> stream = pctp.generateStream();
+		LevelDefinition level = new LevelDefinition();
+		ArgScriptStream<LevelDefinition> stream = level.generateStream();
 		stream.setFastParsing(true);
 		stream.process(input);
-		pctp.write(output);
+		level.write(output);
 		return true;
 	}
 
 	@Override
 	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
 		if (isEncoder(input)) {
-			PCTPUnit pctp = new PCTPUnit();
-			ArgScriptStream<PCTPUnit> stream = pctp.generateStream();
+			LevelDefinition level = new LevelDefinition();
+			ArgScriptStream<LevelDefinition> stream = level.generateStream();
 			stream.setFastParsing(true);
 			stream.process(input);
 			
@@ -83,9 +66,9 @@ public class PCTPConverter implements Converter {
 			ResourceKey name = packer.getTemporaryName();
 			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
 			name.setGroupID(groupID);
-			name.setTypeID(0x7C19AA7A);
+			name.setTypeID(TYPE_ID);
 			
-			packer.writeFile(name, output -> pctp.write(output));
+			packer.writeFile(name, output -> level.write(output));
 			
 			return true;
 		}
@@ -96,24 +79,24 @@ public class PCTPConverter implements Converter {
 
 	@Override
 	public boolean isDecoder(ResourceKey key) {
-		return key.getTypeID() == 0x7C19AA7A;
+		return key.getTypeID() == TYPE_ID;
 	}
 
 	private void checkExtensions() {
 		if (extension == null) {
-			extension = HashManager.get().getTypeName(0x7C19AA7A);
+			extension = HashManager.get().getTypeName(TYPE_ID);
 		}
 	}
 	
 	@Override
 	public boolean isEncoder(File file) {
 		checkExtensions();
-		return file.isFile() && file.getName().endsWith("." + extension + ".pctp_t");
+		return file.isFile() && file.getName().endsWith("." + extension + ".lvl_t");
 	}
 
 	@Override
 	public String getName() {
-		return "Part Capabilities File (." + HashManager.get().getTypeName(0x7C19AA7A) + ")";
+		return "Level Definition File (." + HashManager.get().getTypeName(TYPE_ID) + ")";
 	}
 
 	@Override
@@ -124,7 +107,7 @@ public class PCTPConverter implements Converter {
 	@Override
 	public int getOriginalTypeID(String extension) {
 		checkExtensions();
-		return 0x7C19AA7A;
+		return TYPE_ID;
 	}
 	
 	@Override
@@ -132,7 +115,7 @@ public class PCTPConverter implements Converter {
 		if (!item.isRoot()) {
 			
 			if (item.isMod() && isEncoder(item.getFile())) {
-				MenuItem menuItem = new MenuItem("Convert to PCTP");
+				MenuItem menuItem = new MenuItem("Convert to LVL");
 				menuItem.setMnemonicParsing(false);
 				menuItem.setOnAction(event -> {
 					// This is after isEncoder(), so we can assume it has extension
@@ -157,10 +140,10 @@ public class PCTPConverter implements Converter {
 				ResourceKey key = ProjectManager.get().getResourceKey(item);
 				
 				if (isDecoder(key)) {
-					MenuItem menuItem = new MenuItem("Convert to PCTP_T");
+					MenuItem menuItem = new MenuItem("Convert to LVL_T");
 					menuItem.setMnemonicParsing(false);
 					menuItem.setOnAction(event -> {
-						final File outputFile = Converter.getOutputFile(key, item.getFile().getParentFile(), "pctp_t");
+						final File outputFile = Converter.getOutputFile(key, item.getFile().getParentFile(), "lvl_t");
 						boolean result = UIManager.get().tryAction(() -> {
 							try (FileStream stream = new FileStream(item.getFile(), "r")) {
 								decode(stream, outputFile);

@@ -96390,3 +96390,40 @@ flora_rigblock~	0x40666000
 skinpaint_filter~	0x406A6F00
 skinPaint_script~	0x406A0200
 editor_limbTuning~	0x40606500
+brush_pastry_croissant
+brush_tentacle2
+brush_ribbon_straw
+brush_ribbon_stitching
+brush_ribbon_stem
+brush_ribbon_test2
+brush_ribbon_tahiti_weave
+brush_ribbon_faceted_dunes
+brush_ribbon_faceted_dunes2
+civ_resource_icon
+brush_bumps_small
+brush_wedge
+brush_cone
+brush_alpine_mountain1
+brush_alpine_mountain2
+brush_alpine_mountain3
+brush_alpine_mountain4
+brush_alpine_mountain5
+brush_ribbon_grass
+brush_test_circle
+brush_ribbon_tentacle
+brush_ribbon_tentacle2
+brush_ribbon_steam_pipe
+brush_ribbon_wave
+brush_ribbon_landmass
+brush_crater_smallFresh
+brush_crater_smallEroded
+brush_crater_mediumEroded
+brush_crater_largeEroded
+color_atmosphere
+color_terrain
+color_water
+part_unlock
+ufo_impact
+cell_trans_fade
+civ_cin_start
+ui_material_minimap

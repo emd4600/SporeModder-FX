@@ -24,6 +24,15 @@ import java.util.Map;
 
 import sporemodder.file.DocumentError;
 
+/**
+ * Defines an ArgScript enumeration, which assigns strings to integer values.
+ * The integer values must be unique. 
+ * Multiple strings can point to the same integer value; this will allow all those strings to be parsed
+ * by ArgScript, but when converting from int to string the string that was added last will be used.
+ * Strings are case insensitive, but when converting from int to string they will preserve the original case. 
+ * Strings can be null, but then those values will not be reachable through regular ArgScript parsing
+ * (the `get` method in this class).
+ */
 public final class ArgScriptEnum {
 
 	private final Map<String, Integer> textToValue = new HashMap<String, Integer>();
@@ -31,7 +40,7 @@ public final class ArgScriptEnum {
 	
 	public final void add(int value, String text) {
 		valueToText.put(value, text);
-		textToValue.put(text.toLowerCase(), value);
+		textToValue.put(text == null ? null : text.toLowerCase(), value);
 	}
 	
 	public Collection<Integer> getValues() {
@@ -47,7 +56,7 @@ public final class ArgScriptEnum {
 	}
 	
 	public final int get(String key) {
-		Integer value = textToValue.get(key.toLowerCase());
+		Integer value = textToValue.get(key == null ? null : key.toLowerCase());
 		if (value == null) return -1;
 		else return value;
 	}

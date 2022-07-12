@@ -130,6 +130,9 @@ unlocksTuning	0x534136b6
 spaceshipTuning	0x60c1b295
 characterAnimation	0x17bbce29
 prop_new	0xe51118c3
+obstacle_info	0x2ae9952d
+bfx	0x1999ae0b
+bin	0x2699c284
 markerSet	0xa11d3144
 condition	0x9f8087d5
 phase	0x30728ce7

@@ -98517,3 +98517,7 @@ Nocturna2_Plant_5B_D
 Nocturna2_Plant_5C_D
 Nocturna2C_BossPitGlow_1_D
 Nocturna2C_BossPitGlowCrack_1_D
+ce_page_flair
+ce_page_flair_parts
+ce_category_flair
+ce_palette_flairpages

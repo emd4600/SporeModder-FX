@@ -135,6 +135,10 @@ public class EffectDirectory {
 	private final List<ImportEffect> imports = new ArrayList<ImportEffect>();
 	private final Map<String, ImportEffect> exportedImports = new HashMap<String, ImportEffect>();
 	
+	/** For debugging purposes. */
+	private final Map<Object, Long> fileOffsets = new HashMap<>();
+	private static final boolean OUTPUT_FILE_OFFSETS = true;
+	
 	public EffectDirectory() {
 		
 		for (int i = 0; i < MAX_TYPECODE; i++) {
@@ -407,20 +411,29 @@ public class EffectDirectory {
 			if (list != null) {
 				
 				stream.seek(componentOffsets[i]);
-				for (EffectComponent obj : list) obj.read(stream);
+				for (EffectComponent obj : list) {
+					fileOffsets.put(obj, stream.getFilePointer());
+					obj.read(stream);
+				}
 			}
 		}
 		for (int i = 0; i < resourceOffsets.length; ++i) {
 			List<EffectResource> list = resources.get(i);
 			if (list != null) {
 				stream.seek(resourceOffsets[i]);
-				for (EffectResource obj : list) obj.read(stream);
+				for (EffectResource obj : list) {
+					fileOffsets.put(obj, stream.getFilePointer());
+					obj.read(stream);
+				}
 			}
 		}
 		
 		// Visual effects must be read last, because after them come the exports
 		stream.seek(componentOffsets[0]);
-		for (EffectComponent obj : effectsList) obj.read(stream);
+		for (EffectComponent obj : effectsList) {
+			fileOffsets.put(obj, stream.getFilePointer());
+			obj.read(stream);
+		}
 		
 		// -- EXPORTS -- //
 		Map<Integer, String> futureExportedImports = new HashMap<Integer, String>(); 
@@ -714,6 +727,9 @@ public class EffectDirectory {
 			
 			if (element.isEffectComponent()) {
 				if (!((EffectComponent) element).getFactory().onlySupportsInline()) {
+					if (OUTPUT_FILE_OFFSETS) {
+						writer.tabulatedText("# File offset: 0x" + Long.toHexString(fileOffsets.get(element)), true);
+					}
 					element.toArgScript(writer);
 					writer.blankLine();
 				}
@@ -729,6 +745,9 @@ public class EffectDirectory {
 					}
 				}
 			} else {
+				if (OUTPUT_FILE_OFFSETS) {
+					writer.tabulatedText("# File offset: 0x" + Long.toHexString(fileOffsets.get(element)), true);
+				}
 				element.toArgScript(writer);
 				writer.blankLine();
 				

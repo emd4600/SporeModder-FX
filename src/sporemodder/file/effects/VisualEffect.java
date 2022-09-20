@@ -29,6 +29,7 @@ import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
 import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.StructureIgnore;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
@@ -56,6 +57,7 @@ public class VisualEffect extends EffectComponent {
 	public int flags;
 	public int componentAppFlagsMask;
 	public int notifyMessageID;
+	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN)
 	public final float[] screenSizeRange = new float[2];
 	public float cursorActiveDistance;
 	public byte cursorButton;

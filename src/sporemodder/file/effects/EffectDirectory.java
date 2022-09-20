@@ -137,7 +137,7 @@ public class EffectDirectory {
 	
 	/** For debugging purposes. */
 	private final Map<Object, Long> fileOffsets = new HashMap<>();
-	private static final boolean OUTPUT_FILE_OFFSETS = true;
+	private static final boolean OUTPUT_FILE_OFFSETS = false;
 	
 	public EffectDirectory() {
 		

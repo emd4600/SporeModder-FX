@@ -53,6 +53,9 @@ public class VisualEffect extends EffectComponent {
 	public static final int TYPE_CODE = 0x0000;
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
+	
+	public static final int FLAG_EXTENDED_LOD_WEIGHTS = 0x80000;
+	public static final int FLAGMASK = FLAG_EXTENDED_LOD_WEIGHTS;
 
 	public int flags;
 	public int componentAppFlagsMask;
@@ -62,6 +65,7 @@ public class VisualEffect extends EffectComponent {
 	public float cursorActiveDistance;
 	public byte cursorButton;
 	@StructureLength.Value(32) public final List<Float> lodDistances = new ArrayList<Float>();
+	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN)
 	public final float[] extendedLodWeights = new float[3];
 	public int seed;
 	@StructureLength.Value(32) public final List<VisualEffectBlock> blocks = new ArrayList<VisualEffectBlock>();
@@ -110,7 +114,7 @@ public class VisualEffect extends EffectComponent {
 			data.setCurrentEffect(effect);
 			
 			if (line.getOptionArguments(args, "flags", 1)) {
-				effect.flags = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
+				effect.flags = Optional.ofNullable(stream.parseInt(args, 0) & ~FLAGMASK).orElse(0);
 			}
 			
 			if (line.getOptionArguments(args, "notifyMessageID", 1)) {
@@ -132,6 +136,7 @@ public class VisualEffect extends EffectComponent {
 			
 			if (line.getOptionArguments(args, "extendedLodWeights", effect.extendedLodWeights.length)) {
 				stream.parseFloats(args, effect.extendedLodWeights);
+				effect.flags |= FLAG_EXTENDED_LOD_WEIGHTS;
 			}
 		}
 
@@ -295,7 +300,8 @@ public class VisualEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		if (flags != 0) writer.option("flags").arguments("0x" + Integer.toHexString(flags));
+		int maskedFlags = flags & ~FLAGMASK;
+		if (maskedFlags != 0) writer.option("flags").arguments("0x" + Integer.toHexString(maskedFlags));
 		
 		int appFlagsMask = 0;
 		for (VisualEffectBlock block : blocks) appFlagsMask |= block.appFlagsMask;
@@ -310,7 +316,8 @@ public class VisualEffect extends EffectComponent {
 		}
 		if (cursorActiveDistance != 0) writer.option("toggleButtonActivate").floats(cursorActiveDistance);
 		if (cursorButton != 0) writer.option("toggleButton").ints(cursorButton);
-		if (extendedLodWeights[0] != 0 || extendedLodWeights[1] != 0 || extendedLodWeights[2] != 0) {
+		if ((flags & FLAG_EXTENDED_LOD_WEIGHTS) != 0 || 
+				(extendedLodWeights[0] != 0.0f || extendedLodWeights[1] != 0.0f || extendedLodWeights[2] != 0.0f)) {
 			writer.option("extendedLodWeights").floats(extendedLodWeights);
 		}
 		

@@ -5194,13 +5194,13 @@ ProcBakeBlendTime
 JigglabilityDeterminedByRigBlock
 PolypodGaitStyle
 AnimViewerFKeyAnimIDs
-ScenarioStarEffectsEnabled 0x08069a6c
-ScenarioGAEditorEffectsEnabled 0x0806dbba
-ScenarioGAButtonClicked 0x080d7de1
-ScenarioGAFirstLaunched 0x080d97fe
-ScenarioSpaceGameLaunched 0x080eaa93
-ScenarioCaptainEditorLaunched 0x080d8460
-ScenarioAdventureEditorLaunched 0x080d8470 
+ScenarioStarEffectsEnabled	0x08069a6c
+ScenarioGAEditorEffectsEnabled	0x0806dbba
+ScenarioGAButtonClicked	0x080d7de1
+ScenarioGAFirstLaunched	0x080d97fe
+ScenarioSpaceGameLaunched	0x080eaa93
+ScenarioCaptainEditorLaunched	0x080d8460
+ScenarioAdventureEditorLaunched	0x080d8470 
 
 modelTexturesLODHi
 modelTexturesLOD0
@@ -5586,3 +5586,10 @@ Palette_EditorModelType
 Palette_EditorConfig
 Palette_CategoryID
 MyCaptainLevels
+rewardText
+completedText
+TRG_CreatureShopper
+SPG_CreatureShopper
+evoPointsSocialBonus
+GalaxyNumVisibleStarterWorlds
+creatureFleeWatchTime

@@ -5593,3 +5593,4 @@ SPG_CreatureShopper
 evoPointsSocialBonus
 GalaxyNumVisibleStarterWorlds
 creatureFleeWatchTime
+NumDesiredTribeMembers

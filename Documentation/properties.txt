@@ -4266,3 +4266,4 @@ sprintCapRange=[vector3s]
 stealthCapRange=[vector3s]
 replacementList=[string8s] Used in Universal Property Enhancer mod.
 postinitList=[string8s] Used in Universal Property Enhancer mod.
+editorNudgeHandleTuningFile=[key]

@@ -5593,4 +5593,7 @@ SPG_CreatureShopper
 evoPointsSocialBonus
 GalaxyNumVisibleStarterWorlds
 creatureFleeWatchTime
-NumDesiredTribeMembers
+pitchcurve
+wetlevelcurve
+tutorial_GettingStartedScenario
+editorNudgeHandleTuningFile

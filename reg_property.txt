@@ -5598,3 +5598,4 @@ pitchcurve
 wetlevelcurve
 tutorial_GettingStartedScenario
 editorNudgeHandleTuningFile
+CollisionSoundPatch

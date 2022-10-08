@@ -99100,3 +99100,13 @@ genericAdditiveParticle_material
 genericParticle_material
 ep1_goal_completed
 feed_SubscribedSporecasts
+isMyCaptain
+RGBtestSh
+nationalBoundaries1
+airTradeRoute
+seaTradeRoute
+landTradeRoute
+BakeInScatterTextureMaterial
+BuildingAmbientOcclusion
+CreatureAmbientOcclusion
+FloraAmbientOcclusion

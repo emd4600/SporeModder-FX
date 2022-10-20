@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.StreamReader;
@@ -44,8 +46,8 @@ public class SmtConverter implements Converter {
 	private static final int TYPE_ID = 0x0469A3F7;
 	private static String EXTENSION = null;
 	
-	private final Map<String, Integer> vsMap = new HashMap<>();
-	private final Map<String, Integer> psMap = new HashMap<>();
+	private final ConcurrentMap<String, Integer> vsMap = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Integer> psMap = new ConcurrentHashMap<>();
 	/** The fragments that were last converted and that will be used for compilation. */
 	private ShaderFragments fragments;
 	/** Used to ensure that 'fragments', 'vsMap' and 'psMap' belong to the current packing task. */
@@ -55,11 +57,11 @@ public class SmtConverter implements Converter {
 	
 	/** The folder that will contain unpacked states link. */
 	private File statesLinkFolder;
-	private final Map<Integer, byte[]> statesStreams = new HashMap<>();
-	private final Map<Integer, byte[]> stateLinksStreams = new HashMap<>();
+	private final ConcurrentMap<Integer, byte[]> statesStreams = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Integer, byte[]> stateLinksStreams = new ConcurrentHashMap<>();
 	
 	private File shadersFolder;
-	private final Map<Integer, byte[]> shadersStreams = new HashMap<>(); 
+	private final ConcurrentMap<Integer, byte[]> shadersStreams = new ConcurrentHashMap<>(); 
 	
 	private static void checkExtensions() {
 		if (EXTENSION == null) {

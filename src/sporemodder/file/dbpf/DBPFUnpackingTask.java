@@ -330,6 +330,13 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 				}
 			}
 			
+			// Previously we did this for every package
+			// PROBLEM: SmtConverter has two files that are only converted as one file. EP1_PatchData only has
+			// one of those files, and we want to use that together with the other file from another package,
+			// but resetting the converter made it forget the file.
+			// FIX: We only reset them once, here. Only SmtConverter was using reset anyways so its fine
+			for (Converter converter : converters) converter.reset();
+			
 			int i = 0;
 			for (File inputFile : inputFiles) {
 				double projectProgress = progressFactor * (double)fileSizes[i] / totalFileSize;
@@ -339,15 +346,14 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 					continue;
 				}
 				
-				for (Converter converter : converters) converter.reset();
-				
+				System.out.println("Unpacking " + inputFile.getName() + " ...");
 				try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
 					unpackStream(packageStream, checkFiles ? writtenFiles : null, projectProgress);
 				}
 				catch (Exception e) {
 					return e;
 				}
-				
+				System.out.println("Finished unpacking " + inputFile.getName());
 				System.out.println();
 				++i;
 			}

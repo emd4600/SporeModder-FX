@@ -44,7 +44,7 @@ public class ArgScriptLexer {
 			lexer.skipWhitespaces();
 			lexer.expect(')');
 			
-			return Integer.toUnsignedLong(HashManager.get().fnvHash(string));
+			return Integer.toUnsignedLong(HashManager.get().getFileHash(string));
 		}
 
 		@Override

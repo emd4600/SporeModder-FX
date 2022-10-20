@@ -5594,3 +5594,8 @@ evoPointsSocialBonus
 GalaxyNumVisibleStarterWorlds
 creatureFleeWatchTime
 NumDesiredTribeMembers
+pitchcurve
+wetlevelcurve
+tutorial_GettingStartedScenario
+editorNudgeHandleTuningFile
+CollisionSoundPatch

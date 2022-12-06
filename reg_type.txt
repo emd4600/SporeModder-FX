@@ -544,3 +544,39 @@ ValidAdventurerCreatures	0x5144c45f
 reversed	0x17f3adef
 
 LRUMetaData	0x2e5a9763
+
+Markerset.bin	0xa11d3144
+Noun.bin	0x76a8f7d8
+ServerEventDef.bin	0x92ea4aac
+CharacterAnimation.bin	0x17bbce29
+AIDefinition.bin	0xeeeb0e31
+ClassAttributes.bin	0x474940a5
+NonPlayerClass.bin	0xd117afca
+Condition.bin	0x9f8087d5
+Phase.bin	0x30728ce7
+CrystalTuning.bin	0x20426a63
+EliteNPCGlobals.bin	0xe5c2d838
+NPCAffix.bin	0x7ca6c6c9
+MagicNumbers.bin	0x36201b51
+DifficultyTuning.bin	0x8e94f44c
+ChainLevels.bin	0xa8a25294
+SectionConfig.bin	0xa38fa119
+DirectorTuning.bin	0x9342c4d3
+CharacterType.bin	0xaaed883b
+LootPreferences.bin	0x61bf29aa
+WeaponTuning.bin	0x58e9a177
+UnlocksTuning.bin	0x534136b6
+SpaceshipTuning.bin	0x60c1b295
+LootRigblock.bin	0x1bced3d7
+TestAsset.bin	0x1dfea336
+AffixTuning.bin	0x5cb9f7c7
+lootprefix.bin	0x6a1812c6
+PVPLevels.bin	0x23ef98fd
+LevelConfig.bin	0x52d095f6
+ObjectExtents.bin	0x3583564e
+LevelObjectives.bin	0x68232164
+Level.bin	0xb9193960
+NavPowerTuning.bin	0xbba5400d
+
+arg	0x2523258
+blockinfo	0x793f6424

@@ -4267,3 +4267,7 @@ stealthCapRange=[vector3s]
 replacementList=[string8s] Used in Universal Property Enhancer mod.
 postinitList=[string8s] Used in Universal Property Enhancer mod.
 editorNudgeHandleTuningFile=[key]
+modelTranslucent=[bool] Labs-specific baked creature property.
+prebakedCreatureCount=[uint] Labs-specific prebaked property.
+forceLoadLayerGroup=[key] Labs-specific level generation property.
+editorBackgroundLevel=[string8] Labs-specific editor config property.

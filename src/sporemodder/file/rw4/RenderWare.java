@@ -155,7 +155,9 @@ public class RenderWare {
 		}
 		
 		// Without this, shape keys crash 
-		stream.writePadding(48);
+		// To be precise, this is part of the subReferences section, this extra space is used at runtime, 
+		// so memory gets corrupted if it doesn't have enough space
+		stream.writePadding(Math.max(48, header.sectionManifest.subReferences.references.size() * 0x18));
 		
 		// Now write the BaseResources
 		long pBufferData = stream.getFilePointer();
@@ -420,27 +422,29 @@ public class RenderWare {
 		return object.getClass().getSimpleName() + '-' + sectionInfos.indexOf(object.sectionInfo);
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		MainApp.testInit();
-		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_03.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\be_classic_01.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\Willosaur Mouth rig 4.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\ce_grasper_radial_01.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\ce_mouth_beak_herbivore_04.rw4";  // ce_mouth_jaw_carnivore_01
-		//String path = "C:\\Users\\Eric\\Desktop\\ShapeKeys.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\ce_weapon_slasher_04.rw4";
-		//String path = "C:\\Users\\Eric\\Downloads\\raw.rw4";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CustomPartTutorial\\editor_rigblocks~\\PartTutorial_ce_mouths_test.rw4";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\ve_DI_spikeChest_01.rw4";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\editor_rigblocks~\\be_details_house_10.rw4";
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\GridProject\\TestModels\\ce_mouth_mandible_carnivore_04.rw4";
-		//String path = "C:\\Users\\Eric\\Desktop\\ce_shapes_droneBase_polished_01.rw4";
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\editor_rigblocks~";
-		//String path = "C:\\Users\\Eric\\Downloads\\ce_cubesUpdated_drone_02_B(1).rw4";
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\PartTesting\\editor_rigblocks~\\ce_cubesUpdated_drone_02_B.rw4";
 		
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Valla_SporePartsXtended\\editor_rigblock~\\ce_sense_ear_side_04.rw4";
 		RenderWare renderWare = RenderWare.fromFile(new File(path));
 		renderWare.printInfo();
+		
+		System.out.println();
+		
+		/*String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\editor_rigblock~";
+		for (String name : new File(path).list()) {
+			if (name.endsWith(".rw4")) {
+				RenderWare renderWare = RenderWare.fromFile(new File(path, name));
+				List<RWBlendShapeBuffer> list = renderWare.getObjects(RWBlendShapeBuffer.class);
+				for (RWBlendShapeBuffer obj : list) {
+					for (int i = 4; i <= 8; i++) {
+						if (obj.data[i] != null) {
+							System.out.println(name + ": has data index " + i);
+						}
+					}
+				}
+			}
+		}*/
 		
 		/*String inputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL.rw4";
 		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\ModCreatorKit_\\camera_properties~\\ce_prisms_drone_01_A_TL test.rw4";

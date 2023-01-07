@@ -60,7 +60,7 @@ public class SkinpaintSettingsEffect extends EffectComponent {
 	public static final int FLAG_PARTBUMPSCALE = 0x10;
 	public static final int FLAG_PARTSPECSCALE = 0x20;
 	public static final int FLAG_HAIR = 0x40;
-	public static final int FLAG_HAIRTEXTURE = 0x40;
+	public static final int FLAG_HAIRTEXTURE = 0x80;
 	public static final int FLAG_HAIRPRINTGEOM = 0x100;
 	public static final int FLAG_GLOSS = 0x200;
 	public static final int FLAG_PHONG = 0x400;

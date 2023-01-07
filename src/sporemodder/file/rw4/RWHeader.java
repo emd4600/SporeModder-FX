@@ -74,19 +74,19 @@ public class RWHeader {
 	 */
 	public List<RWSectionInfo> read(StreamReader stream, List<RWSectionInfo> sectionInfos) throws IOException {
 		// magic
-		stream.skip(28);
-		type = RenderWareType.get(stream.readLEInt());
+		stream.skip(28);  // 00h
+		type = RenderWareType.get(stream.readLEInt());  // 1Ch
 		
 		// This one is sectionCount too, but apparently Spore uses the second one
-		stream.skip(1 * 4);
-		int sectionCount = stream.readLEInt();
+		stream.skip(1 * 4);  // 20h
+		int sectionCount = stream.readLEInt();  // 24h
 		// 0x10 if it's a model, 4 if it's a texture
 		// Always 0?
-		stream.skip(2 * 4);
-		long pSectionInfo = stream.readLEUInt();
+		stream.skip(2 * 4);  // 28h
+		long pSectionInfo = stream.readLEUInt();  // 30h
 		// Always 0x98, 0, 0, 0 ?
-		stream.skip(4 * 4);
-		long pBufferData = stream.readLEUInt();
+		stream.skip(4 * 4);  // 40h
+		long pBufferData = stream.readLEUInt();  // 44h
 		
 		// Nothing important here
 		stream.skip(7 * 4);

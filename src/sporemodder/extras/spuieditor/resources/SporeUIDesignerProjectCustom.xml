@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<Project name="Spore">
+
+    <!-- Deprecated controls. Do not use. -->
+    <Category name ="Deprecated" display="none">
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~        Outlined Text          ~~~        
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+	<Class name="Outlined Text" base="Text" proxy="0x039a721c">
+	</Class>
+    </Category>
+
+    <!-- Spore window procedures -->
+    <Category name="Spore WinProcs" display="submenu">
+           
+        <!-- An abstract base for objects implementing IWinProc directly. -->
+        <Class name="WinProcBase" proxy="utfwin:" abstract="true">
+            <Implements name="IWinProc"/>
+            <Implements name="ILayoutElement"/>
+            <Property name="Comment" type="string" description="Designer comment for this drawable" editorhint="caption"/>
+        </Class>
+    
+        <!-- An application winproc class -->
+        <Class name="AppWinProc" icon="proc" share="app">
+            <Implements name="IWinProc"/>
+            <Implements name="ILayoutElement"/>
+            <Category name="Design">
+                <Property name="Comment" type="string" description="Designer comment for this object" editorhint="caption"/>
+            </Category>
+        </Class>
+
+    </Category>
+
+    <!-- Spore window controls-->
+    <Category name="Spore UI Controls" display="submenu">
+    
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                         Animated icon class                    ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Animated Icon" classname="cSPUIAnimatedIconWin" base="WindowBase" proxy="0x0106f14b">
+            <Enum name="AnimationDirection">
+                <EnumVal name="Forward" value="0"></EnumVal>
+                <EnumVal name="Backward" value="1"></EnumVal>
+            </Enum>
+            
+            <Enum name="AnimationEndMode">
+                <EnumVal name="Loop" value="0"></EnumVal>
+                <EnumVal name="PingPong" value="1"></EnumVal>
+                <EnumVal name="Stop" value="2"></EnumVal>
+                <EnumVal name="LoopCount" value="3"></EnumVal>
+            </Enum>
+            <Category name="Animation Parameters">
+                <Property name="Animation"    type="image" proxy="0xeec1d003" description="Animation graphic - a strip of frames in a single image file"/>
+                <Property name="Duration" type="float" proxy="0xeec1d000" description="Animation duration in seconds" default="1"/>
+                <Property name="Direction" enum="AnimationDirection" type="uint32" proxy="0xeec1d002" description="Direction of animation playback" default="0"/>
+                <Property name="End Mode" enum="AnimationEndMode" type="uint32" proxy="0xeec1d001" description="Ending mode of animation" default="0"/>
+                <Property name="Loop Count" type="uint32" proxy="0xeec1d004" description="Number of times to loop through the animation in 'loop' mode" default="1"/>
+                <Property name="Auto Play" type="bool" proxy="0xeec1d005" description="Specifies whether the animation is played automatically" default="false"/>
+                <Property name="Frame Width" browsable="false" type="uint32" proxy="0xeec1d006" description="OBSOLETE! DON'T USE THIS PROPERTY!" default="0"/>
+                <Property name="Frame Count" type="uint32" proxy="0xeec1d007" description="Frame count" default="0"/>
+                <Property name="Flipbook Rows" type="uint32" proxy="0xeec1d008" description="Number of rows in the flipbook image" default="1"/>
+                <Property name="Flipbook Columns" type="uint32" proxy="0xeec1d009" description="Number of columns in the flipbook image" default="1"/>
+            </Category>
+        </Class>
+
+        
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                         Progress Bar class                      ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Progress Bar" classname="cSPUIProgressBarWin" base="Window" proxy="0x010ede03">
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                         Progress Bar class                      ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Gradient Progress Bar" classname="cSPUIProgressBarGradientWin" base="WindowBase" proxy="0x015cbbd6">
+            <Enum name="Drawing Mode">
+                <EnumVal name="Left To Right" value="1"></EnumVal>
+                <EnumVal name="Right To Left" value="2"></EnumVal>
+                <EnumVal name="Centered"      value="3"></EnumVal>
+            </Enum>
+            
+            <Category name="Gradient Parameters">
+                <Property name="Gradient Image" type="image"  proxy="0x015cbe06" description="Graphic providing gradients for progress bar visual"/>
+                <Property name="Color Min" type="color" proxy="0x015cbe07" description="Color for the value of 0%" default="0xFFFF0000"/>
+                <Property name="Color Max" type="color" proxy="0x015cbe08" description="Color for the value of 100%" default="0xFF00FF00"/>
+                <Property name="Color Middle" type="color" proxy="0x015cbe09" description="Middle mark color" default="0xFFFFFFFF"/>
+                <Property name="Drawing Mode" enum="Drawing Mode" type="uint32" proxy="0x015cbe0a" description="Bar drawing mode" default="1"/>
+            </Category>
+        </Class>
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~                    Popup menu item          ~~~
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Popup menu item" classname="cSPUIPopupMenuItemWin" proxy="0x04c04b4e" base="Button" description="Popup menu item">
+        </Class>
+        
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Popup menu               ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Popup menu" classname="cSPUIPopupMenuWin" proxy="0x04c04b4d" base="Button" description="Popup menu">
+            <Property name="Background" type="IDrawable" proxy="0x04c17815" description="Background image" volatile="true"/>
+            <Property name="Scroll up button" type="IButtonDrawable" proxy="0x04c9a86d" description="Scroll up button image" volatile="true"/>
+            <Property name="Scroll down button" type="IButtonDrawable" proxy="0x04c9a86e" description="Scroll down button image" volatile="true"/>
+        </Class>
+
+    </Category>
+    
+    <Category name="Spore UI Drawables" display="submenu">
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                         Variable Width Drawable class     ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="VariableWidthDrawable" classname="cSPUIVariableWidthDrawable" base="Drawable" description="Completely fills the window of variable width with a graphic without a horizontal stretch" proxy="0x0109c69d">
+            <Implements name="IDrawable"/>
+            <Property name="Image"    type="image" description="Background image" proxy="0xeec1d000"/>
+            <Property name="Fill Color"    type="color" default="#FF7F7F7F" description="Fill color used if no image is specified" proxy="0xeec1d001"/>
+        </Class>
+        
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Progress Bar Drawable class             ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="ProgressBarDrawable" base="Drawable" description="Completely fills the window of variable width with a graphic without a horizontal stretch" proxy="0x0109c69d">
+            <Implements name="IDrawable"/>
+            <Property name="Image"    type="image" description="Background image" proxy="0xeec1d000"/>
+            <Property name="Fill Color"    type="color" default="#FF7F7F7F" description="Fill color used if no image is specified" proxy="0xeec1d001"/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                   Spore Std Drawable             ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!-- Interface declarations -->
+        <Interface name="ISporeStdDrawableImageInfo"/>
+        
+        <Class name="DummyObjectBase" type="object" proxy="utfwin:" abstract="true">
+        </Class>
+        
+        <Class name="SporeStdDrawableImageInfo" classname="cSPUIStdDrawableImageInfo" base="DummyObjectBase" proxy="0x0540037e">
+            <Implements name="ISporeStdDrawableImageInfo"/>
+            <Property name="Background Image"    type="image" description="Background image" proxy="0x00000001"/>
+            <Property name="Background Color"    type="color" default="#FFFFFFFF" description="" proxy="0x00000003"/>
+            <Property name="Icon Image"    type="image" description="Icon image" proxy="0x00000002"/>
+            <Property name="Icon Color"    type="color" default="#FFFFFFFF" description="" proxy="0x00000004"/>
+            <Enum name="IconDrawModes">
+                <EnumVal name="ImageSize" value="0"></EnumVal>
+                <EnumVal name="WindowSize" value="1"></EnumVal>
+            </Enum>
+            <Property name="Icon Draw Mode" enum="IconDrawModes" type="uint32" proxy="0x00000005" default="1" description="Icon drawing mode"/>
+            <Property name="Icon Scale"     type="pointf" stepsize="0.1" proxy="0x00000006" description="Icon scale"/>
+            <Property name="Icon Offset"    type="pointf" proxy="0x00000007" description="Icon offset"/>
+            <Property name="Background Scale"     type="pointf" stepsize="0.1" proxy="0x0000000c" description="Background scale"/>
+            <Property name="Background Offset"    type="pointf" proxy="0x0000000d" description="Background offset"/>
+            <Enum name="ShadowModes">
+                <EnumVal name="None" value="0"></EnumVal>
+                <EnumVal name="Full" value="1"></EnumVal>
+                <EnumVal name="Background" value="2"></EnumVal>
+                <EnumVal name="Icon" value="3"></EnumVal>
+            </Enum>
+            <Property name="Stroke Shadow"  type="Outline Format" proxy="0x0000000a" description="Stroke parameters" volatile="true"/>
+            <Property name="Stroke Mode" enum="ShadowModes" type="uint32" proxy="0x00000008" default="0" description="Dropshadow mode."/>
+            <Property name="Halo   Shadow"  type="Outline Format" proxy="0x0000000b" description="Halo parameters" volatile="true"/>
+            <Property name="Halo   Mode" enum="ShadowModes" type="uint32" proxy="0x00000009" default="0" description="Dropshadow mode."/>
+        </Class>
+
+        <Class name="SporeStdDrawable" classname="cSPUIStdDrawable" base="StdDrawable" description="" proxy="0x053eb32a">
+            <Property name="Image"     type="image[8]" description="An image for each state" browsable="false" proxy="0x0f3ac75e"/>
+            <Property name="Image Outline"  type="Outline Format" proxy="0x039a69e6" browsable="false" description="Outline format " volatile="true"/>
+
+            <Implements name="IButtonDrawable"/>
+            <Implements name="IDrawable"/>
+            <Property name="Normal"                   type="ISporeStdDrawableImageInfo" proxy="0x054010a0"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Disabled"                 type="ISporeStdDrawableImageInfo" proxy="0x054010a1"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Highlighted"              type="ISporeStdDrawableImageInfo" proxy="0x054010a2"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Active"                   type="ISporeStdDrawableImageInfo" proxy="0x054010a3"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Checked + Normal"         type="ISporeStdDrawableImageInfo" proxy="0x054010a4"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Checked + Disabled"       type="ISporeStdDrawableImageInfo" proxy="0x054010a5"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Checked + Highlighted"    type="ISporeStdDrawableImageInfo" proxy="0x054010a6"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+            <Property name="Checked + Active"         type="ISporeStdDrawableImageInfo" proxy="0x054010a7"   description="State graphics descriptor" allownull="true" default="null" volatile="true"/>
+        </Class>
+    </Category>
+
+    <Category name="Spore UI Effects" display="submenu">
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Rotate effect that allows to set the start rotation angle        ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Spore Rotate" classname="cSPUIRotateEffect" description="Causes windows to rotate when triggered" base="Rotate" proxy="0x02086743">
+            <Category name="Behavior">
+                <Property name="RotAngleStart" type="float" description="Angle from which to start rotation (in degrees)" proxy="0x02086a1d"/>
+            </Category>
+        </Class>
+
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Swarm effect allows to play swarm effects                           ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Swarm Effect" classname="cSPUISwarmEffect" description="Triggers a Swarm effect" base="BiStateEffect" proxy="0x0238ea36">
+            <Category name="Behavior">
+                <Property name="Swarm effect name" type="string" default="" description="The name of the Swarm effect to play" proxy="0x0238ec88"/>
+            </Category>
+        </Class>
+
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Material  Effect                                                                            ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Material Effect" classname="cSPUIMaterialEffect" base="BiStateEffect" proxy="0x02c200ce" description="Toggle between two material on window event">
+            <Property name="From-Material" type="string" default=""  proxy="0x02c1f2c7" description="Source material"/>
+            <Property name="To-Material" type="string" default=""  proxy="0x02c1f2ca" description="Destination material"/>
+            <Property name="Recursive" type="bool" default="false" proxy="0x02c1f2d4" description="Whether to also use this material for children windows"/>
+        </Class>
+
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Use Material                                                                              ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Use Material" classname="cSPUIMaterialWinProc" base="WinProcBase" proxy="0x02bcfc0e" description="Assigns material to a window [and it's children]">
+            <Property name="Material name" type="string" default=""  proxy="0x02bcb913" description="Name of the material to use"/>
+            <Property name="Recursive" type="bool" default="false" proxy="0x02bcb912" description="Whether to also use this material for children windows"/>
+        </Class>
+
+         <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Layer ID                                                                              ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+        <Class name="Layer ID" classname="cSPUILayerIdWinProc" proxy="0x02bcfc18" base="WinProcBase" description="Assigns draw layer ID to a window [and it's children]">
+            <Property name="Layer ID" type="int32" default="0"  proxy="0x02bcfd66" description="Layer ID to set of offset to offset by"/>
+            <Property name="Relative" type="bool" default="true"  proxy="0x02bcfd64" description="Whether to offset the existing IDs or set them"/>
+            <Property name="Recursive" type="bool" default="true" proxy="0x02bcfd65" description="Whether to also affect children windows"/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             ~~~                    Zoom Layout              ~~~
+            <Property name="Rlative Area" type="rectf" description="The relative position inside parent window" default="1,1,1,1" proxy="0x04ebbaf4" editorhint="layout" volatile="true"/>
+        <Class name="Zoom Layout" proxy="0x04ea92a3" base="LayoutStyle" volatile="true" description="Child is zoomed up/down along with its parent's size changes.">
+        </Class>
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              ~~~                    Tooltip                                                                              ~~~        
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+        <Enum name="Tooltip Behavior">
+            <EnumVal name="Default" value="0"></EnumVal>
+            <EnumVal name="Under window" value="1"></EnumVal>
+            <EnumVal name="Offset" value="2"></EnumVal>
+        </Enum>
+
+        <Class name="Tooltip" classname="cSPUITooltipWinProc" proxy="0x0372e920" base="WinProcBase" description="Tooltip on rollover">
+            <Property name="Layout name" type="string" default="Tooltips"  proxy="0x03754d73" description="Filename of layout which contains tooltip window"/>
+            <Property name="Tooltip control ID" type="uint32" default="0x03754e6c"  proxy="0x03754d74" format="hex" description="Control ID of tooltip window"/>
+            <Property name="Tooltip detail control ID" type="uint32" default="0x03754e6c"  proxy="0x04ebd284" format="hex" description="Control ID of detailed tooltip window"/>
+            <Property name="Tooltip string" type="string_resource" default=""  proxy="0x03754d75" description="Text to display in tooltip"/>
+            <Property name="Tooltip detail string" type="string_resource" default=""  proxy="0x04ebaa53" description="Detailed text to display in tooltip after extended hover"/>
+            <Property name="Tooltip offset position" type="pointf" default="0,30"  proxy="0x03754d76" description="The offset of the tooltip window relative to the cursor"/>
+            <Property name="Tooltip Behavior" enum="Tooltip Behavior" type="uint32" default="0" proxy="0x04dd1a0d" description="Sets the tooltip display behavior"/>
+        </Class>
+    </Category>
+
+    <!--    
+    ********************************************************
+    ********************************************************
+    ***                    UI Event System               *** 
+    ********************************************************
+    ********************************************************
+    -->
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Interface declarations -->
+    <Interface name="IEventWindowValueInterpolator"/>
+    <Interface name="IEventTimeFunction"/>
+    <Interface name="IEventPredicate"/>
+    <Interface name="IEventAction"/>
+
+    <!-- An abstract base for objects implementing IWinProc directly. -->
+    <Class name="EventPropertyObject" type="object" proxy="utfwin:" volatile="true" abstract="true">
+            <Property name="Comment" type="string" description="Designer comment for this drawable" editorhint="caption"/>
+    </Class>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Window state messages -->
+    <Enum name="WindowStateMessage">
+        <EnumVal name="Visibile" value="0x025a5f84"></EnumVal> 
+        <EnumVal name="MouseFocus" value="0x0249f699"></EnumVal> 
+        <EnumVal name="KeyboardFocus" value="0x025a5f5a"></EnumVal> 
+        <EnumVal name="Enabled" value="0x025c8cb3"></EnumVal> 
+        <EnumVal name="Button Highlighted" value="0x025a5f8e"></EnumVal> 
+        <EnumVal name="Button Depressed" value="0x025a5f95"></EnumVal> 
+        <EnumVal name="Button Selected" value="0x025a5f9a"></EnumVal> 
+        <EnumVal name="ButtonClicked" value="0x025a61c5"></EnumVal>
+	</Enum>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Periodic time functions -->
+    <Enum name="OscillatorTimeFunction">
+        <EnumVal name="Wave" value="1"></EnumVal> 
+	</Enum>
+
+
+    <Category name="Spore UI Events" display="submenu">
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Base event  ~~~~~~~~~~~~~~~~~~~~~~~~~~~  -->
+        <Class name="EventBase" classname="cSPUIBehaviorEventBase" abstract="true" proxy="0x024ba741" base="WinProcBase" icon="effect" description="..." >
+            <Implements name="IWinProc"/>
+            <Category name="Behavior">
+                <Property name="Action 1" type="IEventAction"  proxy="0x03335c41"  allownull="true" default="null" volatile="true" description="Event actions" />
+                <Property name="Action 2" type="IEventAction"  proxy="0x03335c42"  allownull="true" default="null" volatile="true" description="Event actions" />
+                <Property name="Action 3" type="IEventAction"  proxy="0x03335c43"  allownull="true" default="null" volatile="true" description="Event actions" />
+                <Property name="Action 4" type="IEventAction"  proxy="0x03335c44"  allownull="true" default="null" volatile="true" description="Event actions" />
+                <Property name="Predicate 1" type="IEventPredicate" proxy="0x03335c12" allownull="true" default="null" volatile="true" description="Event predicates" />
+                <Property name="Predicate 2" type="IEventPredicate" proxy="0x03335c13" allownull="true" default="null" volatile="true" description="Event predicates" />
+                <Property name="Predicate 3" type="IEventPredicate" proxy="0x03335c14" allownull="true" default="null" volatile="true" description="Event predicates" />
+                <Property name="Predicate 4" type="IEventPredicate" proxy="0x03335c15" allownull="true" default="null" volatile="true" description="Event predicates" />
+            </Category>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Base window event ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="BaseWindowEvent" classname="cSPUIBehaviorWinEventBase" abstract="true" proxy="0x0255e38e" base="EventBase" description="..." >
+            <Category name="Window State">
+                <Property name="Message" type="uint32" proxy="0x0255eaf8" enum="WindowStateMessage" default="0x025a5f84" description="Message to trigger the event"/>
+                <Property name="Broadcast" type="bool" proxy="0x0255eaf9" default="true" description="..."/>
+                <Property name="Window ID" type="uint32" proxy="0x0255eafa" default="0x7FFFFFFF" format="hex" description="..."/>
+            </Category>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window bool-state event ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="WindowStateEvent" classname="cSPUIBehaviorWinBoolStateEvent" proxy="0x025611ed" base="BaseWindowEvent" description="..." >
+                <Enum name="TriggerState">
+                    <EnumVal name="OFF" value="0"></EnumVal>
+                    <EnumVal name="ON" value="1"></EnumVal>
+                    <EnumVal name="OFF - ON" value="2"></EnumVal>
+                    <EnumVal name="ON - OFF" value="3"></EnumVal>
+                </Enum>
+                <Property name="Trigger" enum="TriggerState" type="uint32" proxy="0x03339952" default="2" description="..."/>
+        </Class>
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Base event action ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="EventActionBase" proxy="0x024f9feb" base="EventPropertyObject" abstract="true" description="..." >
+                <Implements name="IEventAction"/>
+                <Category name="Behavior">
+                    <Property name="Predicate 1" type="IEventPredicate" proxy="0x03335c12" allownull="true" default="null" volatile="true" description="Event predicates" />
+                    <Property name="Predicate 2" type="IEventPredicate" proxy="0x03335c13" allownull="true" default="null" volatile="true" description="Event predicates" />
+                    <Property name="Predicate 3" type="IEventPredicate" proxy="0x03335c14" allownull="true" default="null" volatile="true" description="Event predicates" />
+                    <Property name="Predicate 4" type="IEventPredicate" proxy="0x03335c15" allownull="true" default="null" volatile="true" description="Event predicates" />
+            </Category>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window parameter interpolation action ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="WindowStateAnimationAction" classname="cSPUIBehaviorActionWinInterpolator" proxy="0x0254cb67" base="EventActionBase" description="Action to animate window parameters" >
+                <Property name="Time Function" type="IEventTimeFunction" proxy="0x0254cdfb" allownull="true" default="null" volatile="true" description="Action time function" />
+                <Property name="Animated Value" type="IEventWindowValueInterpolator" proxy="0x0254cdfc" allownull="true" default="null" volatile="true" description="Window value interpolator animates that value" />
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window state action ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="WindowStateAction" classname="cSPUIBehaviorActionWinState" proxy="0x033f7ad6" base="EventActionBase" description="Action to change window state" >
+                <Enum name="StateAction">
+                        <EnumVal name="Show" value="0"></EnumVal>
+                        <EnumVal name="Hide" value="1"></EnumVal>
+                        <EnumVal name="Enable" value="2"></EnumVal>
+                        <EnumVal name="Disable" value="3"></EnumVal>              
+                        <EnumVal name="DisableMouse" value="4"></EnumVal>
+                        <EnumVal name="EnableMouse" value="5"></EnumVal>
+                        <EnumVal name="DisableMouseChildren" value="6"></EnumVal>
+                        <EnumVal name="EnableMouseChildren" value="7"></EnumVal>
+                        <EnumVal name="CheckButton" value="8"></EnumVal>
+                        <EnumVal name="UncheckButton" value="9"></EnumVal>
+                        <EnumVal name="HighlightButton" value="10"></EnumVal>
+                        <EnumVal name="DehighlightButton" value="11"></EnumVal>
+                        <EnumVal name="DepressButton" value="12"></EnumVal>
+                        <EnumVal name="ReleaseButton" value="13"></EnumVal>
+                        <EnumVal name="SetShadecolor" value="14"></EnumVal>
+                        <EnumVal name="SetFillColor" value="15"></EnumVal>
+                        <EnumVal name="Invalidate" value="16"></EnumVal>
+                        <EnumVal name="InvalidateTransform" value="17"></EnumVal>
+                        <EnumVal name="SetMouseCapture" value="18"></EnumVal>
+                        <EnumVal name="ReleaseMouseCapture" value="19"></EnumVal>
+                </Enum>
+
+                <Enum name="RelationToWindow">
+                    <EnumVal  name="Any" value="0"></EnumVal>
+                    <EnumVal  name="My Ansestor" value="1"></EnumVal>
+                    <EnumVal  name="My Descendant" value="2"></EnumVal>
+                    <EnumVal  name="My Event Source" value="3"></EnumVal>
+                </Enum>
+
+                <Category name="State and Window">
+                    <Property name="Window State" type="uint32" enum="StateAction" proxy="0x033f7f81" default="0" description="Action to be taken" />
+                    <Property name="Parameter" type="uint32" proxy="0x033f7f8c" format="hex" default="0x7FFFFFFF" description="Parameter depends on the action selected" />
+                    <Property name="Window ID" type="uint32" proxy="0x033f7f89" format="hex" default="0x7FFFFFFF" description="The ID of a window whose state we change." />
+                    <Property name="Window is" type="uint32" enum="RelationToWindow" proxy="0x0341f297" default="0" description="Relationship between event's window and the window ID" />
+                </Category>
+        </Class>
+
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Base predicate ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="EventPredicateBase" proxy="0x0251fa3c" base="EventPropertyObject" abstract="true" description="..." >
+                <Implements name="IEventPredicate"/>
+                <Enum name="CombineMode">
+                    <EnumVal name="Default" value="1"></EnumVal>
+                    <EnumVal name="And" value="2"></EnumVal>
+                    <EnumVal name="Or" value="3"></EnumVal>
+                </Enum>
+
+                <Property name="Negate" type="bool" proxy="0x02521afb" default="false" description="Whether the result needs to be negated" />
+                <Property name="Combine Mode" enum="CombineMode" type="uint32" proxy="0x02521afa" default="1" description="Controls how this predicate is combined with other predicates below it." />
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window State Predicate ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="WindowStatePredicate" classname="cSPUIBehaviorPredicateWinState" proxy="0x033c9c5b" base="EventPredicateBase" description="..." >
+                <Enum name="StateToQuery">
+                    <EnumVal  name="Visible" value="0"></EnumVal>
+                    <EnumVal  name="Enabled" value="1"></EnumVal>
+                    <EnumVal  name="HasMouseFocusLocalTree" value="19"></EnumVal>
+                    <EnumVal  name="HasMouseFocus" value="2"></EnumVal>
+                    <EnumVal  name="HasKeyboardFocus" value="3"></EnumVal>
+                    <EnumVal  name="HasAnyFocus" value="4"></EnumVal>
+                    <EnumVal  name="ButtonStateChecked" value="5"></EnumVal>
+                    <EnumVal  name="ButtonStateNormal" value="6"></EnumVal>
+                    <EnumVal  name="ButtonStateHighlighted" value="7"></EnumVal>
+                    <EnumVal  name="ButtonStateDepressed" value="8"></EnumVal>
+                    <EnumVal  name="ButtonStateActive" value="9"></EnumVal>
+                    <EnumVal  name="IsMouseOver" value="10"></EnumVal>
+                    <EnumVal  name="IsParentOf" value="11"></EnumVal>
+                    <EnumVal  name="IsChildOf" value="12"></EnumVal>
+                    <EnumVal  name="IsShadeColor" value="13"></EnumVal>
+                    <EnumVal  name="IsFillColor" value="14"></EnumVal>
+                    <EnumVal  name="IsEventsIntStateHigh" value="15"></EnumVal>
+                    <EnumVal  name="IsEventFromParent" value="16"></EnumVal>
+                    <EnumVal  name="IsEventFromChild" value="17"></EnumVal>
+                    <EnumVal  name="IsEventFromParentOrChild" value="18"></EnumVal>
+                </Enum>
+
+                <Enum name="RelationToWindow">
+                    <EnumVal  name="Any" value="0"></EnumVal>
+                    <EnumVal  name="My Ansestor" value="1"></EnumVal>
+                    <EnumVal  name="My Descendant" value="2"></EnumVal>
+                    <EnumVal  name="My Event Source" value="3"></EnumVal>
+                </Enum>
+
+                <Category name="State and Window">
+                    <Property name="State Query" type="uint32" enum="StateToQuery" proxy="0x033cdc1b" default="1" description="State to query" />
+                    <Property name="Parameter" type="uint32" proxy="0x033cdcf4" format="hex" default="0x7FFFFFFF" description="Parameter depends on the state selected" />
+                    <Property name="Window ID" type="uint32" proxy="0x033cdc22" format="hex" default="0x7FFFFFFF" description="The ID of a window whose state we are after" />
+                    <Property name="Window is" type="uint32" enum="RelationToWindow" proxy="0x0341ef60" default="0" description="Relationship between event's window and the window ID" />
+                </Category>
+        </Class>
+
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window value interpolator base ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="WindowPropertyInterpolatorBase" proxy="0x025492da" base="EventPropertyObject" abstruct="true" description="..." >
+            <Implements name="IEventWindowValueInterpolator"/>
+            <Property name="Window -> From" type="bool" proxy="0x0254ab8e" default="true" description="Use window as a source of From Value"/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window Shade Color Interpolator ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="Window Color" classname="cSPUIBehaviorWinInterpolatorShadeColor" proxy="0x0254aa82" base="WindowPropertyInterpolatorBase" description="..." >
+            <Property name="From Color" type="color" proxy="0x0254b153" default="0xFFFFFFFF" description="Interpolate from this color"/>
+            <Property name="To Color" type="color" proxy="0x0254b152" default="0x00FFFFFF" description="Interpolate to this color"/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Window Scale Interpolator ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="Window Scale" classname="cSPUIBehaviorWinInterpolatorScale" proxy="0x0269efe5" base="WindowPropertyInterpolatorBase" description="..." >
+            <Property name="From Scale" type="float" proxy="0x0254b153" default="1" description="Interpolate from this color"/>
+            <Property name="To Scale" type="float" proxy="0x0254b152" default="1" description="Interpolate to this color"/>
+        </Class>
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Time Function Base ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="EventTimeFunctionBase" proxy="0x025611ed" base="EventPropertyObject" abstract="true" description="..." >
+            <Implements name="IEventTimeFunction"/>
+            <Property name="Negated" type="bool" proxy="0x0253ad19" default="false" description="..."/>
+            <Property name="Duration" type="float" proxy="0x0253aced" default="1" description="Seconds"/>
+            <Property name="Pre Delay Time" type="float" proxy="0x0269a849" default="0" description="..."/>
+            <Property name="Post Delay Time" type="float" proxy="0x0269a84b" default="0" description="..."/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Time Function Ramp ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="TimeRamp" classname="cSPUIBehaviorTimeFunctionRamp" proxy="0x0253acd2" base="EventTimeFunctionBase" description="..." >
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Time Function Smooth Ramp ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="TimeSmoothRamp" classname="cSPUIBehaviorTimeFunctionSmoothRamp" proxy="0x0253add9" base="TimeRamp" description="..." >
+            <Property name="Smooth Time In" type="float" proxy="0x0253ad8c" default="0.5" description="..."/>
+            <Property name="Smooth Time Out" type="float" proxy="0x0253ad8d" default="0.5" description="..."/>
+        </Class>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~ Time Function Periodic ~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <Class name="TimeOscillator" classname="cSPUIBehaviorTimeFunctionDampedPeriodic" proxy="0x0269a661" base="EventTimeFunctionBase" description="..." >
+            <Property name="Type" type="uint32" enum="OscillatorTimeFunction" proxy="0x0269b186" default="1" description="Periodic function type"/>
+            <Property name="Frequency" type="float" proxy="0x0269a919" default="2" description="Hz"/>
+            <Property name="Damping" type="float" proxy="0x0269a91b" default="0" description="0 - damping is baseed on duration, above 0 - duration is based on damping, below 0 - duration based oscillation with no damping."/>
+            <Property name="Ceiling" type="bool" proxy="0x026a02ab" default="false" description="..."/>
+        </Class>
+
+        <!-- ********************************************************************************************************* -->
+        <!-- ********************************************************************************************************* -->
+    </Category> 
+
+</Project>

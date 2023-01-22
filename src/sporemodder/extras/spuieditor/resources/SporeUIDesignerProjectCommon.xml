@@ -1,0 +1,1014 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<Project name="Spore">
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        Outline format 
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ --> 
+    <Struct name="Outline Format" classname="OutlineFormat">
+        <Enum name="OutlinedRenderSize">
+            <EnumVal name="User Defined" value="0"></EnumVal>
+            <EnumVal name="Size 1" value="1"></EnumVal>
+            <EnumVal name="Size 2" value="2"></EnumVal>
+            <EnumVal name="Size 3" value="3"></EnumVal>
+            <EnumVal name="Size 4" value="4"></EnumVal>
+            <EnumVal name="Size 5" value="5"></EnumVal>
+            <EnumVal name="Size 6" value="6"></EnumVal>
+            <EnumVal name="Size 7" value="7"></EnumVal>
+            <EnumVal name="Size 8" value="8"></EnumVal>
+            <EnumVal name="Size 9" value="9"></EnumVal>
+        </Enum>
+            
+        <Enum name="OutlinedRenderStrength">
+            <EnumVal name="User Defined" value="0"></EnumVal>
+            <EnumVal name="Strength 1" value="1"></EnumVal>
+            <EnumVal name="Strength 2" value="2"></EnumVal>
+            <EnumVal name="Strength 3" value="3"></EnumVal>
+            <EnumVal name="Strength 4" value="4"></EnumVal>
+            <EnumVal name="Strength 5" value="5"></EnumVal>
+            <EnumVal name="Strength 6" value="6"></EnumVal>
+            <EnumVal name="Strength 7" value="7"></EnumVal>
+            <EnumVal name="Strength 8" value="8"></EnumVal>
+            <EnumVal name="Strength 9" value="9"></EnumVal>
+        </Enum>
+            
+        <Enum name="OutlinedRenderQuality">
+<!--            
+            <EnumVal name="Low" value="0"></EnumVal>
+            <EnumVal name="Medium" value="1"></EnumVal>
+-->
+            <EnumVal name="High" value="2"></EnumVal> 
+        </Enum>
+            
+        <Property name="Size" enum="OutlinedRenderSize" type="uint32" description="Predefined outline size" proxy="0x00000001"  default="0" volatile="true"/>
+        <Property name="Strength" enum="OutlinedRenderStrength" type="uint32" description="Outline contrast" proxy="0x00000002"  default="0" volatile="true"/>
+        <Property name="Quality" enum="OutlinedRenderQuality" type="uint32" description="Prededined outline quality" proxy="0x00000003" default="2" volatile="true"/>
+        <Property name="Offset X" type="float" description="Outline X-offset relative to the text" proxy="0x00000004" default="0"/>
+        <Property name="Offset Y" type="float" description="Outline Y-offset relative to the text" proxy="0x00000005" default="0"/>
+        <Property name="Size X" type="float" description="Outline width" proxy="0x00000006" default="1"/>
+        <Property name="Size Y" type="float" description="Outline height" proxy="0x00000007" default="1"/>
+        <Property name="Smoothness" type="float" description="Controls contrast" proxy="0x00000008" default="0.01"/>
+        <Property name="Saturation" type="float" description="Controls contrast" proxy="0x00000009" default="0.5"/>
+        <Property name="Color" type="color" description="Outline color" proxy="0x0000000a" default="#00000000"/>
+    </Struct>
+
+    <!-- Guide declarations -->
+    <Guides>
+        <!--
+        resolution is (top,left,right,bottom) and 
+        safety is (offset_from_left, offset_from_top, offset_from_right, offset_from_bottom)
+        colors are ARGB
+        -->
+        <Guide resolution="0, 0, 640, 480" safety="64, 48, 64, 48" guidecolor="#ffff0000" safecolor="7f00ff00"/>
+        <Guide resolution="0, 0, 800, 600" safety="80, 60, 80, 60" guidecolor="#ffff0000" safecolor="7f00ff00"/>
+        <Guide resolution="0, 0, 1280, 720" safety="128, 72, 128, 72" guidecolor="#ffff0000" safecolor="7f00ff00"/>
+        <Guide resolution="0, 0, 1920, 1080" safety="192, 108, 192, 108" guidecolor="#ffff0000" safecolor="7f00ff00"/>
+    </Guides>
+
+    <!-- Interface declarations -->
+    <Interface name="ILayoutElement"/>
+    <Interface name="IWindow"/>
+    <Interface name="IWinProc"/>
+    <Interface name="IDrawable"/>
+    <Interface name="IButtonDrawable"/>
+    <Interface name="IScrollbarDrawable"/>
+    <Interface name="ISliderDrawable"/>
+    <Interface name="ISpinnerDrawable"/>
+    <Interface name="IDialogDrawable"/>
+    <Interface name="IComboBoxDrawable"/>
+    <Interface name="ITreeNode"/>
+
+    <!-- Enumeration declarations -->
+    <Enum name="Alignment">
+        <EnumVal name="Left" value="1"></EnumVal>
+        <EnumVal name="Right" value="2"></EnumVal>
+        <EnumVal name="Center" value="3"></EnumVal>
+    </Enum>
+
+    <Enum name="AlignmentV">
+        <EnumVal name="Top" value="1"></EnumVal>
+        <EnumVal name="Bottom" value="2"></EnumVal>
+        <EnumVal name="Middle" value="3"></EnumVal>
+    </Enum>
+    
+    <Enum name="FontAlignment">
+        <EnumVal name="Default" value="0"></EnumVal>
+        <EnumVal name="Left" value="1"></EnumVal>
+        <EnumVal name="Right" value="2"></EnumVal>
+        <EnumVal name="Center" value="3"></EnumVal>
+    </Enum>
+
+    <Enum name="FontAlignmentV">
+        <EnumVal name="Default" value="0"></EnumVal>
+        <EnumVal name="Top" value="1"></EnumVal>
+        <EnumVal name="Bottom" value="2"></EnumVal>
+        <EnumVal name="Middle" value="3"></EnumVal>
+    </Enum>
+    
+    <Enum name="Orientation">
+       <EnumVal name="Horizontal" value="1"></EnumVal>
+       <EnumVal name="Vertical" value="2"></EnumVal>
+    </Enum>
+
+   <Enum name="ButtonTypes">
+       <EnumVal name="Standard" value="1"></EnumVal>
+       <EnumVal name="Toggle" value="2"></EnumVal>
+       <EnumVal name="Radio" value="3"></EnumVal>
+    </Enum>
+    
+    <!-- Standard border struct -->
+	<Struct name="Borders">
+		<Property name="Left"   type="float" description="Left border width" proxy="1"/>
+		<Property name="Top"    type="float" description="Top border width" proxy="2"/>
+		<Property name="Right"  type="float" description="Right border width" proxy="3"/>
+		<Property name="Bottom" type="float" description="Bottom border width" proxy="4"/>
+	</Struct>
+
+    <!-- Window classes -->
+    <Category name="Windows">
+        <!-- Base of all window classes -->
+        <Class name="WindowBase" abstract="true" icon="window" hicon="window_hidden" export="true" proxy="utfwin:0x4ec1b8d8">
+            <Implements name="IWindow"/>
+            <Implements name="ILayoutElement"/>
+            <Property name="WindowFlags" type="flagset" proxy="0xeec1b000"/>
+            <Category name="Identity">
+                <Property name="Class" type="class" description="The type of this object"/>
+                <Property name="ControlID" type="uint32" format="hex" description="The unique ID of this object" editorhint="id" proxy="0xeec1b001"/>
+                <Property name="CommandID" type="uint32" format="hex" description="The message ID sent by this window" editorhint="id" proxy="0xeec1b002"/>
+            </Category>
+            <Category name="Appearance">
+                <Property name="Area" type="rectf" description="The rectangular extent of the window" default="10,10,50,50" proxy="0xeec1b005" editorhint="area"/>
+                <Property name="Caption" type="string_resource" description="The text contents or title of the window" editorhint="caption" proxy="0xeec1b00a"/>
+                <Property name="Visible" type="flag" mask="0x00000001" description="Flag indicating that this window is visible" editorhint="visible" flagset="WindowFlags"/>
+                <Property name="FillColor" type="color" default="#ff7f7f7f" description="Window background fill color" proxy="0xeec1b006" deprecated="true"/>
+                <Property name="FillDrawable" type="IDrawable" proxy="0xeec1b007" description="Fill drawable" volatile="true" deprecated="true"/>
+                <Property name="ShadeColor" type="color" description="Color modulation value" proxy="0xeec1b004" volatile="true"/>
+                <Property name="TextFont" type="textstyle" default="DefaultStyle" description="Default Text Style for this window" proxy="0xeec1b00e"/>
+            </Category>
+            <Category name="Behavior">
+                <Property name="Enabled" type="flag" mask="0x00000002" description="Flag to put the window into an interactive state" flagset="WindowFlags"/>
+                <Property name="IgnoreMouse" type="flag" mask="0x00000010" displayname="Ignore Mouse" description="Flag indicating that this window can recieve mouse events" flagset="WindowFlags"/>
+                <Property name="ClickToFront" type="flag" mask="0x00000004" displayname="Click To Front" description="If true, window will move to front when clicked" flagset="WindowFlags"/>
+                <Property name="AlwaysInFront" type="flag" mask="0x00000040" displayname="Always In Front" description="If true, window will always be in front of windows that don't have this flag" flagset="WindowFlags"/>
+                <Property name="Clip" type="flag" mask="0x00000400" description="Flag indicating whether child windows should be clipped" flagset="WindowFlags"/>
+            </Category>
+            <Category name="Design">
+                <Property name="Comment" type="string" description="Designer comment for this drawable" editorhint="comment"/>
+            </Category>
+            <Property name="WinProcs" type="IWinProc[]" browsable="false" editorhint="treeview" proxy="0xeec1b00c" volatile="true"/>
+            <Property name="Children" type="IWindow[]" browsable="false" editorhint="treeview" proxy="0xeec1b00b" volatile="true" exclude="true"/>
+        </Class>
+
+        <!-- Generic window class -->
+        <Class name="Window" classname="Window" base="WindowBase" description="A generic window" proxy="0x4ec1b8d8">
+            <Category name="Appearance">
+                <Property name="FillColor" type="color" default="#ff7f7f7f" description="Window background fill color" proxy="0xeec1b006"/>
+                <Property name="FillDrawable" type="IDrawable" proxy="0xeec1b007" description="Fill drawable" volatile="true"/>
+            </Category>
+        </Class>
+
+        <!-- Generic button class -->
+        <Class name="Button" classname="WinButton" base="WindowBase" proxy="0xeeefe2c3">
+        <Property name="ButtonFlags" type="flagset" proxy="0xeec1d002"/>
+        <Property name="ButtonStateFlags" type="flagset" proxy="0xeec1d001"/>
+			<Category name="Appearance">
+                <Property name="Text Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+				<Property name="ButtonDrawable"      type="IButtonDrawable" override="true" proxy="0xeec1b007" volatile="true" default="ButtonDrawableStandard" description="Object to render button appearance"/>
+				<Property name="Alignment"           type="uint32"   enum="Alignment" proxy="0xeec1d004" description="Specifes the horizontal alignment of the button within the window area whenever a fixed width flag is set. This is only the horizontal alignment, the button is always centered vertically. The caption text area always complements the alignment of the button."/>
+				<Property name="CaptionBorder"       type="Borders"         proxy="0xeec1d006" description="Specifies the caption borders"/>
+				<Property name="CaptionOffset"       type="pointf"          proxy="0xeec1d00a" description="Specifies the caption offset to be used when the button is selected/depressed"/>
+				<Property name="CaptionColors"       type="color[8]"        proxy="0xeec1d00b" description="Specifies the caption colors for each possible button state" default="#ff000000">
+					<Index name="Enabled"               value="0"/>
+					<Index name="Disabled"              value="1"/>
+					<Index name="Depressed"             value="2"/>
+					<Index name="Highlighted"           value="3"/>
+					<Index name="Selected"              value="4"/>
+					<Index name="SelectedHighlighted"   value="5"/>
+					<Index name="SelectedDepressed"     value="6"/>
+					<Index name="Active"                value="7"/>
+				</Property>              
+			</Category>
+            <Category name="Button Styles">
+				<Property name="ButtonType"    type="uint32" enum="ButtonTypes" description="Possible button types" default="1" proxy="0xeec1d003"/>           
+				<Property name="ButtonGroupID" type="uint32" format="hex" default="0" proxy="0xeec1d005" description="Allows to group buttons together. Combined with radio button type this enables radio button group control."/>
+                <Property name="Selected"      type="flag" mask="0x00000004" flagset="ButtonStateFlags" description="Button state flag"/>
+				<Property name="TriggerOnDown" type="flag" mask="0x00000001" flagset="ButtonFlags" description="Button considers itself clicked on mouse/key down rather than mouse/key up"/>
+				<Property name="FixedWidth"    type="flag" mask="0x00000002" flagset="ButtonFlags" description="Button is fixed width - this means that you can still resize the window area but the actual button width will remain fixed and and it will be positioned within a given window area. Most often used with radio and check box buttons with caption text positioned to the left or right of the button."/>
+				<Property name="FixedHeight"   type="flag" mask="0x00000004" flagset="ButtonFlags" description="Button is fixed height - this means that you can still resize the window area but the actual button height will remain fixed and and it will be positioned within a given window area. Most often used with radio and check box buttons with caption text positioned to the left or right of the button."/>
+            </Category>
+        </Class>
+        
+        <!-- DemoControl class -->
+        <!-- This entry is part of the example of how custom controls can be added to UTFDesigner -->
+        <!-- (Feel free to remove) -->
+        <Class name="DemoControl" base="WindowBase" proxy="0xeeefe2c4">
+        <Property name="ButtonFlags" type="flagset" proxy="0xeec1d002"/>
+        <Property name="ButtonStateFlags" type="flagset" proxy="0xeec1d001"/>
+			<Category name="Appearance">
+				<Property name="ButtonDrawable"      type="IButtonDrawable" override="true" proxy="0xeec1b007" volatile="true" default="StdDrawableStandard" description="Object to render button appearance"/>
+				<Property name="Alignment"           type="uint32"   enum="Alignment" proxy="0xeec1d004" description="Specifes the horizontal alignment of the button within the window area whenever a fixed width flag is set. This is only the horizontal alignment, the button is always centered vertically. The caption text area always complements the alignment of the button."/>
+				<Property name="CaptionBorder"       type="Borders"         proxy="0xeec1d006" description="Specifies the caption borders"/>
+				<Property name="CaptionOffset"       type="pointf"          proxy="0xeec1d00a" description="Specifies the caption offset to be used when the button is selected/depressed"/>
+				<Property name="CaptionColors"       type="color[8]"        proxy="0xeec1d00b" description="Specifies the caption colors for each possible button state" default="#ff000000">
+					<Index name="Enabled"               value="0"/>
+					<Index name="Disabled"              value="1"/>
+					<Index name="Depressed"             value="2"/>
+					<Index name="Highlighted"           value="3"/>
+					<Index name="Selected"              value="4"/>
+					<Index name="SelectedHighlighted"   value="5"/>
+					<Index name="SelectedDepressed"     value="6"/>
+					<Index name="Active"                value="7"/>
+				</Property>              
+			</Category>
+            <Category name="Button Styles">
+				<Property name="ButtonType"    type="uint32" enum="ButtonTypes" description="Possible button types" default="1" proxy="0xeec1d003"/>           
+				<Property name="ButtonGroupID" type="uint32" default="0" proxy="0xeec1d005" description="Allows to group buttons together. Combined with radio button type this enables radio button group control."/>
+                <Property name="Selected"      type="flag" mask="0x00000004" flagset="ButtonStateFlags" description="Button state flag"/>
+				<Property name="TriggerOnDown" type="flag" mask="0x00000001" flagset="ButtonFlags" description="Button considers itself clicked on mouse/key down rather than mouse/key up"/>
+				<Property name="FixedWidth"    type="flag" mask="0x00000002" flagset="ButtonFlags" description="Button is fixed width - this means that you can still resize the window area but the actual button width will remain fixed and and it will be positioned within a given window area. Most often used with radio and check box buttons with caption text positioned to the left or right of the button."/>
+				<Property name="FixedHeight"   type="flag" mask="0x00000004" flagset="ButtonFlags" description="Button is fixed height - this means that you can still resize the window area but the actual button height will remain fixed and and it will be positioned within a given window area. Most often used with radio and check box buttons with caption text positioned to the left or right of the button."/>
+            </Category>
+        </Class>
+
+	    <!-- ComboBox class -->
+        <Class name="ComboBox" classname="WinComboBox" base="WindowBase" proxy="0xaf552c4b">
+            <Enum name="ComboBoxAlignment">
+				<EnumVal name="Left" value="0"></EnumVal>
+				<EnumVal name="Right" value="1"></EnumVal>
+			</Enum>
+			<Property name="ComboBoxFlags" type="flagset" proxy="0xaf58f7d6"/>
+			<Category name="Appearance">
+                <Property name="Text Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+				<Property name="Alignment"        type="uint32" enum="ComboBoxAlignment" proxy="0xaf58f7d3" description="Specifes the horizontal alignment of the pull-down button within the window area."/>
+				<Property name="Colors"           type="color[6]" proxy="0xaf58f7d4" description="Specifies the text foreground and background colors.">
+					<Index name="Foreground"            value="0"/>
+					<Index name="Background"            value="1"/>
+					<Index name="HighlightedForeground" value="2"/>
+					<Index name="HighlightedBackground" value="3"/>
+					<Index name="SelectedForeground"    value="4"/>
+					<Index name="SelectedBackground"    value="5"/>
+				</Property>              
+				<Property name="ComboBoxDrawable"   type="IComboBoxDrawable" description="Object to render combo box appearance" default="ComboBoxDrawable" proxy="0xeec1b007" volatile="true"/>
+				<Property name="ScrollbarDrawable"  type="IScrollbarDrawable" description="Custom scrollbar drawable for pull down menu" default="ScrollbarDrawable" proxy="0xaf58f7d7" volatile="true"/>
+				<Property name="VisibleValuesCount" type="uint32" proxy="0xaf58f7d5" description="Specifies how many values should be shown at once in the pull-down list"/>
+				<Property name="Outline"            type="flag" mask="0x00000001" flagset="ComboBoxFlags" description="An outline is drawn around the control when highlighted"/>
+			</Category>
+	        <Category name="Behavior">
+	            <Property name="ValueList" type="string[]" description="List of available values for the combo box." proxy="0xaf58f7d1"/>
+	        </Category>
+	    </Class>     
+
+        <!-- Scrollbar class -->
+        <Class name="Scrollbar" classname="WinScrollbar" base="WindowBase" proxy="0x8ef37d6d">
+            <Category name="Appearance">
+                <Property name="ScrollbarDrawable" type="IScrollbarDrawable" description="Object to render scrollbar appearance" default="ScrollbarDrawable" proxy="0xeec1b007" volatile="true"/>
+	            <Property name="Orientation" type="uint32" enum="Orientation" description="Orientation of the scrollbar" default="1" proxy="0xeec1c007"/>           
+            </Category>
+            <Category name="Scroll Values">
+                <Property name="Value"        type="int32" description="Current value" proxy="0xeec1c001"/>
+                <Property name="MinValue"     type="int32" description="Lowest value in the range" proxy="0xeec1c002"/>
+                <Property name="MaxValue"     type="int32" description="Highest value in the range" proxy="0xeec1c003"/>
+                <Property name="VisibleRange" type="int32" description="The amount of the range that is visible" proxy="0xeec1c004"/>
+                <Property name="PageOverlap"  type="int32" description="The amount of overlap when paging up / down" proxy="0xeec1c005"/>
+                <Property name="ArrowDelta"   type="int32" description="The amount of units to move when clicking on the arrows" proxy="0xeec1c006"/>
+                <Property name="MinThumbSize" type="int32" description="The minimum thumb size, in pixels" proxy="0xeec1c008"/>
+            </Category>
+        </Class>
+        
+        <!-- Slider class -->
+        <Class name="Slider" classname="WinSlider" base="WindowBase" proxy="0x2f00bdb3">
+            <Category name="Appearance">
+                <Property name="SliderDrawable" type="ISliderDrawable" description="Object to render slider appearance" default="SliderDrawable" proxy="0xeec1b007" volatile="true"/>
+	            <Property name="Orientation" type="uint32" enum="Orientation" description="Orientation of the slider" default="1" proxy="0xeec1e004"/>           
+            </Category>
+            <Category name="Slider Values">
+                <Property name="Value"    type="int32" description="Current value" proxy="0xeec1e001"/>
+                <Property name="MinValue" type="int32" description="Minimum value of the slider" proxy="0xeec1e002"/>
+                <Property name="MaxValue" type="int32" description="Maximum value of the slider" proxy="0xeec1e003"/>
+            </Category>
+        </Class>
+
+        <!-- Spinner class -->
+        <Class name="Spinner" classname="WinSpinner" base="WindowBase" proxy="0x4f063bb3">
+            <Category name="Appearance">
+                <Property name="SpinnerDrawable" type="ISpinnerDrawable" description="Object to render spinner appearance" default="SpinnerDrawable" proxy="0xeec1b007" volatile="true"/>
+	            <Property name="Orientation" type="uint32" enum="Orientation" description="Orientation of the spinner" proxy="0xeec1f006"/>           
+            </Category>
+            <Category name="Spinner Values">
+                <Property name="Value"       type="int32"  description="Current value" proxy="0xeec1f001"/>
+                <Property name="MinValue"    type="int32"  description="Minimum value of the spinner" proxy="0xeec1f004"/>
+                <Property name="MaxValue"    type="int32"  description="Maximum value of the spinner" proxy="0xeec1f005"/>
+                <Property name="ValueDelta"  type="int32"  description="Number by wich the spinner value is incremented or decremented." proxy="0xeec1f002"/>
+                <Property name="ValuePeriod" type="uint32" description="The frequency at which the value is changed. In miliseconds." proxy="0xeec1f003"/>
+            </Category>
+        </Class>
+
+        <!-- Text class -->
+        <Class name="Text" classname="WinText" base="WindowBase" proxy="0x6f15f51b">
+            <Category name="Appearance">
+				<Property name="TextBorder" type="Borders" proxy="0x6f43fcce" description="Border around the text"/>
+				<Property name="TextColor" type="color" proxy="0x6f43fccd" description="Text color"/>
+                <Property name="FillColor" type="color" default="#ff7f7f7f" description="Window background fill color" proxy="0xeec1b006"/>
+                <Property name="FillDrawable" type="IDrawable" proxy="0xeec1b007" description="Fill drawable" volatile="true"/>
+                <Property name="Text Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+         </Category>
+        </Class>
+
+        <!-- TextEdit class -->
+        <Class name="TextEdit" classname="WinTextEdit" base="WindowBase" proxy="0x6f42b4f0">
+			<Category name="Appearance">
+                <Property name="Text Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+				<Property name="Text Colors"       type="color[8]"        proxy="0x0ff11731" description="Specifies component colors">
+					<Index name="Text"                value="0"/>
+					<Index name="Background"          value="1"/>
+					<Index name="Disabled Text"       value="2"/>
+					<Index name="Disabled Background" value="3"/>
+					<Index name="Selected Text"       value="4"/>
+					<Index name="Selected Background" value="5"/>
+					<Index name="Caret"               value="6"/>
+					<Index name="Caret Background"    value="7"/>
+				</Property>				
+				<Property name="FillDrawable" type="IDrawable" proxy="0xeec1b007" description="Fill drawable" volatile="true"/>
+				<Property name="Borders" type="rectf" default="4,4,4,4" proxy="0x0ff11732" deprecated="true"/>
+				<Property name="BorderWidth" type="Borders" default="4,4,4,4" proxy="0x0ff11732"/>
+				<Property name="Caret Period" type="float" default="0.25" proxy="0x0ff11733" description="Caret Blink Period"/>
+			</Category>
+            <Category name="Scrolling">
+				<Enum name="ScrollbarEnDis">
+					<EnumVal name="Never"     value="0"></EnumVal>
+					<EnumVal name="As Needed" value="1"></EnumVal>
+					<EnumVal name="Always"    value="2"></EnumVal>
+				</Enum>
+				<Property name="HScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x0ff11739"/>
+				<Property name="VScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x0ff1173a"/>
+				
+				<Property name="HScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x0ff1173b" volatile="true"/>
+				<Property name="VScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x0ff1173c" volatile="true"/>
+			</Category>
+			
+            <Property name="TextEditFlags" type="flagset" default="0x0054" proxy="0x0ff11730"/>
+			<Category name="Behavior">
+				<Property name="Read Only" type="flag" mask="0x0001" description="If set to true, the text cannot be changed" flagset="TextEditFlags"/>
+				<Property name="Accepts Return" type="flag" mask="0x0002" description="If set to true, allows return to insert a new line" flagset="TextEditFlags"/>
+				<Property name="Accepts Insert Key" type="flag" mask="0x0004" description="If set to true, allow using the insert key to toggle insert vs. overwrite mode" flagset="TextEditFlags"/>
+				<Property name="Overwrite" type="flag" mask="0x0008" description="If set to true, causes newly entered characters to overwrite existing characters" flagset="TextEditFlags"/>
+				<Property name="Hide Inactive Selection" type="flag" mask="0x0010" description="If set to true, the selection will be hidden if we don't have focus" flagset="TextEditFlags"/>
+				<Property name="Hide Caret" type="flag" mask="0x0020" description="If set to true, the flashing caret is hidden" flagset="TextEditFlags"/>
+				<Property name="Enable Clipboard" type="flag" mask="0x0040" description="If set to true, allows copy and paste to and from clipboard" flagset="TextEditFlags"/>
+				<Property name="Password Mode" type="flag" mask="0x0080" description="If set to true, the displayed text is obscured, and won't copy to clipboard" flagset="TextEditFlags"/>
+				<Enum name="TextEditWarpMode">
+					<EnumVal name="SingleLine"        value="0"></EnumVal>
+					<EnumVal name="MultiLine"         value="1"></EnumVal>
+					<EnumVal name="MultiLineWordWrap" value="2"></EnumVal>         
+				</Enum>
+				<Property name="Wrap Mode" type="uint32" description="SingleLine - all text in one line, MultiLine - wrap on hard linebreaks only, MultiLineWordWrap - Multiline with soft wordwrap" enum="TextEditWarpMode" proxy="0x0ff11734"/>
+				<Property name="Max Text Length" type="int32" default="-1" proxy="0x0ff11735"/>
+				<Property name="Cursor Index" type="uint32" description="Current cursor index" proxy="0x0ff11736"/>
+				<Property name="Anchor Index" type="uint32" description="Current anchor index" proxy="0x0ff11737"/>
+				<Property name="Undo History Size" type="uint32" default="10" description="Max number of undo operations to remember" proxy="0x0ff11738"/>
+			</Category>
+        </Class>
+
+        <!-- Dialog class -->
+        <Class name="Dialog" classname="WinDialog" base="WindowBase" proxy="0x0f0b8b73">
+	        <Property name="DialogFlags" type="flagset" proxy="0xeec2a002"/>
+            <Category name="Appearance">
+                <Property name="FillColor" type="color" default="#FFACA899" description="Window background fill color" proxy="0xeec1b006"/>
+                <Property name="DialogDrawable"      type="IDrawable"	   default="DialogDrawable"         proxy="0xeec1b007"  description="Object to render dialog appearance" volatile="true"/>
+                <Property name="CloseButtonDrawable" type="IButtonDrawable" default="ButtonDrawableStandard" proxy="0xeec2a001"  description="Object to render dialog close button appearance" volatile="true"/>
+                <Property name="BackgroundColor" type="color" default="#ff7f7f7f" description="Window background fill color" proxy="0xeec1b006"/>
+				<Property name="MinWidth"  type="float" proxy="0xeec2a009" description="Specifies the minimum width of the dialog"/>
+				<Property name="MinHeight" type="float" proxy="0xeec2a00a" description="Specifies the minimum height of the dialog"/>
+				<Property name="MaxWidth"  type="float" proxy="0xeec2a00b" description="Specifies the maximum width of the dialog"/>           
+				<Property name="MaxHeight" type="float" proxy="0xeec2a00c" description="Specifies the maximum height of the dialog"/>
+				<Property name="ClientAreaBorder"   type="Borders" proxy="0xeec2a003" description="Client area border"/>
+				<Property name="CloseButtonBorder"  type="Borders" proxy="0xeec2a004" description="Close button border"/>
+                <Property name="TitleText"          type="string_resource" proxy="0xeec2a005" description="Title text"/>
+                <Property name="TitleTextStyle"     type="textstyle"       proxy="0xeec2a006" description="Title text style" default="DialogTitle"/>
+                <Property name="TitleTextColor"     type="color"           proxy="0xeec2a007" description="Title text color"/>
+				<Property name="TitleTextBorder"    type="Borders"         proxy="0xeec2a008" description="Title text border"/>
+            </Category>
+            <Category name="Dialog Styles">
+                <Property name="Moveable"        type="flag" mask="0x00000001" flagset="DialogFlags" description="Dialog flag"/>
+                <Property name="Sizeable"        type="flag" mask="0x00000002" flagset="DialogFlags" description="Dialog flag"/>
+                <Property name="ShowTitle"       type="flag" mask="0x00000004" flagset="DialogFlags" description="Dialog flag"/>
+                <Property name="ShowTitleBar"    type="flag" mask="0x00000008" flagset="DialogFlags" description="Dialog flag"/>
+                <Property name="ShowCloseButton" type="flag" mask="0x00000010" flagset="DialogFlags" description="Dialog flag"/>
+	            <Property name="ShowBorder"      type="flag" mask="0x00000020" flagset="DialogFlags" description="Dialog flag"/>
+            </Category>     
+        </Class>
+        
+        <!-- Message Box class -->
+        <Class name="MessageBox" classname="WinMessageBox" base="Dialog" proxy="0x6f38282b">
+            <Enum name="MessageBoxTypes">
+                <EnumVal name="Ok"            value="1"></EnumVal>
+                <EnumVal name="OkCancel"      value="2"></EnumVal>         
+                <EnumVal name="YesNo"         value="3"></EnumVal>
+                <EnumVal name="YesNoCancel"   value="4"></EnumVal>
+                <EnumVal name="Custom"        value="5"></EnumVal>
+            </Enum>
+            <Category name="Appearance">
+                <Property name="Type"                     type="uint32"           description="Pre-defined type of the message box" enum="MessageBoxTypes" proxy="0xeec2c000"/>
+                <Property name="MessageText"              type="string_resource"  description="Message text" proxy="0xeec2c001"/>
+                <Property name="MessageTextStyle"         type="textstyle"        description="Message text style" proxy="0xeec2c002" default="DefaultStyle"/>
+                <Property name="MessageTextBorder"        type="Borders"          description="Border of the message text" proxy="0xeec2c003"/>
+                <Property name="Gutter"                   type="float"            description="A common gutter between all components of the message box" proxy="0xeec2c011"/>
+            </Category>
+            <Category name="Buttons">
+                <Property name="ButtonBorder"             type="Borders"          description="Border of the button" proxy="0xeec2c007"/>
+                <Property name="ButtonTextStyle"          type="textstyle"        description="Button text style" proxy="0xeec2c00b" default="DefaultStyle"/>
+                <Property name="ButtonMinimumWidth"       type="float"            description="Minimum width of the button" proxy="0xeec2c00c"/>
+                <Property name="ButtonMinimumHeight"      type="float"            description="Minimum height of the button" proxy="0xeec2c00d"/>
+                <Property name="ButtonSpacing"            type="float"            description="Spacing between buttons" proxy="0xeec2c00e"/>
+                <Property name="ButtonAlignment"          type="uint32"           description="Horizontal alignment of the buttons"  enum="Alignment" proxy="0xeec2c00f"/>
+                <Property name="ButtonDrawable"           type="IButtonDrawable"  description="Shared button drawable" default="ButtonDrawableStandard" proxy="0xeec2c010" volatile="true"/>
+            </Category>
+        </Class>
+        
+        <Enum name="CellAlignment">
+            <EnumVal name="Unused"           value="0"></EnumVal>
+            <EnumVal name="Default"          value="1"></EnumVal>         
+            <EnumVal name="HorizontalLeft"   value="2"></EnumVal>
+            <EnumVal name="HorizontalCenter" value="3"></EnumVal>
+            <EnumVal name="HorizontalRight"  value="4"></EnumVal>
+            <EnumVal name="VerticalTop"      value="5"></EnumVal>
+            <EnumVal name="VerticalCenter"   value="6"></EnumVal>
+            <EnumVal name="VerticalBottom"   value="7"></EnumVal>
+      </Enum>
+        
+        <Struct name="CellFormat" classname="CellFormat">
+			<Property name="BorderFlags" type="flagset"   proxy="0x00000006"/>
+			<Property name="TextStyle"   type="textstyle" description="Text style" proxy="0x00000001" default="DefaultStyle"/>
+			<Property name="Colors"      type="color[8]"  description="Colors" proxy="0x00000002">
+				<Index name="Foreground"            value="0"/>
+				<Index name="Background"            value="1"/>
+				<Index name="DisabledForeground"    value="2"/>
+				<Index name="DisabledBackground"    value="3"/>
+				<Index name="HighlightedForeground" value="4"/>
+				<Index name="HighlightedBackground" value="5"/>
+				<Index name="SelectedForeground"    value="6"/>
+				<Index name="SelectedBackground"    value="7"/>
+			</Property>              
+			<Property name="Wrapping"                 type="int8" description="0 - no wrapping, 1 - wrapping" proxy="0x00000003"/>
+			<Property name="HorizontalAlignment"      type="int8" description="Horizontal alignment" proxy="0x00000004" enum="CellAlignment"/>
+			<Property name="VerticalAlignmentBottom"  type="int8" description="Vertical alignment" proxy="0x00000005" enum="CellAlignment"/>
+            <Property name="BorderLeft"               type="flag" mask="0x00000001" flagset="BorderFlags" description="Left border"/>
+            <Property name="BorderTop"                type="flag" mask="0x00000002" flagset="BorderFlags" description="Top border"/>
+            <Property name="BorderRight"              type="flag" mask="0x00000004" flagset="BorderFlags" description="Right border"/>
+            <Property name="BorderBottom"             type="flag" mask="0x00000008" flagset="BorderFlags" description="Bottom border"/>
+			<Property name="BorderColor"              type="color" description="Border color" proxy="0x00000007"/>
+      </Struct>
+        
+        <!-- Grid class -->
+        <Class name="Grid" classname="WinGrid" base="WindowBase" proxy="0x6f1f1aa6">        
+	        <Property name="GridFlags" type="flagset" proxy="0xeec2b000"/>
+			<Category name="Gutters">
+				<Property name="Gutters"            type="Borders" proxy="0xeec2b001" description="Left gutter"/>
+				<Property name="CellGutters"        type="Borders" proxy="0xeec2b005" description="Cell left gutter"/>
+            </Category>
+            <Category name="Appearance">
+                <Property name="OutlineColor"       type="color"      proxy="0xeec2b009" description="Outline color"/>
+                <Property name="ColumnGridColor"    type="color"      proxy="0xeec2b00a" description="Column grid color"/>
+                <Property name="RowGridColor"       type="color"      proxy="0xeec2b00b" description="Row grid color"/>
+                <Property name="DefaultColumnWidth" type="float"      proxy="0xeec2b00c" description="Default column width"/>
+                <Property name="DefaultRowHeight"   type="float"      proxy="0xeec2b00d" description="Default row height"/>
+                <Property name="ColumnCount"        type="int32"      proxy="0xeec2b00e" description="Column count"/>
+                <Property name="RowCount"           type="int32"      proxy="0xeec2b00f" description="Row count"/>
+                <Property name="DefaultCellFormat"  type="CellFormat" proxy="0xeec2b010" description="Default cell formating"/>
+                <Property name="Cell Text Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+                <Property name="ColumnHeadingsList" displayname="Column Headings" type="string[]" proxy="0xaf58f7d1" description="List of column headings for grid"/>
+                <Property name="RowHeadingsList" displayname="Row Headings" type="string[]" proxy="0xaf58f7d2" description="List of row headings for grid"/>
+            </Category>
+            <Category name="Behavior">
+                <Property name="Editable"                 type="flag" mask="0x00000001" flagset="GridFlags" description="If turned off, normally editable grid elements are disabled"/>
+                <Property name="HScrollbar"               type="flag" mask="0x00000002" flagset="GridFlags" description="Allows the display of a horizontal scroll bar if needed"/>
+                <Property name="VScrollbar"               type="flag" mask="0x00000004" flagset="GridFlags" description="Allows the display of a vertical scroll bar if needed"/>
+                <Property name="ColumnHeadings"           type="flag" mask="0x00000008" flagset="GridFlags" description="Enables column headings. This refers to a row along the top that has titles and stays on top when vertically scrolling"/>
+                <Property name="RowHeadings"              type="flag" mask="0x00000010" flagset="GridFlags" description="Enables row headings. This refers to a column along the left that has titles and stays there when horizontally scrolling"/>
+                <Property name="ColumnGrid"               type="flag" mask="0x00000020" flagset="GridFlags" description="Enables vertical gridlines that separate each column"/>
+                <Property name="RowGrid"                  type="flag" mask="0x00000040" flagset="GridFlags" description="Enables horizontal gridlines that separate each row"/>
+                <Property name="InsertionMode"            type="flag" mask="0x00000080" flagset="GridFlags" description="Puts the grid into insertion mode. So if there is an operation that inserts cells, this flag makes it insert instead of overwrite"/>
+                <Property name="DrawOutline"              type="flag" mask="0x00000200" flagset="GridFlags" description="Outline rectangle around window"/>
+                <Property name="DrawGridOutline"          type="flag" mask="0x00000400" flagset="GridFlags" description="Outline around grid area of window, which is inset from the window if gutter sizes are nonzero"/>
+                <Property name="CellWrapping"             type="flag" mask="0x00000800" flagset="GridFlags" description="Wrap whatever is in the cell to fit. Usually applies to text. If cell column is set to a fixed size, this can cause a cell row to grow in height when text wraps"/>
+                <Property name="AllowNoSelection"         type="flag" mask="0x00001000" flagset="GridFlags" description="If true, then you don't have to have any single cell, column, or row selected"/>
+                <Property name="FixedColumnCount"         type="flag" mask="0x00002000" flagset="GridFlags" description="If true, then we act like a fixed size grid, and scrollbars scroll to the edge. If false, then we act like a freeform spreadsheet when you can keep scrolling to the right forever" deprecated="true"/>
+                <Property name="FixedRowCount"            type="flag" mask="0x00004000" flagset="GridFlags" description="Similar to FixedColumnCount" deprecated="true"/>
+                <Property name="DrawPastLastColumn"       type="flag" mask="0x00008000" flagset="GridFlags" description="Spreadsheets want this turned on. Listboxes want this flag turned off. Basically, with a listbox you want to stop scrolling and drawing at the end of the listbox data"/>
+                <Property name="DrawPastLastRow"          type="flag" mask="0x00010000" flagset="GridFlags" description="Similar to DrawPastLastColum"/>
+                <Property name="CellsOverlapped"          type="flag" mask="0x00020000" flagset="GridFlags" description="Allows for overlapped cells - text from one cell can overlapp with adjacent cells"/>
+                <Property name="HighlightCellDataOnly"    type="flag" mask="0x00080000" flagset="GridFlags" description="Sets highlighting to only the cell data and not the cell background"/>
+                <Property name="DefaultRowColHeaderText"  type="flag" mask="0x00100000" flagset="GridFlags" description="When on, and headers are enabled, generates headers automatically; when off, header text is blank unless user calls SetRowHeading()/SetColumnHeading() manually"/>
+            </Category>
+        </Class>    
+        
+        <!-- TreeView class -->
+        <Class name="TreeView" classname="WinTreeView" base="WindowBase" proxy="0xf02aff4b">        
+	        <Property name="TreeViewFlags" type="flagset" proxy="0x302a0000"/>
+
+            <Category name="Appearance">
+				<Property name="Colors" type="color[9]" proxy="0x302a0002" description="Specifies component colors">
+					<Index name="Text"                value="0"/>
+					<Index name="Background"          value="1"/>
+					<Index name="Disabled Text"       value="2"/>
+					<Index name="Disabled Background" value="3"/>
+					<Index name="Selected Text"       value="4"/>
+					<Index name="Selected Background" value="5"/>
+					<Index name="Highlighted Text"    value="6"/>
+					<Index name="Highlighted Background" value="7"/>
+					<Index name="Connector Lines"     value="8"/>
+				</Property>
+				
+				<Property name="Borders" type="rectf" default="4,4,4,4" proxy="0x302a0001" deprecated="true"/>
+				<Property name="BorderWidth" type="Borders" default="4,4,4,4" proxy="0x302a0001"/>
+
+				<Property name="DefaultIcon" type="IDrawable" proxy="0x302a0005" volatile="true"/>
+				<Property name="ExpanderDrawable" type="IDrawable" default="TreeExpanderDrawable" proxy="0x302a0006" volatile="true"/>
+				
+                <Property name="ItemHeight"         type="float"      proxy="0x302a0004" description="Height of individual rows"/>
+                <Property name="IndentWidth"        type="uint32"     proxy="0x302a0007" description="Number of pixels to indent per nesting level"/>
+                <Property name="LineWidth"          type="uint32"     proxy="0x302a0008" description="Width of connecting lines between nodes"/>
+                <Property name="LineIndent"         type="uint32"     proxy="0x302a0009" description="Indentation of connecting lines"/>
+                <Property name="IconSpacing"        type="uint32"     proxy="0x302a000a" description="Space between icon and caption"/>
+                <Property name="DrawLines"          type="flag" mask="0x00000001" flagset="TreeViewFlags" description="Enables the rendering of connecting lines"/>
+                <Property name="DrawRootLines"      type="flag" mask="0x00000002" flagset="TreeViewFlags" description="Enabled connecting lines at the root level"/>
+            </Category>
+            
+            <Category name="Scrolling">
+				<Enum name="ScrollbarEnDis">
+					<EnumVal name="Never"     value="0"></EnumVal>
+					<EnumVal name="As Needed" value="1"></EnumVal>
+					<EnumVal name="Always"    value="2"></EnumVal>
+				</Enum>
+				<Property name="HScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x302a000b"/>
+				<Property name="VScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x302a000c"/>
+				
+				<Property name="HScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x302a000d" volatile="true"/>
+				<Property name="VScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x302a000e" volatile="true"/>
+            </Category>
+            
+            <Category name="Content">
+	            <Property name="Nodes" type="ITreeNode[]" proxy="0x302a0003" volatile="true"/>
+            </Category>
+            
+            <Category name="Behavior">
+                <Property name="HideSelection"      type="flag" mask="0x00000004" flagset="TreeViewFlags" description="Hide the selection when the window does not have focus"/>
+                <Property name="FullRowSelect"      type="flag" mask="0x00000008" flagset="TreeViewFlags" description="Allows nodes to be selected by clicking anywhere along the row"/>
+                <Property name="MultiSelect"        type="flag" mask="0x00000010" flagset="TreeViewFlags" description="Enables multiple items to be selected by holding SHIFT or CTRL while clicking"/>
+            </Category>
+        </Class>    
+        
+    </Category>
+    
+	<Category name="Layout Styles" display="submenu">
+    
+        <!-- Layout (abstract base) -->
+        <Class name="LayoutStyle" proxy="utfwin:" abstract="true" icon="layout">
+            <Implements name="IWinProc"/>
+            <Implements name="ILayoutElement"/>
+        </Class>
+    
+        <!-- "SimpleLayout" style -->
+        <Class name="SimpleLayout" classname="SimpleLayout" description="Layout relative to parent edges" base="LayoutStyle" proxy="0x2f418d72">
+            <Category name="Behavior">
+                <Property name="Anchor" type="anchor" description="Anchor styles" editorhint="layout" proxy="0x0f3d0000"/>
+            </Category>
+        </Class>
+        
+        <!-- "ProportionalLayout" style -->
+        <Class name="ProportionalLayout" classname="ProportionalLayout" description="Layout relative to parent edges" base="LayoutStyle" proxy="0xaf3df411">
+            <Category name="Behavior">
+                <Property name="Proportions" type="float[4]" stepsize="0.05" description="The relative origin of each edge, as a fraction of parent" editorhint="layout" proxy="0x0f3d0000">
+                    <Index name="Left" value="0"/>
+                    <Index name="Top" value="1"/>
+                    <Index name="Right" value="2"/>
+                    <Index name="Bottom" value="3"/>
+                </Property>
+            </Category>
+        </Class>
+
+    </Category>
+	
+	<Category name="Effects" display="submenu">
+    
+        <Enum name="TriggerTypes">
+            <EnumVal name="Visible" value="0"></EnumVal>
+            <EnumVal name="Invisible" value="1"></EnumVal>
+            <EnumVal name="Enabled" value="2"></EnumVal>
+            <EnumVal name="Disabled" value="3"></EnumVal>
+            <EnumVal name="Mouse Focus" value="4"></EnumVal>
+            <EnumVal name="Keyboard Focus" value="5"></EnumVal>
+            <EnumVal name="Any Focus" value="6"></EnumVal>
+            <EnumVal name="No Mouse Focus" value="7"></EnumVal>
+            <EnumVal name="No Keyboard Focus" value="8"></EnumVal>
+            <EnumVal name="No Focus" value="9"></EnumVal>
+            <EnumVal name="Button Selected" value="10"></EnumVal>
+            <EnumVal name="Button Unselected" value="11"></EnumVal>
+        </Enum>
+            
+        <Enum name="InterpolationType">
+            <EnumVal name="Linear" value="0"></EnumVal>
+            <EnumVal name="Ease-In/Ease-Out" value="1"></EnumVal>
+            <EnumVal name="Damped Spring" value="2"></EnumVal>
+        </Enum>
+            
+        <!-- Effect (abstract base) -->
+        <Class name="Effect" proxy="utfwin:" abstract="true" icon="effect">
+            <Implements name="IWinProc"/>
+            <Implements name="ILayoutElement"/>
+        </Class>
+    
+        <!-- BiStateEffect (abstract base) -->
+        <Class name="BiStateEffect" base="Effect" abstract="true">
+            <Category name="Behavior">
+                <Property name="Time" type="float" description="The duration of the effect" proxy="0x4f2b0000"/>
+                <Property name="Trigger" type="uint32" enum="TriggerTypes" description="The type of event that triggers this effect" proxy="0x4f2b0001"/>
+                <Property name="InterpolationType" type="uint32" enum="InterpolationType" description="The interpolation type for the effect envelope" proxy="0x4f2b0002"/>
+                <Property name="Ease-In" type="float" description="Ease-in time, between 0 and 1" proxy="0x4f2b0003"/>
+                <Property name="Ease-Out" type="float" description="Ease-out time, between 0 and 1" proxy="0x4f2b0004"/>
+                <Property name="Damping" type="float" description="Spring damping factor (0-1)" proxy="0x4f2b0005"/>
+            </Category>
+        </Class>
+    
+        <!-- "Glide" effect -->
+        <Class name="Glide" classname="GlideEffect" description="Causes windows to glide on/off the screen when triggered" base="BiStateEffect" proxy="0xcf2b2ad4">
+            <Category name="Behavior">
+                <Property name="Offset" type="pointf" description="The direction and distance to displace the window when hidden" proxy="0x4f2c0000"/>
+            </Category>
+        </Class>
+
+        <!-- "Fade" effect -->
+        <Class name="Fade" classname="FadeEffect" description="Causes windows to fade out when triggered" base="BiStateEffect" proxy="0x6f2b6d2c">
+        </Class>
+
+        <!-- "Inflate" effect -->
+        <Class name="Inflate" classname="InflateEffect" description="Causes windows to grow / shrink when triggered" base="BiStateEffect" proxy="0x4f3daf02">
+            <Category name="Behavior">
+                <Property name="Scale" type="float" description="The scale factor of the window when triggered" proxy="0x4f2c0000"/>
+            </Category>
+        </Class>
+
+        <!-- "Modulate" effect -->
+        <Class name="Modulate" classname="ModulateEffect" description="Animates the shade color" base="BiStateEffect" proxy="0x2f8bbb4d">
+            <Category name="Behavior">
+                <Property name="Color1" type="color" description="First modulation color"  proxy="0x4f2c0000"/>
+                <Property name="Color2" type="color" description="Second modulation color" proxy="0x4f2c0001"/>
+            </Category>
+        </Class>
+
+        <!-- Cascade Effect -->
+        <Class name="Cascade" classname="CascadeEffect" base="Effect" proxy="0x0f90a5ae">
+            <Category name="Behavior">
+                <Property name="Delay" displayname="Initial Delay (sec)" type="float" description="Initial delay of the cascade, in seconds" proxy="0x4f2b0000"/>
+                <Property name="Interval" displayname="Interval (sec)" type="float" description="Interval between steps, in seconds" proxy="0x4f2b0001"/>
+            </Category>
+        </Class>
+        
+        <!-- "Rotate" effect -->
+        <Class name="Rotate" classname="RotateEffect" description="Causes windows to rotate when triggered" base="BiStateEffect" proxy="0xcf2b2ad5">
+            <Category name="Behavior">
+                <Property name="RotX" type="float" description="X component of rotation axis (need not be normalized)" proxy="0x4f2c0100"/>
+                <Property name="RotY" type="float" description="Y component of rotation axis (need not be normalized)" proxy="0x4f2c0101"/>
+                <Property name="RotZ" type="float" description="Z component of rotation axis (need not be normalized)" proxy="0x4f2c0102"/>
+                <Property name="RotAngle" type="float" description="Angle to rotate by clockwise (in degrees)" proxy="0x4f2c0103"/>
+            </Category>
+        </Class>
+        
+        <!-- "Perspective" effect -->
+        <Class name="Perspective" classname="PerspectiveEffect" description="Causes windows to deform via a perspective-projection" base="Effect" proxy="0xcf2b2ad6">
+            <Category name="Behavior">
+                <Property name="NearPlane" type="float" description="Near plane z-position (strength of perspective effect)" proxy="0x4f2c0110"/>
+            </Category>
+        </Class>
+    
+    </Category>
+	
+    <Category name="Navigators" display="submenu">
+    
+        <Enum name="NavType">
+            <EnumVal name="Previous Sibling" value="0"></EnumVal>
+            <EnumVal name="Next Sibling" value="1"></EnumVal>
+            <EnumVal name="Previous Sibling (Wrap)" value="2"></EnumVal>
+            <EnumVal name="Next Sibling (Wrap)" value="3"></EnumVal>
+            <EnumVal name="First Child" value="4"></EnumVal>
+            <EnumVal name="Last Child" value="5"></EnumVal>
+            <EnumVal name="Parent" value="6"></EnumVal>
+        </Enum>
+        
+        <Enum name="FocusFilter">
+            <EnumVal name="Any window" value="0"></EnumVal>
+            <EnumVal name="This window only" value="1"></EnumVal>
+            <EnumVal name="Direct children only" value="2"></EnumVal>
+            <EnumVal name="Any descendent" value="3"></EnumVal>
+        </Enum>
+        
+        <Class name="NavigatorBase" proxy="utfwin:" abstract="true" icon="nav">
+            <Implements name="IWinProc"/>
+            <Implements name="ILayoutElement"/>
+            <Property name="Trigger" type="uint32" description="The event that triggers the navigation" proxy="0x2f860000"/>
+            <Property name="NavigateFrom" type="uint32" enum="FocusFilter" description="Allows the navigator to be selectively enabled based on the current focus window" proxy="0x2f860001"/>
+        </Class>
+                
+        <!-- Focus Relative Navigateor -->
+        <Class name="Relative" classname="RelativeNavigator" base="NavigatorBase" description="Changes the focus window when a specific button or key is pressed." proxy="0xaf8772af">
+            <Property name="Target" type="uint32" enum="NavType" description="The window, relative to the current focus window, that should recieve focus." proxy="0x2f870000" editorhint="caption"/>
+        </Class>
+    
+        <!-- Explicit Navigateor -->
+        <Class name="ExplicitID" classname="ExplicitNavigator" base="NavigatorBase"  description="Changes the focus window when a specific button or key is pressed." proxy="0x4f8772aa">
+            <Property name="Target" type="IWindow" description="The window to recieve focus when this navigator is activated." proxy="0x2f870000" editorhint="caption"/>
+        </Class>
+    
+    </Category>
+
+    <Category name="Drawables" display="submenu">
+    
+        <!-- Drawable (abstract base) -->
+        <Class name="Drawable" share="true" export="true" proxy="utfwin:" abstract="true" icon="drawable">
+            <Implements name="IDrawable"/>
+            <Implements name="ILayoutElement"/>
+            <Category name="Design">
+                <Property name="Comment" type="string" description="Designer comment for this drawable" editorhint="comment"/>
+            </Category>
+        </Class>
+    
+		<Enum name="Scaling">
+			<EnumVal name="Stretch Image" value="1"></EnumVal>
+			<EnumVal name="Stretch Center" value="2"></EnumVal>
+			<EnumVal name="Tile Image" value="3"></EnumVal>
+			<EnumVal name="Tile Center" value="4"></EnumVal>
+		</Enum>
+	
+        <!-- StdDrawable -->
+        <Class name="StdDrawable" classname="StdDrawable" base="Drawable" description="A drawable uses multiple images to render multiple control states" proxy="0xb03c196f">
+            <Implements name="IButtonDrawable"/>
+            <Implements name="IDrawable"/>
+            <Property name="Image"    type="image[8]" description="An image for each state" proxy="0x0f3ac75e">
+				<Index name="Normal"                 value="0"/>
+				<Index name="Disabled"               value="1"/>
+				<Index name="Highlighted"            value="2"/>
+				<Index name="Active"                 value="3"/>
+				<Index name="Checked + Normal"       value="4"/>
+				<Index name="Checked + Disabled"     value="5"/>
+				<Index name="Checked + Highlighted"  value="6"/>
+				<Index name="Checked + Active"       value="7"/>
+            </Property>
+            <Property name="HitMask"  type="hitmask" description="Hit mask for this drawable" allownull="true" proxy="0x0f3c000d"/>
+            <Property name="ScaleType" displayname="Scale Type" type="uint32" enum="Scaling" description="Specifies how the image should be stretched when the window changes size." proxy="0xef3c000a"/>
+            <Property name="ScaleFactor" displayname="Scale Factor" type="pointf" description="Scaling factor for the non-stretched portions of the artwork." proxy="0xef3c000b"/>
+            <Property name="ScaleArea" displayname="Stretch Area" stepsize="0.1" type="Borders" description="Indicates the width of each non-stretched edge, as a proportion of image size (0 to 1)." proxy="0xef3c000c"/>
+            <Property name="Image Outline"  type="Outline Format" proxy="0x039a69e6" description="Outline format " volatile="true"/>
+        </Class>
+        
+        <!-- FrameStyle -->
+        <Struct name="FrameStyle">
+			<Enum name="BorderType">
+				<EnumVal name="Default"         value="0"></EnumVal>
+				<EnumVal name="Hidden"          value="1"></EnumVal>
+				<EnumVal name="Solid"           value="2"></EnumVal>         
+				<EnumVal name="Dotted"          value="3"></EnumVal>         
+				<EnumVal name="Dashed"          value="4"></EnumVal>         
+				<EnumVal name="Inset"           value="5"></EnumVal>         
+				<EnumVal name="Outset"          value="6"></EnumVal>         
+				<EnumVal name="Groove"          value="7"></EnumVal>         
+				<EnumVal name="Ridge"           value="8"></EnumVal>
+				<EnumVal name="Outset+Outline"  value="9"></EnumVal>
+				<EnumVal name="Inset+Outline"   value="10"></EnumVal>
+			</Enum>
+            <Property name="BorderType" type="int32" enum="BorderType" default="Default" description="Border type" proxy="1"/>
+            <Property name="Color"  type="color" description="Border base color" default="#ffffffff" proxy="2"/>
+        </Struct>
+    
+        <!-- FrameDrawable -->
+        <Class name="FrameDrawable" classname="FrameDrawable" base="Drawable" description="A procedural drawable that renders multiple frame styles" proxy="0x030d54b9">
+            <Implements name="IDrawable"/>
+            <Implements name="IButtonDrawable"/>
+            <Property name="Style"    type="FrameStyle[8]" description="Border appearance for each state" proxy="0x030d0001">
+				<Index name="Normal"                 value="0"/>
+				<Index name="Disabled"               value="1"/>
+				<Index name="Highlighted"            value="2"/>
+				<Index name="Active"                 value="3"/>
+				<Index name="Checked + Normal"       value="4"/>
+				<Index name="Checked + Disabled"     value="5"/>
+				<Index name="Checked + Highlighted"  value="6"/>
+				<Index name="Checked + Active"       value="7"/>
+            </Property>
+			<Property name="BorderWidth" type="Borders" proxy="0x030d0000" description="Width of border for each edge"/>
+        </Class>
+        
+        <!-- ButtonDrawableStandard -->
+        <Class name="ButtonDrawableStandard" classname="ButtonDrawableStandard" base="Drawable" description="Standard button drawable" proxy="0xaf3a9e26">
+            <Implements name="IButtonDrawable"/>
+            <Property name="Image"    type="image" description="Standard 4 state image - Disabled | Normal | Highlighted | Depressed" proxy="0x0f3ac75e"/>
+            <Property name="Tileable" type="bool"  description="Specifies whether the image should be edge tiled." proxy="0xef3c000a"/>
+        </Class>
+
+        <!-- ButtonDrawableRadio -->
+        <Class name="ButtonDrawableRadio" classname="ButtonDrawableRadio" base="Drawable" description="Radio or checkbox button drawable" proxy="0x2f3adc5d">
+            <Implements name="IButtonDrawable"/>
+            <Property name="Image"    type="image" description="Radio or checkbox 6 state image - Normal | Highlighted | Depressed | Selected | Selected Highlighted | Selected Depressed" proxy="0x0f3ac75e"/>
+            <Property name="Tileable" type="bool"  description="Specifies whether the image should be edge tiled." proxy="0xef3c000a"/>
+        </Class>
+        
+        <!-- ComboBoxDrawable -->
+        <Class name="ComboBoxDrawable" classname="ComboBoxDrawable" base="Drawable" description="ComboBox drawable" proxy="0x2f552cce">
+            <Implements name="IComboBoxDrawable"/>
+         <Property name="Images" type="image[3]" proxy="0x2f591e33" description="List of images used by this drawable">
+            <Index name="Background"          value="0"/>
+            <Index name="SelectionBackground" value="1"/>
+            <Index name="PullDownButton"      value="2"/>
+         </Property>
+       </Class> 
+        
+        <!-- ScrollbarDrawable -->
+        <Class name="ScrollbarDrawable" classname="ScrollbarDrawable" base="Drawable" description="Standard drawable for a scrollbar" proxy="0x0f034637">
+            <Implements name="IScrollbarDrawable"/>
+         <Property name="Images" type="image[7]" proxy="0xaf42d91c" description="List of images used by this drawable">
+            <Index name="Background"      value="0"/>
+            <Index name="DecrementButton" value="1"/>
+            <Index name="DecrementArea"   value="2"/>
+            <Index name="Thumb"           value="3"/>
+            <Index name="ThumbContainer"  value="4"/>
+            <Index name="IncrementArea"   value="5"/>
+            <Index name="IncrementButton" value="6"/>
+         </Property>     
+        </Class>
+    
+        <!-- SliderDrawable -->
+        <Class name="SliderDrawable" classname="SliderDrawable" base="Drawable" description="Standard drawable for a slider" proxy="0xef034604">
+            <Implements name="ISliderDrawable"/>
+         <Property name="Images" type="image[3]" proxy="0x6f42d5cd" description="List of images used by this drawable">
+            <Index name="Background"      value="0"/>
+            <Index name="Thumb"           value="1"/>
+            <Index name="ThumbContainer"  value="2"/>
+         </Property>              
+        </Class>
+    
+        <!-- SpinnerDrawable -->
+        <Class name="SpinnerDrawable" classname="SpinnerDrawable" base="Drawable" description="Standard drawable for a spinner" proxy="0xef063c4a">
+            <Implements name="ISpinnerDrawable"/>
+         <Property name="Images" type="image[3]" proxy="0x4f4134a8" description="List of images used by this drawable">
+            <Index name="Background"      value="0"/>
+            <Index name="IncrementButton" value="1"/>
+            <Index name="DecrementButton" value="2"/>
+         </Property>              
+        </Class>
+    
+        <!-- DialogDrawable -->
+        <Class name="DialogDrawable" classname="DialogDrawable" base="Drawable" description="Standard drawable for a dialog title bar" proxy="0x6f0c7aea">
+            <Implements name="IDialogDrawable"/>
+			<Property name="BackgroundFillColor" type="color" proxy="0x2f42e1a2" description="Background fill color (supersedes BackgroundColor)"></Property>
+			<Enum name="BackTiling">
+				<EnumVal name="Stretch"       value="0"></EnumVal>
+				<EnumVal name="Tile"          value="1"></EnumVal>         
+				<EnumVal name="CenterStretch" value="2"></EnumVal>
+				<EnumVal name="CenterTile"    value="3"></EnumVal>
+			</Enum>
+			<Property name="BackImageBlitMode" type="uint32" description="Stretch - stretches background image, Tile - tiles image, StretchCenter - Stretches center of image and tiles edges, TileCenter - Tiles center and edges" enum="BackTiling" proxy="0x2f42e1a3"/>
+			
+			<Property name="Images" type="image[10]" proxy="0x2f42e1a1" description="List of images used by this drawable">
+				<Index name="Background"         value="0"/>
+				<Index name="TitleBar"           value="1"/>
+				<Index name="BorderLeft"         value="2"/>
+				<Index name="BorderRight"        value="3"/>
+				<Index name="BorderTop"          value="4"/>
+				<Index name="BorderBottom"       value="5"/>
+				<Index name="BorderTopLeft"      value="6"/>
+				<Index name="BorderTopRight"     value="7"/>
+				<Index name="BorderBottomLeft"   value="8"/>
+				<Index name="BorderBottomRight"  value="9"/>
+			</Property>     
+        </Class>
+        
+        <!-- ImageDrawable -->
+	    <Class name="ImageDrawable" classname="ImageDrawable" base="Drawable" description="Image drawable" proxy="0xcf3c4eae">
+            <Implements name="IDrawable"/>
+            <Implements name="ILayoutElement"/>
+	         <Enum name="ImageTiling">
+				<EnumVal name="None"     value="0"></EnumVal>
+				<EnumVal name="Standard" value="1"></EnumVal>         
+				<EnumVal name="Edge"     value="2"></EnumVal>
+			</Enum>
+			<Property name="Image"                 type="image"   description="Image to be shown" proxy="0x4f3c4a26"/>
+            <Property name="Image Outline"  type="Outline Format" proxy="0x039a69e6" description="Text outline format " volatile="true"/>
+			<Property name="AlignmentHorizontal"   type="uint32"  description="Horizontal alignment of the image." enum="Alignment" proxy="0x4f3c4a29"/>
+			<Property name="AlignmentVertical"     type="uint32"  description="Vertical alignment of the image." enum="AlignmentV" proxy="0x4f3c4a28"/>
+			<Property name="ImageDrawableFlags"    type="flagset" proxy="0x4f3c4a27"/>
+            <Property name="FixedWidth"            type="flag"    description="Preserves the original width of the image" mask="0x00000001" flagset="ImageDrawableFlags" />
+            <Property name="FixedHeight"           type="flag"    description="Preserves the original height of the image" mask="0x00000002" flagset="ImageDrawableFlags" />
+            <Property name="Tiling"                type="uint32"  description="Tiling method" enum="ImageTiling" proxy="0x4f3c4a2a"/>
+            <Property name="Scale"                 type="float"   description="Scale of the image" proxy="0x4f3c4a2b"/>
+        </Class>
+    
+        <!-- Drawable (abstract base) -->
+	    <Class name="TreeExpanderDrawable" classname="TreeExpanderDrawable" base="Drawable" description="TreeView expander button drawable" proxy="0xf02c7c44">
+            <Implements name="IDrawable"/>
+            <Implements name="ILayoutElement"/>
+        </Class>
+    
+    </Category>
+    
+    <!-- Cursor classes -->
+    <Category name="Cursors">
+        <!-- ImageCursor -->
+	    <Struct name="ImageCursor" icon="effect">
+			<Property name="CursorID" type="uint32" format="hex" proxy="1"/>
+			<Property name="Offset" type="point" description="Cursor origin" proxy="2"/>
+			<Property name="Image" type="image" description="Cursor Image" proxy="3"/>
+        </Struct>
+    </Category>
+    
+    <!-- Classes that we don't want to create standalone instances of -->
+    <Category name="Aux" display="none">
+    
+        <!-- TreeNode -->
+	    <Class name="TreeNode" classname="TreeNode" description="TreeView node" proxy="utfwin:0x702c5143">
+            <Implements name="ITreeNode"/>
+			<Property name="Caption" type="string" description="Node caption" editorhint="caption" proxy="0xf0310005"/>
+			<Property name="ID" type="uint32" format="hex" description="Node ID" proxy="0xf0310006"/>
+			<Property name="Icon" type="IDrawable" description="Icon for this node" proxy="0xf0310004"/>
+			<Property name="Children" type="ITreeNode[]" description="Child nodes" proxy="0xf0310001"/>
+            <Property name="TextStyle" type="textstyle" description="Text Style for this node" proxy="0xf0310003"/>
+        </Class>
+        
+        <Struct name="SplinePoint">
+			<Property name="X" type="float"/>
+			<Property name="Y" type="float" default="0"/>
+			<Property name="TensionIn" type="float" default="0"/>
+			<Property name="TangentIn" type="float" default="0"/>
+			<Property name="TensionOut" type="float" default="0"/>
+			<Property name="TangentOut" type="float" default="0"/>
+        </Struct>
+        
+    </Category>
+    
+    <Class name="Spline" designer="TestDesigner">
+		<Property name="ControlPoints" type="SplinePoint[]"/>
+    </Class>
+        
+    <!-- Classes that are used to represent whole documents -->
+    <Category name="Documents">
+    
+        <!-- Layout document -->
+	    <Class name="Layout" description="A user interface layout" designer="LayoutDesigner">
+			<Property name="Contents" type="ILayoutElement[]" editorhint="treeview" proxy="contents" browsable="false"/>
+        </Class>
+
+        <!-- ImageCursorSet document -->
+	    <Class name="ImageCursorSet" classname="ImageCursorProvider" description="A collection of bitmapped cursors" designer="TestDesigner" proxy="0x02cde37e">
+			<Property name="Cursors" type="ImageCursor[]" proxy="0x02cd0000"/>
+        </Class>
+
+    </Category>
+    
+    <!-- Document types -->
+    
+    <!-- Layout document -->
+    <DocumentType name="Layout" extensions="layout" class="Layout" default="true"/>
+    
+    <!-- ImageCursorSet document -->
+    <DocumentType name="ImageCursor Set" extensions="icur" class="ImageCursorSet"/>
+    
+	
+	<!-- These are the missing ones for SporeModder's SPUI Editor -->
+	
+	<!-- WatchWindow -->
+	<Class name="WatchWindow" classname="WatchWindow" base="Window" proxy="0x6FB339C9"> 
+	</Class>
+	
+	<!-- WatchWindow -->
+	<Class name="WatchGraph" classname="WatchGraph" base="Window" proxy="0x0295571A"> 
+	</Class>
+	
+	<!-- ConsoleWindow -->
+	<Class name="ConsoleWindow" classname="ConsoleWindow" proxy="0xEFBC56D8"> 
+	</Class>
+	
+	<!-- WinXHTML TODO!! -->
+	<Class name="WinXHTML" classname="WinXHTML" base="WindowBase" proxy="0x04D04553"> 
+		<Category name="Scrolling">
+			<Enum name="ScrollbarEnDis">
+				<EnumVal name="Never"     value="0"></EnumVal>
+				<EnumVal name="As Needed" value="1"></EnumVal>
+				<EnumVal name="Always"    value="2"></EnumVal>
+			</Enum>
+			<Property name="HScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x0ff11739"/>
+			<Property name="VScrollbar Enabled" type="uint32" enum="ScrollbarEnDis" proxy="0x0ff1173a"/>
+			
+			<Property name="HScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x0ff1173b" volatile="true"/>
+			<Property name="VScrollbarDrawable" type="IScrollbarDrawable" default="ScrollbarDrawable" proxy="0x0ff1173c" volatile="true"/>
+		</Category>
+	</Class>
+	
+	<!-- cSPUILayoutZoom -->
+	<!-- TODO This one is commented in Spore, check if it really has any property -->
+	<Class name="cSPUILayoutZoom" classname="cSPUILayoutZoom" base="LayoutStyle" proxy="0x04EA92A3"> 
+	</Class>
+	
+	<!-- cSPUITextWin -->
+	<Class name="cSPUITextWin" classname="cSPUITextWin" base="Text" proxy="0x039A721C"> 
+	</Class>
+	
+	<!-- cSPUIFrameSequencer -->
+	<Class name="cSPUIFrameSequencer" classname="cSPUIFrameSequencer" proxy="0x0106F61E"> 
+	</Class>
+</Project>

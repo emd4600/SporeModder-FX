@@ -1,5 +1,13 @@
 package sporemodder.view.editors.spui;
 
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+
 import emord.javafx.ribbon.Ribbon;
 import emord.javafx.ribbon.RibbonButton;
 import emord.javafx.ribbon.RibbonGallery;
@@ -7,11 +15,17 @@ import emord.javafx.ribbon.RibbonGalleryItem;
 import emord.javafx.ribbon.RibbonGroup;
 import emord.javafx.ribbon.RibbonTab;
 import emord.javafx.ribbon.RibbonGallery.GalleryItemDisplay;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.file.spui.uidesigner.DesignerClass;
 import sporemodder.view.editors.SpuiEditor;
 import sporemodder.view.ribbons.RibbonTabController;
+import sporemodder.extras.spuieditor.SPUIEditor;
+import sporemodder.files.FileStreamAccessor;
+import sporemodder.files.formats.spui.InvalidBlockException;
+import sporemodder.files.formats.spui.SPUIMain;
+import sporemodder.util.ProjectItem;
 
 public class SpuiRibbonTab extends RibbonTabController {
 	
@@ -100,6 +114,15 @@ public class SpuiRibbonTab extends RibbonTabController {
 			}, "Cannot import partial SPUI.");
 		});
 		editorGroup.getNodes().add(importButton);
+		
+		/*RibbonButton yeOldSpuiEditorButton = new RibbonButton("Activate time machine", UIManager.get().loadIcon("spui-duplicate.png", 0, 48, true));
+		yeOldSpuiEditorButton.setOnAction(event -> {
+			SpuiEditor smfxEditor = SpuiEditor.getActiveSpuiEditor();
+			if (smfxEditor != null) {
+				smfxEditor.setUseLegacySpuiEditor(!smfxEditor.getUseLegacySpuiEditor()); //.getLegacySpuiEditorNode().setVisible(true);
+			}
+		});
+		editorGroup.getNodes().add(yeOldSpuiEditorButton);*/
 
 		tab.getGroups().addAll(windowsGroup, winprocsGroup, editorGroup);
 	}

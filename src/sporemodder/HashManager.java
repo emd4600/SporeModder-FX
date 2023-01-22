@@ -58,6 +58,8 @@ public class HashManager extends AbstractManager {
 	/** The registry used to look for simulator attribute IDs; it is read from reg_simulator.txt */
 	private final NameRegistry simulatorRegistry = new NameRegistry(this, "Simulator Attributes", "reg_simulator.txt");
 	
+	private final NameRegistry spuiRegistry = new NameRegistry(this, "SPUI Elements - what's old is new", "reg_spui.txt");
+	
 	/** The registry used to look for instance and group IDs; it is read from reg_file.txt */
 	private NameRegistry fileRegistry = originalFileRegistry;
 	/** The registry used to look for type IDs; it is read from reg_type.txt */
@@ -143,6 +145,10 @@ public class HashManager extends AbstractManager {
 
 	public NameRegistry getProjectRegistry() {
 		return projectRegistry;
+	}
+
+	public NameRegistry getSpuiRegistry() {
+		return spuiRegistry;
 	}
 
 	public boolean mustUpdateProjectRegistry() {
@@ -686,6 +692,59 @@ public class HashManager extends AbstractManager {
 			return str;
 		} else {
 			return hexToStringUC(hash);
+		}
+	}
+	
+	public String getSpuiName(int hash) {
+		String str = getSpuiNameOptional(hash);
+		if (str != null) {
+			return str;
+		} else {
+			return hexToStringUC(hash);
+		}
+	}
+	
+	private String getSpuiNameOptional(int hash) {
+		String str = spuiRegistry.getName(hash);
+		if (str != null) {
+			return str;
+		} else {
+			return projectRegistry.getName(hash);
+		}
+	}
+	
+	public int getSpuiHash(String name) {
+		if (name == null) {
+			return -1;
+		}
+		if (name.startsWith("#")) {
+			return Integer.parseUnsignedInt(name.substring(1), 16);
+		} 
+		else if (name.startsWith("0x")) {
+			return Integer.parseUnsignedInt(name.substring(2), 16);
+		} 
+		else {
+			if (!name.endsWith("~")) {
+				int hash = fnvHash(name);
+				if (updateProjectRegistry) {
+					projectRegistry.add(name, hash);
+				}
+				return hash;
+			} 
+			else {
+				String lc = name.toLowerCase();
+				Integer i = spuiRegistry.getHash(lc);
+				if (i == null) {
+					i = projectRegistry.getHash(lc);
+				}
+				if (i == null) {
+					throw new IllegalArgumentException("Unable to find " + name + " hash.  It does not exist in the reg_file registry.");
+				}
+				if (updateProjectRegistry) {
+					projectRegistry.add(name, i);
+				}
+				return i;
+			}
 		}
 	}
 	

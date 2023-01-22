@@ -40,10 +40,16 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 	protected ProjectItem item;
 	
 	/** If any unsaved changes have been done, this value is false. */
-	private final ReadOnlyBooleanWrapper isSaved = new ReadOnlyBooleanWrapper(this, "isSaved", true);
+	protected final ReadOnlyBooleanWrapper isSaved = createIsSavedWrapper();
+	protected ReadOnlyBooleanWrapper createIsSavedWrapper() {
+		return new ReadOnlyBooleanWrapper(this, "isSaved", true);
+	}
 	
 	/** For threads that depend on this text editor, whether it is still being used by the user or not. */
-	private final ReadOnlyBooleanWrapper isActive = new ReadOnlyBooleanWrapper(this, "isActive", true);
+	protected final ReadOnlyBooleanWrapper isActive = createIsActiveWrapper();
+	protected ReadOnlyBooleanWrapper createIsActiveWrapper() {
+		return new ReadOnlyBooleanWrapper(this, "isActive", true);
+	}
 	
 	/** If true, the file will be saved when setActive(null) is called. */
 	private boolean isAutosaveEnabled = true;
@@ -52,6 +58,10 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 	private boolean mustRestoreContents;
 	
 	public AbstractEditableEditor() {
+		initIsSavedListener();
+		initIsActiveListener();
+	}
+	protected void initIsSavedListener() {
 		isSavedProperty().addListener((obs, oldValue, isSaved) -> {
 			if (item != null) {
 				if (!isSaved) {
@@ -62,7 +72,8 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 				}
 			}
 		});
-		
+	}
+	protected void initIsActiveListener() {
 		isActiveProperty().addListener((obs, oldValue, isActive) -> {
 			if (item != null) {
 				if (!isActive && !isSaved()) {
@@ -81,7 +92,7 @@ public abstract class AbstractEditableEditor extends Control implements ItemEdit
 					}
 				}
 			}
-			else if (!isActive && isAutosaveEnabled && EditorManager.get().isAutosaveEnabled()) {
+			else if (!isActive && isAutosaveEnabled() && EditorManager.get().isAutosaveEnabled()) {
 				// Using save() will include the file, which we don't want
 				saveInternal();
 			}

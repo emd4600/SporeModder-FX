@@ -25,7 +25,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.metal.DefaultMetalTheme;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.MetalTheme;
+//import javax.swing.plaf.multi.MultiLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+//import javax.swing.plaf.synth.SynthLookAndFeel;
+/*import org.pushingpixels.substance.api.SubstanceCortex;
+import org.pushingpixels.substance.api.SubstanceSkin;
+import org.pushingpixels.substance.api.skin.AutumnSkin;
+import org.pushingpixels.substance.api.skin.BusinessBlackSteelSkin;
+import org.pushingpixels.substance.api.skin.BusinessBlueSteelSkin;
+import org.pushingpixels.substance.api.skin.BusinessSkin;
+import org.pushingpixels.substance.api.skin.CremeCoffeeSkin;
+import org.pushingpixels.substance.api.skin.CremeSkin;
+import org.pushingpixels.substance.api.skin.GraphiteGlassSkin;
+import org.pushingpixels.substance.api.skin.GraphiteSkin;
+import org.pushingpixels.substance.api.skin.MagellanSkin;
+import org.pushingpixels.substance.api.skin.MistAquaSkin;
+import org.pushingpixels.substance.api.skin.ModerateSkin;
+import org.pushingpixels.substance.api.skin.NebulaBrickWallSkin;
+import org.pushingpixels.substance.api.skin.NebulaSkin;
+import org.pushingpixels.substance.api.skin.OfficeSilver2007Skin;
+import org.pushingpixels.substance.api.skin.RavenSkin;
+import org.pushingpixels.substance.api.skin.SaharaSkin;*/
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -33,6 +63,7 @@ import javafx.stage.Stage;
 import sporemodder.MessageManager.MessageType;
 import sporemodder.file.shaders.FXCompiler;
 import sporemodder.file.shaders.ShaderData;
+import sporemodder.userinterface.smfxlook.*;
 
 /**
  * The main class of the program.
@@ -213,6 +244,7 @@ public class MainApp extends Application {
 		pluginManager.initialize(settings);
 		
 		messageManager.postMessage(MessageType.OnSettingsLoad, settings);
+		prepareSwingTheme();
 	}
 	
 	public void saveSettings() {
@@ -289,7 +321,64 @@ public class MainApp extends Application {
 
 	}
 	
+	
+	/*
+	//TODO: Hopefully don't lock Swing GUI elements to a binary dark/light choice
+	
+	 * probably a stretch, but hey...I can dream
+	*/
+	static void prepareSwingTheme() {
+		try {
+			LookAndFeel laf = createSwingTheme();
+			javax.swing.UIManager.setLookAndFeel(laf);
+			/*if (laf instanceof MetalLookAndFeel) {
+				MetalLookAndFeel.setCurrentTheme(theme);
+			}*/
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	static LookAndFeel createSwingTheme() {
+		LookAndFeel laf = new MetalLookAndFeel();
+		MetalTheme theme = isDarkTheme()
+			? createDarkSwingTheme()
+			: createLightSwingTheme()
+		;
+		MetalLookAndFeel.setCurrentTheme(theme);
+		return laf;
+	}
+	
+	static boolean isDarkTheme() {
+		//TODO: Don't rely on dumb name guessing games
+		String currentStyle = UIManager.get().getCurrentStyle().toLowerCase();
+		return currentStyle.contains("dark") || currentStyle.contains("darcula");
+	}
+	
+	
+	static MetalTheme createLightSwingTheme() {
+		return new DefaultMetalTheme();
+	}
+	static MetalTheme createDarkSwingTheme() {
+		if (true) {
+			//TODO: Don't use light theme as dark theme
+			return createLightSwingTheme();
+			}
+		else {
+			return new 
+					//PatheticExcuseForADarkTheme
+					//DarkMetalTheme
+					DarkMetalTheme2
+			();
+		}
+	}
+	
+	
 	public static void main(String[] args) {
 		launch(args);
+	}
+	
+	//TODO: Stub for a function that existed in original SporeModder...but what did it do?
+	public static List<String> getSearchStrings(String what) {
+		return new ArrayList<String>();
 	}
 }

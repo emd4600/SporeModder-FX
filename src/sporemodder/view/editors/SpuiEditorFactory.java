@@ -23,6 +23,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import sporemodder.UIManager;
 import sporemodder.util.ProjectItem;
+import sporemodder.view.editors.spui.OldIsNewSpuiEditor;
+import sporemodder.view.editors.spui.SmSpuiEditor;
 
 public class SpuiEditorFactory implements EditorFactory {
 
@@ -30,7 +32,13 @@ public class SpuiEditorFactory implements EditorFactory {
 
 	@Override
 	public ItemEditor createInstance() {
-		return new SpuiEditor();
+		if (UIManager.get().useSmSpuiEditor()) {
+			System.out.println("useSmSpuiEditor");
+			return new SmSpuiEditor();
+		} else {
+			return new SpuiEditor();
+		}
+		//return new OldIsNewSpuiEditor();
 	}
 
 	@Override

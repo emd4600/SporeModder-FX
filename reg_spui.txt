@@ -1,0 +1,122 @@
+#group SPUI_STRUCT
+cSPUILaunchScreenWinProc	0x0279BF9E
+cSPUIAnimatedIconWin	0x0106F14B
+cSPUIProgressBarWin	0x010EDE03
+cSPUIProgressBarGradientWin	0x015CBBD6
+cSPUIPopupMenuItemWin	0x04C04B4E
+cSPUIPopupMenuWin	0x04C04B4D
+cSPUIRotateEffect	0x02086743
+cSPUISwarmEffect	0x0238EA36
+cSPUIMaterialEffect	0x02C200CE
+cSPUILayerIdWinProc	0x02BCFC18
+cSPUIMaterialWinProc	0x02BCFC0E
+cSPUITooltipWinProc	0x0372E920
+cSPUITextWin	0x039A721C
+cSPUIStdDrawableImageInfo	0x0540037E
+cSPUIStdDrawable	0x053EB32A
+cSPUIVariableWidthDrawable	0x0109C69D
+cSPUILayoutZoom	0x04EA92A3
+cSPUIBehaviorEventBase	0x024BA741
+cSPUIBehaviorWinEventBase	0x0255E38E
+cSPUIBehaviorWinBoolStateEvent	0x025611ED
+cSPUIBehaviorPredicateWinState	0x033C9C5B
+cSPUIBehaviorActionWinInterpolator	0x0254CB67
+cSPUIBehaviorActionWinState	0x033F7AD6
+cSPUIBehaviorTimeFunctionRamp	0x0253ACD2
+cSPUIBehaviorTimeFunctionSmoothRamp	0x0253ADD9
+cSPUIBehaviorTimeFunctionDampedPeriodic	0x0269A661
+cSPUIBehaviorWinInterpolatorShadeColor	0x0254AA82
+cSPUIBehaviorWinInterpolatorScale	0x0269EFE5
+cSPUIFrameSequencer	0x0106F61E
+ButtonDrawableStandard	0xAF3A9E26
+ButtonDrawableRadio	0x2F3ADC5D
+WinButton	0xEEEFE2C3
+CascadeEffect	0xF90A5AE
+ComboBoxDrawable	0x2F552CCE
+WinComboBox	0xAF552C4B
+ConsoleWindow	0xEFBC56D8
+DialogDrawable	0x6F0C7AEA
+WinDialog	0x0F0B8B73
+ExplicitNavigator	0x4F8772AA
+FadeEffect	0x6F2B6D2C
+FrameDrawable	0x030D54B9
+GlideEffect	0xCF2B2AD4
+WinGrid	0x6F1F1AA6
+ImageDrawable	0xCF3C4EAE
+ImageCursorProvider	0x02CDE37E
+InflateEffect	0x4F3DAF02
+ProportionalLayout	0xAF3DF411
+SimpleLayout	0x2F418D72
+WinMessageBox	0x6F38282B
+ModulateEffect	0x2F8BBB4D
+PerspectiveEffect	0xCF2B2AD6
+RelativeNavigator	0xAF8772AF
+RotateEffect	0xCF2B2AD5
+ScrollbarDrawable	0x0F034637
+WinScrollbar	0x8EF37D6D
+SliderDrawable	0xEF034604
+WinSlider	0x2F00BDB3
+SpinnerDrawable	0xEF063C4A
+WinSpinner	0x4F063BB3
+StdDrawable	0xB03C196F
+WinText	0x6F15F51B
+WinTextEdit	0x6F42B4F0
+TreeNode	0x702C5143
+TreeExpanderDrawable	0xF02C7C44
+WinTreeView	0xF02AFF4B
+WatchGraph	0x0295571A
+WatchWindow	0x6FB339C9
+WinXHTML	0x04D04553
+// not sure about these ones
+Window	0x4EC1B8D8
+Image	0x01BE6B15
+#endgroup
+
+#group SPUI_CHANNEL
+///////////////////
+// CHANNEL NAMES //
+///////////////////
+
+// if the block type is Image
+
+#if SPUI_BLOCK_STRUCT == 0x01BE6B15
+resource	0x01BE0001
+uvCoords	0x01BE0002
+dimensions	0x01BE0003
+#end
+
+// WinText
+#if SPUI_BLOCK_STRUCT == 0x6F15F51B
+fontColor	0x6F43FCCD
+#end
+
+tint	0xEEC1B004
+bounds	0xEEC1B005
+additiveTint	0xEEC1B006
+drawable	0xEEC1B007
+text	0xEEC1B00A
+style	0xEEC1B00E
+
+// ImageDrawable
+#if SPUI_BLOCK_STRUCT == 0xCF3C4EAE
+image	0x4F3C4A26
+#end
+
+// Window
+#if SPUI_BLOCK_STRUCT == 0x4EC1B8D8
+// this also has the InflateEffect, etc
+layout	0xEEC1B00C
+children	0xEEC1B00B
+#end
+
+// ScrollbarDrawable
+#if SPUI_BLOCK_STRUCT == 0x0F034637
+images	0xAF42D91C
+#end
+
+// StdDrawable
+#if SPUI_BLOCK_STRUCT == 0xB03C196F
+images	0x0F3AC75E
+#end
+
+#endgroup

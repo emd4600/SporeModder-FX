@@ -91,12 +91,14 @@ public class UIManager extends AbstractManager {
 	private static final String PROPERTY_hasSelectedStyle = "hasSelectedStyle";
 	private static final String PROPERTY_selectedStyle = "selectedStyle";
 	private static final String PROPERTY_isFirstTime = "isFirstTime";
+	private static final String PROPERTY_useSmSpuiEditor = "useSporeModderSpuiEditor";
 	
 	/** The current style used in the program. */
 	private String currentStyle = "Default";
 	/** The style that will be saved in the settings. This avoids weird changes while the program is open, if the user changes the style. */
 	private String selectedStyle = currentStyle;
 	private boolean hasSelectedStyle = false;
+	private boolean useSmSpuiEditor = false;
 	
 	private boolean isShowingOverlay;
 	
@@ -144,6 +146,11 @@ public class UIManager extends AbstractManager {
 		isFirstTime = Boolean.parseBoolean(properties.getProperty(PROPERTY_isFirstTime, "true"));
 		hasSelectedStyle = Boolean.parseBoolean(properties.getProperty(PROPERTY_hasSelectedStyle, "false"));
 		
+		String useSmSpuiEditorRaw = properties.getProperty(PROPERTY_useSmSpuiEditor, null);
+		if (useSmSpuiEditorRaw != null) {
+			useSmSpuiEditor = Boolean.parseBoolean(useSmSpuiEditorRaw);
+		}
+		
 		// Load the stylesheets from the plugins
 		for (SporeModderPlugin plugin : PluginManager.get().getPlugins()) {
 			
@@ -167,6 +174,7 @@ public class UIManager extends AbstractManager {
 		properties.put(PROPERTY_selectedStyle, selectedStyle);
 		properties.put(PROPERTY_isFirstTime, Boolean.toString(isFirstTime));
 		properties.put(PROPERTY_hasSelectedStyle, Boolean.toString(hasSelectedStyle));
+		properties.put(PROPERTY_useSmSpuiEditor, Boolean.toString(useSmSpuiEditor));
 	}
 	
 	
@@ -774,5 +782,13 @@ public class UIManager extends AbstractManager {
 	 */
 	public void setFirstTime(boolean isFirstTime) {
 		this.isFirstTime = isFirstTime;
+	}
+	
+	public boolean useSmSpuiEditor() {
+		return useSmSpuiEditor;
+	}
+	
+	public void setUseSmSpuiEditor(boolean useSmSpuiEditor) {
+		this.useSmSpuiEditor = useSmSpuiEditor;
 	}
 }

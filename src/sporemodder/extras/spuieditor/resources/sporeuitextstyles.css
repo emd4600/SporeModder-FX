@@ -1,0 +1,866 @@
+///////////////////////////////////////////////////////////////////////////////////////
+// Supported style parameters:
+///////////////////////////////////////////////////////////////////////////////////////
+
+//
+// font-size                :Npx or Npt. (font-size : 12px) (font-size : 12pt)
+// font-style               :normal,italic,oblique
+// font-weight              :normal,bold
+// font-variant             :normal,small-caps
+// font-pitch               :variable,fixed
+// font-smooth              :auto,never,always
+// font-stretch             :N
+// font-emphasize-style     :none,accent,dot,circle,disc
+// font-emphasize-position  :before,after
+// text-decoration          :underline,overline,line-through
+// line-spacing         	:N
+// letter-spacing       	:(letter-spacing: 12px) (letter-spacing: -0.5px)
+// word-spacing         	:N
+// text-align               :left,center,right,justify
+// text-valign              :top,middle,bottom
+// text-justify             :inter-word,inter-ideograph,distribute,newspaper,inter-cluster,kashida
+// text-overflow-mode       :none,clip,ellipsis,ellipsis-word
+// color                    :#RGB or #RGBA. (color : #cc2255) (color : #cc2255ff)
+// background-color         :#RGB or #RGBA. (color : #cc2255) (color : #cc2255ff)
+// wrap-option              :wrap (DO NOT USE THIS ONE, use emergency instead),no-wrap,soft-wrap,hard-wrap,emergency
+// digit-substitution       :none,context,western,national,traditional
+// password-mode            :none,password
+// @font "font file name.ttf" ;
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Fonts used in the styles that follow. Styles refer to font family name and NOT to
+// font file name. In order to find out the family name from the font file you need
+// to open the font file with a standard Windows font viewer and the name at the top is the
+// font family name (aka font face name).
+//////////////////////////////////////////////////////////////////////////////////////
+
+@font "PalatinoSansEAbold.ttf" ;
+@font "TrebuchetEAbold.ttf" ;
+@font "MaxisPassword.ttf" ; 	// Used in passwords
+@font "SporeCurrencyEA.ttf" ;   // Used to render monetary symbols (food, DNA, etc)
+@font "ArialUnicodeEA.ttf" ; 	// Used to render characters missing from locale specific fonts
+
+@font "cour.ttf" ; 				// NOT FOR SHIPPING !!! Used in debug/cheat console only.
+
+///////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+// Text styles used in Spore.
+///////////////////////////////////////////////////////////////////////////////////////
+
+// Default style settings
+DefaultStyle(0x00aebb69){
+   font-family:"Trebuchet EA";
+   font-smooth:always;
+   font-weight:bold;
+   font-size:10px;
+   text-valign:middle;
+}
+
+DefaultStyleCentered(0x00aebb70) : DefaultStyle{
+   text-align:center;
+   text-valign:middle;
+}
+
+WindowDefaultStyle(0x00000001) : DefaultStyle{
+}
+
+MessageText(0x0f170dc1) : DefaultStyle{
+}
+
+DialogTitle(0xacbf4564) : DefaultStyleCentered{
+	font-size:14px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+CommButtonCentered(0x0670e46c) : DialogTitle{
+}
+
+CommButtonLeft(0x0670e431) : CommButtonCentered{
+    text-align:left
+}
+
+CommButtonCostRight(0x0670e6af) : CommButtonCentered{
+    font-size:10px;
+    text-align:right;
+}    
+
+BodyText(0xaf14b67f) : DefaultStyleCentered{
+}
+
+ButtonCaption(0xaf14b67e) : DefaultStyleCentered{
+}
+
+ButtonCaptionDefaults(0x06b16a69) : DefaultStyleCentered{
+}
+
+ButtonCaptionSmall(0x05a877f1) : DefaultStyleCentered{
+	font-weight:normal;
+}
+
+ConsoleStyle(0xefe945b2) : DefaultStyle{
+	font-weight:normal;
+	font-smooth:never;
+	font-size:9px;
+	font-family:"Courier New";
+	text-overflow-mode:ellipsis;
+}
+
+ConsoleStyleShipping(0x067caf24) : ConsoleStyle{
+	font-family:"Trebuchet EA";
+}
+
+EventLog(0xaf14b676) : DefaultStyleCentered{
+	font-family:"Palatino Sans EA";
+}
+
+PropertyEditorValues(0x015a4361) : DefaultStyle{
+	text-valign:middle;
+}
+
+CargoCountLabels(0x03713a78) : DefaultStyleCentered{
+	font-size:9px;
+}
+
+CreatureEditorBudget(0x70527a3b) : DefaultStyleCentered{
+	font-size:16px;
+}
+
+EditorSubCategoryCaption(0x535e94ca) : DefaultStyleCentered{
+   font-weight:normal;
+}
+
+EditorBudgetLeft(0x323b4096) : DefaultStyle{
+	font-size:14px;
+	text-valign:middle;
+}
+
+EditorNameText(0x0e0ad07e) : DefaultStyleCentered{
+	font-size:12px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+EditorPageCountText(0x934afd8a) : DefaultStyleCentered{
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+EditorDescriptionText(0xde808a41) : DefaultStyle{
+	font-size:11px;
+	text-valign:middle;
+}
+
+HintText(0x50d7da7f) : DefaultStyleCentered{
+	font-size:11px;
+	text-valign:middle;
+}
+
+HealthBarText(0x727ee727) : DefaultStyleCentered{
+	font-size:8px;
+}
+
+EditorRolloverTitleText(0xde808a42) : DefaultStyle{
+	font-size:14px;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+SwarmCurrencyText(0x064e5ab5) : DefaultStyle{
+	font-size:16px;
+	font-family:"SporeCurrencyEA";
+	text-valign:middle;
+	text-align:center;
+}
+
+DNARewardText(0xb4fe6308) : DefaultStyle{
+	font-size:14px;
+	text-valign:middle;
+}
+
+DefaultRight(0x73da7e17) : DefaultStyleCentered{
+	text-align:right;
+}
+
+DefaultCentered(0x015a5d0f) : DefaultStyleCentered{
+}
+
+RolloverTitleText(0x015a9d0f) : DefaultStyleCentered{
+	font-size:8px;
+}
+
+RolloverText(0x015a6d0f) : DefaultStyle{
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+RolloverTextTribeCitizen(0x06a551ee) : DefaultStyle{
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+RolloverIconText(0x0685d1b8) : DefaultStyle{
+	font-size:16px;
+	wrap-option:no-wrap;
+	text-valign:middle;
+}
+
+RolloverGridText(0x016a5d10) : DefaultStyle{
+	font-weight:normal;
+	font-size:11px;
+	text-valign:middle;
+}
+
+RolloverDescriptionText(0x064b9d5f) : DefaultStyle{
+	font-size:8px;
+	text-valign:middle;
+}
+
+RolloverPlannerDescriptionText(0x919e452d) : DefaultStyle{
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+SpaceRolloverTitle(0x0488e225) : DefaultStyle{
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+SpaceRolloverText(0x0488e222) : DefaultStyle{
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+SpaceBadgeName(0x054293be) : DefaultStyleCentered{
+	font-size:14px;
+	font-family:"Palatino Sans EA";
+}
+
+SpaceMoney(0x04a096aa) : DefaultStyle{
+	text-valign:middle;
+}
+
+SpacePlanetName(0x04a0ad69) : DefaultStyleCentered{
+	text-overflow-mode:ellipsis;
+}
+
+SpaceSpeciesName(0x04a0ad6f) : DefaultStyleCentered{
+	text-overflow-mode:ellipsis;
+}
+
+SpaceTooltip(0x04a0ad74) : DefaultStyle{
+	text-valign:middle;
+}
+
+SpaceTooltipDescription(0x04f60c46) : DefaultStyle{
+	font-size:8px;
+	text-valign:middle;
+}
+
+SpaceItemCount(0x04a0ad7a) : DefaultStyle{
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+SpaceKeyBinding(0x06283de8) : DefaultStyleCentered{
+    font-weight:normal;
+    font-size:6px;
+}
+
+GuiData(0x015a5d10) : DefaultStyle{
+	font-weight:normal;
+	font-size:14px;
+	text-valign:middle;
+}
+
+MissionCardTitle(0x1e6906b7) : DefaultStyle{
+	font-weight:normal;
+	font-size:12px;
+	text-valign:middle;
+	text-overflow-mode:ellipsis;
+}
+
+
+OfflineMessage(0x05b7fa34) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:18px;
+}
+
+AssetBrowserFeedCategory(0x93c84c6b) : DefaultStyle{
+	font-weight:normal;
+	font-size:12px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+cityPlannerNationName(0xbdb7db3c) : DefaultStyle{
+	font-weight:normal;
+	font-size:12px;
+	text-overflow-mode:none;
+	text-valign:middle;
+}
+
+
+AssetBrowserTitle(0x05d65b19) : DefaultStyle{
+	font-family:"Palatino Sans EA";
+	font-weight:normal;
+	font-size:14px;
+	text-overflow-mode:ellipsis;
+	text-valign:top;
+}
+AssetBrowserUserName(0xd2affb81) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-valign:top;
+}
+
+CategoryHeaderGeneric(0x05a87dc6) : DefaultStyleCentered{
+	font-weight:normal;
+}
+
+OptionsHeader(0x05b01163) : DefaultStyle{
+	font-weight:normal;
+	font-size:18px;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+OptionsSubHeader(0x05b00f05) : DefaultStyle{
+	font-weight:normal;
+	font-size:14px;
+	text-valign:middle;
+}
+
+OptionsButtonText(0x05b0109c) : DefaultStyle{
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+OptionsTextSmall(0x05b055d7) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-valign:middle;
+}
+
+OptionsTextSmallTopAlign(0x06aac697) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-valign:top;
+}
+
+OptionsTextSmallCentered(0x05b06de4) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+}
+
+OptionsTextCategoryCentered(0x05b056ce) : DefaultStyleCentered{
+	font-weight:normal;
+}
+
+OptionsTextCategory(0x05b0573a) : DefaultStyle{
+	font-weight:normal;
+}
+
+OptionsComboBoxNumber(0x05b9c30a) : DefaultStyleCentered{
+	font-weight:normal;
+}
+
+NextText(0x05a88622) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-align:right;
+}
+
+AssetBrowserBodyText(0x05a8862a) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+CollectionsUIBodyText(0xbcdc2163) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-valign:top;
+}
+
+PartCardStatName(0x051af7cd) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+MediumGoalCardBodyText(0x052af8ad) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+}
+
+MediumGoalCardSmallText(0x05e8f5eb) : DefaultStyle{
+	font-weight:normal;
+	font-size:9px;
+	text-overflow-mode:ellipsis;
+}
+
+AssetName(0xd3d702a9) : DefaultStyleCentered{
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+}
+
+AssetAuthor(0xd3d702aa) : DefaultStyleCentered{
+	font-weight:normal;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+AssetAuthorCard(0x05a74c6b) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+}
+
+TransitionSporepediaCardText(0x54bf1818) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:9px;
+}
+
+SporepediaSearchBox(0x74935841) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-valign:middle;
+
+}
+
+AssetNameLarge(0x0553adec) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:16px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+AssetBrowserFeedHeader(0xd42483ec) : DefaultStyleCentered{
+	font-family:"Palatino Sans EA";
+	font-weight:normal;
+	font-size:24px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+}
+
+AssetBrowserFeedHeaderRight(0x944ec0c1) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:18px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+	text-align:right;
+}
+
+AssetBrowserMakeNew(0x748e48e3) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:20px;
+}
+
+GuiDataSmall(0x7237635e) : DefaultStyle{
+	font-weight:normal;
+	font-size:11px;
+	text-valign:middle;
+}
+GGEInfoPanel(0x6948d3f6) : DefaultStyle{
+	font-weight:normal;
+	font-size:11px;
+	text-valign:middle;
+}
+
+VerbIconDescription(0x324a1ab2) : DefaultStyle{
+	text-valign:middle;
+}
+
+GuiDataSmallCentered(0x7237635f) : DefaultStyleCentered{
+	font-size:11px;
+}
+
+GuiDataRight(0x02eed114) : DefaultStyleCentered{
+	font-size:14px;
+	text-align:right;
+}
+
+GuiDataCentered(0x015a5d11) : DefaultStyleCentered{
+	font-size:14px;
+}
+
+ShoppingTitle(0x32e6fa7e) : DefaultStyle{
+	font-weight:normal;
+	font-size:22px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+TimelineTitle(0xb5496376) : DefaultStyle{
+	font-weight:normal;
+	font-size:24px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+TimelineSmallTimeOnRuler(0xb554311c) : DefaultStyle{
+	font-weight:normal;
+	font-size:9px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+	text-align:right;
+}
+
+TimelineSmallTimeOnRulerCentered(0xf5711dc2) : DefaultStyle{
+	font-weight:normal;
+	font-size:9px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+	text-align:center;
+}
+
+TimelineCreatureName(0x154aa2bb) : DefaultStyle{
+	font-weight:normal;
+	font-size:12px;
+	wrap-option:emergency;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+	text-align:center;
+}
+
+TimelineClockHeaders(0x55496413) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+	text-align:left;
+}
+
+TimelineClockNumbers(0x55496414) : DefaultStyle{
+	font-weight:normal;
+	font-size:13px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+	text-align:right;
+}
+
+ShoppingDescription(0x32e6fa7f) : DefaultStyle{
+	text-valign:middle;
+}
+
+ShoppingAssetName(0x92e6d0fd) : DefaultStyleCentered{
+	font-size:12px;
+	wrap-option:no-wrap;
+	font-family:"Palatino Sans EA";
+}
+
+ShoppingCreatorName(0x92e6d0fe) : DefaultStyle{
+	font-weight:normal;
+	wrap-option:no-wrap;
+	text-valign:middle;
+}
+
+VerbIconEditorValues(0x04dcf959) : DefaultStyleCentered{
+	wrap-option:no-wrap;
+}
+
+VerbIconAbilityEditorValues(0x05a6e08e) : DefaultStyle{
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-align: right;
+}
+
+SporecastName(0x05a6d6f7) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+SporecastItemCount(0x348e26df) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-align:right;
+}
+
+ShoppingThumbTitle(0x92e8d0fe) : DefaultStyleCentered{
+	wrap-option:no-wrap;
+}
+
+SporepediaLargeTitle(0x02801c6a) : DefaultStyleCentered{
+	font-size:14px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-align:right;
+}
+
+SporepediaLargeStatsLabel(0x02801d0e) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:14px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-align:right;
+}
+
+GGESaveGameTitle(0x02701e0f) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:14px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-align:right;
+}
+
+CommunicationsText(0xd16302df) : DefaultStyleCentered{
+	font-size:12px;
+	font-family:"Palatino Sans EA";
+}
+
+CommunicationsTextLeft(0x03751f9d) : DefaultStyle{
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+CommunicationsButtonCaption(0x5163044d) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:12px;
+	font-family:"Palatino Sans EA";
+}
+PartUnlockCardTitle(0x06a92a17) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:12px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+CommunicationsTitle(0x04f64d9c) : DefaultStyleCentered{
+	font-size:11px;
+	text-overflow-mode:ellipsis;
+}
+
+EventLogText(0x02dde830) : DefaultStyle{
+	font-family:"Palatino Sans EA";
+	font-size:9px;
+	text-overflow-mode:ellipsis;
+}
+
+newSporepediaLargeLeft(0x040d40ab) : DefaultStyle{
+	font-weight:normal;
+	font-size:14px;
+	text-valign:middle;
+}
+
+newSporepediaLargeCenter(0x044481a6) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:14px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+newSporepediaMediumcenter(0x040d4099) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:12px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+}
+
+newSporepediaMediumRight(0x040d40a2) : DefaultStyleCentered{
+	font-weight:bolder;
+	font-size:11px;
+	font-family:"Palatino Sans EA";
+	text-align:right;
+}
+
+newSporepediaMediumLeft(0x040d40a7) : DefaultStyle{
+	font-weight:normal;
+	font-size:11px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+newSporepediaTinyCenter(0x040d40af) : DefaultStyleCentered{
+	font-weight:normal;
+	text-overflow-mode:ellipsis;
+}
+
+newSporepediaTiny(0x04090878) : DefaultStyleCentered{
+	font-weight:normal;
+	text-align:right;
+}
+
+newSporepediaTinyRight(0x040d3f47) : DefaultStyleCentered{
+	text-align:right;
+}
+
+DominantSpeciesClipped(0x044d9452) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	text-overflow-mode:ellipsis;
+}
+
+TimeLineAdjective(0x14090878) : DefaultStyleCentered{
+	font-size:14px;
+	font-family:"Palatino Sans EA";
+}
+
+TimelineEvent(0x74e3afcf) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	text-valign: middle;
+	text-overflow-mode:ellipsis;
+}
+
+TimelineSecondaryTrait(0x7526cc5a) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	text-valign: middle;
+	text-overflow-mode:ellipsis;
+}
+
+TimelineEventNumber(0xd4f77e8d) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:10px;
+	text-align:left;
+}
+
+TimelineDebugButton(0x060a5456) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:7px;
+	text-overflow-mode:ellipsis;
+}
+
+TransitionscreenHeader(0x044730d4) : DefaultStyle{
+	font-size:36px;
+	font-family:"Palatino Sans EA";
+}
+
+TransitionscreenHeaderCenter(0x06601198) : DefaultStyleCentered{
+	font-size:36px;
+	font-family:"Palatino Sans EA";
+}
+
+LetterBox(0x044481a7) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:12px;
+	font-family:"Palatino Sans EA";
+}
+
+TransitionscreensSub(0x04473356) : DefaultStyle{
+	font-weight:normal;
+	font-size:14px;
+}
+
+TopHeader(0x0452d001) : DefaultStyle{
+	font-size:22px;
+	font-family:"Palatino Sans EA";
+}
+
+TopHeaderRight(0x051da2d8) : DefaultStyle{
+	font-size:22px;
+	font-family:"Palatino Sans EA";
+	text-align:right;
+}
+
+TopSubHeader(0x04654546) : DefaultStyle{
+	font-size:18px;
+	font-family:"Palatino Sans EA";
+}
+
+ToolTip(0x025a6d0f) : DefaultStyle{
+	text-valign:middle;
+}
+
+RelationshipRolloverText(0x04d17659) : DefaultStyle{
+	font-size:11px;
+	text-overflow-mode:ellipsis;
+	text-valign:middle;
+}
+
+RareCardItem(0x051aee68) : DefaultStyle{
+	font-size:12px;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+AddSporecast(0x06849328) : DefaultStyleCentered{
+	font-family:"Palatino Sans EA";
+	font-weight:normal;
+	font-size:22px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+}
+
+MissionLogTitle(0x051aee69) : DefaultStyle{
+	font-size:12px;
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+RareCardTitle(0x051c4099) : DefaultStyle{
+	font-size:14px;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+MissionText(0x051c51a0) : DefaultStyle{
+	font-size:9px;
+	text-overflow-mode:ellipsis;
+}
+
+CalloutsText(0x064ed6b9) : DefaultStyle{
+	font-weight:normal;
+	font-size:13px;
+}
+
+AlreadySporeAccount(0x84949a83) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-align:right;
+}
+
+GGENav(0x066f8ea8) : DefaultStyle{
+	font-weight:normal;
+	font-size:14px;
+}
+
+TribePlannerHeader(0xbe2289d2) : DefaultStyle{
+	text-overflow-mode:ellipsis;
+	font-family:"Palatino Sans EA";
+	text-valign:middle;
+}
+
+Counter(0x069eab1c) : DefaultStyleCentered{
+	font-size:8px;
+}
+
+TimelineClock(0x069ec320) : DefaultStyle{
+	font-weight:normal;
+	font-size:8px;
+	text-valign:middle;
+}
+
+LimitMeter(0x06a15ef0) : DefaultStyleCentered{
+	font-weight:normal;
+	font-size:8px;
+	wrap-option:no-wrap;
+	text-overflow-mode:ellipsis;
+}

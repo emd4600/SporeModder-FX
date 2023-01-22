@@ -47,6 +47,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -60,6 +61,8 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import sporemodder.MainApp;
 import sporemodder.extras.spuieditor.components.ComponentFactory;
 import sporemodder.extras.spuieditor.components.Image;
@@ -115,7 +118,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 	private JMenu mnFile;
 	private JMenuItem mntmShowPreview;
 	private JPanel panel_1;
-	private JTextField tfSearchBar;
+	private JTextField tfSearchBar = new JTextField();
 	
 	private final List<SearchSpec> searchSpecs = new ArrayList<SearchSpec>();
 	private JMenuItem mntmSave;
@@ -138,7 +141,8 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 	 * This stores the index of the active undoable action when this SPUI was last saved. This can be used to avoid showing the SPUI as unsaved when no actions have been done since the last time it was saved.
 	 */
 	private int savedActionIndex = -1;
-	private boolean isSaved = true;
+	//private boolean isSaved = true;
+	private final ReadOnlyBooleanWrapper isSaved = new ReadOnlyBooleanWrapper(this, "isSaved", true);
 	private JMenu mnComponent;
 	private JMenu mnAddWindowComponent;
 	private JMenu mnAddModifier;
@@ -156,127 +160,6 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 	private Action saveAction;
 	
 	private ProjectItem smfxProjectItem = null;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e2) {
-			e2.printStackTrace();
-		}
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				MainApp.init();
-				
-				// String path = "C:\\Users\\Eric\\Desktop\\SPUI\\ScrollFrameVerticalGeneric.spui";
-				// String path = "C:\\Users\\Eric\\Desktop\\SPUI\\ScrollFrameVerticalGeneric_custom.spui.spui_t";
-				//String path = "C:\\Users\\Eric\\Desktop\\SPUI\\#834B03AF.spui.spui_t";
-				
-				//String path = "C:\\Users\\Eric\\Desktop\\SPUI\\custom.spui.spui_t";
-				
-//				MainApp.setCurrentProject(MainApp.loadProject("EnhancedColorPicker"));
-				
-				//String path = "layouts_atlas~/EnhancedColorChooser_PanelUI.spui.spui_t";
-				
-//				MainApp.setCurrentProject(MainApp.loadProject("SPUI"));
-//				
-//				String path = "layouts_atlas~/custom.spui";
-//				String path = "layouts_atlas~/custom.spui.spui_t";
-//				String path = "layouts_atlas~/#1E01396F.spui";
-//				String path = "layouts_atlas~/#8DC0DB97.spui";
-//				String path = "layouts_atlas~/#834B03AF.spui";
-//				String path = "layouts_atlas~/#823F0B36.spui";
-//				String path = "layouts_atlas~/#5BF85E34.spui";
-//				String path = "layouts_atlas~/ScrollFrameVerticalGeneric.spui";
-//				String path = "layouts_atlas~/#5B168EB1.spui";
-//				String path = "layouts_atlas~/#5B168EB1_original.spui";
-//				String path = "layouts_atlas~/#5B168EB1_custom.spui.spui_t";
-//				String path = "layouts_atlas~/GlobalUIGGE-9-EP1.spui.spui_t";
-//				String path = "layouts_atlas~/#7526F720.spui";
-//				String path = "layouts_atlas~/timelineEvent.spui.spui_t";
-//				String path = "layouts_atlas~/gamesettingsgraphics.spui";
-//				String path = "layouts_atlas~/gamesettingsgraphics_old.spui";
-//				String path = "layouts_atlas~/gamesettingsgraphics_custom.spui.spui_t";
-//				String path = "layouts_atlas~/ExportTest.spui";
-//				String path = "layouts_atlas~/ExportTest2.spui";
-//				String path = "layouts_atlas~/GGEZoomPanelv2.spui";
-				
-//				String path = "layouts_atlas~/#526920C3.spui";
-				
-//				String path = "layouts_atlas~/gamesettingsaudio.spui";
-				
-//				String path = "layouts_atlas~/trg-Mission.spui";
-//				String path = "layouts_atlas~/#A10D844A.spui";
-
-				//String path = "layouts_atlas~/ggenewgameflowuiv1-flip.spui";
-//				String path = "layouts_atlas~/gamesettingscamera.spui";
-//				String path = "layouts_atlas~/DebugConsole.spui";
-				
-//				MainApp.setCurrentProject(MainApp.loadProject("Spore_Layouts"));
-				
-//				String path = "layouts_atlas_2~/#BA5EE251.spui";
-//				String path = "layouts_atlas_2~/AssetView.spui";
-//				String path = "layouts_atlas~/#6C4E59FB.spui";
-//				String path = "layouts_atlas~/#B5ECE17F.spui";
-//				String path = "layouts_atlas~/#3D96118D.spui";
-//				String path = "layouts_atlas~/MovieCapture.spui";
-//				String path = "layouts_atlas~/#E1AD4145.spui";
-//				String path = "layouts_atlas~/#0BE68B8B.spui";
-//				String path = "layouts_atlas~/editorPalette.spui";
-//				String path = "layouts_atlas~/#3D96118D.spui";
-//				String path = "layouts_atlas~/#5ED10964.spui";
-//				String path = "layouts_atlas~/#5B168EB1.spui";
-//				String path = "layouts_atlas~/GGENewGameFlowUIv1-EP1.spui";
-				
-//				MainApp.setCurrentProject(MainApp.loadProject("REborn - Multiplayer Editor"));
-				
-//				String path = "layouts_atlas~/#5B168EB1.spui";
-				
-				MainApp.setCurrentProject(MainApp.loadProject("SPUI Testing 2"));
-				
-				String path = "layouts_atlas_2~/AssetViewLarge.spui";
-				
-				MainApp.setActiveFile(path);
-				
-				boolean isTextSPUI = false;
-				File file = MainApp.getActiveFile();
-				
-				SPUIMain spui = new SPUIMain();
-				if (path.endsWith(".spui_t")) {
-					isTextSPUI = true;
-					try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-						spui.parse(in);
-					} catch (IOException | ArgScriptException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				} else {
-					isTextSPUI = false;
-					try (InputStreamAccessor in = new FileStreamAccessor(file, "r")) {
-						spui.read(in);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-					
-				SPUIEditor frame;
-				try {
-					frame = new SPUIEditor(spui, MainApp.getCurrentProject().getProjectName() + " - " + path, path, file, isTextSPUI, true, null);
-					if (!frame.hadErrors()) {
-						frame.setVisible(true);
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		});
-	}
 	
 	protected static void loadStyleSheet() throws IOException {
 		InputStream is = ResourceLoader.getResourceInputStream("sporeuitextstyles.css", 0x0248E873);
@@ -678,9 +561,10 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 		panel.add(panel_1, BorderLayout.NORTH);
 		panel_1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
-		tfSearchBar = new JTextField();
 		tfSearchBar.getDocument().addDocumentListener(this);
+		/* ////////////
 		panel_1.add(tfSearchBar);
+		*/
 		tfSearchBar.setColumns(20);
 		
 		Action invisibleComponentAction = new AbstractAction() {
@@ -702,7 +586,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 				cbShowInvisibleComponents.doClick();
 			}
 		});
-		panel_1.add(cbShowInvisibleComponents);
+		////////////panel_1.add(cbShowInvisibleComponents);
 //		panel_1.add(new JLabel("test"));
 		
 		// if we don't do this, the check box is too big and it doesn't show
@@ -710,6 +594,8 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 //		if (divider < 400) {
 //			divider = 400;
 //		}
+		menuBar.add(new JSeparator(SwingConstants.VERTICAL));
+		menuBar.add(cbShowInvisibleComponents);
 		
 		
 		inspectorSplitPane = new JSplitPane();
@@ -777,13 +663,13 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 		if (currentAction != savedActionIndex) {
 			for (int i = currentAction; i >= 0; i--) {
 				if (actions.get(i).isSignificant()) {
-					isSaved = false;
+					isSaved.set(false);
 					//setTitle(MainApp.getCurrentProject().getProjectName() + " - *" + relativePath);
 					return;
 				}
 			}
 		}
-		isSaved = true;
+		isSaved.set(true);
 		//setTitle(MainApp.getCurrentProject().getProjectName() + " - " + relativePath);
 	}
 	
@@ -1068,7 +954,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		if (!isSaved) {
+		if (!isSavedProperty().get()) {
 			int result = JOptionPane.showOptionDialog(this, "Do you want to save changes you made to " + relativePath + "?", "Save", 
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, new String[] {"Save", "Don't save", "Cancel"}, "Save");
 			
@@ -1148,7 +1034,7 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 		}
 	}
 	
-	private void save() {
+	public void save() {
 		
 		if (save(originalFile == null ? smfxProjectItem.getFile() : originalFile, isTextSPUI)) {
 			savedActionIndex = currentAction;
@@ -1294,5 +1180,16 @@ public class SPUIEditor extends JFrame implements TreeSelectionListener, Documen
 	public JSplitPane getInspectorSplitPane() {
 		return inspectorSplitPane;
 	}
+	
+	public JTextField getSearchBar() {
+		return tfSearchBar;
+	}
+	
+	/**
+	 * The property that controls whether the file is saved. If any changes have been done to the text since the last save, this value is false.
+	 * @return
+	 */
+	public final ReadOnlyBooleanProperty isSavedProperty() {
+		return isSaved.getReadOnlyProperty();
+	}
 }
-

@@ -1,6 +1,7 @@
 package sporemodder.view.editors.spui;
 
 import java.awt.Dimension;
+
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.File;
@@ -11,6 +12,7 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import emord.javafx.ribbon.Ribbon;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
@@ -18,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import sporemodder.HashManager;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.extras.spuieditor.SPUIEditor;
 import sporemodder.files.FileStreamAccessor;
@@ -36,12 +39,18 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 	private final SPUIMain spuiMain = new SPUIMain();
 	private final SwingNode swingInspectorPane = new SwingNodeEx();
 	private final SwingNode swingMenuBar = new SwingNode();
+	private final SwingNode swingSearchBar = new SwingNode();
+	private final VBox inspectorPaneTop = new VBox();
 	private BorderPane inspectorPane = new BorderPane();
+	private boolean canBeSaved = false;
 	
 	@SuppressWarnings("unchecked")
 	public SmSpuiEditor(ReadOnlyBooleanWrapper isSavedWrapper, ReadOnlyBooleanWrapper isActiveWrapper) {
 		super(isSavedWrapper, isActiveWrapper);
-		inspectorPane.setTop(swingMenuBar);
+		inspectorPaneTop.getChildren().add(swingMenuBar);
+		//TODO: Un-comment this once searching works again
+		//inspectorPaneTop.getChildren().add(swingSearchBar);
+		inspectorPane.setTop(inspectorPaneTop);
 		inspectorPane.setCenter(swingInspectorPane);
 	}
 	
@@ -53,6 +62,10 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 	protected void loadFileOverride(File file) throws IOException {
 		String spuiPath = file.getAbsolutePath();
 		ProjectItem smfxItem = getItem();
+		
+		if (smfxItem != null && smfxItem.isMod() && ProjectManager.get().getActive().isReadOnly())
+			canBeSaved = true;
+		
 		Action whenSpuiSavedAction = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
@@ -67,7 +80,7 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 					spuiPath,
 					file,
 					false,
-					smfxItem.isMod(),
+					canBeSaved,
 					whenSpuiSavedAction,
 					smfxItem
 			);
@@ -76,9 +89,16 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 			viewer.setContent(spuiEditor.getSPUIViewer()); //swingEditorPane);
 			swingInspectorPane.setContent(spuiEditor.getInspectorSplitPane());
 			swingMenuBar.setContent(spuiEditor.getJMenuBar());
+			swingSearchBar.setContent(spuiEditor.getSearchBar());
+			
 			//inspectorPane.setTop(swingMenuBar);
 			//swingMenuBar
 			//getSPUIViewer()
+			spuiEditor.isSavedProperty().addListener((obs, oldValue, isSaved) -> {
+				if (item != null) {
+					setIsSaved(isSaved);
+				}
+			});
 		} catch (InvalidBlockException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -110,8 +130,7 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 
 	@Override
 	public boolean isEditable() {
-		// TODO Auto-generated method stub
-		return false;
+		return canBeSaved;
 	}
 
 	@Override
@@ -128,8 +147,7 @@ public class SmSpuiEditor extends AbstractSpuiEditor implements EditHistoryEdito
 
 	@Override
 	protected void saveData() throws Exception {
-		// TODO Auto-generated method stub
-		
+		spuiEditor.save();
 	}
 
 	@Override

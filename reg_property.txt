@@ -5773,3 +5773,11 @@ CreaturesToKill
 ValidEditorConfig
 PlanetEffect
 UFOTrailEffect
+NewScenarioLayout
+GameRolloverLayout
+GlobalUILayout
+SidePanelLayout
+ACC_ScenarioShopper
+CreatureAssetType
+VehicleAssetType
+BuildingAssetType

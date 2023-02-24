@@ -449,6 +449,7 @@ fixed	0x299bc2f9
 flapping	0x54d42f94
 
 powers	0x754be343
+tmp	0x3e6cc964
 
 AccessoryCivCreatures	0x07720fe1
 AccessorySpaceCreatures	0x5d0943a9

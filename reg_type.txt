@@ -113,6 +113,7 @@ bfx	0x1999ae0b
 cmp	0x04f684a4
 js	0x67771f5c
 ini	0x1f886ead
+png.dds 0xb8444447
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838

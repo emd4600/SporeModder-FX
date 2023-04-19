@@ -127,7 +127,8 @@ public class CreatureData {
 	public static void main(String[] args) throws IOException {
 		MainApp.testInit();
 		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Player Creations\\creature_editorModel~\\0x1D79B75D.creaturedata";
+		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Player Creations\\creature_editorModel~\\0x1D79B75D.creaturedata";
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\EditorSaves\\creature_editorModel~\\0x21ED3ABA.creaturedata";
 		
 		try (FileStream stream = new FileStream(path, "r")) {
 			CreatureData creatureData = new CreatureData();

@@ -1,0 +1,442 @@
+mName	0x511dfb9
+mDescription	0x511dfc3
+mVolumes	0x4d81cfe
+mAmbienceHistory	0x4226180
+mRhythm	0x4226186
+mInstrument	0x4226189
+mNotePitches	0x4e551ee
+mNoteDurations	0x4f7c02d
+
+sPlanetKey	0x56e4a8b
+sAvatarSpecies	0x56e4a9b
+sGameViewManagerContainer	0x56e361d
+sPlanetModelContainer	0x56e361f
+sAnimalSpeciesManagerContainer	0x56e3621
+sFruitManagerContainer	0x56e3622
+sObstacleManagerContainer	0x56e3624
+sPlantSpeciesManagerContainer	0x56e3626
+sGameInputManagerContainer	0x56e3628
+sAStarContainer	0x56e3629
+sGameBehaviorManagerContainer	0x56e362b
+sGameNounManagerContainer	0x56e362c
+sBundleManagerContainer	0x56e362d
+sStarManagerContainer	0x56e362f
+sGonzagoPhysicsContainer	0x56e3630
+sGameModeManagerContainer	0x56e3631
+sSimTickerContainer	0x56e3633
+sGamePersistenceManagerContainer	0x56e3635
+sToolManagerContainer	0x56e3636
+sCheatObjectManagerContainer	0x56e3637
+sTerraformingManagerContainer	0x56e3639
+sGamePlantManagerContainer	0x56e363a
+sSpaceGfxContainer	0x56e363c
+sCommGraphicsManagerContainer	0x56e363d
+sCommManagerContainer	0x56e363f
+sLivingUniverseContainer	0x56e3641
+sSpaceTradingContainer	0x56e3642
+sUIEventLogContainer	0x56e3644
+sUITimelineContainer	0x56e3649
+sCastingManagerContainer	0x56e364c
+sSpeciesRelationshipManagerContainer	0x56e364d
+sPlanetImpostorManagerContainer	0x56e3651
+sBlobShadowManagerContainer	0x56e3652
+sCinematicManagerContainer	0x56e3654
+sEventLogCommManagerContainer	0x56e3655
+sVignetteManagerContainer	0x56e3656
+sNPCCityMusicManagerContainer	0x56e3658
+sUIMissionLogContainer	0x56e3659
+sAssetDiscoveryManagerContainer	0x74e1ab86
+sMissionCardPanelContainer	0x34f5669b
+sNanoDroneManagerContainer	0x6ef44f2
+sScenarioVehicleTickerContainer	0x6fd969a
+sGameEditModeStrategyContainer	0x56e37ca
+sCreatureModeStrategyContainer	0x56e37d4
+sTribeModeStrategyContainer	0x56e37dd
+sCivModeStrategyContainer	0x56e37e7
+sAppModeSpaceContainer	0x56e37ee
+sTelemetryContainer	0x56e4605
+sAppModeEditorBaseContainer	0x56e46cc
+
+mExploreMissionState	0x3852454
+mVisitCities	0x3852455
+mVisitRadius	0x3852456
+mNumVisitedCities	0x3852457
+mCityVisitInfosInitialized	0x3852459
+mEffectHeight	0x3852460
+mNumCitiesToVisit	0x3852461
+mExploreType	0x3852462
+mCityVisitInfos	0x3852463
+
+mState	0x5268a36e
+mpHerd	0xd2afa598
+mTimeToHatch	0xf301c18b
+mBrokenTimer	0xd301c1ab
+mpToHatch	0x5301c42e
+mEffectScale	0x7301c22a
+
+mBiosphereMissionState	0x437456f
+mInitialTerraformScore	0x686fae9
+mInitialNumPlants	0x686fb14
+mInitialNumAnimals	0x686fb22
+mCurrentBiosphereRow	0x686fd4f
+mMaxNumDiseasedCreatures	0x43b48ea
+mNumDiseasedKills	0x43b4913
+mMaxNumHealthyKills	0x43b491e
+mNumHealthyKills	0x43b4928
+mCollapseTimer	0x686fd9a
+
+mNextPosition	0x21fc170
+mNextVelocity	0x58241ad
+mNextOrientation	0x21fc172
+mOffsetFromPosition	0x58241c6
+mLastTangentialVelocity	0x21fc174
+mDestination	0x21fc178
+mAtDestination	0x21fc17c
+mRotateTowardsDestination	0x5823f78
+mOffsetDueToDamage	0x21fc17e
+mUFOType	0x21fc17f
+mDesiredModelKey	0x3868c14
+mDesiredVisible	0x38784a4
+mZoomAltitude	0x519c29e
+mStartEndPoint	0x53eb2fe
+mDestinationPlanet	0x53eb303
+mPreviousPlanet	0x5823bff
+sDestinationStarKey	0x5823cbd
+mNPCFollowUFO	0x53ecd20
+mNPCFollowOffset	0x53efa00
+mNPCOrbitOffset	0x53ff93c
+mNPCZoomOffset	0x5824001
+mNPCFlockIndex	0x53ed0f8
+mNPCWeapon	0x5823a4c
+mNPCGroundWeapon	0x5823a79
+mNPCNearAirWeapon	0x5823a7b
+mNPCMediumAirWeapon	0x615d246
+mNPCFarAirWeapon	0x615d248
+mNPCAbductWeapon	0x5823a7d
+sNPCHomeStarKey	0x5823afe
+mEnergy	0x581e106
+mMaxEnergy	0x581e107
+mOwnerMission	0x644fb47
+
+mType	0x553a0209
+mTribe	0xf53a020a
+mbEffectsApplied	0xb53f5257
+
+mPrimaryType	0x41f80ad
+mSecondaryType	0x41f80b0
+mActivatedPlanets	0x3755020
+mKey	0x355fa98
+mSolarSystem	0x39d4a3f
+mPlayerCanCapture	0x56cfe97
+
+mCurrSubMissionIndex	0x2851967
+mSubMissions	0x2851968
+mDataRegister_PlanetKeys	0x285196a
+mDataRegister_SpeciesIDs	0x285196b
+
+mpPlanetSim	0x35d9760
+mpVisiblePlanet	0x4457f99
+mParent	0x30d5fd2
+mOrbitedPlanetLastKnownPosition	0x37d2e7b
+mTimeSinceLastColonyPlaced	0x57a58cf
+mPlanetFlags	0x35d5a50
+mPlanetKey	0x355f943
+mNumSpecializedBehaviorUFOs	0x519a04c
+mImpostorModel	0x3742a6e
+mEffectScript	0x3742a83
+mPlanetScale	0x3741dd7
+mStarterWorldID	0x3742ea6
+
+mBucketMaxPopulation[kListening]	0x68c49f8
+mBucketMaxPopulation[kConverted]	0x68c49fd
+mBucketPopulation[kListening]	0x68c4a01
+mBucketPopulation[kConverted]	0x68c4a06
+mBucketEmigration[kListening]	0x68c4a09
+mBucketEmigration[kConverted]	0x68c4a0d
+mBucketImmigration[kListening]	0x68c4a12
+mBucketImmigration[kConverted]	0x68c4a15
+mClearEverything	0x68c3c35
+mAngryCrowdFraction	0x68c3c38
+mDancingCrowdFraction	0x68c3c3b
+mIndifferentCrowdFraction	0x68c3c3e
+mConvertCheckTimer	0x68c3c41
+mConvertedTimer	0x68c3c45
+mAttackTargetChanged	0x68c3c48
+mAttackTarget	0x68c3c4c
+mCultureObject	0x68c3c4f
+
+mBadgeMap	0x361b61b
+mEventCounts	0x361b697
+mStageMap	0x5ee5002
+mCurrentBadgeCard	0x63a6ab5
+
+mCurrentBrainLevel	0xb4177e0e
+mAvatarNormalizingScale	0x61afd98
+mNumFlapsAllowed	0x61afd99
+mAbilityMode	0xb4177e0f
+mEvolutionPoints	0x7220206f
+DEPRECATED_mLearnedAbilities	0xb4177e0d
+mLearnedAbilities	0x76b6609
+
+mSelectionGroup	0x2e6e1b0
+mFavoredGrasperlikeAppendage	0x2e6e1b1
+mGrasperlikeAppendageForBundle	0x5f0d6f3
+mSpecializedTool	0x2e6e1b2
+mAffectedByRecruiting	0x2e6e1ab
+mpOwnerCity	0x2e6e1ad
+mpOwnerTribe	0x2e6e1af
+mpHitSphere	0x6a814a9
+
+mbDisplayingEvolutionButton	0x54aba85
+sCreatureGameData	0x61afc2e
+mAllPartsUnlockedColumn	0x66ce337
+
+mType	0x4bfec52
+mTimeStamp	0x57a4efc
+mpTarget	0x4bfec53
+mUserData1	0x4bfec54
+mUserData2	0x4bfec55
+mUserData3	0x4bfec56
+mUserData4	0x4bfec57
+mbHasTarget	0x4bfec58
+mOriginalTargetPos	0x4bfec59
+
+mpFindMission	0xf4d95c1a
+bUnlockedPart	0x54e57b57
+
+mKey	0x3d58bf2
+mPosition	0x3d58bf1
+mType	0x3e95e04
+mTechLevel	0x3d58bf6
+name	0x3d58bf4
+mFlags	0x3d58bf3
+citizenSpeciesKey	0x3d58bf5
+mStarterWorldID	0x3d58bf7
+empireID	0x3f1389b
+lastObservedTime	0x3f1389a
+savedGameTimeStamp	0x3f1389c
+savedGameVersionMajor	0x3f1389d
+savedGameVersionMinor	0x3f1389e
+planetCount	0x51a1188
+
+mInventoryItems	0x21ffbe8
+
+mpGameDataOwner	0x240e421
+mIsDestroyed	0x240e422
+mPoliticalID	0x240e423
+mDefinitionID	0x2e9efd3
+mID	0x3cdd54b
+
+mpTribe	0x33e0b60
+mUndamagedModel	0x33e0b61
+mDestructModelHi	0x33e0b62
+mDestructModelLo	0x33e0b63
+mDestructModelMd	0x33e0b64
+mpHitSphere	0x5651e69
+
+mCenterAxis	0x2f1a511
+mpCity	0x2f1a512
+mpDock	0x6567f8d
+mWallSize	0x474ea17
+mStyle	0x474ea18
+mLevel	0x474ea19
+mAppliedStamp	0x4dacb55
+
+mpTribeToTribeMission	0xb43c938e
+mTribeToTribeMissionMap	0x743c9504
+
+mCurrentAmmoCount	0x385030d
+mRechargeTimer	0x385031d
+mAutoFireTimer	0x3850360
+mChargeTimer	0x3850362
+mMissCheckTimer	0x3850364
+mpToolOwner	0x3850690
+mpToolTarget	0x38506b6
+mTargetDamagePointId	0x63fc849
+mpArea	0x3850926
+mpBeam	0x3850927
+mpAppTarget	0x3850929
+mInterruptedByDamage	0x3850952
+mDamageMultiplier	0x38509c7
+mRangeMultiplier	0x38509d5
+mProjectileScale	0x39fb1a8
+mIsInUse	0x57f830f
+
+mpOwner	0x24162bf
+mContainerCapacity	0x24162c0
+mBundleCapacity	0x24162c1
+mBundleList	0x24162c2
+
+mUnlockPoints	0x3a3b30d
+mItemStatusInfos	0x3a3b3d4
+mUnlockedItems	0x6676971
+
+mSimulators	0x21e8887
+mIsTicking	0x21e8888
+
+mpCity1	0x418d5cc
+mpCity2	0x418d5cd
+mRoadType	0x418d5ce
+mWidth	0x418d5cf
+mPathData	0x418d5d0
+
+mpGroundContainer	0x225212b
+
+mPlayerUFO	0x22556e7
+mMaxDistance	0x436e7e0
+mMaxScanDistance	0x436e7e1
+mPosseUFOList	0x53e9f38
+
+mType	0xd28eb9ac
+mpWhoIsInteractingWithMe	0xd28eb9cd
+mbHasAttractorEffects	0x5309d09
+
+savedGameVersionOnSave	0x3f140b6
+savedGameVersionOnGenerate	0x3f140b7
+buildVersionOnSave	0x3f140b8
+buildVersionOnGenerate	0x3f140b9
+timestampOnSave	0x3f140ba
+timestampOnGenerate	0x3f140bb
+
+mModelTypeToKeyMap	0x3acc32f
+
+mPos	0x6a7f2f9
+mCurrentFood	0x6a7f2fa
+mMaxFood	0x6a7f2fb
+mResupplyRate	0x6a7f2fc
+mCubeIndex	0x6a7f2fd
+mpFishingHitSphere	0x6a7f2fe
+mpFishingHotSpot	0x6a7f2ff
+mStartTime	0x6a7f419
+mbActive	0x6a7f41a
+mbReplenishing	0x6a7f41b
+
+mResourcePoints	0x403e5f1
+mMaxResourcePoints	0x403e5f2
+mpHitSphere	0x403e5f3
+mbMineInitialized	0x521d43e
+mMineState	0x521d43f
+mMineStateTimer	0x521d440
+mMineStateTimeout	0x521d441
+mConstructingPoliticalID	0x521d442
+mCapturePoliticalID	0x521d443
+mConvertPoliticalID	0x521d444
+mBuyPoliticalID	0x521d445
+mCapturePercent	0x521d446
+mConvertPercent	0x521d447
+mBuyPercent	0x521d448
+mConstructingVehicle	0x5776f58
+
+mGateIndex	0x3dea810
+mAttackState	0x3df32d5
+mAttackState	0x3df32d6
+mAttackerPoliticalID	0x3dad664
+mAttackers	0x3e0c0b0
+mpHitSphere	0x3df010d
+
+mID	0x58b5360
+mState	0x58b5361
+mFrequency	0x58b5362
+mCheckTime	0x58b5363
+mFoodRequired	0x58b5364
+mFoodAccumulated	0x58b5365
+mbCheck	0x58b5366
+mWorkers	0x58b536f
+
+mpOwner	0x32128d8
+mLastPosition	0x32128d9
+mMinDamage	0x32128da
+mMaxDamage	0x32128db
+mDamageType	0x32128dc
+mTool	0x32128dd
+
+mPosition	0x2416c5e
+mOrientation	0x2416c60
+mScale	0x316f520
+mIsInvalid	0xd24b464b
+mIsRolledOver	0xb1a64f7b
+mIsSelected	0x2416c61
+mbPickable	0x2416c62
+mbIsTangible	0x2416c63
+mBoundingRadius	0x2416c64
+mFootprintRadius	0x49100ec
+mbIsBeingEdited	0x2416c65
+mModelChanged	0x2416c66
+mbTransformDirty	0x2416c67
+mbFixed	0x2416c68
+mbEnabled	0x2416c69
+mbInView	0x2416c6a
+mDistanceFromCamera	0x2416c6b
+mbSupported	0x2416c6c
+mFlags	0x2416c6d
+mMaterialType	0x2416c6e
+mbKeepPinnedToPlanet	0x445dc86
+mModelKey	0x47df70d
+mLocalExtents	0x47df723
+mOriginalLocalExtents	0x5e8faa8
+mbIsGhost	0x771d7b4
+
+mKey	0x4164f8e
+name	0x3d58b9a
+type	0x3d58b9e
+techLevel	0x3d58b9f
+flags	0x3d58b99
+orbit	0x3f6d6ba
+rotationIsNull	0x417a8ca
+rotationAxis	0x417a8e9
+rotationPeriod	0x417a902
+ringType	0x3f6d514
+gasGiantType	0x3f6d526
+mGeneratedTerrainKey	0x3d58b9b
+mSpiceGen	0x3d58b9c
+atmosphereScore	0x415fbbe
+temperatureScore	0x415fbcd
+waterScore	0x415fbdf
+numDefenderUFOs	0x5c19861
+timeLastBuiltUFOs	0x5c1a01b
+timeCalledReinforcements	0x5c1a027
+homeWorld	0x5c1a028
+plantSpecies	0x4164f63
+animalSpecies	0x4164f8d
+mTerrainStampsToRemove	0x4164f8d
+
+miMarkerID	0x4a3c9eb
+mPosition	0x632c957
+mOrientation	0x632c95d
+miContinent	0x4a3bae4
+mbIsPlayerCity	0x4a3baeb
+mbIsNeutral	0x4a3c9bc
+mbIsPlayerContinent	0x66ce9b5
+miPersonality	0x4a3c9c0
+miAppearanceOrder	0x4a3c9c3
+mbHasAppeared	0x4a3c9c7
+mbIsCoastalCity	0x50a4cd0
+miWallOffset	0x50a4ceb
+mpTribe	0x50f758c
+mPoliticalID	0x52f20e5
+miCivColorID	0x549651f
+mWallPropKey	0x667bfd9
+
+mCurrentCommEvent	0x361c378
+mListCommEvents	0x361c379
+
+mCommodityNodes	0x6ba6e9c
+
+mRelationships	0x56920ba
+mEmpiresToDecayPending	0x6538767
+
+mEventLogCommItems	0x4474bd5
+
+mStory201State	0x2385389d
+mUFOWreckTargetPlanet	0x2385389e
+mDelayScanCinematic1	0x680791f
+mDelayScanCinematic2	0x6807924
+
+mNumEditorEntries	0x5344d71
+mActionStatus	0x5344d70
+mNumEditorEntriesByEditor	0x63bdb1a
+mActionStatusByEditor [kEditorTypeCell]	0x63bdb1b
+mActionStatusByEditor [kEditorTypeCreature]	0x63bdb1c
+mActionStatusByEditor [kEditorTypeBuilding]	0x63bdb1d
+mActionStatusByEditor [kEditorTypeVehicle]	0x63bdb1e
+mActionStatusByEditor [kEditorTypeAccessories]	0x63bdb1f

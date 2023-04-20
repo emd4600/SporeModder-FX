@@ -20,6 +20,8 @@
 package sporemodder.view.syntax;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,7 +99,13 @@ public class XmlSyntax implements SyntaxFormatFactory {
 
 	@Override
 	public boolean isSupportedFile(File file) {
-		return file.getName().endsWith(".xml");
+		try {
+			// Unfortunately, this syntax highlighter is too slow for "big" files
+			return file.getName().endsWith(".xml") && Files.size(file.toPath()) < 10240;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 

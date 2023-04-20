@@ -49,12 +49,12 @@ public class ScenarioConverter implements Converter {
 
 	@Override
 	public boolean encode(File input, StreamWriter output) throws Exception {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
 	public boolean encode(File input, DBPFPacker packer, int groupID) throws Exception {
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override

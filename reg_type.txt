@@ -16,7 +16,11 @@ summary_pill	0x2d5c9b0
 locale	0x2fac0b6
 pollen_metadata	0x30bdee3
 hm	0x376c3da
+
+# htra is just a wrong guess of a LE file header
 htra	0x472329b
+arth	0x472329b
+
 xhtml	0x65266b7
 raster	0x2f4e681c
 jpg	0x3f8662ea
@@ -114,6 +118,7 @@ cmp	0x04f684a4
 js	0x67771f5c
 ini	0x1f886ead
 png.dds 0xb8444447
+pollen_metadata.bak	0xe1e7f839
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838

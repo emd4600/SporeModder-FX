@@ -241,6 +241,7 @@ mWallSize	0x474ea17
 mStyle	0x474ea18
 mLevel	0x474ea19
 mAppliedStamp	0x4dacb55
+mWallOffset	0x50793d5
 
 mpTribeToTribeMission	0xb43c938e
 mTribeToTribeMissionMap	0x743c9504
@@ -398,7 +399,7 @@ timeCalledReinforcements	0x5c1a027
 homeWorld	0x5c1a028
 plantSpecies	0x4164f63
 animalSpecies	0x4164f8d
-mTerrainStampsToRemove	0x4164f8d
+mTerrainStampsToRemove	0x4164f9e
 
 miMarkerID	0x4a3c9eb
 mPosition	0x632c957
@@ -440,3 +441,562 @@ mActionStatusByEditor [kEditorTypeCreature]	0x63bdb1c
 mActionStatusByEditor [kEditorTypeBuilding]	0x63bdb1d
 mActionStatusByEditor [kEditorTypeVehicle]	0x63bdb1e
 mActionStatusByEditor [kEditorTypeAccessories]	0x63bdb1f
+
+mPlayerAlertState	0xd2708c85
+mNextSpecies	0x3f6565d
+mHerd	0x72ae9fe0
+mNoDamageTimer	0x5c02449
+mLastAvatarDamageTimer	0x5ee740c
+mPregnantEggs	0x52709079
+mUntargetDistanceTime	0x21d2388
+mOwnerMissionID	0x92709161
+mPersonality	0x72709236
+mColor	0x42a2b01
+mCharmDamage	0x666441b
+mCharmTime	0x6664451
+mpCharmer	0x6664454
+
+mToolType	0x2ca0e85
+mCreationTimer	0x51c6c64
+mDestroyedTimer	0x6a59db9
+mhFootprint	0x6c0f3c9
+
+mLevelsToUnlockOnActivateOrShutdown	0x66b980b
+mLastSavedGame	0x66b980a
+mNumCaptainsBroughtToLevel10	0x7ca2686
+mNumAdventuresQuickplayed	0x7ca2687
+mNumAdventuresCreated	0x7ca2688
+mGGEScenarioTerrainDB	0x7ca2689
+
+mArtifactCargoItemID	0x3853c9d
+mMultiDeliveryMissionState	0x3853c9f
+mBuyerList	0x3853ca0
+mItemList	0x3853ca1
+
+mDesiredSpeed	0x241568a
+mStandardSpeed	0x241568c
+mTurnRate	0x241568f
+mAngleVelocity	0x37d3df5
+mbSelfPowered	0x2415689
+mNeighborCheckRadius	0x2415690
+mVelocity	0x2415692
+mAngularVelocity	0x49489a3
+mInTransitTime	0x39a844f
+mPlanetCorrection	0x4c919ab
+mNeighbors	0x2415693
+
+mMissionID	0x57a5308
+mTimeSinceAddedToList	0x57a5309
+mOwnerPlanetKey	0x5f2c298
+
+mUseToolMissionState	0xf385389d
+mToolUsed	0xf385389e
+
+mLifetime	0x489213e
+mFadeTimer	0x4892146
+mFlags	0x489215a
+
+mbTeleport	0x2415ec6
+mbDead	0x2415ebc
+mbUpdateInteractionEffect	0x2415ebd
+mbUpdateMotiveEffect	0x2415ebe
+mbIsDiseased	0x303fb98
+mLastInteractionEffect	0x21d1baa
+mLastMotiveState	0x21d1bab
+mSpeciesKey	0x3f64a78
+mProfileSeq	0x2415ec8
+mAge	0x52773f6f
+mbCasted	0x24cd902
+mpWhoIsInteractingWithMe	0xb2774021
+mbStealthed	0x6948b64
+mCurrentLoudness	0xd277405a
+mFoodValue	0x21d1ba5
+mbHasBeenEaten	0x72774074
+mStrengthRating	0x21d1bac
+mSpeedState	0x2415eca
+mCreatureName	0x3d97b19
+mCurrentAttackIdx	0x21d239f
+mCurrentAttackAnimId	0x547c1bf
+mbColorIsIdentity	0x42a2b0e
+mHunger	0x5501f64
+mHungerDelta	0x5501f65
+mHungerDelayTimer	0x4653b60
+mArchetype	0x33ace6b5
+mGeneralFlags	0x51b38ff
+mNoAttackTimer	0x5242896a
+DEPRECATED_mRechargingAbilityBits	0x528933e
+DEPRECATED_mInUseAbilityBits	0x535a140
+mRechargingAbilityBits	0x76c8f4d
+mInUseAbilityBits	0x76c8f46
+mIntentionTowardsTarget	0x5675535
+mAbilityStates	0x521e608
+mItemInventory	0x5ef360e
+
+mSelectableMembers	0x6ba6e9a
+
+mOffset	0x4458781
+mWorldSpacePosition	0x4458782
+mTurret	0x4458783
+
+mpTribe	0x62d4f39
+
+mFetchMissionState	0x385389d
+mTypeOfFetch	0x385389e
+mFetchArtifactCargoItemID	0x385389f
+mFetchPlantSpeciesKey	0x3f69492
+mFetchAnimalSpeciesKey	0x3f69497
+mFetchCommodityKey	0x3f69498
+mSamplerPlate	0x38538a3
+mDropOffRequired	0x3f69499
+mDropOffDistance	0x3f69500
+
+mSpaceGameTime	0x5ff35fd
+mEmpireGrowthSim	0x553fd49
+
+mAmountInBundle	0x22553f2
+mpContainer	0x22553f3
+mType	0x22553f4
+mDisplayType	0x22553f5
+mLoose	0x6c3d90d
+
+mIDColorID	0x5594700
+mCachedColor	0x6cf7f50
+
+mRadius	0x3e82d14
+mMinScreenSize	0x3e82d15
+mMaxScreenSize	0x3e82d16
+mMinDistance	0x3e82d17
+mMaxDistance	0x3e82d18
+mpDelegate	0x3e82d19
+
+mSpaceGameTime	0x5ff35fd
+mEmpireGrowthSim	0x553fd49
+
+mDroneOwnerMap	0x6ef53d5
+
+mType	0x38cfe0e
+mOrbit	0x38cfe26
+mPosition	0x38cfe48
+mRotationRate	0x38cfe5c
+mName	0x38cfe6d
+mHitSphereSize	0x38e5030
+
+mpTarget	0x3b0990b
+mAction	0x3b0990c
+mMovePoint	0x5135515
+mPlayerID	0x3b0990e
+
+mChangeArchetypeState	0x3385389d
+mProgressSoFar	0x3385389e
+mChangeArchetypeTo	0x3385389f
+mNumTotalActions	0x338538a0
+mKeyHistory	0x338538a1
+
+mTravelTrail	0x3dee991
+
+mEmpire	0xa3f2c297
+mPlanetKey	0xa3f2c298
+mTimeSinceStart	0xa3f2c2a7
+
+mPlayerInventory	0x22556ea
+mHighLODPlanetSim	0x22556f0
+mBadgeManager	0x22556f1
+mTimeSinceStartedSpaceGame	0x57a55b9
+mNPC_UFOs	0x53eb2ed
+mPlanetsToUplift	0x670c962
+
+mCreatureMissionList	0x940fd9b5
+mCreatureMissionMap	0x53540b3
+mSpeciesMissionMap	0xf40fd9b4
+mpDisplayedSpeciesMission	0xb40fd9ab
+mpDisplayedTutorialMission	0xb40fd9ac
+
+mAvatar	0x222ceb7
+mAvatarHerd	0x52aea77b
+mPosseMembers	0xd26a1d6f
+mpPlayerTribe	0x222ceb9
+mpPlayer	0x2c215c5
+mPoliticalMap	0x2cb7255
+cGameData::sInstanceIDGenerator	0x3cdd5c7
+
+mAchievementSet	0xabce0000
+mCrossGameData.mEncounteredCreatures	0xabce0004
+mCrossGameData.mTribeGamesCompleted	0xabce0005
+mCrossGameData.mEatenCreatures	0xabce0006
+mCrossGameData.mCellGameIDs	0xabce0007
+
+mPlanets	0x38cfa88
+mCelestialBodies	0x38cfad9
+mStar1	0x38cfae4
+mStar2	0x38cfafe
+
+mMissionID	0x3851967
+mDuration	0x13851968
+mElapsedTimeMS	0x3851968
+mState	0x3851969
+mOwnerEmpireID	0x385196a
+mpSourcePlanet	0x385196b
+mpTargetPlanet	0x385196c
+mRewardMoney	0x385196d
+mRewardToolID	0x385196e
+mTargetAnimalSpeciesKey	0x3f6ad2c
+mStarClue	0x3851972
+mPlanetClue	0x3851973
+mStarMapIconEffectID	0x3851974
+mUnlockToolIDList	0x3851977
+mTargetEmpireID	0x3851978
+mProgressEventID	0x3978791
+mGiveOnAcceptAnimalIDs	0x3f6b0d8
+mGiveOnAcceptPlantIDs	0x3f6b0de
+mGiveOnAcceptToolIDs	0x3f6b0df
+mGiveOnAcceptMoney	0x3f6b0e0
+mFlags	0x3f6b0e1
+mpParentMission	0x3f6b0e2
+mSystemsShutdown	0x3f6b0e3
+mAcceptCost	0x3f6b0e4
+mToolCost	0x3f6b0e5
+mpGalaxyCommEvent	0x679f2f3
+
+mGameEventRecord	0x3b1e966
+mpCRGItems	0x3a3a4b4
+mFlags	0x3a8d5ca
+mOneTimeEventFlags	0x44f3d49
+mSelectedCityHallKey	0x47696c3
+mSelectedVehicleKey	0x64e5ca6
+mSelectedUFOKey	0x47696e9
+mCapitalCityPos	0x47696ec
+mHasCheated	0x4bc7c77
+mCurrentGoalProgress	0x55a9786
+mGoalProgressTotal	0x55a97a7
+mThemeID	0x58b5e0e
+mMaxPosseSize	0x5d2ac6b
+mTempPosseCount	0x66e3237
+mUniqueGameID	0x5ee017b
+mDifficultyLevel	0x58b5e0f
+mStarsVisited	0x47696ea
+mStarsKnown	0x47696eb
+mWormholesUsed	0x674b0b0
+mSpacePlayerWarData	0x5626f25
+mPlayerCaptureProgressStars	0x57a1100
+mEmbassies	0x580dbb7
+mPlanetData	0x580dbbf
+mSoothingSongTimer	0x600bacf
+mSocialTraitProgress	0x6132c98
+mCombatTraitProgress	0x6132ca7
+mPirateUFOModelKey	0x62fdfef
+mSelectionGroups	0x64909c8
+mCellConsequenceTrait	0x679fb51
+mCreatureConsequenceTrait	0x679fb52
+mTribeConsequenceTrait	0x679fb53
+mCivConsequenceTrait	0x679fb54
+mSpaceConsequenceTrait	0x679fb55
+mInitCaptainKey	0x7be547b
+mPlayerSpecificEmpireData	0x679fb56
+mTotalTimeInCVG	0x6cfb746
+mAdventuresCompleted	0x7673918
+
+mEmpireName	0x3477139
+mEmpireMoney	0x21e6db7
+mTravelDistance	0x51e6db7
+mTrait	0x3477338
+mArchetype	0x554279e
+mCurrentGameMode	0x362ab2e
+mUFOKey	0x3ab8a62
+mCaptainKey	0x7f55dbf
+mHomePlanet	0x21e6dbb
+mHomeStar	0x21e6dba
+mPoliticalID	0x21e6dbc
+mCityMusic	0x42a0f35
+mFlags	0x35d5a51
+mCultureSet	0x5624e2e
+mEnemies	0x3477390
+mAllies	0x3868491
+mStars	0x3868492
+mNextStarTowardsHome	0x3868493
+mAdventureList	0x7995682
+
+mMillisecondsSinceLastUpdate	0x366df4c
+mActivePlanet	0x338a74a
+mpActiveStar	0x3598939
+mCurrentContext	0x366e013
+mRotationRateFactor	0x366e045
+mPlayerEmpire	0x366e0c2
+mTribeCivRelationships	0x6494431
+mPlayerColonies	0x4f3cd9b
+
+mbInitialized	0x3acc831
+mbUseCastedHerds	0x3acc832
+mAnimalStagingDiagnostic	0x3acc833
+mVisualizedTribes	0x3acc836
+mAnimalStageMap	0x5008fd9
+mCastMap	0x4206671
+mInUseAnimals	0x656812e
+
+mGoalProgressHistory	0x55ce8d1
+mFullHealsPerPerTribeMember	0x5ee744a
+mTotalTimeInTribe	0x5ee6f2f
+mEnchantedAnimals	0x608904d
+mEnchantedAnimalsTimer	0x60892b0
+mUnlockedTools	0x68c869a
+mpAccessories	0x625716f
+mPlayerSpearOrnaments	0x681efba
+mNPCSpearOrnaments	0x681efbb
+mbMatingAllowed	0x68c86b2
+
+planetKey	0x5b83971
+lifetime	0x5b83972
+spiceBought	0x5b83973
+mbDirty	0x60b5062
+mSpiceID	0x5b83974
+mSpiceCost	0x5b83975
+mNPCInventory	0x5b83976
+mNPCInventoryAges	0x5b83977
+
+mIsOn	0x2416eb8
+mpOwnerCity	0x2416ebb
+mEvents	0x41614aa
+mAttackTimer	0x4ac7af1
+mDestroyTimer	0x5b9555b
+mConnected	0x4b74e33
+mEffectiveness	0x4b74e34
+mFreezeCount	0x4b74e37
+mMoneyCount	0x4efa697
+mHappyCount	0x4efa698
+mUnhappyCount	0x4efa699
+mNormalModelKey	0x5e4d3d3
+mbIrradiated	0x5e4d3d4
+
+mPostTutorialDelayTimer_Mating	0x5ee5e11
+mPostTutorialDelayTimer_Food	0x66a2038
+mTribeAppearanceProperty	0x629a22d
+mBabyGrowthTimers	0x57a481e
+mNPCTribeSpeciesKeys	0x600dd49
+
+mUnlockableTools	0x3851188
+mUpgradedToolIds	0x6786ec4
+mpDropCargoTool	0x61c7e21
+mpActiveTool	0x61c7e4a
+mpActiveCargoItem	0x61c7e5d
+mMaxItemCountPerItem	0x649014b
+mbHasAddedItem	0x68398c2
+
+mbActive	0x559039b
+mType	0x55903a0
+mFrequency	0x695c2d7
+mCheckTime	0x69d8c20
+mDuration	0x55946f7
+mPropListKey	0x55903a4
+mData	0x55903a7
+mGameDataMap	0x55903ab
+
+mSeqID	0x4bda4a8
+mSpeciesBracket	0x4bda4af
+mDistSequenceIdx	0x4bda4aa
+mFlags	0x4bda4ac
+mSpeciesKey	0x4bda4ad
+mpInteractingWith	0x410d913
+mFruitTransforms	0x62073d2
+mFruitDistEffectIdxs	0x62073d8
+
+mTransform	0x5668f36
+mFruit	0x5668f38
+mSeqId	0x5810db9
+mSeqIndex	0x5810dba
+mSizeBracket	0x5810dbb
+mpWhoIsInteractingWithMe	0x5810dbc
+mSpeciesKey	0x5810dbe
+mBaseRadius	0x5810dbf
+mCanopyRadius	0x595fd21
+mHeight	0x595fdff
+mbRemoved	0x6abf15d
+
+mHerd	0x21e6db2
+mEggs	0x52689e83
+mOwnedByAvatar	0x21e6dae
+mArchetype	0x30bbb5d
+mArchetypeGroup	0x4894af5
+mScheduleIndex	0x4ea45ca
+mOwnerSpeciesKey	0x3f64453
+mGeneration	0x39a2b58
+mEvolvedSpeciesProfileKeys	0x9493bd27
+mInitialShortfall	0x3fe8d35
+mScaleMultiplier	0x3fe8d8b
+mHitpointOverride	0x3fe8e9c
+mDamageMultiplier	0x3fe8eb3
+mTargetHerdSize	0x21e6db0
+mbEggStatusChanged	0x21e6dad
+mNumGuards	0x12689e6f
+mRespawnRate	0x320d9e2
+mCreaturePersonality	0x52ae4e7b
+mpNest	0xd2aa6604
+mpEggLayer	0x12ae4eca
+mpHerdMom	0x73d72126
+mbEggsInNest	0x21e6db1
+mValidLocations	0x32689ec8
+mbEnabled	0xd2ae8fdc
+mTerritoryRadius	0x403e2b1
+mActivateBrainLevel	0x403e2b2
+mDeactivateBrainLevel	0x403e2b3
+mbCheckedForWateringHole	0x4cfbbf9
+mWateringHolePosition	0x41fa3ba
+mbCheckedForForests	0x4cfcaee
+mCurrentFeedingGrounds	0x4cfe14e
+mChangeFeedingGroundsTimer	0x4cfe1f5
+mFeedingGrounds	0x4cfcaf6
+mNumGuardLocations	0x4447955
+mNumGuardsPerLocation	0x4447959
+mGuardMinMaxRadius	0x4447971
+mEggIndex	0x1368374c
+mInitialPosition	0x1368374d
+mDNAEvolutionThreshold	0x517a7b0
+mbShouldEvolve	0x517ad97
+mbBestFriends	0x342dfbf3
+mbExtinction	0xf42dfbf4
+mbTransientHerd	0x5c82085
+
+mpCity	0x44585b1
+mpWeapon	0x44585b2
+mpCivTurretWeapon	0x4c5a1ef
+mpSpaceBeamWeapon	0x4c5a1f5
+mpSpaceDefenseMissileWeapon	0x5790752
+mpSpaceTurretFlak	0x579fa14
+mDestroyTimer	0x4161444
+mFreezeCount	0x4161445
+mpHitSphere	0x4161446
+mpFacingTarget	0x4161447
+
+mpTool	0x4179f65
+mSourceOffset	0x417a784
+mDamageRadius	0x41686ea
+mbStopArea	0x418f318
+mLifeTimer	0x418f319
+mAccumulatedTime	0x418f31a
+mCulturalProjectileTime	0x418f31c
+mLastUpdate	0x418f31b
+
+mpVehicle	0x4fd0320
+mpTarget	0x4fd0321
+mTargetPos	0x4f90c02
+mbSpin	0x4f90c03
+mLifeTimer	0x4f90c04
+mpTool	0x4fd0322
+mOwner	0x5777340
+
+mEnemyEmpireID	0x5626da6
+mTimeSinceWarStart	0x57a0b60
+mPlayerStartStarsCount	0x5626dae
+mEnemyStartStarsCount	0x5626ec6
+mPlayerStarsCaptured	0x5626eca
+mEnemyStarsCaptured	0x5626ece
+
+mType	0x3cd86cc
+mId	0x3cd86d3
+mDefinitionId	0x3cd86d7
+mpAssociatedNoun	0x3cd86ee
+mpNextMarker	0x3d0966c
+mpHeadMarker	0x3d09670
+mNounPosition	0x3daa433
+mNounOrientation	0x3daa434
+mbNounRemoved	0x3daa435
+
+mPosition	0x3221494
+mOrientation	0x3e44212
+mSpiceProduction	0x32214b1
+mMaxSize	0x32214b6
+mSize	0x32214bc
+mFinalIncome	0x32214c2
+mHappiness	0x32214c5
+mBuilding	0x34da69b
+mOrnament	0x34da69f
+mWall	0x34da69c
+mWallStyle	0x34da69e
+mVehicleSpecialty	0x510c373
+mName	0x54ff019
+mDescription	0x6cb88ca
+mCaptureID	0x55ba598
+mCapturePercent	0x55ba59e
+mTurretLocations	0x55a554d
+mLevelHandle	0x689db9f
+mTextureHandle	0x689dba2
+
+mDamageRemainder	0x38521e8
+mDamageRemainderUFO	0x56bc0f6
+mInitialized	0x552a11e
+mShowDefaultEventLog	0x552a11f
+mNumBombers	0x56b7886
+mNumFighters	0x6450510
+mShouldDestroyColonyObject	0x5c4156b
+mOriginStarRecordID	0x5e8ff22
+mGalaxyBomber	0x5ed03d6
+mPendingUFOKey	0x5ed0f0f
+mUFOsLeaveOnArrival	0x5ed0f10
+mUFOSpawnLocation	0x60de151
+mIsPlayerSummoned	0x6367659
+mAttackerEmpire	0x636765a
+mBackgroundShipsList	0x648d0a9
+mWaitingForRaid	0x64925c9
+mTimeOfArrivalMS	0x684a115
+
+mPlayerCreatureKey	0xabcd0000
+mFoodProgression	0xabcd0001
+mPlantFoodProgression	0xabcd0011
+mUnlockedParts	0xabcd0002
+mPartCinematicPlayed	0xabcd0004
+mShowMateButton	0xabcd0005
+mKillCount	0x6947316
+mDeathCount	0x6947317
+gameTimeMS	0x35875139
+gameID	0xabcd0009
+difficulty	0xabcd0010
+missions	0xabcd0012
+playerHasMoved	0xabcd0013
+playerHasEaten	0xabcd0014
+mEvolutionPointsSpent	0xabcd0015
+mOverPlantFoodProgression	0xabcd0016
+mOverAnimalFoodProgression	0xabcd0017
+mFirstEditorEntry	0xabcd0018
+mNanites	0xabcd0019
+mNanovirusActive	0xabcd0020
+mGameMode	0xabcd0021
+mAddedStartTelemetry	0xabcd0022
+
+mPath	0x643fc18
+mLastPathPointIndex	0x643fe1a
+mDistanceFromLastPoint	0x643fe1b
+mCurrentSegmentLength	0x643fe1c
+mLastPointReached	0x643fe1d
+mToNextPoint	0x643fe1e
+mMotionType	0x643fe1f
+mLowestAltitude	0x643fe20
+mHighestAltitude	0x643fe21
+mLastSpeed	0x643fe22
+
+mStarRecordGrid	0x3fabad0
+mStarterStarRecords	0x3ea8676
+mSavedGameStarRecords	0x3ea8679
+mBlackHoles	0x55ceb62
+mEmpireHomeStarRecords	0x4274872
+mPossibleStartLocations	0x563c450
+mSol	0x3f5bbc2
+mpGlobalCLGItems	0x44ee63e
+mNextPoliticalID	0x44ee640
+mGrobID	0x44ee641
+mEmpires	0x52c47aa
+mTradeRouteManager	0x5528d40
+sGameTimeManagerContainer	0x579f61c
+sRelationshipManagerContainer	0x56e616c
+sNameCountMap	0x5d55277
+mTransactionLog	0x5d55278
+mAvailableStarterWorlds	0x563c451
+mEmpireNamesInUse	0x6b94eb9
+mAdventureIDs	0x799479d
+
+mItemID	0x223eb9d
+mItemCount	0x223eb9e
+mItemType	0x362aeb9
+mItemCost	0x362aeba
+mIsUnique	0x362aebb
+mCargoSlot	0x223eba1
+mPoliticalId	0x5d28f83
+mItemPosition	0x61d7ac0
+mIsActive	0x61d7ac9

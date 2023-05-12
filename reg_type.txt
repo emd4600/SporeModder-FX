@@ -16,7 +16,11 @@ summary_pill	0x2d5c9b0
 locale	0x2fac0b6
 pollen_metadata	0x30bdee3
 hm	0x376c3da
+
+# htra is just a wrong guess of a LE file header
 htra	0x472329b
+arth	0x472329b
+
 xhtml	0x65266b7
 raster	0x2f4e681c
 jpg	0x3f8662ea
@@ -79,10 +83,11 @@ structure	0x4b9ef6dc
 populate	0xda141c1b
 advect	0x4805684
 loottable	0xd92af091
-backgroundmap	0x612b3191
+look_algorithm	0xdba35ae2
+backgroundMap	0x612b3191
 random_creature	0xf9c3d770
 look_table	0x8c042499
-effectmap	0x433fb70c
+effectMap	0x433fb70c
 globals	0x2a3ce5b7
 creaturedata	0xf43029a
 geo	0x76a8f7d8
@@ -114,6 +119,10 @@ cmp	0x04f684a4
 js	0x67771f5c
 ini	0x1f886ead
 png.dds 0xb8444447
+pollen_metadata.bak	0xe1e7f839
+avi	0x41e19be
+uiTexture	0xef7d16e1
+activeLog	0x2c23df7
 
 crystalTuning	0x20426a63
 eliteNPCGlobals	0xe5c2d838
@@ -374,6 +383,7 @@ cFindMission	0x14d9597f
 cNanoDrone	0x6ef0f11
 cPlaceableSound	0x74e0069
 cPlaceableEffect	0x7b38ba7
+cPlanetRecord	0x5220cb8
 
 cTimeOfDay	0x21F10B2
 cNpcTribeController	0x21F1105

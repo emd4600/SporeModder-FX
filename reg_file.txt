@@ -4076,7 +4076,7 @@ GenericPressure
 genesisdevice
 gensea
 genufo
-geominfo
+GeomInfo
 get_tool
 get_tool_nog
 getoutofufo
@@ -100657,3 +100657,6 @@ EP1_Icon_TB_River_lakes
 EP1_TB_Road_Paved_End_Cursor
 EP1_TB_Road_Tech_End_Cursor
 cell_background_glow_L2
+effect_builtin~	0x40452700
+lvl
+npc_move_scared

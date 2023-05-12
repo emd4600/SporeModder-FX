@@ -11,6 +11,7 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.argscript.ParserUtils;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 
@@ -221,37 +222,37 @@ public class GaitGroupKey {
 					}
 				}));
 				
-				addParser("trigger", GaitFile.createFloatParser(stream, value -> { key.triggers.add(value); }));
-				addParser("dutyFactor", GaitFile.createFloatParser(stream, value -> { key.dutyFactors.add(value); }));
+				ParserUtils.createFloatParser("trigger", stream, value -> { key.triggers.add(value); });
+				ParserUtils.createFloatParser("dutyFactor", stream, value -> { key.dutyFactors.add(value); });
 				
-				addParser("speedi", GaitFile.createFloatParser(stream, value -> { key.speedi = value; }));
-				addParser("stepHeight", GaitFile.createFloatParser(stream, value -> { key.stepHeight = value; }));
-				addParser("stepGallop", GaitFile.createFloatParser(stream, value -> { key.stepGallop = value; }));
-				addParser("stepPhaseBiasH", GaitFile.createFloatParser(stream, value -> { key.stepPhaseBiasH = value; }));
-				addParser("stepPhaseBiasV", GaitFile.createFloatParser(stream, value -> { key.stepPhaseBiasV = value; }));
-				addParser("stepSkew", GaitFile.createFloatParser(stream, value -> { key.stepSkew = value; }));
-				addParser("footTilt", GaitFile.createFloatParser(stream, value -> { key.footTilt = value; }));
-				addParser("tiltPoint", GaitFile.createFloatParser(stream, value -> { key.tiltPoint = value; }));
-				addParser("toeCurlMax", GaitFile.createFloatParser(stream, value -> { key.toeCurlMax = value; }));
-				addParser("toeCurlBegin", GaitFile.createFloatParser(stream, value -> { key.toeCurlBegin = value; }));
-				addParser("toeCurlEnd", GaitFile.createFloatParser(stream, value -> { key.toeCurlEnd = value; }));
-				addParser("swayAmplitude", GaitFile.createFloatParser(stream, value -> { key.swayAmplitude = value; }));
-				addParser("swayPhase", GaitFile.createFloatParser(stream, value -> { key.swayPhase = value; }));
-				addParser("trackWidthReduction", GaitFile.createFloatParser(stream, value -> { key.trackWidthReduction = value; }));
-				addParser("verticalPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.verticalPhaseOffset = value; }));
-				addParser("sagittalPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.sagittalPhaseOffset = value; }));
-				addParser("lateralPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.lateralPhaseOffset = value; }));
-				addParser("maxVerticalOffset", GaitFile.createFloatParser(stream, value -> { key.maxVerticalOffset = value; }));
-				addParser("verticalDist", GaitFile.createFloatParser(stream, value -> { key.verticalDist = value; }));
-				addParser("walkRunShape", GaitFile.createFloatParser(stream, value -> { key.walkRunShape = value; }));
-				addParser("maxSagittalOffset", GaitFile.createFloatParser(stream, value -> { key.maxSagittalOffset = value; }));
-				addParser("maxLateralOffset", GaitFile.createFloatParser(stream, value -> { key.maxLateralOffset = value; }));
-				addParser("yawPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.yawPhaseOffset = value; }));
-				addParser("pitchPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.pitchPhaseOffset = value; }));
-				addParser("rollPhaseOffset", GaitFile.createFloatParser(stream, value -> { key.rollPhaseOffset = value; }));
-				addParser("maxYawAngle", GaitFile.createFloatParser(stream, value -> { key.maxYawAngle = value; }));
-				addParser("maxPitchAngle", GaitFile.createFloatParser(stream, value -> { key.maxPitchAngle = value; }));
-				addParser("maxRollAngle", GaitFile.createFloatParser(stream, value -> { key.maxRollAngle = value; }));
+				ParserUtils.createFloatParser("speedi", stream, value -> { key.speedi = value; });
+				ParserUtils.createFloatParser("stepHeight", stream, value -> { key.stepHeight = value; });
+				ParserUtils.createFloatParser("stepGallop", stream, value -> { key.stepGallop = value; });
+				ParserUtils.createFloatParser("stepPhaseBiasH", stream, value -> { key.stepPhaseBiasH = value; });
+				ParserUtils.createFloatParser("stepPhaseBiasV", stream, value -> { key.stepPhaseBiasV = value; });
+				ParserUtils.createFloatParser("stepSkew", stream, value -> { key.stepSkew = value; });
+				ParserUtils.createFloatParser("footTilt", stream, value -> { key.footTilt = value; });
+				ParserUtils.createFloatParser("tiltPoint", stream, value -> { key.tiltPoint = value; });
+				ParserUtils.createFloatParser("toeCurlMax", stream, value -> { key.toeCurlMax = value; });
+				ParserUtils.createFloatParser("toeCurlBegin", stream, value -> { key.toeCurlBegin = value; });
+				ParserUtils.createFloatParser("toeCurlEnd", stream, value -> { key.toeCurlEnd = value; });
+				ParserUtils.createFloatParser("swayAmplitude", stream, value -> { key.swayAmplitude = value; });
+				ParserUtils.createFloatParser("swayPhase", stream, value -> { key.swayPhase = value; });
+				ParserUtils.createFloatParser("trackWidthReduction", stream, value -> { key.trackWidthReduction = value; });
+				ParserUtils.createFloatParser("verticalPhaseOffset", stream, value -> { key.verticalPhaseOffset = value; });
+				ParserUtils.createFloatParser("sagittalPhaseOffset", stream, value -> { key.sagittalPhaseOffset = value; });
+				ParserUtils.createFloatParser("lateralPhaseOffset", stream, value -> { key.lateralPhaseOffset = value; });
+				ParserUtils.createFloatParser("maxVerticalOffset", stream, value -> { key.maxVerticalOffset = value; });
+				ParserUtils.createFloatParser("verticalDist", stream, value -> { key.verticalDist = value; });
+				ParserUtils.createFloatParser("walkRunShape", stream, value -> { key.walkRunShape = value; });
+				ParserUtils.createFloatParser("maxSagittalOffset", stream, value -> { key.maxSagittalOffset = value; });
+				ParserUtils.createFloatParser("maxLateralOffset", stream, value -> { key.maxLateralOffset = value; });
+				ParserUtils.createFloatParser("yawPhaseOffset", stream, value -> { key.yawPhaseOffset = value; });
+				ParserUtils.createFloatParser("pitchPhaseOffset", stream, value -> { key.pitchPhaseOffset = value; });
+				ParserUtils.createFloatParser("rollPhaseOffset", stream, value -> { key.rollPhaseOffset = value; });
+				ParserUtils.createFloatParser("maxYawAngle", stream, value -> { key.maxYawAngle = value; });
+				ParserUtils.createFloatParser("maxPitchAngle", stream, value -> { key.maxPitchAngle = value; });
+				ParserUtils.createFloatParser("maxRollAngle", stream, value -> { key.maxRollAngle = value; });
 				
 				addParser("pathData", GaitPathData.createArgScriptBlock(() -> key.pathData));
 			}

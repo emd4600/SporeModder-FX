@@ -79,8 +79,8 @@ public class MaterialStateLink {
 	}
 	
 	private static int parseStateValue(Class<?> typeClass, ArgScriptStream<MaterialStateLink> stream, ArgScriptLine line, ArgScriptArguments args, int index) {
-		if (typeClass == int.class) return Optional.of(stream.parseInt(args, index)).orElse(0);
-		else if (typeClass == float.class) return Float.floatToRawIntBits(Optional.of(stream.parseFloat(args, index)).orElse(0.0f));
+		if (typeClass == int.class) return Optional.ofNullable(stream.parseInt(args, index)).orElse(0);
+		else if (typeClass == float.class) return Float.floatToRawIntBits(Optional.ofNullable(stream.parseFloat(args, index)).orElse(0.0f));
 		else if (typeClass == ColorRGBA.class) {
 			ColorRGBA color = new ColorRGBA();
 			stream.parseColorRGBA(args, index, color);

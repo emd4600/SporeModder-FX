@@ -40,6 +40,18 @@ import sporemodder.view.StatusBar.Status;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
 import sporemodder.view.editors.AnimTextEditorFactory;
+import sporemodder.view.editors.CellBackgroundMapEditorFactory;
+import sporemodder.view.editors.CellEffectMapEditorFactory;
+import sporemodder.view.editors.CellFileEditorFactory;
+import sporemodder.view.editors.CellGlobalsEditorFactory;
+import sporemodder.view.editors.CellLookAlgorithmEditorFactory;
+import sporemodder.view.editors.CellLookTableEditorFactory;
+import sporemodder.view.editors.CellLootTableEditorFactory;
+import sporemodder.view.editors.CellPopulateEditorFactory;
+import sporemodder.view.editors.CellPowersEditorFactory;
+import sporemodder.view.editors.CellRandomCreatureEditorFactory;
+import sporemodder.view.editors.CellStructureEditorFactory;
+import sporemodder.view.editors.CellWorldEditorFactory;
 import sporemodder.view.editors.CnvEditorFactory;
 import sporemodder.view.editors.CompiledShaderViewerFactory;
 import sporemodder.view.editors.EditHistoryEditor;
@@ -122,6 +134,18 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new CellLookTableEditorFactory());
+		editorFactories.add(new CellEffectMapEditorFactory());
+		editorFactories.add(new CellPopulateEditorFactory());
+		editorFactories.add(new CellStructureEditorFactory());
+		editorFactories.add(new CellRandomCreatureEditorFactory());
+		editorFactories.add(new CellFileEditorFactory());
+		editorFactories.add(new CellLootTableEditorFactory());
+		editorFactories.add(new CellPowersEditorFactory());
+		editorFactories.add(new CellBackgroundMapEditorFactory());
+		editorFactories.add(new CellWorldEditorFactory());
+		editorFactories.add(new CellGlobalsEditorFactory());
+		editorFactories.add(new CellLookAlgorithmEditorFactory());
 		editorFactories.add(new GaitEditorFactory());
 		editorFactories.add(new LvlEditorFactory());
 		editorFactories.add(new CompiledShaderViewerFactory());

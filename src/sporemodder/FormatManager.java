@@ -28,6 +28,18 @@ import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.anim.AnimConverter;
 import sporemodder.file.bitmaps.BitmapConverter;
+import sporemodder.file.cell.CellBackgroundMapConverter;
+import sporemodder.file.cell.CellEffectMapConverter;
+import sporemodder.file.cell.CellFileConverter;
+import sporemodder.file.cell.CellGlobalsConverter;
+import sporemodder.file.cell.CellLookAlgorithmConverter;
+import sporemodder.file.cell.CellLookTableConverter;
+import sporemodder.file.cell.CellLootTableConverter;
+import sporemodder.file.cell.CellPopulateConverter;
+import sporemodder.file.cell.CellPowersConverter;
+import sporemodder.file.cell.CellRandomCreatureConverter;
+import sporemodder.file.cell.CellStructureConverter;
+import sporemodder.file.cell.CellWorldConverter;
 import sporemodder.file.cnv.CnvConverter;
 import sporemodder.file.dbpf.DBPFConverter;
 import sporemodder.file.effects.EffectsConverter;
@@ -56,6 +68,18 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new CellLookTableConverter());
+		converters.add(new CellEffectMapConverter());
+		converters.add(new CellPopulateConverter());
+		converters.add(new CellStructureConverter());
+		converters.add(new CellRandomCreatureConverter());
+		converters.add(new CellFileConverter());
+		converters.add(new CellLootTableConverter());
+		converters.add(new CellPowersConverter());
+		converters.add(new CellBackgroundMapConverter());
+		converters.add(new CellWorldConverter());
+		converters.add(new CellGlobalsConverter());
+		converters.add(new CellLookAlgorithmConverter());
 		converters.add(new ScenarioConverter());
 		converters.add(new GaitConverter());
 		converters.add(new LvlConverter());

@@ -1,17 +1,13 @@
 package sporemodder.file.gait;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 
@@ -121,36 +117,5 @@ public class GaitFile {
 		stream.addParser("gaitGroupKey", GaitGroupKey.createArgScriptBlock(gaitGroupKeys));
 		
 		return stream;
-	}
-	
-	@FunctionalInterface
-	static interface QuickFloatParser {
-		public void setValue(float value);
-	}
-	static ArgScriptParser<GaitFile> createFloatParser(ArgScriptStream<GaitFile> stream, QuickFloatParser parser) {
-		return ArgScriptParser.create((parser_, line) -> {
-			Number value = null;
-			ArgScriptArguments args = new ArgScriptArguments();
-			if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-				parser.setValue(value.floatValue());
-			}
-		}); 
-	}
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		MainApp.testInit();
-		
-		File baseFolder = new File("C:\\Users\\Eric\\Desktop\\gaits");
-		for (File file : baseFolder.listFiles()) {
-			if (file.getName().endsWith(".gait")) {
-				System.out.println("Converting " + file.getName());
-				
-				try (StreamReader stream = new FileStream(file, "r")) {
-					GaitFile gait = new GaitFile();
-					gait.read(stream);
-					gait.toArgScript().write(new File(baseFolder, file.getName() + ".gait_t"));
-				}
-			}
-		}
 	}
 }

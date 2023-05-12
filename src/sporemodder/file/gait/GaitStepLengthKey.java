@@ -3,18 +3,13 @@ package sporemodder.file.gait;
 import java.io.IOException;
 import java.util.List;
 
-import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptLine;
-import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.argscript.ParserUtils;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.lvl.GameplayMarker;
-import sporemodder.file.lvl.LevelDefinition;
-import sporemodder.util.Vector3;
-import sporemodder.util.Vector4;
 
 public class GaitStepLengthKey {
 	public float speedi;
@@ -53,8 +48,8 @@ public class GaitStepLengthKey {
 			public void setData(ArgScriptStream<GaitFile> stream, GaitFile data) {
 				super.setData(stream, data);
 				
-				addParser("speedi", GaitFile.createFloatParser(stream, value -> { key.speedi = value; }));
-				addParser("stepLength", GaitFile.createFloatParser(stream, value -> { key.stepLength = value; }));
+				ParserUtils.createFloatParser("speedi", stream, value -> { key.speedi = value; });
+				ParserUtils.createFloatParser("stepLength", stream, value -> { key.stepLength = value; });
 			}
 		};
 	}

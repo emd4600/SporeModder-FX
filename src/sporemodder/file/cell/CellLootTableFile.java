@@ -31,7 +31,7 @@ public class CellLootTableFile {
 	{
 		public int type;
 		public int cellID;
-		public int tableID;  // to a .cell file
+		public int tableID;  // to a .lootTable file
 		public float weight = 1.0f;
 		public int count;
 		public int countDelta;

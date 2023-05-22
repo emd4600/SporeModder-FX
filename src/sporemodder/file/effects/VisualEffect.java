@@ -54,8 +54,10 @@ public class VisualEffect extends EffectComponent {
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
 	
+	public static final int FLAG_HARDSTOP = 0x20;
+	public static final int FLAG_RIGID = 0x40;
 	public static final int FLAG_EXTENDED_LOD_WEIGHTS = 0x80000;
-	public static final int FLAGMASK = FLAG_EXTENDED_LOD_WEIGHTS;
+	public static final int FLAGMASK = FLAG_EXTENDED_LOD_WEIGHTS | FLAG_HARDSTOP | FLAG_RIGID;
 
 	public int flags;
 	public int componentAppFlagsMask;
@@ -115,6 +117,13 @@ public class VisualEffect extends EffectComponent {
 			
 			if (line.getOptionArguments(args, "flags", 1)) {
 				effect.flags = Optional.ofNullable(stream.parseInt(args, 0) & ~FLAGMASK).orElse(0);
+			}
+			
+			if (line.hasFlag("hardStop")) {
+				effect.flags |= FLAG_HARDSTOP;
+			}
+			if (line.hasFlag("rigid")) {
+				effect.flags |= FLAG_RIGID;
 			}
 			
 			if (line.getOptionArguments(args, "notifyMessageID", 1)) {
@@ -204,9 +213,30 @@ public class VisualEffect extends EffectComponent {
 						for (int i = firstIndex; i < effect.blocks.size(); i++) {
 							VisualEffectBlock block = effect.blocks.get(i);
 							
-							if (block.selectionChance != 0) {
+							if (block.selectionChance == 0) {
 								block.selectionChance = remaining;
 							}
+						}
+					}
+					
+					// If the total probability is less than 65535, no effect is selected;
+					// if it is more than 65535, sometimes more than one is selected!
+					// So we need to normalize them to ensure they add up to 65535
+					
+					int totalAddUp = 0;
+					for (int i = firstIndex; i < effect.blocks.size(); i++) {
+						VisualEffectBlock block = effect.blocks.get(i);
+						totalAddUp += block.selectionChance;
+					}
+					
+					int difference = 65535 - totalAddUp;
+					int distributedDifference = difference / (effect.blocks.size() - firstIndex);
+					int finalRemainder = difference - distributedDifference * (effect.blocks.size() - firstIndex);
+					for (int i = firstIndex; i < effect.blocks.size(); i++) {
+						VisualEffectBlock block = effect.blocks.get(i);
+						block.selectionChance += distributedDifference;
+						if (i == firstIndex) {
+							block.selectionChance += finalRemainder;
 						}
 					}
 					
@@ -302,6 +332,9 @@ public class VisualEffect extends EffectComponent {
 		
 		int maskedFlags = flags & ~FLAGMASK;
 		if (maskedFlags != 0) writer.option("flags").arguments("0x" + Integer.toHexString(maskedFlags));
+		
+		writer.flag("rigid", (flags & FLAG_RIGID) != 0);
+		writer.flag("hardStop", (flags & FLAG_HARDSTOP) != 0);
 		
 		int appFlagsMask = 0;
 		for (VisualEffectBlock block : blocks) appFlagsMask |= block.appFlagsMask;

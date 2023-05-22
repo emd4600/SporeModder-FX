@@ -77,7 +77,7 @@ public class CellPopulateFile {
 		public int clusterCellID;
 		public int encounterPopulateID;
 		public int plantType;  // ENUM_PLANT_TYPE
-		public int type;
+		public int type;  // ENUM_TYPE
 		public float count = -1.0f;
 		public float count_easy = -1.0f;
 		public float count_med = -1.0f;
@@ -88,7 +88,7 @@ public class CellPopulateFile {
 		public float encounterScale;
 	}
 	
-	public int scale = 1;
+	public int scale = 1;  // ENUM_SCALE
 	public int maskTexture;
 	public final List<cMarker> markers = new ArrayList<>();
 	

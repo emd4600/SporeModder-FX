@@ -57,7 +57,7 @@ public class VisualEffect extends EffectComponent {
 	public static final int FLAG_HARDSTOP = 0x20;
 	public static final int FLAG_RIGID = 0x40;
 	public static final int FLAG_EXTENDED_LOD_WEIGHTS = 0x80000;
-	public static final int FLAGMASK = FLAG_EXTENDED_LOD_WEIGHTS | FLAG_HARDSTOP | FLAG_RIGID;
+	public static final int FLAGMASK = FLAG_EXTENDED_LOD_WEIGHTS;
 
 	public int flags;
 	public int componentAppFlagsMask;

@@ -50,14 +50,14 @@ public class CellFile {
 		ENUM_AI_MOVEMENT_STYLE.add(7, "flagella_cillia_jet");
 	}
 	
-	public static final ArgScriptEnum ENUM_MEDIUM = new ArgScriptEnum();
+	public static final ArgScriptEnum ENUM_AI_FOOD = new ArgScriptEnum();
 	static {
-		ENUM_MEDIUM.add(-1, "null");
-		ENUM_MEDIUM.add(0, "none");
-		ENUM_MEDIUM.add(3, "liquid");
-		ENUM_MEDIUM.add(1, "rock");
-		ENUM_MEDIUM.add(2, "solid");
-		ENUM_MEDIUM.add(4, "air");
+		ENUM_AI_FOOD.add(-1, "null");
+		ENUM_AI_FOOD.add(0, "none");
+		ENUM_AI_FOOD.add(3, "liquid");
+		ENUM_AI_FOOD.add(1, "rock");
+		ENUM_AI_FOOD.add(2, "solid");
+		ENUM_AI_FOOD.add(4, "air");
 	}
 	
 	public static final ArgScriptEnum ENUM_UNLOCK_TYPE = new ArgScriptEnum();
@@ -91,6 +91,18 @@ public class CellFile {
 		ENUM_SOUND.add(3, "rock");
 		ENUM_SOUND.add(1, "creature");
 		ENUM_SOUND.add(4, "bubble");
+	}
+	
+	public static final ArgScriptEnum ENUM_CELL_TYPE = new ArgScriptEnum();
+	static {
+		ENUM_CELL_TYPE.add(0, "none");
+		ENUM_CELL_TYPE.add(3, "liquid");
+		ENUM_CELL_TYPE.add(1, "rock");
+		ENUM_CELL_TYPE.add(2, "solid");
+		ENUM_CELL_TYPE.add(4, "air");
+		ENUM_CELL_TYPE.add(5, "poison");
+		ENUM_CELL_TYPE.add(7, "nanite");
+		ENUM_CELL_TYPE.add(6, "unlock");
 	}
 	
 	public static class cLocalizedString
@@ -301,7 +313,7 @@ public class CellFile {
 			writer.command("numArcs").ints(numArcs);
 			writer.command("keyTransformation").arguments(HashManager.get().getFileName(keyTransformation));
 			writer.command("keyProjectile").arguments(HashManager.get().getFileName(keyProjectile));
-			writer.command("food").arguments(ENUM_MEDIUM.get(food));
+			writer.command("food").arguments(ENUM_AI_FOOD.get(food));
 			writer.command("growCount").ints(growCount);
 			writer.command("digestionCount").ints(digestionCount);
 			writer.command("digestionTime").floats(digestionTime);
@@ -438,7 +450,7 @@ public class CellFile {
 		writer.command("hp").ints(hp);
 		writer.command("fixedOrientation").arguments(fixedOrientation);
 		writer.command("flags").ints(flags);
-		writer.command("cellType").arguments(ENUM_MEDIUM.get(cellType));
+		writer.command("cellType").arguments(ENUM_CELL_TYPE.get(cellType));
 		writer.command("unlockType").arguments(ENUM_UNLOCK_TYPE.get(unlockType));
 		writer.command("density").arguments(ENUM_DENSITY.get(density));
 		writer.command("sound").arguments(ENUM_SOUND.get(sound));
@@ -487,7 +499,7 @@ public class CellFile {
 		ParserUtils.createIntParser("hp", stream, value -> hp = value);
 		ParserUtils.createBooleanParser("fixedOrientation", stream, value -> fixedOrientation = value);
 		ParserUtils.createIntParser("flags", stream, value -> flags = value);
-		ParserUtils.createEnumParser("cellType", stream, ENUM_MEDIUM, value -> cellType = value);
+		ParserUtils.createEnumParser("cellType", stream, ENUM_CELL_TYPE, value -> cellType = value);
 		ParserUtils.createEnumParser("unlockType", stream, ENUM_UNLOCK_TYPE, value -> unlockType = value);
 		ParserUtils.createEnumParser("density", stream, ENUM_DENSITY, value -> density = value);
 		ParserUtils.createEnumParser("sound", stream, ENUM_SOUND, value -> sound = value);
@@ -586,7 +598,7 @@ public class CellFile {
 			ParserUtils.createIntParser("numArcs", this, value -> data.numArcs = value);
 			ParserUtils.createFileIDParser("keyTransformation", this, value -> data.keyTransformation = value);
 			ParserUtils.createFileIDParser("keyProjectile", this, value -> data.keyProjectile = value);
-			ParserUtils.createEnumParser("food", this, ENUM_MEDIUM, value -> data.food = value);
+			ParserUtils.createEnumParser("food", this, ENUM_AI_FOOD, value -> data.food = value);
 			ParserUtils.createIntParser("growCount", this, value -> data.growCount = value);
 			ParserUtils.createIntParser("digestionCount", this, value -> data.digestionCount = value);
 			ParserUtils.createFloatParser("digestionTime", this, value -> data.digestionTime = value);

@@ -160,6 +160,7 @@ bnk	0x0a4d8d09
 json	0x0a98eaf0
 er2	0x08068aec
 eapdPixie	0x0330a65e
+mrk	0x2b7df427
 
 kGameData	0x17F243B
 kCheatObject	0x2A37E35

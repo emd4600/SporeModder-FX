@@ -302,21 +302,34 @@ public class EffectDirectory {
 			if (file.getName().endsWith(".pfx")) {
 				if (packer != null) packer.setCurrentFile(file);
 				
-				processUnit(file);
+				processUnit(file, folder);
 			}
 		}
 	}
 	
-	public void processUnit(File file) throws IOException {
+	public void processUnit(File file, File parentFolder) throws IOException {
 		EffectUnit unit = new EffectUnit(this);
 		ArgScriptStream<EffectUnit> stream = unit.generateStream();
 		stream.setFastParsing(true);
+		stream.setFolder(parentFolder);
 		
 		stream.process(file);
 		
 		// Stop reading .PFX files if one of them has errors
 		if (!stream.getErrors().isEmpty()) {
-			throw new IOException("File " + file.getName() + " cannot be compiled, " + stream.getErrors().size() + " errors found.");
+			StringBuilder sb = new StringBuilder();
+			sb.append("File ");
+			sb.append(file.getName());
+			sb.append(" cannot be compiled, ");
+			sb.append(stream.getErrors().size());
+			sb.append(" errors found.");
+			for (int i = 0; i < Math.min(stream.getErrors().size(), 4); i++) {
+				sb.append("\n [Line ");
+				sb.append(stream.getErrors().get(i).getLine());
+				sb.append("]: ");
+				sb.append(stream.getErrors().get(i).getMessage());
+			}
+			throw new IOException(sb.toString());
 		}
 		
 		addEffectUnit(unit);

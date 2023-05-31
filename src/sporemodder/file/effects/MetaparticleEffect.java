@@ -1066,6 +1066,13 @@ public class MetaparticleEffect extends EffectComponent {
 				else {
 					effect.prerollTime = value.floatValue() > 0.5f ? value.floatValue() : 0.5f;
 				}
+				
+				if (line.hasFlag("propagateAlways")) {
+					effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+				}
+				if (line.hasFlag("propagateIfKilled")) {
+					effect.unkFlags |= LIFE_PROPAGATEIFKILLED;
+				}
 			}));
 		}
 		

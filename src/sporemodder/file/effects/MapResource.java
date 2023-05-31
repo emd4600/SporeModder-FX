@@ -21,18 +21,18 @@ package sporemodder.file.effects;
 import java.io.IOException;
 import java.util.Collection;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureFieldEndian;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.Vector4;
 import sporemodder.view.editors.PfxEditor;
 
@@ -50,32 +50,37 @@ public class MapResource extends EffectResource {
 	
 	public static final ArgScriptEnum ENUM_CHANNEL = new ArgScriptEnum();
 	static {
-		ENUM_CHANNEL.add(0, "red");
+		ENUM_CHANNEL.add(0, "blue");
 		ENUM_CHANNEL.add(1, "green");
-		ENUM_CHANNEL.add(2, "blue");
+		ENUM_CHANNEL.add(2, "red");
 		ENUM_CHANNEL.add(3, "alpha");
 		ENUM_CHANNEL.add(4, "all");
 	}
 	
 	public static final ArgScriptEnum ENUM_MAPTYPE = new ArgScriptEnum();
 	static {
-		ENUM_MAPTYPE.add(0, "imageUnk0");
+		//ENUM_MAPTYPE.add(0, "test");
 		ENUM_MAPTYPE.add(1, "bitImage");
-		ENUM_MAPTYPE.add(2, "bitImage8");
-		ENUM_MAPTYPE.add(3, "bitImage32");
-		ENUM_MAPTYPE.add(4, "imageUnk4");
-		ENUM_MAPTYPE.add(5, "imageUnk5");
+		ENUM_MAPTYPE.add(2, "monoImage");
+		ENUM_MAPTYPE.add(3, "image");
+		ENUM_MAPTYPE.add(4, "advectImage");
+		ENUM_MAPTYPE.add(5, "forceImage");
+		//ENUM_MAPTYPE.add(6, "op");
+		ENUM_MAPTYPE.add(7, "bitCubeImage");
+		ENUM_MAPTYPE.add(8, "monoCubeImage");
 	}
+	public static byte TYPE_TEST = 0;
+	public static byte TYPE_OP = 6;
 	
 	public static final ArgScriptEnum ENUM_OPTYPE = new ArgScriptEnum();
 	static {
 		ENUM_OPTYPE.add(0, "set");
 		ENUM_OPTYPE.add(1, "add");
-		ENUM_OPTYPE.add(2, "mul");
-		ENUM_OPTYPE.add(3, "sub");
-		ENUM_OPTYPE.add(4, "max");
-		ENUM_OPTYPE.add(5, "min");
-		ENUM_OPTYPE.add(6, "mad");
+		ENUM_OPTYPE.add(2, "multiply");
+		ENUM_OPTYPE.add(3, "subtract");
+		ENUM_OPTYPE.add(4, "min");
+		ENUM_OPTYPE.add(5, "max");
+		ENUM_OPTYPE.add(6, "multiplyAdd");
 	}
 	
 	public static final int MAPTYPE_1BIT = 1;  // ? .#03E421E9 files
@@ -83,6 +88,8 @@ public class MapResource extends EffectResource {
 	public static final int MAPTYPE_32BIT = 3;  // ?
 	public static final int MAPTYPE_NONE = 6;  // ?
 	
+	public static final int FLAG_WORLD_SPACE = 1;
+	public static final int FLAG_TILE = 2;
 	public static final int ARG_RES_0 = 0x4;  // ?
 	public static final int ARG_RES_1 = 0x8;  // ?
 	public static final int ARG_RES_2 = 0x10;  // ?
@@ -92,6 +99,10 @@ public class MapResource extends EffectResource {
 	public static final int ARG_VALUE_2 = 0x100;  // ?
 	public static final int ARG_VALUE_3 = 0x200;  // ?
 	public static final int ARG_MASK = 0x3FC;
+	public static final int[] ARG_RES = new int[] { ARG_RES_0, ARG_RES_1, ARG_RES_2, ARG_RES_3 };
+	public static final int[] ARG_VALUE = new int[] { ARG_VALUE_0, ARG_VALUE_1, ARG_VALUE_2, ARG_VALUE_3 };
+	
+	public static final int FLAGMASK = FLAG_WORLD_SPACE | FLAG_TILE | ARG_MASK;
 	
 	
 	public int flags;
@@ -128,14 +139,64 @@ public class MapResource extends EffectResource {
 			
 			data.setPosition(resource, stream.getLinePositions().get(stream.getCurrentLine()));
 			
+			if (line.hasFlag("tile")) {
+				resource.flags |= FLAG_TILE;
+			}
+			if (line.hasFlag("worldSpace")) {
+				resource.flags |= FLAG_WORLD_SPACE;
+			}
+			
+			boolean hasImage = false;
 			Collection<String> keys = ENUM_MAPTYPE.getKeys(); 
-			for (String key : keys) {
-				if (line.getOptionArguments(args, key, 1)) {
-					String[] words = new String[2];
-					resource.imageID.parse(args, 0, words);
-					resource.mapType = (byte) ENUM_MAPTYPE.get(key);
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, key, 0);
-					break;
+			
+			if (!keys.stream().anyMatch(s -> line.hasOption(s)) &&
+					!line.hasOption("op") && !line.hasOption("test"))
+			{
+				stream.addError(line.createError("No map type specified. Map types are '-op', '-bitImage', '-monoImage', '-image', '-advectImage', '-forceImage', '-bitCubeImage', '-monoCubeImage'"));
+			}
+			else
+			{
+				for (String key : keys) {
+					if (line.getOptionArguments(args, key, 1)) {
+						String[] words = new String[2];
+						resource.imageID.parse(args, 0, words);
+						resource.mapType = (byte) ENUM_MAPTYPE.get(key);
+						line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, key, 0);
+						hasImage = true;
+						break;
+					}
+				}
+				
+				if (!hasImage) {
+					if (line.getOptionArguments(args, "op", 2, 5)) {
+						resource.mapType = TYPE_OP;
+						resource.opType = (byte)ENUM_OPTYPE.get(args, 0);
+						
+						// The values can either be other maps, which can be names or 0x hashes, or numerical vector4 values
+						for (int i = 1; i < args.size(); i++) 
+						{
+							if (args.get(i).contains("(")) {
+								float[] arr = new float[4];
+								stream.parseVector4(args, i, arr);
+								
+								resource.flags |= ARG_VALUE[i-1];
+								resource.opArgValues[i-1] = new Vector4(arr);
+							}
+							else
+							{
+								resource.flags |= ARG_RES[i-1];
+								resource.opArgMaps[i-1] = new ResourceID();
+								String[] words = new String[2];
+								if (resource.opArgMaps[i-1].parse(args, i)) {
+									line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "op", i);
+								}
+							}
+						}
+					}
+					else {
+						line.hasFlag("test");
+						resource.mapType = TYPE_TEST;
+					}
 				}
 			}
 			
@@ -147,91 +208,9 @@ public class MapResource extends EffectResource {
 				stream.parseVector4(args, 0, resource.bounds);
 			}
 			
-			if (line.getOptionArguments(args, "map0", 1)) {
-				resource.opArgMaps[0] = new ResourceID();
-				String[] words = new String[2];
-				if (resource.opArgMaps[0].parse(args, 0)) {
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "map0", 0);
-					resource.flags |= ARG_RES_0;
-				}
-			}
-			
-			if (line.getOptionArguments(args, "map1", 1)) {
-				resource.opArgMaps[1] = new ResourceID();
-				String[] words = new String[2];
-				if (resource.opArgMaps[1].parse(args, 0)) {
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "map1", 0);
-					resource.flags |= ARG_RES_1;
-				}
-			}
-			
-			if (line.getOptionArguments(args, "map2", 1)) {
-				resource.opArgMaps[2] = new ResourceID();
-				String[] words = new String[2];
-				if (resource.opArgMaps[2].parse(args, 0)) {
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "map2", 0);
-					resource.flags |= ARG_RES_2;
-				}
-			}
-			
-			if (line.getOptionArguments(args, "map3", 1)) {
-				resource.opArgMaps[3] = new ResourceID();
-				String[] words = new String[2];
-				if (resource.opArgMaps[3].parse(args, 0)) {
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "map3", 0);
-					resource.flags |= ARG_RES_3;
-				}
-			}
-			
-			if (line.getOptionArguments(args, "value0", 1)) {
-				resource.flags |= ARG_VALUE_0;
-				
-				float[] arr = new float[4];
-				
-				if (args.get(0).contains("(")) {
-					stream.parseVector4(args, 0, arr);
-				}
-				else if ((value = stream.parseFloat(args, 0)) != null) {
-					arr[0] = arr[1] = arr[2] = arr[3] = value.floatValue();
-				}
-				
-				resource.opArgValues[0] = new Vector4(arr);
-			}
-			
-			if (line.getOptionArguments(args, "value1", 1)) {
-				resource.flags |= ARG_VALUE_1;
-				
-				float[] arr = new float[4];
-				stream.parseVector4(args, 0, arr);
-				
-				resource.opArgValues[1] = new Vector4(arr);
-			}
-			
-			if (line.getOptionArguments(args, "value2", 1)) {
-				resource.flags |= ARG_VALUE_2;
-				
-				float[] arr = new float[4];
-				stream.parseVector4(args, 0, arr);
-				
-				resource.opArgValues[2] = new Vector4(arr);
-			}
-			
-			if (line.getOptionArguments(args, "value3", 1)) {
-				resource.flags |= ARG_VALUE_3;
-				
-				float[] arr = new float[4];
-				stream.parseVector4(args, 0, arr);
-				
-				resource.opArgValues[3] = new Vector4(arr);
-			}
-			
-			if (line.getOptionArguments(args, "op", 1)) {
-				resource.opType = (byte) ENUM_OPTYPE.get(args, 0);
-			}
-			
 			if (line.getOptionArguments(args, "flags", 1) && (value = stream.parseInt(args, 0)) != null) {
 				// We don't want the user to modify the arg flags
-				resource.flags |= (value.intValue() & ~ARG_MASK);
+				resource.flags |= (value.intValue() & ~FLAGMASK);
 			}
 		}
 		
@@ -288,35 +267,37 @@ public class MapResource extends EffectResource {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(resourceID);
 		
-		if (!imageID.isDefault()) writer.option(ENUM_MAPTYPE.get(mapType)).arguments(imageID);
-		
 		writer.option("channel").arguments(ENUM_CHANNEL.get(channel));
 		writer.option("rect").vector(bounds);
 		
-		if ((flags & ARG_RES_0) == ARG_RES_0) writer.option("map0").arguments(opArgMaps[0]);
-		if ((flags & ARG_RES_1) == ARG_RES_1) writer.option("map1").arguments(opArgMaps[1]);
-		if ((flags & ARG_RES_2) == ARG_RES_2) writer.option("map2").arguments(opArgMaps[2]);
-		if ((flags & ARG_RES_3) == ARG_RES_3) writer.option("map3").arguments(opArgMaps[3]);
+		writer.flag("tile", (flags & FLAG_TILE) != 0);
+		writer.flag("worldSpace", (flags & FLAG_WORLD_SPACE) != 0);
 		
-		if ((flags & ARG_VALUE_0) == ARG_VALUE_0) {
-			if (opArgValues[0].allEqual()) writer.option("value0").floats(opArgValues[0].getX());
-			else writer.option("value0").vector4(opArgValues[0]);
+		if (mapType == TYPE_TEST)
+		{
+			writer.option("test");
 		}
-		if ((flags & ARG_VALUE_1) == ARG_VALUE_1) {
-			if (opArgValues[1].allEqual()) writer.option("value1").floats(opArgValues[1].getX());
-			else writer.option("value1").vector4(opArgValues[1]);
+		else if (mapType == TYPE_OP)
+		{
+			writer.option("op").arguments(ENUM_OPTYPE.get(opType));
+			
+			for (int i = 0; i < 4; i++) {
+				if ((flags & ARG_VALUE[i]) == ARG_VALUE[i]) {
+					writer.vector4(opArgValues[i]);
+				}
+				else if ((flags & ARG_RES[i]) == ARG_RES[i]) {
+					writer.arguments(opArgMaps[i]);
+				}
+				else {
+					break;
+				}
+			}
 		}
-		if ((flags & ARG_VALUE_2) == ARG_VALUE_2) {
-			if (opArgValues[2].allEqual()) writer.option("value2").floats(opArgValues[2].getX());
-			else writer.option("value2").vector4(opArgValues[2]);
-		}
-		if ((flags & ARG_VALUE_3) == ARG_VALUE_3) {
-			if (opArgValues[3].allEqual()) writer.option("value3").floats(opArgValues[3].getX());
-			else writer.option("value3").vector4(opArgValues[3]);
+		else
+		{
+			writer.option(ENUM_MAPTYPE.get(mapType)).arguments(imageID);
 		}
 		
-		if ((flags & ARG_MASK) != 0) writer.option("op").arguments(ENUM_OPTYPE.get(opType));
-		
-		if ((flags & ~ARG_MASK) != 0) writer.option("flags").arguments("0x" + Integer.toHexString(flags & ~ARG_MASK));
+		if ((flags & ~FLAGMASK) != 0) writer.option("flags").arguments("0x" + Integer.toHexString(flags & ~FLAGMASK));
 	}
 }

@@ -77,6 +77,8 @@ public class ParticleEffect extends EffectComponent {
 		ENUM_PHYSICS.add(0, "normal");
 		ENUM_PHYSICS.add(1, "unk1");
 		ENUM_PHYSICS.add(2, "unk2");
+		ENUM_PHYSICS.add(1, "standard");
+		ENUM_PHYSICS.add(2, "path");
 	}
 
 	public static final int SOURCE_ROUND = 0x10;

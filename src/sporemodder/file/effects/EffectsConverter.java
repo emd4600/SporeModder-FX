@@ -69,7 +69,7 @@ public class EffectsConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		EffectDirectory effectDirectory = new EffectDirectory();
 		if (input.isFile()) {
-			effectDirectory.processUnit(input);
+			effectDirectory.processUnit(input, input.getParentFile());
 		} else {
 			effectDirectory.process(input, null);
 		}

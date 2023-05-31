@@ -61,6 +61,7 @@ public class CnvConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CnvUnit unit = new CnvUnit();
 		ArgScriptStream<CnvUnit> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -72,6 +73,7 @@ public class CnvConverter implements Converter {
 		if (isEncoder(input)) {
 			CnvUnit unit = new CnvUnit();
 			ArgScriptStream<CnvUnit> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

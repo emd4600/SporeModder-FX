@@ -43,6 +43,7 @@ public class LvlConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		LevelDefinition level = new LevelDefinition();
 		ArgScriptStream<LevelDefinition> stream = level.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		level.write(output);
@@ -54,6 +55,7 @@ public class LvlConverter implements Converter {
 		if (isEncoder(input)) {
 			LevelDefinition level = new LevelDefinition();
 			ArgScriptStream<LevelDefinition> stream = level.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

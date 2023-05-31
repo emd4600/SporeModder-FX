@@ -43,6 +43,7 @@ public class CellLootTableConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellLootTableFile unit = new CellLootTableFile();
 		ArgScriptStream<CellLootTableFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellLootTableConverter implements Converter {
 		if (isEncoder(input)) {
 			CellLootTableFile unit = new CellLootTableFile();
 			ArgScriptStream<CellLootTableFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

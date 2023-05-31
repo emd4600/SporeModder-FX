@@ -43,6 +43,7 @@ public class CellLookAlgorithmConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellLookAlgorithmFile unit = new CellLookAlgorithmFile();
 		ArgScriptStream<CellLookAlgorithmFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellLookAlgorithmConverter implements Converter {
 		if (isEncoder(input)) {
 			CellLookAlgorithmFile unit = new CellLookAlgorithmFile();
 			ArgScriptStream<CellLookAlgorithmFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

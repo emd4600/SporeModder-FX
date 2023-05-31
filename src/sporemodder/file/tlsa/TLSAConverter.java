@@ -61,6 +61,7 @@ public class TLSAConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		TLSAUnit unit = new TLSAUnit();
 		ArgScriptStream<TLSAUnit> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -72,6 +73,7 @@ public class TLSAConverter implements Converter {
 		if (isEncoder(input)) {
 			TLSAUnit unit = new TLSAUnit();
 			ArgScriptStream<TLSAUnit> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

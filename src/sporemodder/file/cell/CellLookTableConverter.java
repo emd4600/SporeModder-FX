@@ -43,6 +43,7 @@ public class CellLookTableConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellLookTableFile unit = new CellLookTableFile();
 		ArgScriptStream<CellLookTableFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellLookTableConverter implements Converter {
 		if (isEncoder(input)) {
 			CellLookTableFile unit = new CellLookTableFile();
 			ArgScriptStream<CellLookTableFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

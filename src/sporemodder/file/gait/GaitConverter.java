@@ -43,6 +43,7 @@ public class GaitConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		GaitFile gait = new GaitFile();
 		ArgScriptStream<GaitFile> stream = gait.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		gait.write(output);
@@ -54,6 +55,7 @@ public class GaitConverter implements Converter {
 		if (isEncoder(input)) {
 			GaitFile gait = new GaitFile();
 			ArgScriptStream<GaitFile> stream = gait.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

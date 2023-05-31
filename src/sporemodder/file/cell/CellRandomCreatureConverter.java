@@ -43,6 +43,7 @@ public class CellRandomCreatureConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellRandomCreatureFile unit = new CellRandomCreatureFile();
 		ArgScriptStream<CellRandomCreatureFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellRandomCreatureConverter implements Converter {
 		if (isEncoder(input)) {
 			CellRandomCreatureFile unit = new CellRandomCreatureFile();
 			ArgScriptStream<CellRandomCreatureFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

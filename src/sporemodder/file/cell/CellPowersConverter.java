@@ -43,6 +43,7 @@ public class CellPowersConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellPowersFile unit = new CellPowersFile();
 		ArgScriptStream<CellPowersFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellPowersConverter implements Converter {
 		if (isEncoder(input)) {
 			CellPowersFile unit = new CellPowersFile();
 			ArgScriptStream<CellPowersFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

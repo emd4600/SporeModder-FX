@@ -43,6 +43,7 @@ public class CellWorldConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellWorldFile unit = new CellWorldFile();
 		ArgScriptStream<CellWorldFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellWorldConverter implements Converter {
 		if (isEncoder(input)) {
 			CellWorldFile unit = new CellWorldFile();
 			ArgScriptStream<CellWorldFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

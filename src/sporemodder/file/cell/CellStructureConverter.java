@@ -43,6 +43,7 @@ public class CellStructureConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellStructureFile unit = new CellStructureFile();
 		ArgScriptStream<CellStructureFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellStructureConverter implements Converter {
 		if (isEncoder(input)) {
 			CellStructureFile unit = new CellStructureFile();
 			ArgScriptStream<CellStructureFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

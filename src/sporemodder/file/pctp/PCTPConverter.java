@@ -60,6 +60,7 @@ public class PCTPConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		PCTPUnit pctp = new PCTPUnit();
 		ArgScriptStream<PCTPUnit> stream = pctp.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		pctp.write(output);
@@ -71,6 +72,7 @@ public class PCTPConverter implements Converter {
 		if (isEncoder(input)) {
 			PCTPUnit pctp = new PCTPUnit();
 			ArgScriptStream<PCTPUnit> stream = pctp.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

@@ -175,6 +175,7 @@ public class ShaderFragments {
 		
 		ShaderFragmentUnit parseUnit = new ShaderFragmentUnit();
 		ArgScriptStream<ShaderFragmentUnit> stream = parseUnit.generateStream(); 
+		stream.setFolder(inputFolder);
 		
 		for (File file : vertexFiles) {
 			if (packer != null) packer.setCurrentFile(file);

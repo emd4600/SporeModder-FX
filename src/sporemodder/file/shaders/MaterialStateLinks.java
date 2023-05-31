@@ -27,6 +27,7 @@ import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
+import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.effects.ResourceID;
 import sporemodder.file.rw4.MaterialStateCompiler;
@@ -172,7 +173,9 @@ public class MaterialStateLinks {
 		for (File file : folder.listFiles()) {
 			if (file.getName().endsWith(".smt_t")) {
 				MaterialStateLink link = new MaterialStateLink();
-				link.generateStream(false).process(file);
+				ArgScriptStream<MaterialStateLink> stream = link.generateStream(false);
+				stream.setFolder(folder);
+				stream.process(file);
 				materials.add(link);
 			}
 		}

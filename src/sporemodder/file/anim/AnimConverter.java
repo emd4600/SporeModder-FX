@@ -62,6 +62,7 @@ public class AnimConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		SPAnimation anim = new SPAnimation();
 		ArgScriptStream<SPAnimation> stream = anim.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		anim.write(output, input.getAbsolutePath(), HashManager.get().getFileHash(FileManager.removeExtension(input.getName())));
@@ -72,6 +73,7 @@ public class AnimConverter implements Converter {
 		if (isEncoder(input)) {
 			SPAnimation anim = new SPAnimation();
 			ArgScriptStream<SPAnimation> stream = anim.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

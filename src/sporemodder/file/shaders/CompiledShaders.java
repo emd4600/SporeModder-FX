@@ -33,15 +33,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import sporemodder.FileManager;
+import sporemodder.HashManager;
+import sporemodder.MainApp;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.FileManager;
-import sporemodder.HashManager;
-import sporemodder.MainApp;
-import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.dbpf.DBPFPacker;
 import sporemodder.file.shaders.ShaderBuilder.ShaderBuilderEntry;
 import sporemodder.file.shaders.StandardShader.StandardShaderEntry;
 
@@ -261,7 +262,8 @@ public class CompiledShaders {
 			shader.processName(shaderName);
 			
 			ShaderBuilderEntry entry = new ShaderBuilderEntry();
-			ShaderBuilder.generateStream(entry, vsMap, psMap).process(file);
+			ArgScriptStream<ShaderBuilderEntry> stream = ShaderBuilder.generateStream(entry, vsMap, psMap);
+			stream.process(file);
 			shader.entries.put(entryIndex, entry);
 		}
 		

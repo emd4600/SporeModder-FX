@@ -43,6 +43,7 @@ public class CellPopulateConverter implements Converter {
 	public boolean encode(File input, StreamWriter output) throws Exception {
 		CellPopulateFile unit = new CellPopulateFile();
 		ArgScriptStream<CellPopulateFile> stream = unit.generateStream();
+		stream.setFolder(input.getParentFile());
 		stream.setFastParsing(true);
 		stream.process(input);
 		unit.write(output);
@@ -54,6 +55,7 @@ public class CellPopulateConverter implements Converter {
 		if (isEncoder(input)) {
 			CellPopulateFile unit = new CellPopulateFile();
 			ArgScriptStream<CellPopulateFile> stream = unit.generateStream();
+			stream.setFolder(input.getParentFile());
 			stream.setFastParsing(true);
 			stream.process(input);
 			

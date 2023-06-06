@@ -39,7 +39,7 @@ public class PropertyString8 extends BaseProperty {
 	
 	public static final int TYPE_CODE = 0x0012;
 	public static final String KEYWORD = "string8";
-	public static final int ARRAY_SIZE = 8;
+	public static final int ARRAY_SIZE = 16;
 
 	private String[] values;
 	

@@ -105082,4 +105082,8 @@ vlib_dance_probShXCr07
 vlib_dance_probShXCr08
 vlib_dance_probShXCr09
 
-solarskybox_0
+
+solarSkybox_0
+cell_solidFood
+tribe_camera
+creature_free_camera

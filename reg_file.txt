@@ -105081,3 +105081,5 @@ vlib_dance_probShXCr06
 vlib_dance_probShXCr07
 vlib_dance_probShXCr08
 vlib_dance_probShXCr09
+
+solarskybox_0

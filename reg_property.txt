@@ -5804,3 +5804,5 @@ polyphonymode
 mixmode_planetcombat
 inverse_gain_curve
 ColorOutOfScale
+maxNoteNumber
+minNoteNumber

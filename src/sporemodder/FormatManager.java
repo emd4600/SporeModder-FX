@@ -27,6 +27,7 @@ import java.util.Properties;
 import sporemodder.file.Converter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.anim.AnimConverter;
+import sporemodder.file.arth.ArithmeticaConverter;
 import sporemodder.file.bitmaps.BitmapConverter;
 import sporemodder.file.cell.CellBackgroundMapConverter;
 import sporemodder.file.cell.CellEffectMapConverter;
@@ -68,6 +69,7 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new ArithmeticaConverter());
 		converters.add(new CellLookTableConverter());
 		converters.add(new CellEffectMapConverter());
 		converters.add(new CellPopulateConverter());

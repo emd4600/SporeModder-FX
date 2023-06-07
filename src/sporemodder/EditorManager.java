@@ -40,6 +40,7 @@ import sporemodder.view.StatusBar.Status;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
 import sporemodder.view.editors.AnimTextEditorFactory;
+import sporemodder.view.editors.ArithmeticaEditorFactory;
 import sporemodder.view.editors.CellBackgroundMapEditorFactory;
 import sporemodder.view.editors.CellEffectMapEditorFactory;
 import sporemodder.view.editors.CellFileEditorFactory;
@@ -134,6 +135,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new ArithmeticaEditorFactory());
 		editorFactories.add(new CellLookTableEditorFactory());
 		editorFactories.add(new CellEffectMapEditorFactory());
 		editorFactories.add(new CellPopulateEditorFactory());

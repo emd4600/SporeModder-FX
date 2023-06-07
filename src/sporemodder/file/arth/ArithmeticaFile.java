@@ -2,22 +2,25 @@ package sporemodder.file.arth;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import sporemodder.MainApp;
-import sporemodder.file.filestructures.FileStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
 import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class ArithmeticaFile {
 	public static final int OP_ADD = 0;  // stack(-2) + stack(-1), pops 2 values
 	public static final int OP_SUBTRACT = 1;  // stack(-2) - stack(-1), pops 2 values
 	public static final int OP_MULTIPLY = 2;  // stack(-2) * stack(-1), pops 2 values
 	public static final int OP_DIVIDE = 3;  // stack(-2) / stack(-1), pops 2 values
-	public static final int OP_POW = 4;  // stack(-1) ^ stack(-2), pops 2 values  //TODO I'm not sure of the order
+	public static final int OP_POW = 4;  // stack(-2) ^ stack(-1), pops 2 values  //TODO I'm not sure of the order
 	public static final int OP_PUSH = 5;  // pushes value from this definition
 	public static final int OP_PUSH_VARIABLE = 6;  // pushes from code set variables
 	public static final int OP_POP_INTO_VARIABLE = 7;  // assigns last pushed value into variable, pops
@@ -49,9 +52,9 @@ public class ArithmeticaFile {
 	
 	public static class Operation
 	{
-		public int opCode;
-		public float value;
-		public int indexValue;  // index to string or to another instruction
+		public int opCode = OP_NOP;
+		public float value = 0f;
+		public int indexValue = -1;  // index to string or to another instruction
 		public int line;
 	}
 	public static class Function
@@ -82,10 +85,10 @@ public class ArithmeticaFile {
 		if (version != 1)
 			throw new IOException("Error: Wrong version in HTRA file");
 		
-		stream.readInt();
-		stream.readInt();
-		
-		//System.out.println("·· VARIABLES ··");
+		if (stream.readLEInt() != 2) 
+			throw new IOException("Error: Wrong field_8 in HTRA file");
+		if (stream.readLEInt() != numDwords) 
+			throw new IOException("Error: Wrong field_C in HTRA file");
 		
 		int count = stream.readLEInt();
 		for (int i = 0; i < count; i++) {
@@ -95,27 +98,15 @@ public class ArithmeticaFile {
 			operation.indexValue = stream.readLEInt();
 			operation.opCode = stream.readLEInt();
 			operations.add(operation);
-			
-			if (operation.opCode >= 20 && operation.opCode <= 24) {
-				System.err.println("Unknown OP CODE " + operation.opCode);
-			}
-			
-			//System.out.println("\t" + operation.line + " " + operation.value + " " + operation.stringIndex + " " + operation.opCode);
 		}
-		//System.out.println(stream.getFilePointer());
-		
-		//System.out.println("·· FUNCTIONS ··");
-		
+
 		int functionsCount = stream.readLEInt();
 		for (int i = 0; i < functionsCount; i++) {
 			Function function = new Function();
 			function.stringIndex = stream.readLEInt();
 			function.firstOpIndex = stream.readLEInt();
 			functions.add(function);
-			//System.out.println("\t" + value1 + " " + value2);
 		}
-		
-		//System.out.println("·· STRINGS ··");
 		
 		int stringsCount = stream.readLEInt();
 		if (stream.readLEInt() != stringsCount)
@@ -123,29 +114,46 @@ public class ArithmeticaFile {
 		
 		for (int i = 0; i < stringsCount; i++) {
 			strings.add(stream.readCString(StringEncoding.ASCII));
-			//System.out.println("\t" + i + " " + strings.get(strings.size() - 1));
+		}
+	}
+	
+	public void write(StreamWriter stream) throws IOException {
+		stream.writeInt(0);
+		stream.writeInt(0);
+		stream.writeInt(0);
+		stream.writeInt(0);
+		stream.writeInt(0);
+		
+		stream.writeLEInt(operations.size());
+		for (Operation op : operations) {
+			stream.writeLEInt(op.line);
+			stream.writeLEFloat(op.value);
+			stream.writeLEInt(op.indexValue);
+			stream.writeLEInt(op.opCode);
 		}
 		
-//		System.out.println();
-//		System.out.println();
-//		System.out.println();
-//		System.out.println();
-//		
-//		int lastLine = 0;
-//		for (Operation operation : operations) {
-//			if (operation.line != lastLine) {
-//				System.out.println();
-//				lastLine = operation.line;
-//			}
-//			if (operation.opCode >= 20 && operation.opCode <= 24) {
-//				throw new IOException("Unknown OP CODE " + operation.opCode);
-//			}
-//			String str = "[" + lastLine + "] OP=" + operation.opCode + "  " + operation.value;
-//			if (operation.stringIndex != -1) {
-//				str += " (" + strings.get(operation.stringIndex) + ")";
-//			}
-//			System.out.println(str);
-//		}
+		stream.writeLEInt(functions.size());
+		for (Function function : functions) {
+			stream.writeLEInt(function.stringIndex);
+			stream.writeLEInt(function.firstOpIndex);
+		}
+		
+		stream.writeLEInt(strings.size());
+		stream.writeLEInt(strings.size());
+		for (String str : strings) {
+			stream.writeCString(str, StringEncoding.ASCII);
+		}
+		// Make the size multiple of 4
+		long offset = stream.getFilePointer();
+		stream.writePadding((int) (((offset + 4-1) & ~(4-1)) - offset));
+		
+		long numDwords = (stream.length() - 4) / 4;
+		stream.seek(0);
+		stream.writeUInt(numDwords);
+		stream.writeInt(0x48545241);
+		stream.writeLEInt(1);
+		stream.writeLEInt(2);
+		stream.writeLEUInt(numDwords);
 	}
 	
 	public void debugPrint() {
@@ -173,13 +181,25 @@ public class ArithmeticaFile {
 		}
 	}
 	
+	public boolean parse(File file) throws IOException {
+		ArithmeticaFileGrammarLexer lexer = new ArithmeticaFileGrammarLexer(CharStreams.fromPath(file.toPath()));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		ArithmeticaFileGrammarParser parser = new ArithmeticaFileGrammarParser(tokens);
+		ParseTree tree = parser.program();
+		ParseTreeWalker walker = new ParseTreeWalker();
+		ArithmeticaFileListener listener = new ArithmeticaFileListener(this, parser);
+		walker.walk(listener, tree);
+		
+		return parser.getNumberOfSyntaxErrors() == 0;
+	}
+	
 	private static void checkStack(Stack<String> stack, int numValues, Operation op) throws UnsupportedOperationException {
 		if (stack.size() < numValues) 
 			throw new UnsupportedOperationException("Invalid ARTH: not enough stack for op " + op.opCode);
 	}
 	
 	private static String addParenthesis(String text) {
-		if (text.contains(" ")) return "(" + text + ")";
+		if (text.contains(" ") || text.contains("^")) return "(" + text + ")";
 		return text;
 	}
 	
@@ -233,7 +253,7 @@ public class ArithmeticaFile {
 				checkStack(stack, 2, op);
 				value1 = stack.pop();
 				value2 = stack.pop();
-				stack.push(addParenthesis(value1) + "^" + addParenthesis(value2));
+				stack.push(addParenthesis(value2) + "^" + addParenthesis(value1));
 				break;
 			case OP_PUSH:
 			case OP_PUSH_VARIABLE:
@@ -252,7 +272,7 @@ public class ArithmeticaFile {
 				break;
 				
 			case OP_RANDOM:
-				stack.push("random()");
+				stack.push("RAND");
 				break;
 			case OP_GREATER:
 				checkStack(stack, 2, op);
@@ -433,59 +453,4 @@ public class ArithmeticaFile {
 		
 		return sb.toString();
 	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		MainApp.testInit();
-		//String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CellStuff\\scripts1~\\CityGame_CreaturePopulation.htra";
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\scripts1~\\0xDF2754A3.arth";
-//		
-//		try (StreamReader stream = new FileStream(path, "r")) {
-//			ArithmeticaFile htra = new ArithmeticaFile();
-//			htra.read(stream);
-//			htra.debugPrint();
-//			
-//			System.out.println();
-//			System.out.println();
-//			System.out.println(htra.generateText());
-//		}
-		
-		String inputDir = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\scripts1~";
-		String outputDir = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CellStuff\\scripts1~";
-		
-		for (File file : new File(inputDir).listFiles()) {
-			if (file.getName().endsWith(".arth")) {
-				try (StreamReader stream = new FileStream(file, "r")) {
-					ArithmeticaFile arth = new ArithmeticaFile();
-					arth.read(stream);
-					
-					String asText = arth.generateText();
-					try (PrintWriter out = new PrintWriter(new File(outputDir, file.getName() + ".arth_t"))) {
-					    out.println(asText);
-					}
-				}
-				catch (Exception e) {
-					System.err.println(file.getName());
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-//	public static void main(String[] args) throws Exception
-//	{
-//		MainApp.testInit();
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\CellStuff\\scripts~\\cell_ground_L1.structure";
-//		
-//		try (StreamReader stream = new FileStream(path, "r")) {
-//			HtraFile htra = new HtraFile
-//			while (stream.getFilePointer() < stream.length()) {
-//				long address = stream.getFilePointer();
-//				int value = stream.readLEInt();
-//				stream.seek(address);
-//				float valuefloat = stream.readLEFloat();
-//				System.out.println(address + ":\t" + HashManager.get().hexToString(value) + "\t" + valuefloat + "\t" + HashManager.get().getFileName(value));
-//			}
-//		}
-//	}
 }

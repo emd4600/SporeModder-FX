@@ -81,3 +81,19 @@
 	-fx-fill: #e57402;
 	-fx-font-weight: bold;
 }
+
+/** -- ARTH -- */
+
+.styled-text-area .arth-keyword {
+	-fx-fill: #6f94d1;
+	-fx-font-weight: bold;
+}
+
+.styled-text-area .arth-functions {
+	-fx-fill: #e57402;
+	-fx-font-weight: bold;
+}
+
+.styled-text-area .arth-number {
+	-fx-fill: #e5af25;
+}

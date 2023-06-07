@@ -24,23 +24,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javafx.application.Platform;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import sporemodder.EditorManager;
@@ -57,7 +50,6 @@ import sporemodder.file.locale.LocaleUnit;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.ColorRGBA;
 import sporemodder.util.ProjectItem;
-import sporemodder.view.StatusBar.Status;
 import sporemodder.view.colorpicker.ColorSwatchUI;
 import sporemodder.view.syntax.SyntaxHighlighter;
 
@@ -65,18 +57,7 @@ import sporemodder.view.syntax.SyntaxHighlighter;
  * An editor that is backed by an ArgScript stream. This means that the editor will use the ArgScript syntax highlighting,
  * show the errors of the stream in tooltips, etc
  */
-public abstract class ArgScriptEditor<T> extends TextEditor {
-	
-	// A class we need to store additional information
-	private static class ErrorInfo {
-		DocumentError error;
-		
-		int position;
-		int length;
-	}
-	
-	/** The current errors, used in tooltips. */
-	private final List<ErrorInfo> errors = new ArrayList<ErrorInfo>();
+public abstract class ArgScriptEditor<T> extends TextEditorWithErrors {
 	
 	private final Map<List<String>, LocaleUnit> localeCache = new HashMap<>();
 	private final Map<List<String>, Long> localeCacheTimes = new HashMap<>();
@@ -94,19 +75,6 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 	
 	public ArgScriptEditor() {
 		super();
-		
-		// Generate tooltips for the errors
-		getTooltipFactories().add((text, event) -> {
-			int index = event.getCharacterIndex();
-			
-			for (ErrorInfo error : errors) {
-				if (error.position <= index && index < error.position + error.length) {
-					return error.error.getMessage();
-				}
-			}
-			
-			return null;
-		});
 		
 		// Generate tooltips for colors
 		getTooltipFactories().add((text, event) -> {
@@ -405,91 +373,11 @@ public abstract class ArgScriptEditor<T> extends TextEditor {
 		return stream;
 	}
 	
-	private void setErrorInfo(SyntaxHighlighter syntax) {
-		errors.clear();
-		
-		Map<DocumentError, ErrorInfo> errorsMap = new HashMap<>();
-		
-		// Store some information about the errors for tooltips
-		List<DocumentError> documentErrors = stream.getErrors();
-		for (DocumentError error : documentErrors) {
-			int lineStart = syntax.getLinePosition(error.getLine());
-			int startPosition = lineStart + error.getStartPosition();
-			int endPosition = lineStart + error.getEndPosition();
-			
-			ErrorInfo errorInfo = new ErrorInfo();
-			errorInfo.error = error;
-			errorInfo.position = startPosition;
-			errorInfo.length = endPosition - startPosition;
-			
-			errorsMap.put(error, errorInfo);
-			errors.add(errorInfo);
-		}
-		
-		List<DocumentError> documentWarnings = stream.getWarnings();
-		for (DocumentError error : documentWarnings) {
-			int lineStart = syntax.getLinePosition(error.getLine());
-			int startPosition = lineStart + error.getStartPosition();
-			int endPosition = lineStart + error.getEndPosition();
-			
-			ErrorInfo errorInfo = new ErrorInfo();
-			errorInfo.error = error;
-			errorInfo.position = startPosition;
-			errorInfo.length = endPosition - startPosition;
-			
-			errors.add(errorInfo);
-		}
-	
-		// Errors are ordered by lines, but not by position; fix that here
-		Collections.sort(errors, new Comparator<ErrorInfo>() {
-			@Override
-			public int compare(ErrorInfo obj1, ErrorInfo obj2) {
-				return obj1.position - obj2.position;
-			}
-		});
-		
-		if (item != null) {
-			if (documentErrors.isEmpty()) {
-				UIManager.get().getUserInterface().setStatusInfo(null);
-				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.DEFAULT);
-			} else {
-				StringBuilder sb = new StringBuilder();
-				sb.append("The file contains ");
-				sb.append(documentErrors.size());
-				sb.append(" error");
-				if (documentErrors.size() > 1) sb.append('s');
-				sb.append(", cannot be compiled. Line");
-				if (documentErrors.size() > 1) sb.append('s');
-				sb.append(": ");
-				
-				
-				HBox hbox = new HBox();
-				hbox.setSpacing(4.0);
-				Label label = new Label(sb.toString());
-				label.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
-				hbox.getChildren().add(label);
-				
-				for (int i = 0; i < Math.min(documentErrors.size(), 5); ++i) {
-					Hyperlink hyperlink = new Hyperlink(Integer.toString(documentErrors.get(i).getLine() + 1));
-					hyperlink.setMaxHeight(12.0);
-					hyperlink.setPrefHeight(12.0);
-					hyperlink.setPadding(Insets.EMPTY);
-					hbox.getChildren().add(hyperlink);
-					
-					final int index = i;
-					hyperlink.setOnAction(ev -> {
-						ErrorInfo error = errorsMap.get(documentErrors.get(index));
-						Platform.runLater(() -> getCodeArea().requestFocus());
-						getCodeArea().moveTo(error.position);
-						getCodeArea().selectRange(error.position + error.length, error.position);
-						getCodeArea().requestFollowCaret();
-					});
-				}
-				
-				UIManager.get().getUserInterface().setStatusInfo(hbox);
-				UIManager.get().getUserInterface().getStatusBar().setStatus(Status.ERROR);
-			}
-		}
+	@Override protected List<DocumentError> getErrors() {
+		return stream.getErrors();
+	}
+	@Override protected List<DocumentError> getWarnings() {
+		return stream.getWarnings();
 	}
 	
 	protected void onStreamParse() {

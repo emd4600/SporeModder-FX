@@ -15,7 +15,8 @@ elseFragment : ELSE NEWLINE* ;
 endifFragment : ENDIF NEWLINE* ;
     
 conditionalExpr
-    :   expr (AND | OR) expr
+    :   conditionalExpr (AND | OR) conditionalExpr
+    |   '(' conditionalExpr ')'
     |   expr
     ;
     

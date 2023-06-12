@@ -2,7 +2,7 @@
 
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import emd4600.javafx.ribbon.RibbonWindow?>
+<?import io.github.emd4600.javafxribbon.RibbonWindow?>
 
 <StackPane fx:id="mainNode" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.UserInterface">
    <children>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import emd4600.javafx.ribbon.RibbonGroup?>
-<?import emd4600.javafx.ribbon.RibbonMenuButton?>
+<?import io.github.emd4600.javafxribbon.RibbonGroup?>
+<?import io.github.emd4600.javafxribbon.RibbonMenuButton?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioMenuItem?>
 <?import javafx.scene.control.ToggleGroup?>

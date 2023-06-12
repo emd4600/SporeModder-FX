@@ -6,9 +6,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import emd4600.javafx.ribbon.RibbonGroup?>
-<?import emd4600.javafx.ribbon.RibbonButton?>
-<?import emd4600.javafx.ribbon.RibbonMenuButton?>
+<?import io.github.emd4600.javafxribbon.RibbonGroup?>
+<?import io.github.emd4600.javafxribbon.RibbonButton?>
+<?import io.github.emd4600.javafxribbon.RibbonMenuButton?>
 <?import javafx.scene.layout.RowConstraints?>
 
 

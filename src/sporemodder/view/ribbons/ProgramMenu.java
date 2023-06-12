@@ -20,8 +20,8 @@ package sporemodder.view.ribbons;
 
 import java.util.List;
 
-import emd4600.javafx.ribbon.Ribbon;
-import emd4600.javafx.ribbon.RibbonCustomMenu;
+import io.github.emd4600.javafxribbon.Ribbon;
+import io.github.emd4600.javafxribbon.RibbonCustomMenu;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;

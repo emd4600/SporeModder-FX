@@ -1,12 +1,12 @@
 package sporemodder.view.editors.spui;
 
-import emd4600.javafx.ribbon.Ribbon;
-import emd4600.javafx.ribbon.RibbonButton;
-import emd4600.javafx.ribbon.RibbonGallery;
-import emd4600.javafx.ribbon.RibbonGalleryItem;
-import emd4600.javafx.ribbon.RibbonGroup;
-import emd4600.javafx.ribbon.RibbonTab;
-import emd4600.javafx.ribbon.RibbonGallery.GalleryItemDisplay;
+import io.github.emd4600.javafxribbon.Ribbon;
+import io.github.emd4600.javafxribbon.RibbonButton;
+import io.github.emd4600.javafxribbon.RibbonGallery;
+import io.github.emd4600.javafxribbon.RibbonGalleryItem;
+import io.github.emd4600.javafxribbon.RibbonGroup;
+import io.github.emd4600.javafxribbon.RibbonTab;
+import io.github.emd4600.javafxribbon.RibbonGallery.GalleryItemDisplay;
 import sporemodder.UIManager;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.file.spui.uidesigner.DesignerClass;

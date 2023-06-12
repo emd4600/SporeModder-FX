@@ -19,7 +19,7 @@
 
 package sporemodder.view.ribbons.util;
 
-import emd4600.javafx.ribbon.RibbonMenuButton;
+import io.github.emd4600.javafxribbon.RibbonMenuButton;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.RadioMenuItem;

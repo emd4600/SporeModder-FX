@@ -1,7 +1,7 @@
 package sporemodder.view.ribbons;
 
-import emd4600.javafx.ribbon.Ribbon;
-import emd4600.javafx.ribbon.RibbonTab;
+import io.github.emd4600.javafxribbon.Ribbon;
+import io.github.emd4600.javafxribbon.RibbonTab;
 
 public abstract class RibbonTabController {
 	

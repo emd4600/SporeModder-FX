@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import emd4600.javafx.ribbon.RibbonGroup?>
-<?import emd4600.javafx.ribbon.RibbonButton?>
+<?import io.github.emd4600.javafxribbon.RibbonGroup?>
+<?import io.github.emd4600.javafxribbon.RibbonButton?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 

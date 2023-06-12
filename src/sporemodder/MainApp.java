@@ -46,7 +46,6 @@ public class MainApp extends Application {
 	private PathManager pathManager;
 	private HashManager hashManager;
 	private ProjectManager projectManager;
-	private PluginManager pluginManager;
 	private GameManager gameManager;
 	private DocumentationManager documentationManager;
 	private FormatManager formatManager;
@@ -105,14 +104,6 @@ public class MainApp extends Application {
 	}
 	
 	/**
-	 * Returns the class that manages the SporeModder plugins.
-	 * @return The plugin manager.
-	 */
-	public PluginManager getPluginManager() {
-		return pluginManager;
-	}
-	
-	/**
 	 * Returns the class that manages the available Spore games.
 	 * @return The game manager
 	 */
@@ -168,7 +159,6 @@ public class MainApp extends Application {
 		
 		messageManager = new MessageManager();
 		gameManager = new GameManager();
-		pluginManager = new PluginManager();
 		pathManager = new PathManager();
 		uiManager = new UIManager();
 		if (!testInit) editorManager = new EditorManager();
@@ -209,16 +199,12 @@ public class MainApp extends Application {
 		
 		ShaderData.initialize();
 		
-		// The plugin must go last, as plugins will use the other managers
-		pluginManager.initialize(settings);
-		
 		messageManager.postMessage(MessageType.OnSettingsLoad, settings);
 	}
 	
 	public void saveSettings() {
 		messageManager.saveSettings(settings);
 		gameManager.saveSettings(settings);
-		pluginManager.saveSettings(settings);
 		pathManager.saveSettings(settings);
 		uiManager.saveSettings(settings);
 		editorManager.saveSettings(settings);
@@ -245,9 +231,6 @@ public class MainApp extends Application {
 	
 	@Override
 	public void stop() {
-		// The plugin must go first, as plugins will use the other managers
-		pluginManager.dispose();
-		
 		fxCompiler.dispose();
 		documentationManager.dispose();
 		formatManager.dispose();

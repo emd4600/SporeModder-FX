@@ -24,12 +24,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Properties;
+import java.util.prefs.Preferences;
 
 import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.AbstractManager;
 import sporemodder.MainApp;
-import sporemodder.util.WinRegistry;
 
 public class FXCompiler extends AbstractManager {
 	
@@ -69,16 +69,17 @@ public class FXCompiler extends AbstractManager {
 	
 	public boolean autoDetectPath() {
 		try {
-			String path = WinRegistry.valueForKey(WinRegistry.HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\Microsoft\\Windows Kits\\Installed Roots", "KitsRoot10");
-			
-			File versionFolder = new File(path, "bin");
-			if (versionFolder.exists()) {
-				for (File folder : versionFolder.listFiles()) {
-					File file = new File(folder, "x86\\fxc.exe");
-					if (file.exists()) {
-						fxcFile = file;
-						isAutoPath = true;
-						return true;
+			String path = Preferences.systemRoot().get("SOFTWARE\\WOW6432Node\\Microsoft\\Windows Kits\\Installed Roots\\KitsRoot10", null);
+			if (path != null) {
+				File versionFolder = new File(path, "bin");
+				if (versionFolder.exists()) {
+					for (File folder : versionFolder.listFiles()) {
+						File file = new File(folder, "x86\\fxc.exe");
+						if (file.exists()) {
+							fxcFile = file;
+							isAutoPath = true;
+							return true;
+						}
 					}
 				}
 			}

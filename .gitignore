@@ -5,3 +5,4 @@ WinMerge/
 WinMerge/**
 .classpath
 config.properties
+/target/

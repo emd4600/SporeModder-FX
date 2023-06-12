@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -54,7 +53,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import sporemodder.MessageManager.MessageType;
-import sporemodder.util.SporeModderPlugin;
 import sporemodder.view.Controller;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.UserInterface;
@@ -143,15 +141,6 @@ public class UIManager extends AbstractManager {
 		currentStyle = selectedStyle = properties.getProperty(PROPERTY_selectedStyle, "Default");
 		isFirstTime = Boolean.parseBoolean(properties.getProperty(PROPERTY_isFirstTime, "true"));
 		hasSelectedStyle = Boolean.parseBoolean(properties.getProperty(PROPERTY_hasSelectedStyle, "false"));
-		
-		// Load the stylesheets from the plugins
-		for (SporeModderPlugin plugin : PluginManager.get().getPlugins()) {
-			
-			List<String> stylesheets = plugin.getStylesheets();
-			if (stylesheets != null) {
-				stylesheetsToLoad.addAll(plugin.getStylesheets());
-			}
-		}
 		
 		taskbarProgress = new ProgressBar();
 		

@@ -19,16 +19,13 @@
 package sporemodder.file.simulator;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
-import sporemodder.file.filestructures.FileStream;
-import sporemodder.file.filestructures.MemoryStream;
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFItem;
 import sporemodder.file.dbpf.DatabasePackedFile;
+import sporemodder.file.filestructures.MemoryStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.prop.PropertyList;
 
 public class cScenarioResource {
@@ -144,68 +141,5 @@ public class cScenarioResource {
 		sb.append("</cScenarioResource>\n");
 		
 		return sb.toString();
-	}
-	
-	
-	private static void extractTest() throws Exception {
-	
-		MainApp.testInit();
-		
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\extracted\\";
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\adventureImages_1~\\0x1999746C.0x366A930D";
-		
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\real extracted\\";
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\adventureImages_1~\\0x199C129D.0x366A930D";
-		
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\re extracted\\";
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\adventureImages_1~\\SRNS_PlanetTemplate_100.0x366A930D";
-		
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\small_planet_extracted\\";
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\adventureImages_1~\\SRNS_PlanetTemplate_100_original.0x366A930D";
-		
-		try (FileStream stream = new FileStream(path, "r")) {
-			
-			cScenarioResource resource = new cScenarioResource();
-			resource.read(stream);
-			
-			
-			try (PrintWriter writer = new PrintWriter(outputPath + "planet.prop.prop_t")) {
-				writer.write(resource.propertyList.toArgScript());
-			}
-			
-			resource.dataStream.writeToFile(outputPath + "data.0x1897C18");
-			
-			try (PrintWriter writer = new PrintWriter(outputPath + "data.json")) {
-				writer.write(resource.printData());
-			}
-		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		MainApp.testInit();
-//		String path = "E:\\Eric\\SporeModder\\Projects\\Spore_EP1_Data.package.unpacked\\adventureImages_1~\\#0D19B6DA.#366A930D";
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\scenarioTest\\#0D19B6DA\\";
-		
-		String path = "E:\\Eric\\SporeModder\\Projects\\Spore_EP1_Data.package.unpacked\\adventureImages_1~\\#3C546825.#366A930D";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\scenarioTest\\temple #3C546825\\";
-		
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\EditorSaves\\adventureImages_1~\\0x1999746C.0x366A930D";
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Terrain Test\\extracted\\";
-		
-		try (FileStream stream = new FileStream(path, "r")) {
-			
-			cScenarioResource resource = new cScenarioResource();
-			resource.read(stream);
-			
-			try (PrintWriter writer = new PrintWriter(outputPath + "planet.prop.prop_t")) {
-				writer.write(resource.propertyList.toArgScript());
-			}
-			
-			resource.dataStream.writeToFile(outputPath + "data.0x1897C18");
-			
-			try (PrintWriter writer = new PrintWriter(outputPath + "data.xml")) {
-				writer.write(resource.printDataXML());
-			}
-		}
 	}
 }

@@ -198,6 +198,7 @@ public class SpuiDesigner {
 					});
 					
 					for (File xml : xmlFiles) {
+						System.out.println(xml.getAbsolutePath());
 						try (InputStream is = new FileInputStream(xml)) {
 							parse(is);
 						}

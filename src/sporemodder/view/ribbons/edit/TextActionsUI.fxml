@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
-<?import emord.javafx.ribbon.RibbonGroup?>
+<?import emd4600.javafx.ribbon.RibbonGroup?>
 <?import javafx.scene.layout.RowConstraints?>
 
 

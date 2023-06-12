@@ -43,15 +43,15 @@ public class GameManager extends AbstractManager {
 
 	public static final String[] RegistryValues = { "InstallLoc", "Install Dir" };
 
-	public static final String[] GARegistryKeys = { "SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE_EP1",
-			"SOFTWARE\\Electronic Arts\\SPORE_EP1" };
+	public static final String[] GARegistryKeys = { "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE_EP1",
+			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Electronic Arts\\SPORE_EP1" };
 
-	public static final String[] SporeRegistryKeys = { "SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE",
-			"SOFTWARE\\Electronic Arts\\SPORE" };
+	public static final String[] SporeRegistryKeys = { "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE",
+			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Electronic Arts\\SPORE" };
 
 	public static final String[] CCRegistryKeys = {
-			"SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack",
-			"SOFTWARE\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack" };
+			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack",
+			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack" };
 	
 	public static final String SPORE_SPOREBIN = "Sporebin";
 	public static final String GA_SPOREBIN = "SporebinEP1";
@@ -225,7 +225,6 @@ public class GameManager extends AbstractManager {
 		Map<GameType, SporeGame> map = new HashMap<GameType, SporeGame>();
 		
 		try {
-			
 			String path = getFromRegistry(GameType.GA);
 			if (path != null) {
 				map.put(GameType.GA, createGA(path));
@@ -384,7 +383,7 @@ public class GameManager extends AbstractManager {
 
 		for (String key : keys) {
 			for (String value : RegistryValues) {
-				result = getRegistryValue(WinRegistry.HKEY_LOCAL_MACHINE, key, value);
+				result = getRegistryValue(key, value);
 				if (result != null) {
 
 					return fixPath(result);
@@ -394,7 +393,7 @@ public class GameManager extends AbstractManager {
 
 		// not found? try with DataDir; some users only have that one
 		for (String key : GARegistryKeys) {
-			result = getRegistryValue(WinRegistry.HKEY_LOCAL_MACHINE, key, RegistryDataDir);
+			result = getRegistryValue(key, RegistryDataDir);
 			if (result != null) {
 
 				return fixPath(result);
@@ -404,9 +403,9 @@ public class GameManager extends AbstractManager {
 		return null;
 	}
 
-	private static String getRegistryValue(int hkey, String key, String value) {
+	private static String getRegistryValue(String key, String value) {
 		try {
-			return WinRegistry.valueForKey(hkey, key, value);
+			return WinRegistry.readRegistry(key, value);
 		} catch (Exception e) {
 			return null;
 		}

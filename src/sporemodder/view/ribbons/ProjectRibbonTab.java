@@ -18,9 +18,9 @@
 ****************************************************************************/
 package sporemodder.view.ribbons;
 
-import emord.javafx.ribbon.Ribbon;
-import emord.javafx.ribbon.RibbonGroup;
-import emord.javafx.ribbon.RibbonTab;
+import emd4600.javafx.ribbon.Ribbon;
+import emd4600.javafx.ribbon.RibbonGroup;
+import emd4600.javafx.ribbon.RibbonTab;
 import sporemodder.UIManager;
 import sporemodder.view.ribbons.project.BasicActionsUI;
 import sporemodder.view.ribbons.project.ModdingActionsUI;

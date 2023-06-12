@@ -25,10 +25,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import emord.javafx.ribbon.Ribbon;
-import emord.javafx.ribbon.RibbonProgramButton;
-import emord.javafx.ribbon.RibbonTab;
-import emord.javafx.ribbon.RibbonWindow;
+import emd4600.javafx.ribbon.Ribbon;
+import emd4600.javafx.ribbon.RibbonProgramButton;
+import emd4600.javafx.ribbon.RibbonTab;
+import emd4600.javafx.ribbon.RibbonWindow;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;

@@ -49,7 +49,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x1, bounds.y1, pointSize);
+			return getPointRectImpl(bounds.x1, bounds.y1, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -68,7 +68,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x2, bounds.y1, pointSize);
+			return getPointRectImpl(bounds.x2, bounds.y1, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -87,7 +87,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x1, bounds.y2, pointSize);
+			return getPointRectImpl(bounds.x1, bounds.y2, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -106,7 +106,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x2, bounds.y2, pointSize);
+			return getPointRectImpl(bounds.x2, bounds.y2, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -124,7 +124,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x1 + bounds.getWidth() / 2, bounds.y1, pointSize);
+			return getPointRectImpl(bounds.x1 + bounds.getWidth() / 2, bounds.y1, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -142,7 +142,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x1 + bounds.getWidth() / 2, bounds.y2, pointSize);
+			return getPointRectImpl(bounds.x1 + bounds.getWidth() / 2, bounds.y2, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -160,7 +160,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x1, bounds.y1 + bounds.getHeight() / 2, pointSize);
+			return getPointRectImpl(bounds.x1, bounds.y1 + bounds.getHeight() / 2, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -178,7 +178,7 @@ public enum SpuiDraggableType {
 		}
 		@Override
 		public SPUIRectangle getPointRect(SPUIRectangle bounds, float pointSize) {
-			return getPointRect(bounds.x2, bounds.y1 + bounds.getHeight() / 2, pointSize);
+			return getPointRectImpl(bounds.x2, bounds.y1 + bounds.getHeight() / 2, pointSize);
 		}
 		@Override
 		public Cursor getCursor() {
@@ -193,7 +193,7 @@ public enum SpuiDraggableType {
 		return null;
 	}
 	
-	private static SPUIRectangle getPointRect(float x, float y, float pointSize) {
+	private static SPUIRectangle getPointRectImpl(float x, float y, float pointSize) {
 		float radius = pointSize / 2.0f;
 		return new SPUIRectangle(x - radius, y - radius, x + radius, y + radius);
 	}

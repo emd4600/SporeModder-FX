@@ -40,13 +40,37 @@
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<version>4.13.0</version>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <shadedArtifactAttached>true</shadedArtifactAttached>
+                        <shadedClassifierName>project-classifier</shadedClassifierName>
+                        <outputFile>shade\${project.artifactId}.jar</outputFile>
+                        <transformers>
+                            <transformer implementation=
+                                                 "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>sporemodder.Launcher</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+            </executions>
+			</plugin>
 		</plugins>
 	</build>
 	<repositories>
 		<repository>
 			<id>maven.nikr.net</id>
 			<name>maven.nikr.net</name>
-			<url>http://maven.nikr.net/</url>
+			<url>https://maven.nikr.net/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -70,11 +94,26 @@
 			<artifactId>javafx-swing</artifactId>
 			<version>${javafx.version}</version>
 		</dependency>
+		<!-- Used to create cross-platform fat jar-->
 		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-graphics</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac</classifier>
+        </dependency>
+        <!--                                      -->
 		<dependency>
 			<groupId>org.fxmisc.richtext</groupId>
 		    <artifactId>richtextfx</artifactId>
@@ -99,7 +138,6 @@
 			<groupId>org.fxmisc.flowless</groupId>
 			<artifactId>flowless</artifactId>
 			<version>0.7.0</version>
-			<type>pom.sha512</type>
 		</dependency>
 		<dependency>
 			<groupId>io.github.emd4600</groupId>

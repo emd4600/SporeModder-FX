@@ -21,11 +21,6 @@ package sporemodder.file.effects;
 import java.io.IOException;
 import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -33,6 +28,11 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
@@ -48,16 +48,21 @@ public class SoundEffect extends EffectComponent {
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
 	
-	public static final int FLAG_FIELD18 = 1 << 4;
-	public static final int FLAG_LOOP = 0xa;
-	public static final int FLAGMASK = FLAG_FIELD18 | FLAG_LOOP;
+	public static final int FLAGS_3D = 1;  // 1 << 0;
+	public static final int FLAGS_LOOP = 2;  // 1 << 1;
+	public static final int FLAGS_VOLUME = 4;  // 1 << 2;
+	public static final int FLAGS_STOP = 8;  // 1 << 3;
+	public static final int FLAGS_TRACK = 0x10;  // 1 << 4;
+	
+	public static final int MASK_FLAGS = FLAGS_3D | FLAGS_LOOP |
+			FLAGS_VOLUME | FLAGS_STOP | FLAGS_TRACK;
 	
 	public int flags;
 	public final ResourceID soundID = new ResourceID();
-	public int field_18 = 0xCDCDCDCD;  // only used if flags >> 4
-	public float field_1C = 0.05f;
-	public float field_20;
-	public float field_24;
+	public int trackID = 0xCDCDCDCD;  // only used if flags >> 4
+	public float invSample = 0.05f;
+	public float length;
+	public float volume;
 	
 	@Override
 	public EffectComponentFactory getFactory() {
@@ -73,10 +78,10 @@ public class SoundEffect extends EffectComponent {
 		
 		flags = effect.flags;
 		soundID.copy(effect.soundID);
-		field_18 = effect.field_18;
-		field_1C = effect.field_1C;
-		field_20 = effect.field_20;
-		field_24 = effect.field_24;
+		trackID = effect.trackID;
+		invSample = effect.invSample;
+		length = effect.length;
+		volume = effect.volume;
 	}
 	
 	// We add it just to warn the user that only the anonymous version is supported
@@ -109,29 +114,44 @@ public class SoundEffect extends EffectComponent {
 				stream.addError(line.createError(String.format("Need at least option '-name' for anonymous '%s' effect.", KEYWORD)));
 			}
 			
-			if (line.getOptionArguments(args, "soundFlags", 1)) 
+			if (line.getOptionArguments(args, "locationUpdateRate", 1) ||
+					line.getOptionArguments(args, "sample", 1))
 			{
-				effect.flags |= Optional.ofNullable(stream.parseInt(args, 0)).orElse(0) & ~FLAG_FIELD18;
+				float value = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+				if (value > 0) {
+					value = 1.0f / value;
+				}
+				effect.invSample = value;
 			}
-			if (line.getOptionArguments(args, "field_18", 1)) 
+			
+			if (line.getOptionArguments(args, "id", 1)) {
+				effect.trackID = Optional.ofNullable(stream.parseFileID(args, 0)).orElse(0);
+				effect.flags |= FLAGS_TRACK;
+			}
+			
+			if (line.hasFlag("threeD") || 
+					line.hasFlag("spatialize") ||
+					line.hasFlag("spatialise") ||
+					line.hasFlag("3d")) {
+				effect.flags |= FLAGS_3D;
+			}
+			
+			if (line.getOptionArguments(args, "volume", 1))
 			{
-				effect.flags |= FLAG_FIELD18;
-				effect.field_18 = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
+				effect.volume = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+				effect.flags |= FLAGS_VOLUME;
 			}
-			if (line.getOptionArguments(args, "field_1C", 1)) 
-			{
-				effect.field_1C = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
-			}
-			if (line.getOptionArguments(args, "field_20", 1)) 
-			{
-				effect.field_20 = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
-			}
-			if (line.getOptionArguments(args, "field_24", 1)) 
-			{
-				effect.field_24 = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
-			}
+			
 			if (line.hasFlag("loop")) {
-				effect.flags |= FLAG_LOOP;
+				effect.flags |= FLAGS_LOOP;
+			}
+			
+			if (line.hasFlag("stop") || line.getOptionArguments(args, "stopWithEffect", 1)) {
+				effect.flags |= FLAGS_STOP;
+			}
+			
+			if (line.getOptionArguments(args, "soundFlags", 1)) {
+				effect.flags |= Optional.ofNullable(stream.parseInt(args, 0)).orElse(0) & ~MASK_FLAGS;
 			}
 			
 
@@ -204,16 +224,22 @@ public class SoundEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).option("name").arguments(soundID);
 		
-		if ((flags & FLAG_LOOP) == FLAG_LOOP) {
-			writer.option("loop");
+		if ((flags & FLAGS_TRACK) != 0) writer.option("id").arguments(HashManager.get().getFileName(trackID));
+		
+		writer.flag("loop", (flags & FLAGS_LOOP) != 0);
+		writer.flag("stop", (flags & FLAGS_STOP) != 0);
+		writer.flag("3d", (flags & FLAGS_3D) != 0);
+		
+		if (invSample != 0.05f) {
+			writer.option("sample").floats(invSample == 0 ? 0 : (1 / invSample));
 		}
-		else if ((flags & FLAG_LOOP) != 0 || (flags & ~FLAGMASK) != 0) {
-			writer.option("soundFlags").arguments("0x" + Integer.toHexString(flags & ~FLAG_FIELD18));
+		if ((flags & FLAGS_VOLUME) != 0) {
+			writer.option("volume").floats(volume);
 		}
 		
-		if ((flags & FLAG_FIELD18) != 0) writer.option("field_18").arguments(HashManager.get().getFileName(field_18));
-		if (field_1C != 0.05f) writer.option("field_1C").floats(field_1C);
-		if (field_20 != 0) writer.option("field_20").floats(field_20);
-		if (field_24 != 0) writer.option("field_24").floats(field_24);
+		int maskedFlags = flags & ~MASK_FLAGS;
+		if (maskedFlags != 0) {
+			writer.option("soundFlags").arguments("0x" + Integer.toHexString(maskedFlags));
+		}
 	}
 }

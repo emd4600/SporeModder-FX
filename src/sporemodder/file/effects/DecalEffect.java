@@ -151,7 +151,7 @@ public class DecalEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue() & ~MASK_FLAGS;
+					effect.flags |= value.intValue() & ~MASK_FLAGS;
 				}
 			}));
 			

@@ -32,6 +32,7 @@ import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
+import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptParser;
@@ -58,6 +59,9 @@ public class TextEffect extends EffectComponent {
 	public static final int FLAG_SUSTAIN = 2;  // 1 << 1
 	public static final int FLAG_LOOP = 4;  // 1 << 2
 	public static final int FLAG_SCREEN_POSITION = 8;  // 1 << 3
+	
+	public static final int MASK_FLAGS = FLAG_PARENT_SCALE |
+			FLAG_SUSTAIN | FLAG_LOOP | FLAG_SCREEN_POSITION;
 	
 	
 	public int flags;  // & 0xF
@@ -211,6 +215,13 @@ public class TextEffect extends EffectComponent {
 					effect.flags |= FLAG_PARENT_SCALE;
 				}
 			}));
+			
+			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
+				Number value = null;
+				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
+					effect.flags |= value.intValue() & ~MASK_FLAGS;
+				}
+			}));
 		}
 		
 	}
@@ -307,6 +318,8 @@ public class TextEffect extends EffectComponent {
 			writer.command("size").floats(size);
 			writer.flag("parentScale", (flags & FLAG_PARENT_SCALE) != 0);
 		}
+		
+		if ((flags & ~MASK_FLAGS) != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags & ~MASK_FLAGS));
 		
 		writer.endBlock().commandEND();
 	}

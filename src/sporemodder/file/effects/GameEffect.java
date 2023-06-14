@@ -156,6 +156,11 @@ public class GameEffect extends EffectComponent {
 				stream.addError(error);
 			}
 			
+			if (line.getOptionArguments(args, "gameFlags", 1) && 
+					(value = stream.parseInt(args, 0)) != null) {
+				effect.flags |= value.intValue() & ~MASK_FLAGS;
+			}
+			
 
 			// Add it to the effect
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
@@ -260,7 +265,7 @@ public class GameEffect extends EffectComponent {
 		
 		int maskedFlags = flags & ~MASK_FLAGS;
 		if (maskedFlags != 0) {
-			writer.option("flags").arguments(HashManager.get().hexToString(maskedFlags));
+			writer.option("gameFlags").arguments(HashManager.get().hexToString(maskedFlags));
 		}
 	}
 }

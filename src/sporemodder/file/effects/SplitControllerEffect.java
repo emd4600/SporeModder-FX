@@ -44,6 +44,9 @@ public class SplitControllerEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return SplitControllerEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

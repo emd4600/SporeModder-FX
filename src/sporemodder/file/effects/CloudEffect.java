@@ -1340,6 +1340,9 @@ public class CloudEffect extends EffectComponent {
 	}
 
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return CloudEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

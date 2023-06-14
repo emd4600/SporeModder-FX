@@ -47,6 +47,9 @@ public class GroundCoverEffect extends ParticleEffect {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return GroundCoverEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

@@ -286,6 +286,9 @@ public class CameraEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return CameraEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

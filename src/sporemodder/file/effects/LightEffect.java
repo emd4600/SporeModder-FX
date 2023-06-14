@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -32,6 +30,8 @@ import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.ColorRGB;
 
 public class LightEffect extends EffectComponent {
@@ -218,6 +218,9 @@ public class LightEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return LightEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

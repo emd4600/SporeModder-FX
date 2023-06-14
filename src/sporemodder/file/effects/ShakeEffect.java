@@ -18,21 +18,17 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
@@ -231,30 +227,5 @@ public class ShakeEffect extends EffectComponent {
 		if (maskedFlags != 0) writer.command("flags").arguments("0x" + Integer.toHexString(maskedFlags));
 		
 		writer.endBlock().commandEND();
-	}
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		MainApp.testInit();
-		
-		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
-		for (File file : folder.listFiles()) {
-			if (file.getName().endsWith(".effdir")) {
-				EffectDirectory effdir = new EffectDirectory();
-				try (StreamReader stream = new FileStream(file, "r")) {
-					effdir.read(stream);
-					for (EffectComponent component : effdir.getComponents(ShakeEffect.TYPE_CODE)) {
-						ArgScriptWriter writer = new ArgScriptWriter();
-						component.toArgScript(writer);
-						System.out.println(writer.toString());
-						System.out.println();
-						
-						int flags = ((ShakeEffect)component).flags;
-						if (flags != 0) {
-							System.err.println("ERROR: 0x" + Integer.toHexString(flags));
-						}
-					}
-				}
-			}
-		}
 	}
 }

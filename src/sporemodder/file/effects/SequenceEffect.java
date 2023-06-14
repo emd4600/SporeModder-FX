@@ -21,15 +21,16 @@ package sporemodder.file.effects;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.view.editors.PfxEditor;
 
 public class SequenceEffect extends EffectComponent {
@@ -55,6 +56,14 @@ public class SequenceEffect extends EffectComponent {
 	public static final int TYPE_CODE = 0x0004;
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
+	
+	public static final int FLAGS_LOOP = 1;  // 1 << 0
+	public static final int FLAGS_HARD_START = 2;  // 1 << 1
+	public static final int FLAGS_HARD_STOP = 4;  // 1 << 2, also called 'noOverlap'
+	public static final int FLAGS_NO_STOP = 8;  // 1 << 3, also called 'overlap'
+	
+	public static final int MASK_FLAGS = FLAGS_LOOP | FLAGS_HARD_START |
+			FLAGS_HARD_STOP | FLAGS_NO_STOP;
 	
 	public final List<SequenceInstance> instances = new ArrayList<SequenceInstance>();
 	public int flags;
@@ -109,34 +118,41 @@ public class SequenceEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue();
+					effect.flags = value.intValue() & ~MASK_FLAGS;
+				}
+			}));
+			
+			this.addParser("wait", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1, 2)) {
+					SequenceInstance ins = new SequenceInstance();
+					effect.instances.add(ins);
+					
+					ins.timeRange[0] = ins.timeRange[1] = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+					
+					if (args.size() > 1) {
+						ins.timeRange[1] = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
+					}
 				}
 			}));
 			
 			this.addParser("play", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
 				SequenceInstance ins = new SequenceInstance();
-				
-				if (line.getArguments(args, 0, 1)) {
-					if (args.size() == 0) {
-						ins.effect = null;
-					}
-					else {
-						ins.effect = data.getComponent(args, 0, VisualEffect.class, VisualEffect.KEYWORD);
-						if (ins.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(ins.effect), ins.effect, 0);
-					}
-				}
-				
-				if (line.getOptionArguments(args, "range", 1, 2)) {
-					if (args.size() == 1 && (value = stream.parseFloat(args, 0)) != null) {
-						ins.timeRange[0] = ins.timeRange[1] = value.floatValue();
-					}
-					else if (args.size() == 2) {
-						stream.parseFloats(args, ins.timeRange);
-					}
-				}
-				
 				effect.instances.add(ins);
+				
+				if (line.getArguments(args, 1, 3)) {
+					ins.effect = data.getComponent(args, 0, VisualEffect.class, VisualEffect.KEYWORD);
+					if (ins.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(ins.effect), ins.effect, 0);
+					
+					ins.timeRange[0] = ins.timeRange[1] = -1.0f;
+					
+					if (args.size() > 1) {
+						ins.timeRange[0] = ins.timeRange[1] = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0.0f);
+						
+						if (args.size() > 2) {
+							ins.timeRange[1] = Optional.ofNullable(stream.parseFloat(args, 2)).orElse(0.0f);
+						}
+					}
+				}
 			}));
 		}
 	}
@@ -188,17 +204,35 @@ public class SequenceEffect extends EffectComponent {
 	
 	@Override
 	public void toArgScript(ArgScriptWriter writer) {
-		writer.command(KEYWORD).arguments(name).startBlock();
+		writer.command(KEYWORD).arguments(name);
+		
+		writer.flag("loop", (flags & FLAGS_LOOP) != 0);
+		writer.flag("hardStart", (flags & FLAGS_HARD_START) != 0);
+		writer.flag("noOverlap", (flags & FLAGS_HARD_STOP) != 0);
+		writer.flag("overlap", (flags & FLAGS_NO_STOP) != 0);
+		
+		writer.startBlock();
 		
 		for (SequenceInstance ins : instances) {
-			writer.command("play");
-			
-			if (ins.effect != null) writer.arguments(ins.effect.getName());
+			if (ins.effect == null) {
+				writer.command("wait").floats(ins.timeRange[0]);
+				if (ins.timeRange[0] != ins.timeRange[1]) writer.floats(ins.timeRange[1]);
+			}
+			else {
+				writer.command("play").arguments(ins.effect.getName());
+				if (ins.timeRange[0] != -1.0f) {
+					writer.floats(ins.timeRange[0]);
+					if (ins.timeRange[0] != ins.timeRange[1]) {
+						writer.floats(ins.timeRange[1]);
+					}
+				}
+			}
 			
 			if (ins.timeRange[0] != -1 || ins.timeRange[1] != -1) writer.option("range").floats(ins.timeRange);
 		}
 		
-		if (flags != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags));
+		int maskedFlags = flags & ~MASK_FLAGS;
+		if (maskedFlags != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags));
 		
 		writer.endBlock().commandEND();
 	}

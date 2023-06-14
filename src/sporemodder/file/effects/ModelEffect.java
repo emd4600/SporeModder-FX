@@ -23,18 +23,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
 import sporemodder.view.editors.PfxEditor;
 

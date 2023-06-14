@@ -54,7 +54,10 @@ public class TextEffect extends EffectComponent {
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
 	
-	public static final int FLAG_SUSTAIN = 2;
+	public static final int FLAG_PARENT_SCALE = 1;  // 1 << 0
+	public static final int FLAG_SUSTAIN = 2;  // 1 << 1
+	public static final int FLAG_LOOP = 4;  // 1 << 2
+	public static final int FLAG_SCREEN_POSITION = 8;  // 1 << 3
 	
 	
 	public int flags;  // & 0xF
@@ -111,12 +114,29 @@ public class TextEffect extends EffectComponent {
 				}
 				
 				Number value = null;
-				if (line.getOptionArguments(args, "size", 1) && (value = stream.parseFloat(args, 0)) != null) {
+				if ((line.getOptionArguments(args, "size", 1) || line.getOptionArguments(args, "pointSize", 1))
+						&& (value = stream.parseFloat(args, 0)) != null) {
 					effect.fontSize = value.floatValue();
 				}
 				
 				if (line.getOptionArguments(args, "offset", 1)) {
 					stream.parseVector2(args, 0, effect.offset);
+				}
+				else if (line.getOptionArguments(args, "screen", 1)) {
+					stream.parseVector2(args, 0, effect.offset);
+					effect.flags |= FLAG_SCREEN_POSITION;
+				}
+			}));
+			
+			this.addParser("position", ArgScriptParser.create((parser, line) -> {
+				line.getArguments(args, 0);
+				
+				if (line.getOptionArguments(args, "offset", 1)) {
+					stream.parseVector2(args, 0, effect.offset);
+				}
+				else if (line.getOptionArguments(args, "screen", 1)) {
+					stream.parseVector2(args, 0, effect.offset);
+					effect.flags |= FLAG_SCREEN_POSITION;
 				}
 			}));
 			
@@ -128,12 +148,13 @@ public class TextEffect extends EffectComponent {
 				}
 				
 				Number value = null;
-				if (line.getOptionArguments(args, "size", 1) && (value = stream.parseFloat(args, 0)) != null) {
+				if ((line.getOptionArguments(args, "size", 1) || line.getOptionArguments(args, "pointSize", 1))
+						&& (value = stream.parseFloat(args, 0)) != null) {
 					effect.fontSize = value.floatValue();
 				}
 			});
 			
-			this.addParser("text", fontParser);
+			this.addParser("font", fontParser);
 			this.addParser("style", fontParser);
 			
 			this.addParser("life", ArgScriptParser.create((parser, line) -> {
@@ -141,7 +162,7 @@ public class TextEffect extends EffectComponent {
 				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
 					float fValue = value.floatValue();
 					if (fValue > 0.000001) {
-						effect.life = 1 / fValue;  //TODO ??
+						effect.life = 1 / fValue;
 					}
 					else {
 						effect.life = 0;
@@ -149,6 +170,7 @@ public class TextEffect extends EffectComponent {
 				}
 				
 				if (line.hasFlag("sustain")) effect.flags |= FLAG_SUSTAIN;
+				else if (line.hasFlag("loop")) effect.flags |= FLAG_LOOP;
 			}));
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
@@ -183,6 +205,10 @@ public class TextEffect extends EffectComponent {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.size.clear();
 					stream.parseFloats(args, effect.size);
+				}
+				
+				if (line.hasFlag("parentScale")) {
+					effect.flags |= FLAG_PARENT_SCALE;
 				}
 			}));
 		}
@@ -257,17 +283,30 @@ public class TextEffect extends EffectComponent {
 		if (!localeID.isDefault()) writer.option("id").arguments(localeID);
 		// If we write the 'font' command, better put size there
 		if (fontIsDefault) writer.option("size").floats(fontSize);
-		if (offset[0] != 0 || offset[1] != 0) writer.option("offset").vector(offset);
+		
+		if (offset[0] != 0 || offset[1] != 0) {
+			writer.command("position");
+			if ((flags & FLAG_SCREEN_POSITION) != 0) {
+				writer.option("screen").vector(offset);
+			}
+			else {
+				writer.option("offset").vector(offset);
+			}
+		}
 		
 		if (!fontIsDefault) {
 			writer.command("style").arguments(fontID).option("size").floats(fontSize);
 		}
 		
-		writer.command("life").floats(1.0f / life).flag("sustain", (flags & FLAG_SUSTAIN) == FLAG_SUSTAIN);
+		writer.command("life").floats(1.0f / life);
+		writer.flag("sustain", (flags & FLAG_SUSTAIN) != 0).flag("loop", (flags & FLAG_LOOP) != 0);
 		
 		if (!color.isEmpty()) writer.command("color").colors(color);
 		if (!alpha.isEmpty()) writer.command("alpha").floats(alpha);
-		if (!size.isEmpty()) writer.command("size").floats(size);
+		if (!size.isEmpty()) {
+			writer.command("size").floats(size);
+			writer.flag("parentScale", (flags & FLAG_PARENT_SCALE) != 0);
+		}
 		
 		writer.endBlock().commandEND();
 	}

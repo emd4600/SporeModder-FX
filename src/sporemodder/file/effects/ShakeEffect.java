@@ -18,22 +18,27 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
+import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class ShakeEffect extends EffectComponent {
@@ -47,6 +52,9 @@ public class ShakeEffect extends EffectComponent {
 	public static final int TYPE_CODE = 0x0006;
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
+	
+	public static final int FLAGS_FALLOFF_3D = 1;
+	public static final int MASK_FLAGS = FLAGS_FALLOFF_3D;
 	
 	public static final ArgScriptEnum ENUM_TABLE = new ArgScriptEnum();
 	static {
@@ -94,7 +102,7 @@ public class ShakeEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue();
+					effect.flags = value.intValue() & ~MASK_FLAGS;
 				}
 			}));
 			
@@ -112,6 +120,14 @@ public class ShakeEffect extends EffectComponent {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.strength.clear();
 					stream.parseFloats(args, effect.strength);
+				}
+				
+				if (line.getOptionArguments(args, "falloff", 1)) {
+					effect.falloff = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+				}
+				else if (line.getOptionArguments(args, "falloff3D", 1)) {
+					effect.falloff = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0.0f);
+					effect.flags |= FLAGS_FALLOFF_3D;
 				}
 			}));
 			
@@ -132,13 +148,6 @@ public class ShakeEffect extends EffectComponent {
 			this.addParser("table", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.baseTableType = (byte) ENUM_TABLE.get(args, 0);
-				}
-			}));
-			
-			this.addParser("falloff", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.falloff = value.floatValue();
 				}
 			}));
 		}
@@ -203,17 +212,49 @@ public class ShakeEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		if (flags != 0) writer.command("flags").arguments("0x" + Integer.toHexString(flags));
-		
 		writer.command("length").floats(lifeTime);
-		if (fadeTime != 1) writer.option("fade").floats(fadeTime);
+		if (fadeTime != 1.0f) writer.option("fade").floats(fadeTime);
 		
 		writer.command("amplitude").floats(strength);
+		boolean isFalloff3D = (flags & FLAGS_FALLOFF_3D) != 0;
+		if (falloff != 0.0f || isFalloff3D) {
+			if (isFalloff3D) writer.option("falloff3D");
+			else writer.option("falloff");
+			writer.floats(falloff);
+		}
+		
 		writer.command("frequency").floats(frequency);
 		if (aspectRatio != 1) writer.command("shakeAspect").floats(aspectRatio);
 		writer.command("table").arguments(ENUM_TABLE.get(baseTableType));
-		writer.command("falloff").floats(falloff);
+		
+		int maskedFlags = flags & ~MASK_FLAGS;
+		if (maskedFlags != 0) writer.command("flags").arguments("0x" + Integer.toHexString(maskedFlags));
 		
 		writer.endBlock().commandEND();
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		MainApp.testInit();
+		
+		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
+		for (File file : folder.listFiles()) {
+			if (file.getName().endsWith(".effdir")) {
+				EffectDirectory effdir = new EffectDirectory();
+				try (StreamReader stream = new FileStream(file, "r")) {
+					effdir.read(stream);
+					for (EffectComponent component : effdir.getComponents(ShakeEffect.TYPE_CODE)) {
+						ArgScriptWriter writer = new ArgScriptWriter();
+						component.toArgScript(writer);
+						System.out.println(writer.toString());
+						System.out.println();
+						
+						int flags = ((ShakeEffect)component).flags;
+						if (flags != 0) {
+							System.err.println("ERROR: 0x" + Integer.toHexString(flags));
+						}
+					}
+				}
+			}
+		}
 	}
 }

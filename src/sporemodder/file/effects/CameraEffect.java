@@ -273,13 +273,13 @@ public class CameraEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue() & ~MASK_FLAGS;
+					effect.flags |= value.intValue() & ~MASK_FLAGS;
 				}
 			}));
 			this.addParser("controlFlags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.controlFlags = (short)(value.intValue() & ~MASK_CONTROL_FLAGS);
+					effect.controlFlags |= (short)(value.intValue() & ~MASK_CONTROL_FLAGS);
 				}
 			}));
 		}

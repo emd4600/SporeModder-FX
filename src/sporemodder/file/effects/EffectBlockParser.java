@@ -60,6 +60,8 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 			
 			data.setPosition(effect, stream.getLinePositions().get(stream.getCurrentLine()));
 			
+			additionalLineParsing(line);
+			
 			data.setParsingComponent(true);
 			stream.startBlock(this);
 		}
@@ -79,4 +81,8 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 	}
 	
 	public abstract void addParsers();
+	
+	protected void additionalLineParsing(ArgScriptLine line) {
+		
+	}
 }

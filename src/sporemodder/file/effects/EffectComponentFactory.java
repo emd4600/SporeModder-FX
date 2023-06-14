@@ -35,6 +35,8 @@ public interface EffectComponentFactory extends ElementFactory {
 	
 	public EffectComponent create(EffectDirectory effectDirectory, int version);
 	
+	public Class<? extends EffectComponent> getComponentClass();
+	
 //	//TODO
 //	default boolean buildInspector(InspectorUnit<ArgScriptStream<EffectUnit>> inspector, DocumentFragment fragment) {
 //		return false;

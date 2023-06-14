@@ -24,8 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -33,6 +31,8 @@ import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.Transform;
 import sporemodder.view.editors.PfxEditor;
@@ -43,6 +43,32 @@ public class DistributeEffect extends EffectComponent {
 	public static final int TYPE_CODE = 0x000D;
 	
 	public static final EffectComponentFactory FACTORY = new Factory();
+	
+	public static final int FLAGS_SUBDIVIDE = 1;  // 1 << 0
+	public static final int FLAGS_SURFACE = 2;  // 1 << 1
+	public static final int FLAGS_MAP_EMIT_HEIGHT_RANGE = 4;  // 1 << 2
+	public static final int FLAGS_MAP_EMIT_SURFACE = 8;  // 1 << 3
+	public static final int FLAGS_SIZE = 0x10;  // 1 << 4
+	public static final int FLAGS_COLOR = 0x20;  // 1 << 5, for color, alpha, and mapColor
+	public static final int FLAGS_ROTATE = 0x40;  // 1 << 6, for rotate, pitch, roll, heading
+	public static final int FLAGS_TEXTURE = 0x80;  // 1 << 7
+	public static final int FLAGS_MODEL = 0x100;  // 1 << 8
+	public static final int FLAGS_FIT = 0x200;  // 1 << 9, also 'fitChildren'
+	public static final int FLAGS_MAP_EMIT_PIN = 0x400;  // 1 << 10, also 'pinToSurface'
+	public static final int FLAGS_MAP_EMIT_FORCE_STATIC = 0x800;  // 1 << 11
+	public static final int FLAGS_NO_BUDGET = 0x1000;  // 1 << 12
+	public static final int FLAGS_SYNC = 0x2000;  // 1 << 13
+	public static final int FLAGS_ATTACH = 0x4000;  // 1 << 14, its true when using 'attach' and the component is another distribute
+	public static final int FLAGS_SURFACE_SCALE_OFFSET = 0x8000;  // 1 << 15
+	public static final int FLAGS_ALPHA_FROM_TIME = 0x10000;  // 1 << 16
+	public static final int FLAGS_MESSAGE_KEEP_ALIVE = 0x20000;  // 1 << 17
+	
+	public static final int MASK_FLAGS = FLAGS_SUBDIVIDE | FLAGS_SURFACE |
+			FLAGS_MAP_EMIT_HEIGHT_RANGE | FLAGS_MAP_EMIT_SURFACE | FLAGS_SIZE |
+			FLAGS_COLOR | FLAGS_ROTATE | FLAGS_TEXTURE | FLAGS_MODEL | FLAGS_FIT |
+			FLAGS_MAP_EMIT_PIN | FLAGS_MAP_EMIT_FORCE_STATIC | FLAGS_NO_BUDGET |
+			FLAGS_SYNC | FLAGS_ATTACH | FLAGS_SURFACE_SCALE_OFFSET | FLAGS_ALPHA_FROM_TIME |
+			FLAGS_MESSAGE_KEEP_ALIVE;
 	
 	public static final ArgScriptEnum ENUM_SOURCE = new ArgScriptEnum();
 	static {
@@ -55,26 +81,22 @@ public class DistributeEffect extends EffectComponent {
 		ENUM_SOURCE.add(6, "sphereCubeSurface");
 	}
 	
-	public static final int FLAG_SURFACES = 0x1000;
-	public static final int FLAG_MODEL = 0x100;
-	
-	public static final int FLAGMASK = FLAG_SURFACES | FLAG_MODEL;
+	// 1Ch is source type, 20h is source size?
 	
 	// 0x40 (1000000b) -> heading, pitch, roll ?
 	// 0x100 (00000001 00000000b) -> model ?
 	public int flags;
 	public int density = 1;
-	public EffectComponent effect;
+	public EffectComponent component;
+	public int start;
 	public byte sourceType;  // byte
-	public int sourceSize;
-	public byte field_1C;  // byte
-	public float start = 1.0f;
+	public float sourceScale = 1.0f;
 	public final Transform transform = new Transform();
 	public final List<Float> size = new ArrayList<Float>(Arrays.asList(1.0f));
 	public float sizeVary;
 	public final List<Float> pitch = new ArrayList<Float>();
 	public final List<Float> roll = new ArrayList<Float>();
-	public final List<Float> yaw = new ArrayList<Float>();
+	public final List<Float> yaw = new ArrayList<Float>();  // also 'heading' and 'rotate'
 	public float pitchVary;
 	public float rollVary;
 	public float yawVary;
@@ -93,10 +115,10 @@ public class DistributeEffect extends EffectComponent {
 	public final TextureSlot resource = new TextureSlot();
 	public int overrideSet;  // byte
 	public int messageID;
-	public int field_160;
-	public int field_164;
-	public float rotateVary;
-	public final List<Float> rotate = new ArrayList<Float>();
+	public int numClusters;
+	public int clustersStart;
+	public float clustersFactor;
+	public final List<Float> clusters = new ArrayList<Float>();
 	
 	public DistributeEffect(EffectDirectory effectDirectory, int version) {
 		super(effectDirectory, version);
@@ -107,11 +129,10 @@ public class DistributeEffect extends EffectComponent {
 		
 		flags = effect.flags;
 		density = effect.density;
-		this.effect = effect.effect;
-		sourceType = effect.sourceType;
-		sourceSize = effect.sourceSize;
-		field_1C = effect.field_1C;
+		component = effect.component;
 		start = effect.start;
+		sourceType = effect.sourceType;
+		sourceScale = effect.sourceScale;
 		
 		transform.copy(effect.transform);
 		
@@ -146,10 +167,10 @@ public class DistributeEffect extends EffectComponent {
 		overrideSet = effect.overrideSet;
 		messageID = effect.messageID;
 		
-		field_160 = effect.field_160;
-		field_164 = effect.field_164;
-		rotateVary = effect.rotateVary;
-		rotate.addAll(effect.rotate);
+		numClusters = effect.numClusters;
+		clustersStart = effect.clustersStart;
+		clustersFactor = effect.clustersFactor;
+		clusters.addAll(effect.clusters);
 	}
 	
 	private void readTransform(StreamReader in) throws IOException {
@@ -172,11 +193,12 @@ public class DistributeEffect extends EffectComponent {
 		
 		flags = in.readInt();
 		density = in.readInt();
-		effect = effectDirectory.getEffect(VisualEffect.TYPE_CODE, in.readInt());
+		int componentIndex = in.readInt();
+		int componentType = in.readByte();
+		component = effectDirectory.getEffect(componentType, componentIndex);
+		start = in.readInt();
 		sourceType = in.readByte();
-		sourceSize = in.readInt();
-		field_1C = in.readByte();
-		start = in.readFloat();
+		sourceScale = in.readFloat();
 		
 		readTransform(in);
 		
@@ -232,23 +254,29 @@ public class DistributeEffect extends EffectComponent {
 		messageID = in.readInt();
 		
 		if (version > 3) {
-			field_160 = in.readInt();
-			field_164 = in.readInt();
-			rotateVary = in.readFloat();
+			numClusters = in.readInt();
+			clustersStart = in.readInt();
+			clustersFactor = in.readFloat();
 			
 			count = in.readInt();
-			for (int i = 0; i < count; i++) rotate.add(in.readFloat());
+			for (int i = 0; i < count; i++) clusters.add(in.readFloat());
 		}
 	}
 
 	@Override public void write(StreamWriter out) throws IOException {
 		out.writeInt(flags);
 		out.writeInt(density);
-		out.writeInt(effectDirectory.getIndex(VisualEffect.TYPE_CODE, effect));
+		if (component != null) {
+			out.writeInt(effectDirectory.getIndex(component.getFactory().getTypeCode(), component));
+			out.writeByte(component.getFactory().getTypeCode());
+		}
+		else {
+			out.writeInt(0);
+			out.writeByte(0);
+		}
+		out.writeInt(start);
 		out.writeByte(sourceType);
-		out.writeInt(sourceSize);
-		out.writeByte(field_1C);
-		out.writeFloat(start);
+		out.writeFloat(sourceScale);
 		
 		writeTransform(out);
 		
@@ -297,11 +325,11 @@ public class DistributeEffect extends EffectComponent {
 		out.writeInt(messageID);
 		
 		if (version > 3) {
-			out.writeInt(field_160);
-			out.writeInt(field_164);
-			out.writeFloat(rotateVary);
-			out.writeInt(rotate.size());
-			for (float f : rotate) out.writeFloat(f);
+			out.writeInt(numClusters);
+			out.writeInt(clustersStart);
+			out.writeFloat(clustersFactor);
+			out.writeInt(clusters.size());
+			for (float f : clusters) out.writeFloat(f);
 		}
 	}
 
@@ -324,6 +352,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1)) {
 					stream.parseColorRGB(args, 0, effect.colorVary);
 				}
+				effect.flags |= FLAGS_COLOR;
 			}), "color", "colour");
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
@@ -334,6 +363,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1)) {
 					stream.parseColorRGB(args, 0, effect.colorVary);
 				}
+				effect.flags |= FLAGS_COLOR;
 			}), "color255", "colour255");
 			
 			this.addParser("alpha", ArgScriptParser.create((parser, line) -> {
@@ -345,6 +375,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.alphaVary = value.floatValue();
 				}
+				effect.flags |= FLAGS_COLOR;
 			}));
 			
 			this.addParser("alpha255", ArgScriptParser.create((parser, line) -> {
@@ -356,6 +387,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.alphaVary = value.floatValue();
 				}
+				effect.flags |= FLAGS_COLOR;
 			}));
 			
 			this.addParser("size", ArgScriptParser.create((parser, line) -> {
@@ -367,6 +399,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.sizeVary = value.floatValue();
 				}
+				effect.flags |= FLAGS_SIZE;
 			}));
 			
 			this.addParser("pitch", ArgScriptParser.create((parser, line) -> {
@@ -381,6 +414,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "offset", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.pitchOffset = value.floatValue();
 				}
+				effect.flags |= FLAGS_ROTATE;
 			}));
 			
 			this.addParser("roll", ArgScriptParser.create((parser, line) -> {
@@ -395,9 +429,10 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "offset", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.rollOffset = value.floatValue();
 				}
+				effect.flags |= FLAGS_ROTATE;
 			}));
 			
-			this.addParser("yaw", ArgScriptParser.create((parser, line) -> {
+			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					effect.yaw.clear();
 					stream.parseFloats(args, effect.yaw);
@@ -409,53 +444,101 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "offset", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.yawOffset = value.floatValue();
 				}
-			}));
+				effect.flags |= FLAGS_ROTATE;
+			}), "yaw", "heading", "rotate");
 			
 			this.addParser("density", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
 					effect.density = value.intValue();
 				}
-				if (line.getOptionArguments(args, "start", 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.start = value.floatValue();
+				if (line.getOptionArguments(args, "start", 1) && (value = stream.parseInt(args, 0)) != null) {
+					effect.start = value.intValue();
 				}
-				//TODO 'sync' flag?
+				if (line.hasFlag("noBudget")) effect.flags |= FLAGS_NO_BUDGET;
+				if (line.hasFlag("sync")) effect.flags |= FLAGS_SYNC;
+			}));
+			
+			this.addParser("subdivide", ArgScriptParser.create((parser, line) -> {
+				Number value = null;
+				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
+					effect.density = value.intValue();
+				}
+				
+				if (line.hasFlag("fit") || line.hasFlag("fitChildren")) effect.flags |= FLAGS_FIT;
+				if (line.hasFlag("noBudget")) effect.flags |= FLAGS_NO_BUDGET;
+				if (line.hasFlag("sync")) effect.flags |= FLAGS_SYNC;
+				
+				effect.flags |= FLAGS_SUBDIVIDE;
 			}));
 			
 			this.addParser("source", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1)) {
-					if (Character.isDigit(args.get(0).charAt(0))) {
-						effect.sourceType = Optional.ofNullable(stream.parseByte(args, 0)).orElse((byte)0);
-					}
-					else {
-						effect.sourceType = (byte) ENUM_SOURCE.get(args, 0);
-					}
+					effect.sourceType = (byte) ENUM_SOURCE.get(args, 0);
 				}
-				if (line.getOptionArguments(args, "scale", 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.sourceSize = value.intValue();
+				if (line.getOptionArguments(args, "scale", 1) && (value = stream.parseFloat(args, 0)) != null) {
+					effect.sourceScale = value.floatValue();
 				}
 			}));
 			
 			this.addParser("effect", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
-					effect.effect = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
-					if (effect.effect != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.effect), effect.effect, 0);
+					effect.component = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
+					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
 				}
 				
 				effect.transform.parse(stream, line);
+				
+				effect.flags &= ~FLAGS_MODEL;
+				effect.flags &= ~FLAGS_TEXTURE;
+				effect.flags &= ~FLAGS_ATTACH;
 			}));
+			
+			this.addParser(ArgScriptParser.create((parser, line) -> {
+				effect.flags &= ~FLAGS_MODEL;
+				effect.flags &= ~FLAGS_TEXTURE;
+				effect.flags &= ~FLAGS_ATTACH;
+				
+				if (line.getArguments(args, 1, 2)) {
+					if (args.size() > 1) {
+						for (EffectComponentFactory factory : EffectDirectory.getFactories()) {
+							if (factory.getKeyword().equals(args.get(0))) {
+								int componentType = factory.getTypeCode();
+								effect.component = parser.getData().getComponent(args, 1, factory.getComponentClass(), factory.getKeyword());
+								
+								if (componentType == DistributeEffect.TYPE_CODE) {
+									effect.flags |= FLAGS_ATTACH;
+								}
+								break;
+							}
+						}
+						stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
+						return;
+					}
+					else {
+						effect.component = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
+					}
+					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+				}
+				
+				effect.transform.parse(stream, line);
+			}), "attach", "component");
 			
 			this.addParser("surface", ArgScriptParser.create((parser, line) -> {
 				if (line.hasFlag("reset")) {
 					effect.surfaces.clear();
 				}
 				
+				if (line.hasFlag("scaleOffset")) {
+					effect.flags |= FLAGS_SURFACE_SCALE_OFFSET;
+				}
+				
 				Surface surface = new Surface();
 				surface.parse(stream, line);
 				effect.surfaces.add(surface);
 				
-				effect.flags |= FLAG_SURFACES;
+				effect.flags |= FLAGS_SURFACE;
 			}));
 			
 			this.addParser("mapEmit", ArgScriptParser.create((parser, line) -> {
@@ -465,9 +548,11 @@ public class DistributeEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
+					effect.flags |= FLAGS_MAP_EMIT_HEIGHT_RANGE;
 				}
 				if (line.getOptionArguments(args, "aboveHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[0] = value.floatValue();
+					effect.flags |= FLAGS_MAP_EMIT_HEIGHT_RANGE;
 				}
 				if (line.getOptionArguments(args, "heightRange", 2)) {
 					if ((value = stream.parseFloat(args, 0)) != null) {
@@ -476,6 +561,17 @@ public class DistributeEffect extends EffectComponent {
 					if ((value = stream.parseFloat(args, 1)) != null) {
 						effect.altitudeRange[1] = value.floatValue();
 					}
+					effect.flags |= FLAGS_MAP_EMIT_HEIGHT_RANGE;
+				}
+				
+				if (line.hasFlag("pin") || line.hasFlag("pinToSurface")) {
+					effect.flags |= FLAGS_MAP_EMIT_PIN;
+				}
+				if (line.hasFlag("forceStatic")) {
+					effect.flags |= FLAGS_MAP_EMIT_FORCE_STATIC;
+				}
+				if (line.hasFlag("surface")) {
+					effect.flags |= FLAGS_MAP_EMIT_SURFACE;
 				}
 			}));
 			
@@ -483,6 +579,7 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					effect.colorMap.parseSpecial(args, 0);
 				}
+				effect.flags |= FLAGS_COLOR;
 			}));
 			
 			this.addParser("mapPin", ArgScriptParser.create((parser, line) -> {
@@ -490,21 +587,15 @@ public class DistributeEffect extends EffectComponent {
 					effect.pinMap.parseSpecial(args, 0);
 				}
 			}));
-			
-			//TODO could be texture, model?
-			this.addParser("resource", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
-				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.overrideSet = value.intValue();
-				}
-			}));
 
 			this.addParser("model", ArgScriptParser.create((parser, line) -> {
-				effect.resource.drawMode = 0;
-				effect.flags |= FLAG_MODEL;
+				effect.flags |= FLAGS_MODEL;
+				effect.flags &= ~FLAGS_TEXTURE;
+				effect.flags &= ~FLAGS_ATTACH;
 				
-				if (line.getArguments(args, 0, 1) && args.size() == 1) {
+				effect.resource.drawMode = 0;
+				
+				if (line.getArguments(args, 1)) {
 					effect.resource.resource.parse(args, 0);
 				}
 				
@@ -518,27 +609,65 @@ public class DistributeEffect extends EffectComponent {
 					effect.overrideSet = value.byteValue();
 				}
 				
+				if (line.hasFlag("alphaFromTime")) {
+					effect.flags |= FLAGS_ALPHA_FROM_TIME;
+				}
+				
 				effect.resource.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
 				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				
+				effect.transform.parse(stream, line);
+			}));
+			
+			this.addParser("texture", ArgScriptParser.create((parser, line) -> {
+				effect.flags &= ~FLAGS_MODEL;
+				effect.flags |= FLAGS_TEXTURE;
+				effect.flags &= ~FLAGS_ATTACH;
+				
+				effect.resource.drawMode = 0;
+				
+				if (line.getArguments(args, 0, 1) && args.size() == 1) {
+					effect.resource.resource.parse(args, 0);
+				}
+				
+				Number value = null;
+				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {
+					effect.overrideSet = value.byteValue();
+				}
+				
+				if (line.hasFlag("alphaFromTime")) {
+					effect.flags |= FLAGS_ALPHA_FROM_TIME;
+				}
+				
+				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				
+				effect.transform.parse(stream, line);
 			}));
 			
 			// This is a .smt material, not an effect material
 			this.addParser("material", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
+				effect.flags &= ~FLAGS_MODEL;
+				effect.flags |= FLAGS_TEXTURE;
+				effect.flags &= ~FLAGS_ATTACH;
+				
 				effect.resource.drawMode = TextureSlot.DRAWMODE_NONE;
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
-				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.overrideSet = value.intValue();
+				
+				if (line.getArguments(args, 0, 1) && args.size() == 1) {
+					effect.resource.resource.parse(args, 0);
 				}
-			}));
-			
-			
-			this.addParser("resource", ArgScriptParser.create((parser, line) -> {
+				
 				Number value = null;
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
-				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.overrideSet = value.intValue();
+				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {
+					effect.overrideSet = value.byteValue();
 				}
+				
+				if (line.hasFlag("alphaFromTime")) {
+					effect.flags |= FLAGS_ALPHA_FROM_TIME;
+				}
+				
+				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				
+				effect.transform.parse(stream, line);
 			}));
 			
 			this.addParser("message", ArgScriptParser.create((parser, line) -> {
@@ -546,50 +675,50 @@ public class DistributeEffect extends EffectComponent {
 				if (line.getArguments(args, 1) && (value = stream.parseFileID(args, 0)) != null) {
 					effect.messageID = value.intValue();
 				}
-			}));
-			
-			this.addParser("rotate", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.rotate.clear();
-					stream.parseFloats(args, effect.rotate);
-				}
-				if (line.getOptionArguments(args, "vary", 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.rotateVary = value.floatValue();
+				
+				if (line.hasFlag("keepAlive")) {
+					effect.flags |= FLAGS_MESSAGE_KEEP_ALIVE;
 				}
 			}));
 			
-			this.addParser("field_160", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.field_160 = value.intValue();
+			this.addParser("clusters", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 2, Integer.MAX_VALUE)) {
+					effect.numClusters = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
+					for (int i = 1; i < args.size(); i++) {
+						effect.clusters.add(Optional.ofNullable(stream.parseFloat(args, i)).orElse(0f));
+					}
+					effect.clustersFactor = effect.clusters.get(0);
+					for (int i = 1; i < effect.clusters.size(); i++) {
+						if (effect.clusters.get(i) > effect.clustersFactor) {
+							effect.clustersFactor = effect.clusters.get(i);
+						}
+					}
+					for (int i = 0; i < effect.clusters.size(); i++) {
+						effect.clusters.set(i, effect.clusters.get(i) / effect.clustersFactor);
+					}
+					
+					float value = (float) (Math.sqrt((double)effect.numClusters) / (double)effect.numClusters);
+					effect.clustersFactor *= (value - 3f) * value * -0.5f;
 				}
-			}));
-			
-			this.addParser("field_164", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.field_164 = value.intValue();
-				}
-			}));
-			
-			this.addParser("field_1C", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseByte(args, 0)) != null) {
-					effect.field_1C = value.byteValue();
+				
+				if (line.getOptionArguments(args, "start", 1)) {
+					effect.clustersStart = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0);
 				}
 			}));
 			
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags |= value.intValue() & ~FLAGMASK;
+					effect.flags |= value.intValue() & ~MASK_FLAGS;
 				}
 			}));
 		}
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return DistributeEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}
@@ -638,6 +767,93 @@ public class DistributeEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
+		boolean hasNoBudget = (flags & FLAGS_NO_BUDGET) != 0;
+		boolean hasSync = (flags & FLAGS_SYNC) != 0;
+		if ((flags & FLAGS_SUBDIVIDE) != 0) {
+			writer.command("subdivide").ints(density);
+			writer.flag("fit", (flags & FLAGS_FIT) != 0);
+			writer.flag("noBudget", hasNoBudget);
+			writer.flag("sync", hasSync);
+		}
+		else {
+			writer.command("density").ints(density);
+			if (sourceScale != 1.0f) writer.option("start").floats(sourceScale);
+			writer.flag("noBudget", hasNoBudget);
+			writer.flag("sync", hasSync);
+		}
+		
+		writer.command("source").arguments(ENUM_SOURCE.get(sourceType));
+		if (sourceScale != 1.0f) writer.option("scale").floats(sourceScale);
+		//TODO width
+		
+		if (!surfaces.isEmpty()) {
+			writer.blankLine();
+			boolean isFirst = true;
+			for (Surface s : surfaces) {
+				writer.command("surface");
+				s.toArgScript(writer);
+				if (isFirst && (flags & FLAGS_SURFACE_SCALE_OFFSET) != 0) {
+					writer.option("scaleOffset");
+				}
+				isFirst = false;
+			}
+			writer.blankLine();
+		}
+		
+		if ((flags & FLAGS_ATTACH) != 0) {
+			writer.command("attach");
+			if (component instanceof VisualEffect) {
+				writer.arguments(component.getName());
+			}
+			else {
+				writer.arguments(component.getFactory().getKeyword(), component.getName());
+			}
+			transform.toArgScriptNoDefault(writer, false);
+		}
+		else if (component != null) {
+			if (component instanceof VisualEffect) {
+				writer.command("effect").arguments(component.getName());
+			}
+			else {
+				writer.command("component").arguments(component.getFactory().getKeyword(), component.getName());
+			}
+			transform.toArgScriptNoDefault(writer, false);
+		}
+		else if ((flags & FLAGS_MODEL) != 0) {
+			writer.command("model");
+			if (!resource.resource.isDefault()) writer.arguments(resource.resource);
+			
+			if (!resource.resource2.isDefault()) writer.option("material").arguments(resource.resource2);
+			
+			if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
+			
+			writer.flag("alphaFromTime", (flags & FLAGS_ALPHA_FROM_TIME) != 0);
+			
+			resource.toArgScript(null, writer, false, false);
+			
+			transform.toArgScriptNoDefault(writer, false);
+		}
+		else if ((flags & FLAGS_TEXTURE) != 0) {
+			writer.command(resource.drawMode == TextureSlot.DRAWMODE_NONE ? "material" : "texture");
+			if (!resource.resource.isDefault()) writer.arguments(resource.resource);
+			
+			if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
+			
+			writer.flag("alphaFromTime", (flags & FLAGS_ALPHA_FROM_TIME) != 0);
+			
+			resource.toArgScript(null, writer, false, false);
+			
+			transform.toArgScriptNoDefault(writer, false);
+		}
+		
+		boolean hasMessageKeepAlive = (flags & FLAGS_MESSAGE_KEEP_ALIVE) != 0;
+		if (messageID != 0) {
+			writer.command("message").arguments(HashManager.get().getFileName(messageID));
+			writer.flag("keepAlive", hasMessageKeepAlive);
+			
+			transform.toArgScriptNoDefault(writer, false);
+		}
+		
 		if (!color.isEmpty()) {
 			writer.command("color").colors(color);
 			if (!colorVary.isBlack()) writer.option("vary").color(colorVary);
@@ -661,37 +877,14 @@ public class DistributeEffect extends EffectComponent {
 			if (rollOffset != 0.0f) writer.option("offset").floats(rollOffset);
 		}
 		if (!yaw.isEmpty()) {
-			writer.command("yaw").floats(yaw);
+			writer.command("heading").floats(yaw);
 			if (yawVary != 0.0f) writer.option("vary").floats(yawVary);
 			if (yawOffset != 0.0f) writer.option("offset").floats(yawOffset);
-		}
-		if (density != 1 || start != 1.0f) {
-			writer.command("density").ints(density);
-			if (start != 1.0f) writer.option("start").floats(start);
-		}
-		
-		String src = ENUM_SOURCE.get(sourceType);
-		writer.command("source").arguments(src != null ? src : Integer.toString(sourceType));
-		if (sourceSize != 0.0f) writer.option("scale").ints(sourceSize);
-		
-		if (effect != null) {
-			writer.command("effect").arguments(effect.getName());
-			transform.toArgScriptNoDefault(writer, false);
-		}
-		
-		//TODO subdivide
-		if (!surfaces.isEmpty()) {
-			writer.blankLine();
-			for (Surface s : surfaces) {
-				writer.command("surface");
-				s.toArgScript(writer);
-			}
-			writer.blankLine();
 		}
 		
 		if (!emitMap.isDefault()) {
 			writer.command("mapEmit").arguments(emitMap);
-			if (altitudeRange[0] != -10000.0f || altitudeRange[1] != 10000.0f) {
+			if ((flags & FLAGS_MAP_EMIT_HEIGHT_RANGE) != 0) {
 				if (altitudeRange[0] != -10000.0f && altitudeRange[1] != 10000.0f) {
 					writer.option("heightRange").floats(altitudeRange);
 				}
@@ -700,42 +893,32 @@ public class DistributeEffect extends EffectComponent {
 				}
 				else writer.option("aboveHeight").floats(altitudeRange[0]);
 			}
+			writer.flag("surface", (flags & FLAGS_MAP_EMIT_SURFACE) != 0);
+			writer.flag("pinToSurface", (flags & FLAGS_MAP_EMIT_PIN) != 0);
+			writer.flag("forceStatic", (flags & FLAGS_MAP_EMIT_FORCE_STATIC) != 0);
 		}
 		if (!colorMap.isDefault()) writer.command("mapEmitColor").arguments(colorMap);
 		if (!pinMap.isDefault()) writer.command("mapPin").arguments(pinMap);
 		
-		if (!resource.isDefault() || overrideSet != 0) {
-			if ((flags & FLAG_MODEL) == FLAG_MODEL) {
-				writer.command("model");
-				if (!resource.resource.isDefault()) writer.arguments(resource.resource);
-				
-				if (!resource.resource2.isDefault()) writer.option("material").arguments(resource.resource2);
-				
-				resource.toArgScript(null, writer, false, false);
-			}
-			else {
-				resource.toArgScript(resource.drawMode == TextureSlot.DRAWMODE_NONE ? "material" : "resource", writer);
-				if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
+		if (numClusters != 0) {
+			writer.command("clusters").ints(numClusters);
+		
+			float value = (float) (Math.sqrt((double)numClusters) / (double)numClusters);
+			float factor = clustersFactor / ((value - 3f) * value * -0.5f);
+			
+			for (float f : clusters) {
+				writer.floats(f * factor);
 			}
 		}
 		
-		if (messageID != 0) writer.command("message").arguments(HashManager.get().getFileName(messageID));
-		
-		if (!rotate.isEmpty()) {
-			writer.command("rotate").floats(rotate);
-			if (rotateVary != 0.0f) writer.option("vary").floats(rotateVary);
-		}
-		if (field_160 != 0) writer.command("field_160").ints(field_160);
-		if (field_164 != 0) writer.command("field_164").ints(field_164);
-		if (field_1C != 0) writer.command("field_1C").arguments(HashManager.get().hexToString(field_1C));
-		if ((flags & ~FLAGMASK) != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
+		if ((flags & ~MASK_FLAGS) != 0) writer.command("flags").arguments(HashManager.get().hexToString(flags & ~MASK_FLAGS));
 		
 		writer.endBlock().commandEND();
 	}
 	
 	@Override public List<EffectFileElement> getUsedElements() {
 		List<EffectFileElement> list = new ArrayList<EffectFileElement>();
-		list.add(effect);
+		list.add(component);
 		
 		for (Surface surface : surfaces) {
 			list.add(surface.collideEffect);

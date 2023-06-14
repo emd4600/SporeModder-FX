@@ -612,6 +612,9 @@ public class ScreenEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return ScreenEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

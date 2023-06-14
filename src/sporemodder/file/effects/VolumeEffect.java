@@ -221,6 +221,9 @@ public class VolumeEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return VolumeEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

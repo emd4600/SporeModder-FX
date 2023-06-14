@@ -334,6 +334,9 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return SkinpaintDistributeEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

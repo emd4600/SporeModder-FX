@@ -596,6 +596,9 @@ public class GameModelEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return GameModelEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

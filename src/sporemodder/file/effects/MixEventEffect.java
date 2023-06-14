@@ -113,6 +113,9 @@ public class MixEventEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return MixEventEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

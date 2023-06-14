@@ -147,7 +147,9 @@ public class SoundEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
-
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return SoundEffect.class;
+		}
 		@Override
 		public int getTypeCode() {
 			return TYPE_CODE;

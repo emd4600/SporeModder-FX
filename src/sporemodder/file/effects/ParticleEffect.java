@@ -1342,6 +1342,9 @@ public class ParticleEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return ParticleEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

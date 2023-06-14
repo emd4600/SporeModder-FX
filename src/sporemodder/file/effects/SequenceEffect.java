@@ -158,6 +158,9 @@ public class SequenceEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return SequenceEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

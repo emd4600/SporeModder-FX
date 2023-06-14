@@ -571,6 +571,9 @@ public class FastParticleEffect extends EffectComponent {
 	}
 	
 	public static class Factory implements EffectComponentFactory {
+		@Override public Class<? extends EffectComponent> getComponentClass() {
+			return FastParticleEffect.class;
+		}
 		@Override public String getKeyword() {
 			return KEYWORD;
 		}

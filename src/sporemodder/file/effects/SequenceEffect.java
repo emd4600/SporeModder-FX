@@ -26,6 +26,7 @@ import java.util.Optional;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
@@ -110,6 +111,22 @@ public class SequenceEffect extends EffectComponent {
 			return new SequenceEffect(effectDirectory, FACTORY.getMaxVersion());
 		}
 
+		@Override
+		protected void additionalLineParsing(ArgScriptLine line) {
+			if (line.hasFlag("loop")) {
+				effect.flags |= FLAGS_LOOP;
+			}
+			if (line.hasFlag("noOverlap") || line.hasFlag("hardStop")) {
+				effect.flags |= FLAGS_HARD_STOP;
+			}
+			if (line.hasFlag("hardStart")) {
+				effect.flags |= FLAGS_HARD_START;
+			}
+			if (line.hasFlag("overlap") || line.hasFlag("noStop")) {
+				effect.flags |= FLAGS_NO_STOP;
+			}
+		}
+		
 		@Override
 		public void addParsers() {
 			

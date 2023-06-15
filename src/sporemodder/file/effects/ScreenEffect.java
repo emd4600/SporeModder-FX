@@ -18,8 +18,6 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 
 import sporemodder.HashManager;
-import sporemodder.MainApp;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -37,7 +34,6 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
@@ -347,17 +343,6 @@ public class ScreenEffect extends EffectComponent {
 					if (stream.parseVector2(args, index, arr)) {
 						effect.paramsVector2.add(new Vector2(arr));
 						return (byte) (effect.paramsVector2.size() - 1);
-					}
-					else {
-						return -1;
-					}
-				}
-				
-				private byte vector3Parameter(ArgScriptArguments args, int index) {
-					float[] arr = new float[3];
-					if (stream.parseVector3(args, index, arr)) {
-						effect.paramsVector3.add(new Vector3(arr));
-						return (byte) (effect.paramsVector3.size() - 1);
 					}
 					else {
 						return -1;
@@ -990,30 +975,5 @@ public class ScreenEffect extends EffectComponent {
 	
 	private void writeFlag(ArgScriptWriter writer, ScreenFilter f, int param, String option) {
 		writer.flag(option, f.parameters.get(param) != 0);
-	}
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		MainApp.testInit();
-		
-		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
-		for (File file : folder.listFiles()) {
-			if (file.getName().endsWith(".effdir")) {
-				EffectDirectory effdir = new EffectDirectory();
-				try (StreamReader stream = new FileStream(file, "r")) {
-					effdir.read(stream);
-					for (EffectComponent component : effdir.getComponents(ScreenEffect.TYPE_CODE)) {
-						ArgScriptWriter writer = new ArgScriptWriter();
-						component.toArgScript(writer);
-						System.out.println(writer.toString());
-						System.out.println();
-						
-//						DistributeEffect distribute = (DistributeEffect)component;
-//						if (distribute.field_14 != 0) {
-//							System.err.println("ERROR: 0x" + Integer.toHexString(distribute.field_14) + "   " + component.name);
-//						}
-					}
-				}
-			}
-		}
 	}
 }

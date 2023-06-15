@@ -124,10 +124,10 @@ public class GameModelEffect extends EffectComponent {
 		ENUM_SPLIT_TYPE.add(SPLIT_STATIC, "static");
 	}
 	
-	public static final int FLAG_MESSAGE = 4;
-	public static final int FLAG_NOATTACHMENTS = 0x20;
-	public static final int FLAG_FIXEDSIZE = 0x10;
-	public static final int FLAG_PERSIST = 8;
+	public static final int FLAGS_MESSAGE = 4;  // 1 << 2
+	public static final int FLAGS_PERSIST = 8;  // 1 << 3
+	public static final int FLAGS_FIXED_SIZE = 0x10;  // 1 << 4
+	public static final int FLAGS_NO_ATTACHMENTS = 0x20;  // 1 << 5
 	
 	public static class ModelSplitter {
 		public EffectResource splitterKernel;
@@ -353,7 +353,7 @@ public class GameModelEffect extends EffectComponent {
 					ResourceKey key = new ResourceKey();
 					if (key.parse(args, 0)) {
 						effect.messageID = key.getInstanceID();
-						effect.flags |= FLAG_MESSAGE;
+						effect.flags |= FLAGS_MESSAGE;
 					}
 				}
 				
@@ -363,7 +363,7 @@ public class GameModelEffect extends EffectComponent {
 				}
 				
 				if (line.hasFlag("noAttachments")) {
-					effect.flags |= FLAG_NOATTACHMENTS;
+					effect.flags |= FLAGS_NO_ATTACHMENTS;
 				}
 			}));
 			
@@ -375,7 +375,7 @@ public class GameModelEffect extends EffectComponent {
 				}
 				
 				if (line.hasFlag("fixed")) {
-					effect.flags |= FLAG_FIXEDSIZE;
+					effect.flags |= FLAGS_FIXED_SIZE;
 				}
 			}));
 			
@@ -407,9 +407,9 @@ public class GameModelEffect extends EffectComponent {
 						(value = stream.parseBoolean(args, 0)) != null) {
 					
 					if (value == true) {
-						effect.flags |= FLAG_PERSIST;
+						effect.flags |= FLAGS_PERSIST;
 					} else {
-						effect.flags &= ~FLAG_PERSIST;
+						effect.flags &= ~FLAGS_PERSIST;
 					}
 				}
 			}));
@@ -565,7 +565,7 @@ public class GameModelEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "message", 1) &&
 						(value = stream.parseFileID(args, 0)) != null) {
 					effect.messageID = value.intValue();
-					effect.flags |= FLAG_MESSAGE;
+					effect.flags |= FLAGS_MESSAGE;
 				}
 				
 				if (line.getOptionArguments(args, "color", 1) || line.getOptionArguments(args, "colour", 1)) {
@@ -647,21 +647,21 @@ public class GameModelEffect extends EffectComponent {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
 		writer.command("name").arguments(new ResourceID(groupID, instanceID));
-		if ((flags & FLAG_MESSAGE) == FLAG_MESSAGE) writer.option("message").arguments(HashManager.get().getFileName(messageID));
+		if ((flags & FLAGS_MESSAGE) != 0) writer.option("message").arguments(HashManager.get().getFileName(messageID));
 		
 		if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
 		
-		writer.flag("noAttachments", (flags & FLAG_NOATTACHMENTS) == FLAG_NOATTACHMENTS);
+		writer.flag("noAttachments", (flags & FLAGS_NO_ATTACHMENTS) == FLAGS_NO_ATTACHMENTS);
 		
 		writer.command("size").floats(size);
-		writer.flag("fixed", (flags & FLAG_FIXEDSIZE) == FLAG_FIXEDSIZE);
+		writer.flag("fixed", (flags & FLAGS_FIXED_SIZE) == FLAGS_FIXED_SIZE);
 		
 		writer.command("color").color(color);
 		writer.command("alpha").floats(alpha);
 		
 		if (worldID != 0) writer.command("world").arguments(HashManager.get().getFileName(worldID));
 		
-		if ((flags & FLAG_PERSIST) == FLAG_PERSIST) writer.command("persist").arguments("true");
+		if ((flags & FLAGS_PERSIST) == FLAGS_PERSIST) writer.command("persist").arguments("true");
 		
 		if (!groups.isEmpty()) {
 			writer.command("groups");

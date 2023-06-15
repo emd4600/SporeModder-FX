@@ -26,6 +26,7 @@ import java.util.Optional;
 import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
@@ -285,6 +286,33 @@ public class CameraEffect extends EffectComponent {
 		}
 	}
 	
+	protected static class GroupParser extends ArgScriptParser<EffectUnit> {
+		@Override
+		public void parse(ArgScriptLine line) {
+			ArgScriptArguments args = new ArgScriptArguments();
+			
+			// Add it to the effect
+			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
+			block.blockType = TYPE_CODE;
+			data.getCurrentEffect().blocks.add(block);
+			
+			if (line.getArguments(args, 0, 1) && args.size() == 0) {
+				// It's the anonymous version
+				
+				CameraEffect effect = new CameraEffect(data.getEffectDirectory(), FACTORY.getMaxVersion());
+				
+				if (line.hasFlag("snapshot")) {
+					effect.flags |= FLAGS_SNAPSHOT_ON_START;
+				}
+				
+				data.addComponent(effect.toString(), effect);
+				block.component = effect;
+			}
+			
+			block.parse(stream, line, CameraEffect.class, args.size() == 0);
+		}
+	}
+	
 	public static class Factory implements EffectComponentFactory {
 		@Override public Class<? extends EffectComponent> getComponentClass() {
 			return CameraEffect.class;
@@ -314,7 +342,7 @@ public class CameraEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, CameraEffect.class));
+			effectBlock.addParser(KEYWORD, new GroupParser());
 		}
 		
 		@Override public EffectComponent create(EffectDirectory effectDirectory, int version) {

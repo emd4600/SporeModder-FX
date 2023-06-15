@@ -61,10 +61,16 @@ public class VisualEffectBlock {
 		public float alpha;
 	}
 	
-	public static final int FLAG_IGNORELENGTH = 1;
-	public static final int FLAG_RESPECTLENGTH = ~1;  // &, 0xFFFFFFFE
-	public static final int FLAG_IGNOREPARAMS = 0x20;
-	public static final int FLAG_RIGID = 0x40;
+	public static final int FLAGS_IGNORE_LENGTH = 1;  // 1 << 0
+	public static final int FLAGS_PARTICLE_SEQUENCE = 2;  // 1 << 1
+	
+	public static final int FLAGS_STATES = 8;  // 1 << 3
+	
+	public static final int FLAGS_IGNORE_PARAMS = 0x20;  // 1 << 5
+	public static final int FLAGS_RIGID = 0x40;  // 1 << 6
+	
+	public static final int MASK_FLAGS = FLAGS_IGNORE_LENGTH | FLAGS_PARTICLE_SEQUENCE |
+			FLAGS_STATES | FLAGS_IGNORE_PARAMS | FLAGS_RIGID;
 	
 	public static final List<String> APP_FLAGS = Arrays.asList("kAppFlagDeepWater", "kAppFlagShallowWater", "kAppFlagLowerAtmosphere",
 			"kAppFlagUpperAtmosphere", "kAppFlagEnglish", "kAppFlagPlanetHasWater", "kAppFlagCinematics", "kAppFlagCellGameMode", "kAppFlagCreatureGameMode",
@@ -182,15 +188,31 @@ public class VisualEffectBlock {
 			}
 		}
 		
+		int numLods = 1;
+		
 		if (line.getOptionArguments(args, "lodRange", 2)) {
 			if ((iValue = stream.parseInt(args, 0, 0, 255)) != null) lodBegin = iValue;
 			if ((iValue = stream.parseInt(args, 1, 0, 255)) != null) lodEnd = iValue;
+			
+			numLods = lodEnd - lodBegin + 1;
+			if (numLods <= 0) {
+				stream.addError(line.createErrorForOption("lodRange", "LOD range must be in ascending order"));
+			}
+			
+			if (stream.getData().getCurrentEffect().isParsingSelect) {
+				stream.addError(line.createErrorForOption("lodRange", "Cannot specify LOD in a 'select'"));
+			}
 		}
 		else if (line.getOptionArguments(args, "lod", 1) && 
 				// the limit is 254 because we have to add 1
 				(iValue = stream.parseInt(args, 0, 0, 254)) != null) {
 			lodBegin = iValue;
 			lodEnd = iValue + 1;
+			numLods = 2;
+			
+			if (stream.getData().getCurrentEffect().isParsingSelect) {
+				stream.addError(line.createErrorForOption("lodRange", "Cannot specify LOD in a 'select'"));
+			}
 		}
 		else {
 			lodBegin = 1;
@@ -223,34 +245,40 @@ public class VisualEffectBlock {
 		List<Float> alphaScales = new ArrayList<Float>();
 		List<Float> sizeScales = new ArrayList<Float>();
 		int count = 0;
-		boolean correctScales = true;
 		
 		if (line.getOptionArguments(args, "emitScale", 1, Integer.MAX_VALUE)) {
-			if (stream.parseFloats(args, emitScales)) {
-				count = count < args.size() ? args.size() : count;
+			if (numLods < args.size() || (args.size() > 2 && args.size() < numLods)) {
+				stream.addError(line.createErrorForOption("emitScale", "emitScale/LOD range mismatch"));
 			}
 			else {
-				correctScales = false;
-			}
-		}
-		if (line.getOptionArguments(args, "alphaScale", 1, Integer.MAX_VALUE)) {
-			if (stream.parseFloats(args, alphaScales)) {
-				count = count < args.size() ? args.size() : count;
-			}
-			else {
-				correctScales = false;
+				count = Math.max(args.size(), count);
+				stream.parseFloats(args, emitScales);
 			}
 		}
 		if (line.getOptionArguments(args, "sizeScale", 1, Integer.MAX_VALUE)) {
-			if (stream.parseFloats(args, sizeScales)) {
-				count = count < args.size() ? args.size() : count;
+			if (numLods < args.size() || (args.size() > 2 && args.size() < numLods)) {
+				stream.addError(line.createErrorForOption("sizeScale", "sizeScale/LOD range mismatch"));
 			}
 			else {
-				correctScales = false;
+				count = Math.max(args.size(), count);
+				stream.parseFloats(args, sizeScales);
+			}
+		}
+		if (line.getOptionArguments(args, "alphaScale", 1, Integer.MAX_VALUE)) {
+			if (numLods < args.size() || (args.size() > 2 && args.size() < numLods)) {
+				stream.addError(line.createErrorForOption("alphaScale", "alphaScale/LOD range mismatch"));
+			}
+			else {
+				count = Math.max(args.size(), count);
+				stream.parseFloats(args, alphaScales);
 			}
 		}
 		
-		if (correctScales && count != 0) {
+		if (count != 0) {
+			if (count != 1) {
+				count = numLods;
+			}
+			
 			lodScales.clear();
 			
 			int divider = count == 1 ? 1 : (count-1);
@@ -318,21 +346,21 @@ public class VisualEffectBlock {
 		flags = 0;
 		
 		if (line.hasFlag("ignoreLength")) {
-			flags |= FLAG_IGNORELENGTH;
+			flags |= FLAGS_IGNORE_LENGTH;
 		}
 		if (line.hasFlag("respectLength")) {
-			flags |= FLAG_RESPECTLENGTH;
+			flags &= ~FLAGS_IGNORE_LENGTH;
 		}
 		if (line.hasFlag("ignoreParams")) {
-			flags |= FLAG_IGNOREPARAMS;
+			flags |= FLAGS_IGNORE_PARAMS;
 		}
 		if (line.hasFlag("rigid")) {
-			flags |= FLAG_RIGID;
+			flags |= FLAGS_RIGID;
 		}
 		
 		if (line.getOptionArguments(args, "flags", 1) && 
 				(iValue = stream.parseInt(args, 0)) != null) {
-			flags |= iValue.intValue();
+			flags |= iValue.intValue() & ~MASK_FLAGS;
 		}
 		
 		appFlagsMask = 0;
@@ -354,6 +382,14 @@ public class VisualEffectBlock {
 			if (line.getOptionArguments(args, "prob", 1) && (fValue = stream.parseFloat(args, 0, 0.0f, 1.0f)) != null) {
 				selectionChance = Math.round(fValue.floatValue() * 65535);
 			}
+		}
+		
+		if (stream.getData().getCurrentEffect().isParsingStates) {
+			flags |= FLAGS_STATES;
+		}
+		
+		if (stream.getData().getCurrentEffect().isParsingParticleSequence) {
+			flags |= FLAGS_PARTICLE_SEQUENCE;
 		}
 	}
 	
@@ -418,13 +454,13 @@ public class VisualEffectBlock {
 		
 		if (timeScale != 1.0f) writer.option("timeScale").floats(timeScale); 
 		
-		writer.flag("ignoreLength", (flags & FLAG_IGNORELENGTH) != 0);
-		writer.flag("ignoreParams", (flags & FLAG_IGNOREPARAMS) != 0);
-		writer.flag("rigid", (flags & FLAG_RIGID) != 0);
+		writer.flag("ignoreLength", (flags & FLAGS_IGNORE_LENGTH) != 0);
+		writer.flag("ignoreParams", (flags & FLAGS_IGNORE_PARAMS) != 0);
+		writer.flag("rigid", (flags & FLAGS_RIGID) != 0);
 		
 		// are there any remaining unknown flags?
-		if ((flags & ~(FLAG_IGNORELENGTH | FLAG_IGNOREPARAMS | FLAG_RIGID)) != 0) {
-			writer.option("flags").arguments("0x" + Integer.toHexString(flags & ~(FLAG_IGNORELENGTH | FLAG_IGNOREPARAMS | FLAG_RIGID)));
+		if ((flags & ~MASK_FLAGS) != 0) {
+			writer.option("flags").arguments("0x" + Integer.toHexString(flags & ~MASK_FLAGS));
 		}
 		
 		if (appFlagsMask != 0) {

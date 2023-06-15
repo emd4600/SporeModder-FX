@@ -18,19 +18,17 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.HashManager;
+import sporemodder.MainApp;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -39,6 +37,13 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.Vector2;
 import sporemodder.util.Vector3;
@@ -97,9 +102,14 @@ public class ScreenEffect extends EffectComponent {
 		}
 	}
 
-	public static final int FLAG_LOOP = 1;
-	
-	public static final int FLAG_MASK = FLAG_LOOP;
+	public static final int FLAGS_LOOP = 1;  // 1 << 0
+	public static final int FLAGS_SUSTAIN = 2;  // 1 << 1
+	public static final int FLAGS_FALLOFF_3D = 4;  // 1 << 2
+	public static final int FLAGS_HOLD = 8;  // 1 << 3
+	public static final int FLAGS_CYCLE_HOLD = 0x10;  // 1 << 4
+
+	public static final int MASK_FLAGS = FLAGS_LOOP | FLAGS_SUSTAIN |
+			FLAGS_FALLOFF_3D | FLAGS_HOLD | FLAGS_CYCLE_HOLD;
 	
 	public static final byte TYPE_COPY = 0;
 	public static final byte TYPE_COMPRESS = 1;
@@ -112,7 +122,7 @@ public class ScreenEffect extends EffectComponent {
 	public static final byte TYPE_EDGEX = 8;
 	public static final byte TYPE_EDGEY = 9;
 	public static final byte TYPE_DISTORT = 10;
-	//TODO type 11 edgeBlend
+	public static final byte TYPE_EDGE_BLEND = 11;
 	public static final byte TYPE_EXTRACT = 12;
 	public static final byte TYPE_MULTIPLY = 13;
 	public static final byte TYPE_DILATE = 14;
@@ -146,7 +156,7 @@ public class ScreenEffect extends EffectComponent {
 	public float falloff;
 	public float distanceBase;
 	public final ResourceID texture = new ResourceID();
-	public short field_68;
+	public short layer;
 	@StructureLength.Value(32) public final List<ScreenFilter> filters = new ArrayList<ScreenFilter>();
 	@StructureLength.Value(32) public final List<TemporaryFilterBuffer> filterBuffers = new ArrayList<TemporaryFilterBuffer>();
 	@StructureLength.Value(32) public final List<Float> paramsFloat = new ArrayList<Float>();
@@ -171,7 +181,7 @@ public class ScreenEffect extends EffectComponent {
 		falloff = effect.falloff;
 		distanceBase = effect.distanceBase;
 		texture.copy(effect.texture);
-		field_68 = effect.field_68;
+		layer = effect.layer;
 		
 		// don't need to copy all these. If the user uses 'filterChain' again, the lists will be cleared
 		for (ScreenFilter filter : effect.filters) {
@@ -200,13 +210,51 @@ public class ScreenEffect extends EffectComponent {
 			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.flags = value.intValue() & ~FLAG_MASK;
+					effect.flags = value.intValue() & ~MASK_FLAGS;
 				}
 			}));
 			
 			this.addParser("mode", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.mode = (byte) ENUM_MODE.get(args, 0);
+				}
+			}));
+			
+			this.addParser("strength", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
+					effect.strength.clear();
+					stream.parseFloats(args, effect.strength);
+					
+					if (line.getOptionArguments(args, "falloff", 1)) {
+						effect.falloff = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+					}
+					else if (line.getOptionArguments(args, "falloff3D", 1)) {
+						effect.falloff = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+						effect.flags |= FLAGS_FALLOFF_3D;
+					}
+				}
+			}));
+			
+			this.addParser("length", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1)) {
+					effect.lifeTime = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+				}
+				
+				if (line.getOptionArguments(args, "delay", 1)) {
+					effect.delay = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+				}
+				
+				if (line.hasFlag("loop")) {
+					effect.flags |= FLAGS_LOOP;
+				}
+				if (line.hasFlag("sustain")) {
+					effect.flags |= FLAGS_SUSTAIN;
+				}
+				if (line.hasFlag("hold")) {
+					effect.flags |= FLAGS_HOLD;
+				}
+				if (line.hasFlag("cycleHold")) {
+					effect.flags |= FLAGS_CYCLE_HOLD;
 				}
 			}));
 			
@@ -224,10 +272,21 @@ public class ScreenEffect extends EffectComponent {
 				}
 			}), "color255", "colour255");
 			
-			this.addParser("strength", ArgScriptParser.create((parser, line) -> {
-				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.strength.clear();
-					stream.parseFloats(args, effect.strength);
+			this.addParser("texture", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1)) {
+					String[] words = new String[2];
+					effect.texture.parse(args, 0, words);
+					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, words, 0);
+				}
+			}));
+			
+			this.addParser("layer", ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1)) {
+					effect.layer = Optional.ofNullable(stream.parseInt(args, 0)).orElse(0).shortValue();
+				}
+				
+				if (line.hasFlag("exclusive")) {
+					effect.layer += 0x80;
 				}
 			}));
 			
@@ -238,50 +297,10 @@ public class ScreenEffect extends EffectComponent {
 				}
 			}));
 			
-			this.addParser("delay", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.delay = value.floatValue();
-				}
-			}));
-			
-			this.addParser("falloff", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.falloff = value.floatValue();
-				}
-			}));
-			
 			this.addParser("distanceBase", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.distanceBase = value.floatValue();
-				}
-			}));
-			
-			this.addParser("length", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.lifeTime = value.floatValue();
-				}
-				
-				if (line.hasFlag("loop")) {
-					effect.flags |= FLAG_LOOP;
-				}
-			}));
-			
-			this.addParser("texture", ArgScriptParser.create((parser, line) -> {
-				if (line.getArguments(args, 1)) {
-					String[] words = new String[2];
-					effect.texture.parse(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, words, 0);
-				}
-			}));
-
-			this.addParser("field_68", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0, Short.MIN_VALUE, Short.MAX_VALUE)) != null) {
-					effect.field_68 = value.shortValue();
 				}
 			}));
 			
@@ -338,6 +357,17 @@ public class ScreenEffect extends EffectComponent {
 					float[] arr = new float[3];
 					if (stream.parseVector3(args, index, arr)) {
 						effect.paramsVector3.add(new Vector3(arr));
+						return (byte) (effect.paramsVector3.size() - 1);
+					}
+					else {
+						return -1;
+					}
+				}
+				
+				private byte colorRGBParameter(ArgScriptArguments args, int index) {
+					ColorRGB color = new ColorRGB();
+					if (stream.parseColorRGB(args, index, color)) {
+						effect.paramsVector3.add(new Vector3(color.getR(), color.getG(), color.getB()));
 						return (byte) (effect.paramsVector3.size() - 1);
 					}
 					else {
@@ -446,34 +476,15 @@ public class ScreenEffect extends EffectComponent {
 						}
 					}));
 					
-					this.addParser("distort", ArgScriptParser.create((parser, line) -> {
-						ScreenFilter filter = parseFilter(line, TYPE_DISTORT);
-						
-						filter.parameters.add(line.getOptionArguments(args, "distorter", 1) ? sourceParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "offsetX", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "offsetY", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "strength", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "transXY", 1) ? vector2Parameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
-					}));
-					
-					this.addParser("blur1d", ArgScriptParser.create((parser, line) -> {
-						ScreenFilter filter = parseFilter(line, TYPE_BLUR1D);
-						
-						filter.parameters.add(line.getOptionArguments(args, "scale", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "scaleX", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "scaleY", 1) ? floatParameter(args, 0) : -1);
-					}));
-					
 					this.addParser("copy", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_COPY);
 						
-						filter.parameters.add((byte) (line.hasFlag("pointSource") ? 1 : 0));
 						filter.parameters.add((byte) (line.hasFlag("blend") ? 1 : 0));
 						filter.parameters.add((byte) (line.hasFlag("add") ? 1 : 0));
 						filter.parameters.add((byte) (line.hasFlag("multiply") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("pointSource") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "sourceAlpha", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "sourceColor", 1) ? vector3Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "sourceColor", 1) ? colorRGBParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "maskTexture", 1) ? sourceParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "maskChannel", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
@@ -506,10 +517,10 @@ public class ScreenEffect extends EffectComponent {
 					this.addParser("colorize", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_COLORIZE);
 						
-						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? vector3Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? colorRGBParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "strength", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param2", 1) ? sourceParameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param3") ? 1 : 0));
+						filter.parameters.add(line.getOptionArguments(args, "rampTexture", 1) ? sourceParameter(args, 0) : -1);
+						filter.parameters.add((byte) (line.hasFlag("overrideColor") ? 1 : 0));
 					}));
 					
 					this.addParser("blurx", ArgScriptParser.create((parser, line) -> {
@@ -524,15 +535,23 @@ public class ScreenEffect extends EffectComponent {
 						filter.parameters.add(line.getOptionArguments(args, "scale", 1) ? floatParameter(args, 0) : -1);
 					}));
 					
+					this.addParser("blur1d", ArgScriptParser.create((parser, line) -> {
+						ScreenFilter filter = parseFilter(line, TYPE_BLUR1D);
+						
+						filter.parameters.add(line.getOptionArguments(args, "scale", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "scaleX", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "scaleY", 1) ? floatParameter(args, 0) : -1);
+					}));
+					
 					this.addParser("edge", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_EDGE);
 						
 						filter.parameters.add((byte) (line.hasFlag("normalMap") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "scale", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param2") ? 1 : 0));
-						filter.parameters.add(line.getOptionArguments(args, "param3", 1) ? vector3Parameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param4", 1) ? vector3Parameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param5", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add((byte) (line.hasFlag("hardEdge") ? 1 : 0));
+						filter.parameters.add(line.getOptionArguments(args, "edgeColor", 1) ? colorRGBParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "backColor", 1) ? colorRGBParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "edgeThickness", 1) ? floatParameter(args, 0) : -1);
 					}));
 					
 					this.addParser("edgex", ArgScriptParser.create((parser, line) -> {
@@ -543,10 +562,29 @@ public class ScreenEffect extends EffectComponent {
 						parseFilter(line, TYPE_EDGEY);
 					}));
 					
+					this.addParser("distort", ArgScriptParser.create((parser, line) -> {
+						ScreenFilter filter = parseFilter(line, TYPE_DISTORT);
+						
+						filter.parameters.add(line.getOptionArguments(args, "distorter", 1) ? sourceParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "offsetX", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "offsetY", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "strength", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "transXY", 1) ? vector2Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
+					}));
+					
+					// Apparently not supported in Spore
+					this.addParser("edgeBlend", ArgScriptParser.create((parser, line) -> {
+						ScreenFilter filter = parseFilter(line, TYPE_EDGE_BLEND);
+						
+						filter.parameters.add(line.getOptionArguments(args, "mix", 1) ? sourceParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "edges", 1) ? sourceParameter(args, 0) : -1);
+					}));
+					
 					this.addParser("extract", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_EXTRACT);
 						
-						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? vector3Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? colorRGBParameter(args, 0) : -1);
 					}));
 					
 					this.addParser("multiply", ArgScriptParser.create((parser, line) -> {
@@ -554,13 +592,13 @@ public class ScreenEffect extends EffectComponent {
 						
 						filter.parameters.add(line.getOptionArguments(args, "texture", 1) ? sourceParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "sourceMul", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param2", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "texMul", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "tileXY", 1) ? vector2Parameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? vector3Parameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "color", 1) ? colorRGBParameter(args, 0) : -1);
 						filter.parameters.add((byte) (line.hasFlag("replace") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "offsetXY", 1) ? vector2Parameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param7", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add(line.getOptionArguments(args, "param8", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "sourceBias", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "texBias", 1) ? floatParameter(args, 0) : -1);
 					}));
 					
 					this.addParser("dilate", ArgScriptParser.create((parser, line) -> {
@@ -570,8 +608,8 @@ public class ScreenEffect extends EffectComponent {
 					this.addParser("contrast", ArgScriptParser.create((parser, line) -> {
 						ScreenFilter filter = parseFilter(line, TYPE_CONTRAST);
 						
-						filter.parameters.add(line.getOptionArguments(args, "upper", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "lower", 1) ? floatParameter(args, 0) : -1);
+						filter.parameters.add(line.getOptionArguments(args, "upper", 1) ? floatParameter(args, 0) : -1);
 					}));
 					
 					this.addParser("customMaterial", ArgScriptParser.create((parser, line) -> {
@@ -591,11 +629,11 @@ public class ScreenEffect extends EffectComponent {
 						filter.parameters.add(line.getOptionArguments(args, "customParams5", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "customParams6", 1) ? floatParameter(args, 0) : -1);
 						filter.parameters.add(line.getOptionArguments(args, "customParams7", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param13") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("depthRender") ? 1 : 0));
 						filter.parameters.add(line.getOptionArguments(args, "maxDistance", 1) ? floatParameter(args, 0) : -1);
-						filter.parameters.add((byte) (line.hasFlag("param15") ? 1 : 0));
-						filter.parameters.add((byte) (line.hasFlag("param16") ? 1 : 0));
-						filter.parameters.add((byte) (line.hasFlag("param17") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("timeOfDay") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("cameraMotion") ? 1 : 0));
+						filter.parameters.add((byte) (line.hasFlag("overrideParams") ? 1 : 0));
 					}));
 					
 					this.addParser("strengthFader", ArgScriptParser.create((parser, line) -> {
@@ -699,21 +737,47 @@ public class ScreenEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		writer.command("mode").arguments(ENUM_MODE.get(mode));
-		if ((flags & ~FLAG_MASK) != 0) writer.command("flags").arguments("0x" + Integer.toHexString(flags & ~FLAG_MASK));
-		writer.command("color").colors(color);
-		if (!strength.isEmpty()) writer.command("strength").floats(strength);
-		if (!distance.isEmpty()) writer.command("distance").floats(distance);
+		if ((flags & ~MASK_FLAGS) != 0) writer.command("flags").arguments("0x" + Integer.toHexString(flags & ~MASK_FLAGS));
 		
-		if (lifeTime != 2.0f || (flags & FLAG_LOOP) == FLAG_LOOP) {
-			writer.command("length").floats(lifeTime);
-			writer.flag("loop", (flags & FLAG_LOOP) == FLAG_LOOP);
+		writer.command("mode").arguments(ENUM_MODE.get(mode));
+		
+		if (!writer.isDefaultColor(color)) writer.command("color").colors(color);
+		
+		if (!writer.isDefault(strength, 1.0f) || falloff != 0) {
+			writer.command("strength").floats(strength);
+			if (falloff != 0) {
+				writer.command((flags & FLAGS_FALLOFF_3D) != 0 ? "falloff3D" : "falloff").floats(falloff);
+			}
 		}
-		if (delay != 0.0f) writer.command("delay").floats(delay);
-		if (falloff != 0.0f) writer.command("falloff").floats(falloff);
-		if (distanceBase != 0.0f) writer.command("distanceBase").floats(distanceBase);
+		
+		boolean hasLengthFlag = (flags & (FLAGS_LOOP | FLAGS_SUSTAIN | FLAGS_HOLD | FLAGS_CYCLE_HOLD)) != 0;
+		if (lifeTime != 2.0f || hasLengthFlag || delay != 0.0f) {
+			writer.command("length").floats(lifeTime);
+			
+			if (delay != 0) {
+				writer.command("delay").floats(delay);
+			}
+			
+			writer.flag("loop", (flags & FLAGS_LOOP) != 0);
+			writer.flag("sustain", (flags & FLAGS_SUSTAIN) != 0);
+			writer.flag("hold", (flags & FLAGS_HOLD) != 0);
+			writer.flag("cycleHold", (flags & FLAGS_CYCLE_HOLD) != 0);
+		}
+		
 		if (!texture.isDefault()) writer.command("texture").arguments(texture);
-		if (field_68 != 0.0f) writer.command("field_68").ints(field_68);
+		
+		if (layer != 0) {
+			if (layer > 0x80) {
+				writer.command("layer").ints(layer - 0x80);
+				writer.option("exclusive");
+			}
+			else {
+				writer.command("layer").ints(layer);
+			}
+		}
+		
+		if (!distance.isEmpty()) writer.command("distance").floats(distance);
+		if (distanceBase != 0.0f) writer.command("distanceBase").floats(distanceBase);
 		
 		if (!filters.isEmpty()) {
 			writer.blankLine();
@@ -792,15 +856,14 @@ public class ScreenEffect extends EffectComponent {
 		}
 		else if (f.type == TYPE_COPY) {
 			writeFilterCommandBase("copy", writer, f);
-			writeFlag(writer, f, 0, "pointSource");
-			writeFlag(writer, f, 1, "blend");
-			writeFlag(writer, f, 2, "add");
-			writeFlag(writer, f, 3, "multiply");
+			writeFlag(writer, f, 0, "blend");
+			writeFlag(writer, f, 1, "add");
+			writeFlag(writer, f, 2, "multiply");
+			writeFlag(writer, f, 3, "pointSoruce");
 			if (writeParam(writer, f, 4, "sourceAlpha")) writer.floats(getFloat(f, 4));
 			if (writeParam(writer, f, 5, "sourceColor")) writer.vector3(getVector3(f, 5));
 			if (writeParam(writer, f, 6, "maskTexture")) writer.arguments(getSourceString(f, 6));
 			if (writeParam(writer, f, 7, "maskChannel")) writer.floats(getFloat(f, 7));
-			// maybe it's offsetXY and tileXY
 			if (writeParam(writer, f, 8, "tileXY")) writer.vector2(getVector2(f, 8));
 			writeFlag(writer, f, 9, "invertMask");
 			if (writeParam(writer, f, 10, "offsetXY")) writer.vector2(getVector2(f, 10));
@@ -820,15 +883,15 @@ public class ScreenEffect extends EffectComponent {
 			if (writeParam(writer, f, 4, "addMul")) writer.floats(getFloat(f, 4));
 			if (writeParam(writer, f, 5, "tileXY")) writer.vector2(getVector2(f, 5));
 			if (writeParam(writer, f, 6, "maskTexture")) writer.arguments(getSourceString(f, 6));
-			if (writeParam(writer, f, 7, "param7")) writer.floats(getFloat(f, 7));
-			writeFlag(writer, f, 8, "param8");
+			if (writeParam(writer, f, 7, "maskChannel")) writer.floats(getFloat(f, 7));
+			writeFlag(writer, f, 8, "replace");
 		}
 		else if (f.type == TYPE_COLORIZE) {
 			writeFilterCommandBase("colorize", writer, f);
 			if (writeParam(writer, f, 0, "color")) writer.vector3(getVector3(f, 0));
 			if (writeParam(writer, f, 1, "strength")) writer.floats(getFloat(f, 1));
-			if (writeParam(writer, f, 2, "param2")) writer.arguments(getSourceString(f, 2));
-			writeFlag(writer, f, 3, "param3");
+			if (writeParam(writer, f, 2, "rampTexture")) writer.arguments(getSourceString(f, 2));
+			writeFlag(writer, f, 3, "overrideColor");
 		}
 		else if (f.type == TYPE_BLURX) {
 			writeFilterCommandBase("blurx", writer, f);
@@ -842,16 +905,21 @@ public class ScreenEffect extends EffectComponent {
 			writeFilterCommandBase("edge", writer, f);
 			writeFlag(writer, f, 0, "normalMap");
 			if (writeParam(writer, f, 1, "scale")) writer.floats(getFloat(f, 1));
-			writeFlag(writer, f, 2, "param2");
-			if (writeParam(writer, f, 3, "param3")) writer.vector3(getVector3(f, 3));
-			if (writeParam(writer, f, 4, "param4")) writer.vector3(getVector3(f, 4));
-			if (writeParam(writer, f, 5, "param5")) writer.floats(getFloat(f, 5));
+			writeFlag(writer, f, 2, "hardEdge");
+			if (writeParam(writer, f, 3, "edgeColor")) writer.vector3(getVector3(f, 3));
+			if (writeParam(writer, f, 4, "backColor")) writer.vector3(getVector3(f, 4));
+			if (writeParam(writer, f, 5, "edgeThickness")) writer.floats(getFloat(f, 5));
 		}
 		else if (f.type == TYPE_EDGEX) {
 			writeFilterCommandBase("edgex", writer, f);
 		}
 		else if (f.type == TYPE_EDGEY) {
 			writeFilterCommandBase("edgey", writer, f);
+		}
+		else if (f.type == TYPE_EDGE_BLEND) {
+			writeFilterCommandBase("edgeBlend", writer, f);
+			if (writeParam(writer, f, 0, "mix")) writer.arguments(getSourceString(f, 0));
+			if (writeParam(writer, f, 1, "edges")) writer.arguments(getSourceString(f, 1));
 		}
 		else if (f.type == TYPE_EXTRACT) {
 			writeFilterCommandBase("extract", writer, f);
@@ -861,21 +929,21 @@ public class ScreenEffect extends EffectComponent {
 			writeFilterCommandBase("multiply", writer, f);
 			if (writeParam(writer, f, 0, "texture")) writer.arguments(getSourceString(f, 0));
 			if (writeParam(writer, f, 1, "sourceMul")) writer.floats(getFloat(f, 1));
-			if (writeParam(writer, f, 2, "param2")) writer.floats(getFloat(f, 2));
+			if (writeParam(writer, f, 2, "texMul")) writer.floats(getFloat(f, 2));
 			if (writeParam(writer, f, 3, "tileXY")) writer.vector2(getVector2(f, 3));
 			if (writeParam(writer, f, 4, "color")) writer.vector3(getVector3(f, 4));
 			writeFlag(writer, f, 5, "replace");
 			if (writeParam(writer, f, 6, "offsetXY")) writer.vector2(getVector2(f, 6));
-			if (writeParam(writer, f, 7, "param7")) writer.floats(getFloat(f, 7));
-			if (writeParam(writer, f, 8, "param8")) writer.floats(getFloat(f, 8));
+			if (writeParam(writer, f, 7, "sourceBias")) writer.floats(getFloat(f, 7));
+			if (writeParam(writer, f, 8, "texBias")) writer.floats(getFloat(f, 8));
 		}
 		else if (f.type == TYPE_DILATE) {
 			writeFilterCommandBase("dilate", writer, f);
 		}
 		else if (f.type == TYPE_CONTRAST) {
 			writeFilterCommandBase("contrast", writer, f);
-			if (writeParam(writer, f, 0, "upper")) writer.floats(getFloat(f, 0));
-			if (writeParam(writer, f, 1, "lower")) writer.floats(getFloat(f, 1));
+			if (writeParam(writer, f, 0, "lower")) writer.floats(getFloat(f, 0));
+			if (writeParam(writer, f, 1, "upper")) writer.floats(getFloat(f, 1));
 		}
 		else if (f.type == TYPE_CUSTOM_MATERIAL) {
 			writeFilterCommandBase("customMaterial", writer, f);
@@ -892,11 +960,11 @@ public class ScreenEffect extends EffectComponent {
 			if (writeParam(writer, f, 10, "customParams5")) writer.floats(getFloat(f, 10));
 			if (writeParam(writer, f, 11, "customParams6")) writer.floats(getFloat(f, 11));
 			if (writeParam(writer, f, 12, "customParams7")) writer.floats(getFloat(f, 12));
-			writeFlag(writer, f, 13, "param13");
+			writeFlag(writer, f, 13, "depthRender");
 			if (writeParam(writer, f, 14, "maxDistance")) writer.floats(getFloat(f, 14));
-			writeFlag(writer, f, 15, "param15");
-			writeFlag(writer, f, 16, "param16");
-			writeFlag(writer, f, 17, "param17");
+			writeFlag(writer, f, 15, "timeOfDay");
+			writeFlag(writer, f, 16, "cameraMotion");
+			writeFlag(writer, f, 17, "overrideParams");
 		}
 		else if (f.type == TYPE_STRENGTH_FADER) {
 			writeFilterCommandBase("strengthFader", writer, f);
@@ -922,5 +990,30 @@ public class ScreenEffect extends EffectComponent {
 	
 	private void writeFlag(ArgScriptWriter writer, ScreenFilter f, int param, String option) {
 		writer.flag(option, f.parameters.get(param) != 0);
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		MainApp.testInit();
+		
+		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
+		for (File file : folder.listFiles()) {
+			if (file.getName().endsWith(".effdir")) {
+				EffectDirectory effdir = new EffectDirectory();
+				try (StreamReader stream = new FileStream(file, "r")) {
+					effdir.read(stream);
+					for (EffectComponent component : effdir.getComponents(ScreenEffect.TYPE_CODE)) {
+						ArgScriptWriter writer = new ArgScriptWriter();
+						component.toArgScript(writer);
+						System.out.println(writer.toString());
+						System.out.println();
+						
+//						DistributeEffect distribute = (DistributeEffect)component;
+//						if (distribute.field_14 != 0) {
+//							System.err.println("ERROR: 0x" + Integer.toHexString(distribute.field_14) + "   " + component.name);
+//						}
+					}
+				}
+			}
+		}
 	}
 }

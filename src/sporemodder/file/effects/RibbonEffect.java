@@ -415,7 +415,7 @@ public class RibbonEffect extends EffectComponent {
 				}
 			}));
 			
-			this.addParser("segmentLength", ArgScriptParser.create((parser, line) -> {
+			this.addParser("static", ArgScriptParser.create((parser, line) -> {
 				effect.flags |= FLAGS_STATIC;
 				if (line.getArguments(args, 0, 1) && args.size() > 0) {
 					boolean value = Optional.ofNullable(stream.parseBoolean(args, 0)).orElse(false);
@@ -620,6 +620,8 @@ public class RibbonEffect extends EffectComponent {
 			writer.floats(lifeTime[0]);
 		}
 		writer.flag("sustain", (flags & FLAGS_SUSTAIN) != 0);
+		
+		if ((flags & FLAGS_STATIC) != 0) writer.command("static").arguments(true);
 		
 		if (!writer.isDefaultColor(lengthColor)) writer.command("lengthColor").colors(lengthColor);
 		if (!writer.isDefaultColor(edgeColor)) writer.command("edgeColor").colors(edgeColor);

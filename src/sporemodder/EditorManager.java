@@ -57,6 +57,7 @@ import sporemodder.view.editors.CnvEditorFactory;
 import sporemodder.view.editors.CompiledShaderViewerFactory;
 import sporemodder.view.editors.EditHistoryEditor;
 import sporemodder.view.editors.EditorFactory;
+import sporemodder.view.editors.GMDLModelViewer;
 import sporemodder.view.editors.GaitEditorFactory;
 import sporemodder.view.editors.ImageViewer;
 import sporemodder.view.editors.ItemEditor;
@@ -162,6 +163,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		editorFactories.add(new SpuiEditorFactory());
 		editorFactories.add(new ImageViewer.Factory());
 		editorFactories.add(new RWModelViewer.Factory());
+		editorFactories.add(new GMDLModelViewer.Factory());
 		editorFactories.add(new PfxEditorFactory());
 		editorFactories.add(new PropEditorFactory());
 		

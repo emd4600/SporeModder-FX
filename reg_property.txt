@@ -5806,3 +5806,8 @@ inverse_gain_curve
 ColorOutOfScale
 maxNoteNumber
 minNoteNumber
+isvirtual
+threadpriority
+polyphonymode
+virtualcurve
+voicecount

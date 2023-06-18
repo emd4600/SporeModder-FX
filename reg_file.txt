@@ -105087,3 +105087,14 @@ solarSkybox_0
 cell_solidFood
 tribe_camera
 creature_free_camera
+edit_mode_camera
+EP1_ShoppingTemplate
+simulationpause_group
+ep1_ambience_duck_group
+_scenario_loops_base
+_scenario_small_base
+_scenario_mid_base
+unpanned
+mincurve
+virtualcurve
+isvirtual

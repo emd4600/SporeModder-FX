@@ -21,9 +21,17 @@ package sporemodder.file.effects;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptEnum;
+import sporemodder.file.argscript.ArgScriptLine;
+import sporemodder.file.argscript.ArgScriptParser;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
@@ -33,14 +41,6 @@ import sporemodder.file.filestructures.StructureFieldMethod;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.StructureUnsigned;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.HashManager;
-import sporemodder.file.argscript.ArgScriptArguments;
-import sporemodder.file.argscript.ArgScriptBlock;
-import sporemodder.file.argscript.ArgScriptEnum;
-import sporemodder.file.argscript.ArgScriptLine;
-import sporemodder.file.argscript.ArgScriptParser;
-import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.util.ColorRGB;
 import sporemodder.view.editors.PfxEditor;
 
@@ -81,58 +81,45 @@ public class ParticleEffect extends EffectComponent {
 		ENUM_PHYSICS.add(2, "path");
 	}
 
-	public static final int SOURCE_ROUND = 0x10;
-	public static final int SOURCE_SCALEPARTICLES = 0x800;
-	public static final int SOURCE_RESETINCOMING = 0x4000000;
+	public static final int FLAGBIT_INJECT = 0;
+	public static final int FLAGBIT_MAINTAIN = 1;
+	public static final int FLAGBIT_RATE_SUSTAIN = 2;
+	public static final int FLAGBIT_EMIT_BASE = 3;
+	public static final int FLAGBIT_SOURCE_ROUND = 4;
+	public static final int FLAGBIT_MAP_EMIT_PIN_TO_SURFACE = 5;
+	public static final int FLAGBIT_MAP_EMIT_HEIGHT_RANGE = 6;
+	public static final int FLAGBIT_MAP_EMIT_DENSITY = 7;
+	public static final int FLAGBIT_RATE_SIZE_SCALE = 8;
+	public static final int FLAGBIT_RATE_AREA_SCALE = 9;
+	public static final int FLAGBIT_RATE_VOLUME_SCALE = 0xa;
+	public static final int FLAGBIT_SOURCE_SCALE_PARTICLES = 0xb;
+	public static final int FLAGBIT_SURFACES = 0xc;
+	public static final int FLAGBIT_MAP_COLLIDE = 0xd;
+	public static final int FLAGBIT_MAP_REPEL = 0xe;
+	public static final int FLAGBIT_MAP_ADVECT = 0xf;
+	public static final int FLAGBIT_MAP_FORCE = 0x10;
+	public static final int FLAGBIT_KILL_OUTSIDE_MAP = 0x11;
+	public static final int FLAGBIT_MAP_COLLIDE_PIN_TO_MAP = 0x12;
+	public static final int FLAGBIT_RANDOM_WALK = 0x13;
+	public static final int FLAGBIT_RANDOM_WALK_WAIT = 0x14;
+	public static final int FLAGBIT_MODEL = 0x15;
+	public static final int FLAGBIT_TEXTURE_ACCEPT_COMPOSITE = 0x16;
+	public static final int FLAGBIT_ATTRACTOR = 0x17;
+	public static final int FLAGBIT_NOT_PRESET_ATTRACTOR = 0x18;
+	public static final int FLAGBIT_EMIT_SCALE_EXISTING = 0x19;
+	public static final int FLAGBIT_SOURCE_RESET_INCOMING = 0x1a;
+	public static final int FLAGBIT_RATE_KILL = 0x1b;
+	public static final int FLAGBIT_RATE_HOLD = 0x1c;
+	public static final int FLAGBIT_WARP_SPIRAL = 0x1d;
+	public static final int FLAGBIT_LOOP_BOX = 0x1e;
+	public static final int FLAGBIT_PATH = 0x1f;
+	public static final int FLAGBIT_PROPAGATE_ALWAYS = 0x20;
+	public static final int FLAGBIT_PROPAGATE_IF_KILLED = 0x21;
+	public static final int FLAGBIT_FRAMES_RELATIVE_SPEED = 0x22;
+	public static final int FLAGBIT_COLOR_VARY_RGB = 0x23;
 	
-	public static final int EMIT_SCALEEXISTING = 0x2000000;
-	public static final int EMIT_BASE = 8;
-	
-	public static final int WARP_SPIRAL = 0x20000000;
-	
-	public static final int ATTRACTOR_LOCATION = 0x1000000;
-	
-	public static final int FLAG_RANDOMWALK = 0x80000;
-	public static final int RANDOMWALK_WAIT = 0x100000;
-	
-	public static final int LIFE_PROPAGATEALWAYS = 1;
-	public static final int LIFE_PROPAGATEIFKILLED = 2;
-	
-	public static final int FLAG_SUSTAIN = 4;
-	public static final int FLAG_HOLD = 0x10000000;
-	public static final int FLAG_KILL = 0x8000000;
-	public static final int FLAG_INJECT = 1;
-	public static final int FLAG_MAINTAIN = 2;
-	public static final int RATE_SIZESCALE = 0x100;
-	public static final int RATE_AREASCALE = 0x200;
-	public static final int RATE_VOLUMESCALE = 0x400;
-	
-	public static final int FLAG_MODEL = 0x200000;
-	public static final int FLAG_ACCEPTCOMPOSITE = 0x400000;
-	
-	public static final int FLAG_LOOPBOX = 0x40000000;
-	
-	public static final int EMITMAP_PINTOSURFACE = 0x20;
-	public static final int EMITMAP_HEIGHT = 0x40;
-	public static final int EMITMAP_DENSITY = 0x80;
-	
-	public static final int FLAG_SURFACES = 0x1000;
-	public static final int FLAG_COLLIDEMAP = 0x2000;
-	public static final int COLLIDE_PINTOMAP = 0x40000;
-	public static final int FLAG_KILLOUTSIDEMAP = 0x20000;
-	public static final int FLAG_REPULSEMAP = 0x4000;
-	public static final int FLAG_ADVECTMAP = 0x8000;
-	public static final int FLAG_FORCEMAP = 0x10000;
-	
-	public static final int FLAGMASK = SOURCE_ROUND | SOURCE_SCALEPARTICLES | SOURCE_RESETINCOMING | EMIT_SCALEEXISTING | EMIT_BASE
-			| WARP_SPIRAL | ATTRACTOR_LOCATION | FLAG_RANDOMWALK | RANDOMWALK_WAIT | LIFE_PROPAGATEALWAYS | LIFE_PROPAGATEIFKILLED
-			| FLAG_SUSTAIN | FLAG_HOLD | FLAG_KILL | FLAG_INJECT | FLAG_MAINTAIN | RATE_SIZESCALE | RATE_AREASCALE | RATE_VOLUMESCALE
-			| FLAG_MODEL | FLAG_ACCEPTCOMPOSITE | FLAG_LOOPBOX | EMITMAP_PINTOSURFACE | EMITMAP_HEIGHT | EMITMAP_DENSITY
-			| FLAG_SURFACES | FLAG_COLLIDEMAP | COLLIDE_PINTOMAP | FLAG_KILLOUTSIDEMAP | FLAG_REPULSEMAP | FLAG_ADVECTMAP | FLAG_FORCEMAP;
-	
-	
-	public int unkFlags;
-	public int flags;
+	@StructureFieldMethod(read="readFlags", write="writeFlags")
+	public final BitSet flags = new BitSet(64);  // actually only 36 values
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] life = new float[2];
 	public float prerollTime;
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] emitDelay = {-1, -1};
@@ -226,8 +213,8 @@ public class ParticleEffect extends EffectComponent {
 	
 	@Override public void copy(EffectComponent _effect) {
 		ParticleEffect effect = (ParticleEffect) _effect;
-		unkFlags = effect.unkFlags;
-		flags = effect.flags;
+		flags.clear();
+		flags.or(effect.flags);
 		EffectDirectory.copyArray(life, effect.life);
 		prerollTime = effect.prerollTime;
 		EffectDirectory.copyArray(emitDelay, effect.emitDelay);
@@ -311,6 +298,30 @@ public class ParticleEffect extends EffectComponent {
 		for (int i = 0; i < effect.pathPoints.size(); i++) pathPoints.add(new ParticlePathPoint(effect.pathPoints.get(i)));
 	}
 	
+	void readFlags(String fieldName, StreamReader in) throws IOException {
+		int flags1 = in.readInt();
+		int flags2 = in.readInt();
+		for (int i = 0; i < 32; i++) {
+			flags.set(i, ((flags2 >> i) & 1) != 0);
+		}
+		for (int i = 0; i < 32; i++) {
+			flags.set(32 + i, ((flags1 >> i) & 1) != 0);
+		}
+	}
+	
+	void writeFlags(String fieldName, StreamWriter out, Object value) throws IOException {
+		int bitflags2 = 0;
+		for (int i = 0; i < 32; i++) {
+			if (flags.get(i)) bitflags2 |= 1 << i;
+		}
+		int bitflags1 = 0;
+		for (int i = 0; i < 32; i++) {
+			if (flags.get(32 + i)) bitflags1 |= 1 << i;
+		}
+		out.writeInt(bitflags1);
+		out.writeInt(bitflags2);
+	}
+	
 	void readSurfaces(String fieldName, StreamReader in) throws IOException {
 		int surfaceCount = in.readInt();
 		for (int i = 0; i < surfaceCount; i++) {
@@ -346,6 +357,10 @@ public class ParticleEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "vary", 1)) {
 					stream.parseColorRGB(args, 0, effect.colorVary);
 				}
+				if (line.getOptionArguments(args, "varyRGB", 1)) {
+					stream.parseColorRGB(args, 0, effect.colorVary);
+					effect.flags.set(FLAGBIT_COLOR_VARY_RGB);
+				}
 			}), "color", "colour");
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
@@ -355,6 +370,10 @@ public class ParticleEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "vary", 1)) {
 					stream.parseColorRGB(args, 0, effect.colorVary);
+				}
+				if (line.getOptionArguments(args, "varyRGB", 1)) {
+					stream.parseColorRGB(args, 0, effect.colorVary);
+					effect.flags.set(FLAGBIT_COLOR_VARY_RGB);
 				}
 			}), "color255", "colour255");
 			
@@ -445,7 +464,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOP_BOX);
 					effect.loopBoxColor.clear();
 					stream.parseColorRGBs(args, effect.loopBoxColor);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -454,7 +473,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOP_BOX);
 					effect.loopBoxColor.clear();
 					stream.parseColorRGB255s(args, effect.loopBoxColor);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -463,7 +482,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			this.addParser("loopBoxAlpha", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOP_BOX);
 					effect.loopBoxAlpha.clear();
 					stream.parseFloats(args, effect.loopBoxAlpha);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -472,7 +491,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			this.addParser("loopBoxAlpha255", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOP_BOX);
 					effect.loopBoxAlpha.clear();
 					stream.parseFloat255s(args, effect.loopBoxAlpha);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -488,7 +507,7 @@ public class ParticleEffect extends EffectComponent {
 				surface.parse(stream, line);
 				effect.surfaces.add(surface);
 				
-				effect.flags |= FLAG_SURFACES;
+				effect.flags.set(FLAGBIT_SURFACES);
 			}));
 			
 			parseEmitMap();
@@ -513,17 +532,18 @@ public class ParticleEffect extends EffectComponent {
 			}));
 			
 			this.addParser("path", ArgScriptParser.create((parser, line) -> {
+				effect.flags.set(FLAGBIT_PATH);
 				ParticlePathPoint point = new ParticlePathPoint();
 				point.parse(stream, line, effect.pathPoints, effect.pathPoints.size());
 				effect.pathPoints.add(point);
 			}));
 			
-			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
-				Number value;
-				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
-					effect.flags |= value.intValue() & ~FLAGMASK;
-				}
-			}));
+//			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
+//				Number value;
+//				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
+//					effect.flags |= value.intValue() & ~FLAGMASK;
+//				}
+//			}));
 		}
 		
 		private void parseSource() {
@@ -534,7 +554,7 @@ public class ParticleEffect extends EffectComponent {
 				Number value2 = null;
 				
 				// disable round source
-				effect.flags &= ~SOURCE_ROUND;
+				effect.flags.clear(FLAGBIT_SOURCE_ROUND);
 				float min_x = 0;
 				float min_y = 0;
 				float min_z = 0;
@@ -584,7 +604,7 @@ public class ParticleEffect extends EffectComponent {
 						}
 					}
 					else if (line.getOptionArguments(args, "circle", 1) && (value = stream.parseFloat(args, 0)) != null) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float size = value.floatValue();
 						min_x -= size;
 						min_y -= size;
@@ -592,7 +612,7 @@ public class ParticleEffect extends EffectComponent {
 						max_y += size;
 					}
 					else if (line.getOptionArguments(args, "sphere", 1) && (value = stream.parseFloat(args, 0)) != null) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float size = value.floatValue();
 						min_x -= size;
 						min_y -= size;
@@ -602,7 +622,7 @@ public class ParticleEffect extends EffectComponent {
 						max_z += size;
 					}
 					else if (line.getOptionArguments(args, "ellipse", 1) || line.getOptionArguments(args, "ellipsoid", 1)) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float[] array = new float[3];
 						if (stream.parseVector3(args, 0, array)) {
 							min_x -= array[0];
@@ -658,10 +678,10 @@ public class ParticleEffect extends EffectComponent {
 				effect.emitVolumeBBMax[2] = max_z;
 				
 				if (line.hasFlag("scaleParticles")) {
-					effect.flags |= SOURCE_SCALEPARTICLES;
+					effect.flags.set(FLAGBIT_SOURCE_SCALE_PARTICLES);
 				}
 				if (line.hasFlag("resetIncoming")) {
-					effect.flags |= SOURCE_RESETINCOMING;
+					effect.flags.set(FLAGBIT_SOURCE_RESET_INCOMING);
 				}
 			}));
 		}
@@ -700,8 +720,8 @@ public class ParticleEffect extends EffectComponent {
 					effect.emitDirectionBBMax[2] = point[2] * normalize + vary[2];
 				}
 				
-				if (line.hasFlag("base")) effect.flags |= EMIT_BASE;
-				if (line.hasFlag("scaleExisting")) effect.flags |= EMIT_SCALEEXISTING;
+				if (line.hasFlag("base")) effect.flags.set(FLAGBIT_EMIT_BASE);
+				if (line.hasFlag("scaleExisting")) effect.flags.set(FLAGBIT_EMIT_SCALE_EXISTING);
 			}));
 		}
 		
@@ -759,11 +779,13 @@ public class ParticleEffect extends EffectComponent {
 					stream.parseVector3(args, 0, effect.attractorOrigin);
 					
 					index++;
-					effect.flags |= ATTRACTOR_LOCATION;
+					effect.flags.set(FLAGBIT_ATTRACTOR);
+					effect.flags.set(FLAGBIT_NOT_PRESET_ATTRACTOR);
 					validArguments = true;
 				}
 				else if (line.getOptionArguments(args, "presetAttractor", 2, Integer.MAX_VALUE)) {
-					effect.flags &= ~ATTRACTOR_LOCATION;
+					effect.flags.set(FLAGBIT_ATTRACTOR);
+					effect.flags.clear(FLAGBIT_NOT_PRESET_ATTRACTOR);
 					validArguments = true;
 				}
 				
@@ -801,28 +823,22 @@ public class ParticleEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "spiral", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.screwRate = value.floatValue();
-					effect.flags |= WARP_SPIRAL;
+					effect.flags.set(FLAGBIT_WARP_SPIRAL);
 				}
 				
-				// Spore does something really strange here, so we just disable (wiggle can be added manually with 'wiggleDir')
-//				if (line.getOptionArguments(args, "wiggle", 4) && (value = stream.parseFloat(args, 0)) != null) {
-//					ParticleWiggle item = new ParticleWiggle();
-//					item.rateDirection[0] = 0.0f;
-//					item.rateDirection[1] = 0.0f;
-//					item.rateDirection[2] = value.floatValue();
-//					
-//					if ((value = stream.parseFloat(args, 1)) != null) {
-//						item.timeRate = value.floatValue();
-//					}
-//					
-//					Number value2 = null;
-//					if ((value = stream.parseFloat(args, 2)) != null && (value2 = stream.parseFloat(args, 3, 0.0f, 1.0f)) != null) {
-//						float val = value.floatValue();
-//						float vary = value2.floatValue();
-//						
-//						val1 = vary * 16;  // vary * 2PI * (16 / 2PI)
-//					}
-//				}
+				if (line.getOptionArguments(args, "wiggle", 4)) {
+					ParticleWiggle item = new ParticleWiggle();
+					item.rateDirection[0] = 0.0f;
+					item.rateDirection[1] = 0.0f;
+					item.rateDirection[2] = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+					item.timeRate = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0f);
+					float scale = Optional.ofNullable(stream.parseFloat(args, 2)).orElse(0f);
+					float ratio = Optional.ofNullable(stream.parseFloat(args, 3, 0f, 1f)).orElse(0f);
+					item.wiggleDirection[0] = (float)Math.cos(ratio * Math.PI * 2) * scale;
+					item.wiggleDirection[1] = (float)Math.sin(ratio * Math.PI * 2) * -scale;
+					item.wiggleDirection[2] = 0f;
+					effect.wiggles.add(item);
+				}
 				
 				if (line.getOptionArguments(args, "wiggleDir", 2, 3) && (value = stream.parseFloat(args, 0)) != null) {
 					ParticleWiggle item = new ParticleWiggle();
@@ -886,7 +902,7 @@ public class ParticleEffect extends EffectComponent {
 					line.getArguments(args, 0);
 				}
 				
-				effect.flags |= FLAG_RANDOMWALK;
+				effect.flags.set(FLAGBIT_RANDOM_WALK);
 				
 				if (line.getOptionArguments(args, "delay", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
 					float delay = value.floatValue();
@@ -931,7 +947,7 @@ public class ParticleEffect extends EffectComponent {
 					else if (line.hasFlag("loop")) effect.randomWalk.loopType = 0;
 				}
 				
-				if (line.hasFlag("wait")) effect.flags |= RANDOMWALK_WAIT;
+				if (line.hasFlag("wait")) effect.flags.set(FLAGBIT_RANDOM_WALK_WAIT);
 			}
 		}
 		
@@ -964,6 +980,12 @@ public class ParticleEffect extends EffectComponent {
 					}
 				}
 				
+				if (line.hasFlag("propagateAlways")) {
+					effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
+				}
+				if (line.hasFlag("propagateIfKilled")) {
+					effect.flags.set(FLAGBIT_PROPAGATE_IF_KILLED);
+				}
 			}));
 		}
 		
@@ -980,25 +1002,25 @@ public class ParticleEffect extends EffectComponent {
 				effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 			}
 			else if (line.getOptionArguments(args, "sustain", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-				effect.flags |= FLAG_SUSTAIN;
+				effect.flags.set(FLAGBIT_RATE_SUSTAIN);
 				effect.rateLoop = value.floatValue();
 				effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 			}
 			else if (line.getOptionArguments(args, "hold", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-				effect.flags |= FLAG_HOLD;
+				effect.flags.set(FLAGBIT_RATE_HOLD);
 				effect.rateLoop = value.floatValue();
 				effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 			}
 			else if (line.getOptionArguments(args, "kill", 0, 1)) {
-				effect.flags |= FLAG_KILL;
-				effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+				effect.flags.set(FLAGBIT_RATE_KILL);
+				effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
 				effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 				effect.rateCurveCycles = 1;
 			}
 			
-			if (line.hasFlag("sizeScale")) effect.flags |= RATE_SIZESCALE;
-			if (line.hasFlag("areaScale")) effect.flags |= RATE_AREASCALE;
-			if (line.hasFlag("volumeScale")) effect.flags |= RATE_VOLUMESCALE;
+			if (line.hasFlag("sizeScale")) effect.flags.set(FLAGBIT_RATE_SIZE_SCALE);
+			if (line.hasFlag("areaScale")) effect.flags.set(FLAGBIT_RATE_AREA_SCALE);
+			if (line.hasFlag("volumeScale")) effect.flags.set(FLAGBIT_RATE_VOLUME_SCALE);
 			
 			if (line.getOptionArguments(args, "speedScale", 1) && (value = stream.parseFloat(args, 0)) != null) {
 				effect.rateSpeedScale = value.floatValue();
@@ -1044,7 +1066,7 @@ public class ParticleEffect extends EffectComponent {
 					effect.rate.add(value.floatValue());
 				}
 				
-				effect.flags |= FLAG_INJECT;
+				effect.flags.set(FLAGBIT_INJECT);
 				effect.rateLoop = 0.01f;
 				effect.rateCurveCycles = 1;
 				parseRateMain(line);
@@ -1061,7 +1083,7 @@ public class ParticleEffect extends EffectComponent {
 					effect.rate.add(value.floatValue());
 				}
 				
-				effect.flags |= FLAG_MAINTAIN;
+				effect.flags.set(FLAGBIT_MAINTAIN);
 
 				if (line.getOptionArguments(args, "delay", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.emitDelay[0] = effect.emitDelay[1] = value.floatValue();
@@ -1072,13 +1094,13 @@ public class ParticleEffect extends EffectComponent {
 				}
 				
 				if (line.getOptionArguments(args, "hold", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.flags |= FLAG_HOLD;
+					effect.flags.set(FLAGBIT_RATE_HOLD);
 					effect.rateLoop = value.floatValue();
 					effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 				}
 				else if (line.getOptionArguments(args, "kill", 0, 1)) {
-					effect.flags |= FLAG_KILL;
-					effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+					effect.flags.set(FLAGBIT_RATE_KILL);
+					effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
 					effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 					effect.rateCurveCycles = 1;
 				}
@@ -1096,13 +1118,18 @@ public class ParticleEffect extends EffectComponent {
 				effect.texture.drawMode = TextureSlot.DRAWMODE_NONE;
 				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_MATERIAL);
 				
-				effect.flags &= ~FLAG_MODEL;
+				effect.flags.clear(FLAGBIT_MODEL);
 				
 				Number value = null;
 				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {
 					effect.overrideSet = value.byteValue();
 				}
 			}));
+		}
+		
+		private static boolean isPowerOfTwo(int value) {
+			return ((value - 1) & 0xFFFFFF00) != 0 ||
+					(value & (value - 1)) != 0;
 		}
 		
 		private void parseTexture() {
@@ -1115,20 +1142,27 @@ public class ParticleEffect extends EffectComponent {
 				
 				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_TEXTURE);
 				
-				effect.flags &= ~FLAG_MODEL;
+				effect.flags.set(FLAGBIT_MODEL);
 				
 				Number value = null;
 				
 				if (line.getOptionArguments(args, "tile", 1, 2) && (value = stream.parseByte(args, 0)) != null) {
 					effect.tileCount[0] = value.byteValue();
 					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 1) : null).orElse((byte) 1);
+					
+					if (!isPowerOfTwo(effect.tileCount[0])) {
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 0));
+					}
+					if (!isPowerOfTwo(effect.tileCount[1])) {
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 1));
+					}
 				}
 				
 				if (line.getOptionArguments(args, "overrideSet", 1) && (value = stream.parseByte(args, 0)) != null) {
 					effect.overrideSet = value.byteValue();
 				}
 				
-				if (line.hasFlag("acceptComposite")) effect.flags |= FLAG_ACCEPTCOMPOSITE;
+				if (line.hasFlag("acceptComposite")) effect.flags.set(FLAGBIT_TEXTURE_ACCEPT_COMPOSITE);
 			}));
 		}
 		
@@ -1137,7 +1171,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			this.addParser("model", ArgScriptParser.create((parser, line) -> {
 				effect.texture.drawMode = 0;
-				effect.flags |= FLAG_MODEL;
+				effect.flags.set(FLAGBIT_MODEL);
 				
 				if (line.getArguments(args, 0, 1) && args.size() == 1) {
 					effect.texture.resource.parse(args, 0);
@@ -1164,8 +1198,25 @@ public class ParticleEffect extends EffectComponent {
 			this.addParser("frames", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				
+				if (line.getOptionArguments(args, "tile", 1, 2) && (value = stream.parseByte(args, 0)) != null) {
+					effect.tileCount[0] = value.byteValue();
+					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 1) : null).orElse((byte) 1);
+					
+					if (!isPowerOfTwo(effect.tileCount[0])) {
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 0));
+					}
+					if (!isPowerOfTwo(effect.tileCount[1])) {
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 1));
+					}
+				}
+				
 				if (line.getOptionArguments(args, "speed", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.frameSpeed = value.floatValue();
+					effect.flags.clear(FLAGBIT_FRAMES_RELATIVE_SPEED);
+				}
+				if (line.getOptionArguments(args, "speed", 1) && (value = stream.parseFloat(args, 0)) != null) {
+					effect.frameSpeed = value.floatValue();
+					effect.flags.set(FLAGBIT_FRAMES_RELATIVE_SPEED);
 				}
 				
 				if (line.getOptionArguments(args, "count", 1) && (value = stream.parseByte(args, 0)) != null) {
@@ -1194,9 +1245,11 @@ public class ParticleEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				if (line.getOptionArguments(args, "aboveHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[0] = value.floatValue();
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				if (line.getOptionArguments(args, "heightRange", 2)) {
 					if ((value = stream.parseFloat(args, 0)) != null) {
@@ -1205,10 +1258,11 @@ public class ParticleEffect extends EffectComponent {
 					if ((value = stream.parseFloat(args, 1)) != null) {
 						effect.altitudeRange[1] = value.floatValue();
 					}
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				
-				if (line.hasFlag("pinToSurface")) effect.flags |= EMITMAP_PINTOSURFACE;
-				if (line.hasFlag("density")) effect.flags |= EMITMAP_DENSITY;
+				if (line.hasFlag("pinToSurface")) effect.flags.set(FLAGBIT_MAP_EMIT_PIN_TO_SURFACE);
+				if (line.hasFlag("density")) effect.flags.set(FLAGBIT_MAP_EMIT_DENSITY);
 			}));
 		}
 		
@@ -1229,17 +1283,17 @@ public class ParticleEffect extends EffectComponent {
 					}
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
 				
 				if (line.hasFlag("pinToMap")) {
-					effect.flags |= COLLIDE_PINTOMAP;
+					effect.flags.set(FLAGBIT_MAP_COLLIDE_PIN_TO_MAP);
 					effect.mapBounce = 0;
 				}
 				else if (line.getOptionArguments(args, "bounce", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapBounce = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 				if (line.getOptionArguments(args, "death", 1) && (value = stream.parseFloat(args, 0, 0.0f, 1.0f)) != null) {
 					effect.probabilityDeath = value.floatValue();
@@ -1274,8 +1328,8 @@ public class ParticleEffect extends EffectComponent {
 					}
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_REPULSEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_REPEL);
 
 				if (line.getOptionArguments(args, "scout", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseScoutDistance = value.floatValue();
@@ -1289,7 +1343,7 @@ public class ParticleEffect extends EffectComponent {
 					effect.mapRepulseKillHeight = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1305,14 +1359,14 @@ public class ParticleEffect extends EffectComponent {
 					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_ADVECTMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_ADVECT);
 
 				if (line.getOptionArguments(args, "strength", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseStrength = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1328,14 +1382,14 @@ public class ParticleEffect extends EffectComponent {
 					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_FORCEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_FORCE);
 
 				if (line.getOptionArguments(args, "strength", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseStrength = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1407,23 +1461,33 @@ public class ParticleEffect extends EffectComponent {
 	protected void toArgScript(ArgScriptWriter writer, String keyword) {
 		writer.command(keyword).arguments(name).startBlock();
 		
-		writer.command("color").colors(color);
-		if (!colorVary.isBlack()) writer.option("vary").color(colorVary);
+		if (!writer.isDefaultColor(color) || !colorVary.isBlack() || flags.get(FLAGBIT_COLOR_VARY_RGB)) {
+			writer.command("color").colors(color);
+			if (flags.get(FLAGBIT_COLOR_VARY_RGB)) writer.option("varyRGB").color(colorVary);
+			else if (!colorVary.isBlack()) writer.option("vary").color(colorVary);
+		}
 		
-		writer.command("alpha").floats(alpha);
-		if (alphaVary != 0) writer.option("vary").floats(alphaVary);
+		if (!writer.isDefault(alpha, 1.0f) || alphaVary != 0) {
+			writer.command("alpha").floats(alpha);
+			if (alphaVary != 0) writer.option("vary").floats(alphaVary);
+		}
 		
-		writer.command("size").floats(size);
-		if (sizeVary != 0) writer.option("vary").floats(sizeVary);
+		if (!writer.isDefault(size, 1.0f) || sizeVary != 0) {
+			writer.command("size").floats(size);
+			if (sizeVary != 0) writer.option("vary").floats(sizeVary);
+		}
 		
-		if (!writer.isDefault(aspectRatio)) {
+		if (!writer.isDefault(aspectRatio) || aspectRatioVary != 0) {
 			writer.command("aspect").floats(aspectRatio);
 			if (aspectRatioVary != 0) writer.option("vary").floats(aspectRatioVary);
 		}
 		
-		writer.command("rotate").floats(rotate);
-		if (rotationVary != 0) writer.option("vary").floats(rotationVary);
-		if (rotationOffset != 0) writer.option("offset").floats(rotationOffset);
+		if (!writer.isDefault(rotate, 0.0f) || rotationVary != 0.0f || rotationOffset != 0.0f)
+		{
+			writer.command("rotate").floats(rotate);
+			if (rotationVary != 0) writer.option("vary").floats(rotationVary);
+			if (rotationOffset != 0) writer.option("offset").floats(rotationOffset);
+		}
 		
 		writeSource(writer);
 		writeEmit(writer);
@@ -1437,7 +1501,7 @@ public class ParticleEffect extends EffectComponent {
 		writeResource(writer);
 		writeFrames(writer);
 		if (alignMode != 0) writer.command("align").arguments(ENUM_ALIGNMENT.get(alignMode));
-		if ((flags & FLAG_LOOPBOX) == FLAG_LOOPBOX) {
+		if (flags.get(FLAGBIT_LOOP_BOX)) {
 			if (!loopBoxColor.isEmpty()) writer.command("loopBoxColor").colors(loopBoxColor);
 			if (!loopBoxAlpha.isEmpty()) writer.command("loopBoxAlpha").floats(loopBoxAlpha);
 		}
@@ -1463,10 +1527,10 @@ public class ParticleEffect extends EffectComponent {
 			}
 		}
 		
-		if ((flags & ~FLAGMASK) != 0) {
-			writer.blankLine();
-			writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
-		}
+//		if ((flags & ~FLAGMASK) != 0) {
+//			writer.blankLine();
+//			writer.command("flags").arguments(HashManager.get().hexToString(flags & ~FLAGMASK));
+//		}
 		
 		writer.endBlock().commandEND();
 	}
@@ -1475,7 +1539,7 @@ public class ParticleEffect extends EffectComponent {
 		
 		if (emitVolumeBBMin[0] != 0 || emitVolumeBBMin[1] != 0 || emitVolumeBBMin[2] != 0 
 				|| emitVolumeBBMax[0] != 0 || emitVolumeBBMax[1] != 0 || emitVolumeBBMax[2] != 0
-				|| torusWidth != -1 || (flags & (SOURCE_SCALEPARTICLES | SOURCE_RESETINCOMING)) != 0) {
+				|| torusWidth != -1 || flags.get(FLAGBIT_SOURCE_SCALE_PARTICLES) || flags.get(FLAGBIT_SOURCE_RESET_INCOMING)) {
 			
 			float[] offset = new float[3];
 			float min_x = (emitVolumeBBMin[0] - emitVolumeBBMax[0]) / 2;
@@ -1490,7 +1554,7 @@ public class ParticleEffect extends EffectComponent {
 			
 			writer.command("source");
 			
-			if ((flags & SOURCE_ROUND) == SOURCE_ROUND) {
+			if (flags.get(FLAGBIT_SOURCE_ROUND)) {
 				if (max_x == max_y && max_y == max_z) writer.option("sphere").floats(max_x);
 				else writer.option("ellipse").vector(max_x, max_y, max_z);
 			}
@@ -1514,8 +1578,8 @@ public class ParticleEffect extends EffectComponent {
 				writer.option("offset").vector(offset);
 			}
 			
-			writer.flag("scaleParticles", (flags & SOURCE_SCALEPARTICLES) == SOURCE_SCALEPARTICLES);
-			writer.flag("resetIncoming", (flags & SOURCE_RESETINCOMING) == SOURCE_RESETINCOMING);
+			writer.flag("scaleParticles", flags.get(FLAGBIT_SOURCE_SCALE_PARTICLES));
+			writer.flag("resetIncoming", flags.get(FLAGBIT_SOURCE_RESET_INCOMING));
 		}
 	}
 
@@ -1551,14 +1615,15 @@ public class ParticleEffect extends EffectComponent {
 			if (vary[0] != 0 || vary[1] != 0 || vary[2] != 0) writer.vector(vary);
 		}
 		
-		if ((flags & EMIT_BASE) == EMIT_BASE) {
+		if (flags.get(FLAGBIT_EMIT_BASE)) {
 			if (!commandWritten) writer.command("emit");
 			commandWritten = true;
 			writer.option("base");
 		}
 		
-		if ((flags & EMIT_SCALEEXISTING) == EMIT_SCALEEXISTING) {
+		if (flags.get(FLAGBIT_EMIT_SCALE_EXISTING)) {
 			if (!commandWritten) writer.command("emit");
+			commandWritten = true;
 			writer.option("scaleExisting");
 		}
 	}
@@ -1600,8 +1665,8 @@ public class ParticleEffect extends EffectComponent {
 				}
 			}
 			
-			if (!attractor.attractorStrength.isEmpty()) {
-				if ((flags & ATTRACTOR_LOCATION) == ATTRACTOR_LOCATION) writer.option("attractor").vector(attractorOrigin);
+			if (flags.get(FLAGBIT_ATTRACTOR)) {
+				if (flags.get(FLAGBIT_NOT_PRESET_ATTRACTOR)) writer.option("attractor").vector(attractorOrigin);
 				else writer.option("presetAttractor");
 				
 				writer.floats(attractor.range).floats(attractor.attractorStrength);
@@ -1629,7 +1694,7 @@ public class ParticleEffect extends EffectComponent {
 			if (!commandWritten) writer.command("warp");
 			commandWritten = true;
 			
-			if ((flags & WARP_SPIRAL) == WARP_SPIRAL) writer.option("spiral");
+			if (flags.get(FLAGBIT_WARP_SPIRAL)) writer.option("spiral");
 			else writer.option("screw");
 			writer.floats(screwRate);
 		}
@@ -1646,7 +1711,7 @@ public class ParticleEffect extends EffectComponent {
 	}
 	
 	private void writeWalk(ArgScriptWriter writer) {
-		if ((flags & FLAG_RANDOMWALK) == FLAG_RANDOMWALK) {
+		if (flags.get(FLAGBIT_RANDOM_WALK)) {
 			boolean isDirectedWalk = !randomWalk.turnOffsetCurve.isEmpty();
 			if (isDirectedWalk) writer.command("directedWalk").floats(randomWalk.turnOffsetCurve);
 			else writer.command("randomWalk");
@@ -1669,7 +1734,7 @@ public class ParticleEffect extends EffectComponent {
 			if (randomWalk.loopType == 1) writer.option("sustain");
 			else if (randomWalk.loopType == 0) writer.option("loop");
 			if (randomWalk.mix != 0) writer.option("mix").floats(randomWalk.mix);
-			writer.flag("wait", (flags & RANDOMWALK_WAIT) == RANDOMWALK_WAIT);
+			writer.flag("wait", flags.get(FLAGBIT_RANDOM_WALK_WAIT));
 		}
 	}
 	
@@ -1684,24 +1749,24 @@ public class ParticleEffect extends EffectComponent {
 			writer.option("preroll").floats(prerollTime);
 		}
 		
-		writer.flag("propagateAlways", (unkFlags & LIFE_PROPAGATEALWAYS) == LIFE_PROPAGATEALWAYS);
-		writer.flag("propagateIfKilled", (unkFlags & LIFE_PROPAGATEIFKILLED) == LIFE_PROPAGATEIFKILLED);
+		writer.flag("propagateAlways", flags.get(FLAGBIT_PROPAGATE_ALWAYS));
+		writer.flag("propagateIfKilled", flags.get(FLAGBIT_PROPAGATE_IF_KILLED));
 	}
 	
 	private void writeRate(ArgScriptWriter writer) {
-		if ((flags & FLAG_INJECT) == FLAG_INJECT) {
+		if (flags.get(FLAGBIT_INJECT)) {
 			writer.command("inject").floats(rate.get(0));
-		} else if ((flags & FLAG_MAINTAIN) == FLAG_MAINTAIN) {
+		} else if (flags.get(FLAGBIT_MAINTAIN)) {
 			writer.command("maintain").floats(rate.get(0));
 			if (emitDelay[0] != -1 || emitDelay[1] != -1) {
 				writer.option("delay").floats(emitDelay[0]);
 				if (emitDelay[1] != emitDelay[0]) writer.floats(emitDelay[1]);
 			}
-			if ((flags & FLAG_HOLD) == FLAG_HOLD) {
+			if (flags.get(FLAGBIT_RATE_HOLD)) {
 				writer.option("hold").floats(rateLoop);
 				if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 			} 
-			else if ((flags & FLAG_KILL) == FLAG_KILL) {
+			else if (flags.get(FLAGBIT_RATE_KILL)) {
 				writer.option("kill").floats(rateLoop);
 			}
 			// This has no more options
@@ -1710,15 +1775,19 @@ public class ParticleEffect extends EffectComponent {
 			writer.command("rate").floats(rate);
 		}
 		
-		if ((flags & FLAG_SUSTAIN) == FLAG_SUSTAIN) {
+		writer.flag("sizeScale", flags.get(FLAGBIT_RATE_SIZE_SCALE));
+		writer.flag("areaScale", flags.get(FLAGBIT_RATE_AREA_SCALE));
+		writer.flag("volumeScale", flags.get(FLAGBIT_RATE_VOLUME_SCALE));
+		
+		if (flags.get(FLAGBIT_RATE_SUSTAIN)) {
 			writer.option("sustain").floats(rateLoop);
 			if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 		}
-		else if ((flags & FLAG_HOLD) == FLAG_HOLD) {
+		else if (flags.get(FLAGBIT_RATE_HOLD)) {
 			writer.option("hold").floats(rateLoop);
 			if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 		} 
-		else if ((flags & FLAG_KILL) == FLAG_KILL) {
+		else if (flags.get(FLAGBIT_RATE_KILL)) {
 			writer.option("kill").floats(rateLoop);
 		}
 		else if (rateLoop != 0.1f && rateCurveCycles == 1) {
@@ -1728,10 +1797,23 @@ public class ParticleEffect extends EffectComponent {
 			writer.option("loop").floats(rateLoop);
 			if (rateCurveCycles != 0) writer.ints(rateCurveCycles);
 		}
+		
+		if (emitDelay[0] != -1.0f || emitDelay[1] != -1.0f) {
+			writer.option("delay").floats(emitDelay[0]);
+			if (emitDelay[1] != emitDelay[0]) {
+				writer.floats(emitDelay[1]);
+			}
+		}
+		if (emitRetrigger[0] != -1.0f || emitRetrigger[1] != -1.0f) {
+			writer.option("trigger").floats(emitRetrigger[0]);
+			if (emitRetrigger[1] != emitRetrigger[0]) {
+				writer.floats(emitRetrigger[1]);
+			}
+		}
 	}
 	
 	private void writeResource(ArgScriptWriter writer) {
-		if ((flags & FLAG_MODEL) == FLAG_MODEL) {
+		if (flags.get(FLAGBIT_MODEL)) {
 			writer.command("model");
 			if (!texture.resource.isDefault()) writer.arguments(texture.resource);
 			
@@ -1751,7 +1833,7 @@ public class ParticleEffect extends EffectComponent {
 		}
 		
 		if (overrideSet != 0) writer.option("overrideSet").ints(overrideSet);
-		writer.flag("acceptComposite", (flags & FLAG_ACCEPTCOMPOSITE) == FLAG_ACCEPTCOMPOSITE);
+		writer.flag("acceptComposite", flags.get(FLAGBIT_TEXTURE_ACCEPT_COMPOSITE));
 	}
 	
 	private void writeFrames(ArgScriptWriter writer) {
@@ -1767,8 +1849,7 @@ public class ParticleEffect extends EffectComponent {
 	private void writeEmitMap(ArgScriptWriter writer) {
 		if (!mapEmit.isDefault()) {
 			writer.command("mapEmit").arguments(mapEmit);
-			if ((flags & EMITMAP_PINTOSURFACE) == EMITMAP_PINTOSURFACE) writer.option("pinToSurface");
-			if ((flags & EMITMAP_HEIGHT) == EMITMAP_HEIGHT) {
+			if (flags.get(FLAGBIT_MAP_EMIT_HEIGHT_RANGE)) {
 				if (altitudeRange[0] != -10000.0f && altitudeRange[1] != 10000.0f) {
 					writer.option("heightRange").floats(altitudeRange);
 				}
@@ -1777,26 +1858,27 @@ public class ParticleEffect extends EffectComponent {
 				}
 				else writer.option("aboveHeight").floats(altitudeRange[0]);
 			}
-			if ((flags & EMITMAP_DENSITY) == EMITMAP_DENSITY) writer.option("density");
+			writer.flag("pinToSurface", flags.get(FLAGBIT_MAP_EMIT_PIN_TO_SURFACE));
+			writer.flag("density", flags.get(FLAGBIT_MAP_EMIT_DENSITY));
 		}
 	}
 	
 	private void writeCollideMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_COLLIDEMAP) == FLAG_COLLIDEMAP) {
+		if (flags.get(FLAGBIT_MAP_COLLIDE)) {
 			writer.command("mapCollide");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
-			if ((flags & COLLIDE_PINTOMAP) == COLLIDE_PINTOMAP) writer.option("pinToMap");
+			if (flags.get(FLAGBIT_MAP_COLLIDE_PIN_TO_MAP)) writer.option("pinToMap");
 			else if (mapBounce != 1.0f) writer.option("bounce").floats(mapBounce);
 			
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 			
 			if (probabilityDeath != 0) writer.option("death").floats(probabilityDeath);
 		}
 	}
 	
 	private void writeRepelMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_REPULSEMAP) == FLAG_REPULSEMAP) {
+		if (flags.get(FLAGBIT_MAP_REPEL)) {
 			writer.command("mapRepel");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
@@ -1806,27 +1888,27 @@ public class ParticleEffect extends EffectComponent {
 			if (mapRepulseVertical != 0) writer.option("vertical").floats(mapRepulseVertical);
 			if (mapRepulseKillHeight != -1000000000.0f) writer.option("killHeight").floats(mapRepulseKillHeight);
 			
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
 	private void writeAdvectMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_ADVECTMAP) == FLAG_ADVECTMAP) {
+		if (flags.get(FLAGBIT_MAP_ADVECT)) {
 			writer.command("mapAdvect");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
 			if (mapRepulseStrength != 0) writer.option("strength").floats(mapRepulseStrength);
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
 	private void writeForceMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_FORCEMAP) == FLAG_FORCEMAP) {
+		if (flags.get(FLAGBIT_MAP_FORCE)) {
 			writer.command("mapForce");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
-			if (mapRepulseStrength != 0) writer.option("strength").floats(mapRepulseStrength);
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			if (mapRepulseStrength != 1.0f) writer.option("strength").floats(mapRepulseStrength);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
@@ -1844,7 +1926,7 @@ public class ParticleEffect extends EffectComponent {
 		list.add(effectDirectory.getResource(MapResource.TYPE_CODE, mapEmit));
 		
 		if (texture.drawMode == TextureSlot.DRAWMODE_NONE) {
-			if ((flags & FLAG_MODEL) == FLAG_MODEL) {
+			if (flags.get(FLAGBIT_MODEL)) {
 				list.add(effectDirectory.getResource(MaterialResource.TYPE_CODE, texture.resource2));
 			} else {
 				list.add(effectDirectory.getResource(MaterialResource.TYPE_CODE, texture.resource));

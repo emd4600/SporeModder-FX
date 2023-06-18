@@ -18,8 +18,6 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +25,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 
-import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
@@ -35,7 +32,6 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.Stream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
@@ -1874,13 +1870,13 @@ public class MetaParticleEffect extends EffectComponent {
 			if (rateCurveCycles != 0) writer.ints(rateCurveCycles);
 		}
 		
-		if (emitDelay[0] != 0.0f || emitDelay[1] != 0.0f) {
+		if (emitDelay[0] != -1.0f || emitDelay[1] != -1.0f) {
 			writer.option("delay").floats(emitDelay[0]);
 			if (emitDelay[1] != emitDelay[0]) {
 				writer.floats(emitDelay[1]);
 			}
 		}
-		if (emitRetrigger[0] != 0.0f || emitRetrigger[1] != 0.0f) {
+		if (emitRetrigger[0] != -1.0f || emitRetrigger[1] != -1.0f) {
 			writer.option("trigger").floats(emitRetrigger[0]);
 			if (emitRetrigger[1] != emitRetrigger[0]) {
 				writer.floats(emitRetrigger[1]);
@@ -1971,31 +1967,5 @@ public class MetaParticleEffect extends EffectComponent {
 		list.add(deathEffect);
 		
 		return list;
-	}
-	
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		MainApp.testInit();
-		
-		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
-		for (File file : folder.listFiles()) {
-			if (file.getName().endsWith(".effdir")) {
-				EffectDirectory effdir = new EffectDirectory();
-				try (StreamReader stream = new FileStream(file, "r")) {
-					effdir.read(stream);
-					for (EffectComponent component : effdir.getComponents(MetaParticleEffect.TYPE_CODE)) {
-						ArgScriptWriter writer = new ArgScriptWriter();
-						component.toArgScript(writer);
-						System.out.println(writer.toString());
-						System.out.println();
-						
-						MetaParticleEffect metaParticle = (MetaParticleEffect)component;
-						if (metaParticle.flags.get(FLAGBIT_TRACTOR)) {
-							System.err.println("ERROR:   " + component.name);
-						}
-					}
-				}
-			}
-		}
 	}
 }

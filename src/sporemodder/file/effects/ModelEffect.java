@@ -199,7 +199,7 @@ public class ModelEffect extends EffectComponent {
 				block.component = effect;
 			}
 			
-			block.parse(stream, line, ModelEffect.class, args.size() == 0);
+			block.parse(stream, line, ModelEffect.TYPE_CODE, args.size() == 0);
 		}
 	}
 	

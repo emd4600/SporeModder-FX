@@ -43,8 +43,8 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 				name = args.get(0);
 				effect.name = name;
 				
-				if (stream.getData().hasComponent(name)) {
-					stream.addError(line.createErrorForArgument("A component with this name already exists in this file.", 0));
+				if (stream.getData().hasComponent(name, effect.getFactory().getTypeCode())) {
+					stream.addError(line.createErrorForArgument("A '" + effect.getFactory().getKeyword() + "' component with this name already exists in this file.", 0));
 				}
 				
 				if (args.size() > 1) {
@@ -52,7 +52,7 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 						stream.addError(line.createErrorForArgument("Wrong format for effect inheritance. Correct format is `name : parentName`", 2));
 					} else {
 						String parentName = args.get(2);
-						EffectComponent parent = stream.getData().getComponent(parentName, effect.getClass(), effect.getFactory().getKeyword());
+						EffectComponent parent = stream.getData().getComponent(parentName, effect.getFactory().getTypeCode());
 						if (parent != null) effect.copy(parent);
 					}
 				}
@@ -69,7 +69,7 @@ public abstract class EffectBlockParser<T extends EffectComponent> extends ArgSc
 	
 	@Override
 	public void onBlockEnd() {
-		stream.getData().addComponent(name, effect);
+		if (effect != null) stream.getData().addComponent(name, effect);
 		data.setParsingComponent(false);
 	}
 	

@@ -85,7 +85,7 @@ public class SplitControllerEffect extends EffectComponent {
 				// Add it to the effect
 				VisualEffectBlock block = new VisualEffectBlock(parser.getData().getEffectDirectory());
 				block.blockType = TYPE_CODE;
-				block.parse(parser.getStream(), line, SplitControllerEffect.class);
+				block.parse(parser.getStream(), line, SplitControllerEffect.TYPE_CODE);
 				
 				parser.getData().getCurrentEffect().blocks.add(block);
 			}));

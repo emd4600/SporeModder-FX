@@ -1368,7 +1368,7 @@ public class CloudEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, CloudEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

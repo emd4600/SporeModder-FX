@@ -80,7 +80,7 @@ public class GroundCoverEffect extends ParticleEffect {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, GroundCoverEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 		
 		@Override

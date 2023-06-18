@@ -178,7 +178,7 @@ public class ShakeEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, ShakeEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

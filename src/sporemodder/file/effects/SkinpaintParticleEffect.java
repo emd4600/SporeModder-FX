@@ -299,7 +299,7 @@ public class SkinpaintParticleEffect extends EffectComponent {
 			
 			this.addParser("chain", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
-					effect.chainParticles = data.getComponent(args, 0, SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
+					effect.chainParticles = data.getComponent(args, 0, SkinpaintParticleEffect.TYPE_CODE);
 					if (effect.chainParticles != null)
 						args.addHyperlink(PfxEditor.getHyperlinkType(effect.chainParticles), effect.chainParticles, 0);
 				}
@@ -889,7 +889,7 @@ public class SkinpaintParticleEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, SkinpaintParticleEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

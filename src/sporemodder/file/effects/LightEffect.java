@@ -246,7 +246,7 @@ public class LightEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, LightEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

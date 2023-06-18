@@ -175,7 +175,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 			
 			this.addParser("particle", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
-					effect.particle = parser.getData().getComponent(args, 0, SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
+					effect.particle = parser.getData().getComponent(args, 0, SkinpaintParticleEffect.TYPE_CODE);
 					if (effect.particle != null) args.addHyperlink(PfxEditor.getHyperlinkType(effect.particle), effect.particle, 0);
 				}
 			}));
@@ -203,7 +203,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 					if (!line.isEmpty()) {
 						float prob = effect.selectAll ? 1.0f : -1.0f;
 
-						EffectComponent component = getData().getComponent(line.getKeyword(), SkinpaintParticleEffect.class, SkinpaintParticleEffect.KEYWORD);
+						EffectComponent component = getData().getComponent(line.getKeyword(), SkinpaintParticleEffect.TYPE_CODE);
 						if (component != null) {
 							// -1 cause it's the first split, 0 is the second split
 							line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(component), component, -1);
@@ -362,7 +362,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, SkinpaintDistributeEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

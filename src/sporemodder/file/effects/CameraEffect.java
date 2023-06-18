@@ -309,7 +309,7 @@ public class CameraEffect extends EffectComponent {
 				block.component = effect;
 			}
 			
-			block.parse(stream, line, CameraEffect.class, args.size() == 0);
+			block.parse(stream, line, CameraEffect.TYPE_CODE, args.size() == 0);
 		}
 	}
 	

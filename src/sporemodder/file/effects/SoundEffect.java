@@ -158,7 +158,7 @@ public class SoundEffect extends EffectComponent {
 			// Add it to the effect
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 			block.blockType = TYPE_CODE;
-			block.parse(stream, line, SoundEffect.class);
+			block.parse(stream, line, SoundEffect.TYPE_CODE);
 			
 			block.component = effect;
 			data.addComponent(effect.toString(), effect);

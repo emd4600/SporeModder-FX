@@ -104,7 +104,7 @@ public class MixEventEffect extends EffectComponent {
 			// Add it to the effect
 			VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
 			block.blockType = TYPE_CODE;
-			block.parse(stream, line, MixEventEffect.class);
+			block.parse(stream, line, MixEventEffect.TYPE_CODE);
 			
 			data.addComponent(effect.toString(), effect);
 			data.getCurrentEffect().blocks.add(block);

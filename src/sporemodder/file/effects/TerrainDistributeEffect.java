@@ -166,7 +166,7 @@ public class TerrainDistributeEffect extends EffectComponent {
 						Number value = null;
 						
 						if (line.getArguments(args, 1)) {
-							instance.effect = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
+							instance.effect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 							if (instance.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(instance.effect), instance.effect, 0);
 						}
 						
@@ -222,7 +222,7 @@ public class TerrainDistributeEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, TerrainDistributeEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

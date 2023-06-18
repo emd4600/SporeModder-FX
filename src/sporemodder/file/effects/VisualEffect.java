@@ -56,7 +56,7 @@ public class VisualEffect extends EffectComponent {
 	public static final int FLAGS_CAMERA_FACING = 2;  // 1 << 1
 	public static final int FLAGS_CAMERA_ATTACHED = 0x4;  // 1 << 2
 	public static final int FLAGS_CAMERA_ATTACHED_RIGID = 0x8;  // 1 << 3
-	public static final int FLAGS_AUTO_STOP = 0x10;  // 1 << 4 TODO
+	public static final int FLAGS_NO_AUTO_STOP = 0x10;  // 1 << 4
 	public static final int FLAGS_HARD_STOP = 0x20;  // 1 << 5
 	public static final int FLAGS_RIGID = 0x40;  // 1 << 6
 	public static final int FLAGS_IGNORE_PARAMS = 0x80;  // 1 << 7
@@ -182,6 +182,9 @@ public class VisualEffect extends EffectComponent {
 			}
 			if (line.hasFlag("detach")) {
 				effect.flags |= FLAGS_DETACH;
+			}
+			if (line.hasFlag("noAutoStop")) {
+				effect.flags |= FLAGS_NO_AUTO_STOP;
 			}
 			
 			if (line.getOptionArguments(args, "notify", 1)) {

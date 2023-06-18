@@ -85,7 +85,7 @@ public class EffectDirectory {
 		addFactory(VisualEffect.FACTORY);
 		
 		addFactory(ParticleEffect.FACTORY);
-		addFactory(MetaparticleEffect.FACTORY);
+		addFactory(MetaParticleEffect.FACTORY);
 		addFactory(DecalEffect.FACTORY);
 		addFactory(SequenceEffect.FACTORY);
 		addFactory(SoundEffect.FACTORY);
@@ -253,13 +253,11 @@ public class EffectDirectory {
 	public void addEffectUnit(EffectUnit unit) {
 		units.add(unit);
 		
-		Map<String, EffectComponent> components = unit.getComponents(); 
-		for (EffectComponent component : components.values()) {
+		for (EffectComponent component : unit.getComponents().values()) {
 			addComponent(component);
 		}
 		
-		Map<String, EffectResource> resources = unit.getResources(); 
-		for (EffectResource resource : resources.values()) {
+		for (EffectResource resource : unit.getResources().values()) {
 			addResource(resource);
 		}
 		

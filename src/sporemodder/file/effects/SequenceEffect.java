@@ -157,7 +157,7 @@ public class SequenceEffect extends EffectComponent {
 				effect.instances.add(ins);
 				
 				if (line.getArguments(args, 1, 3)) {
-					ins.effect = data.getComponent(args, 0, VisualEffect.class, VisualEffect.KEYWORD);
+					ins.effect = data.getComponent(args, 0, VisualEffect.TYPE_CODE);
 					if (ins.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(ins.effect), ins.effect, 0);
 					
 					ins.timeRange[0] = ins.timeRange[1] = -1.0f;
@@ -203,7 +203,7 @@ public class SequenceEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, SequenceEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

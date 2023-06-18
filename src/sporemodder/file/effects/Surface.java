@@ -152,12 +152,12 @@ public class Surface {
 		}
 		
 		if (line.getOptionArguments(args, "collideEffect", 1)) {
-			collideEffect = stream.getData().getComponent(args, 0, VisualEffect.class, "effect");
+			collideEffect = stream.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 			if (collideEffect != null) args.addHyperlink(PfxEditor.getHyperlinkType(collideEffect), collideEffect, 0);
 		}
 		
 		if (line.getOptionArguments(args, "deathEffect", 1)) {
-			deathEffect = stream.getData().getComponent(args, 0, VisualEffect.class, "effect");
+			deathEffect = stream.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 			if (deathEffect != null) args.addHyperlink(PfxEditor.getHyperlinkType(deathEffect), deathEffect, 0);
 		}
 		

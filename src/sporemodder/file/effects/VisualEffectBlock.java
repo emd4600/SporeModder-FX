@@ -167,11 +167,11 @@ public class VisualEffectBlock {
 		}
 	}
 	
-	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, Class<?> type) {
+	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, int type) {
 		parse(stream, line, type, true);
 	}
 	
-	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, Class<?> type, boolean isAnonymous) {
+	public void parse(ArgScriptStream<EffectUnit> stream, ArgScriptLine line, int type, boolean isAnonymous) {
 		ArgScriptArguments args = new ArgScriptArguments();
 		
 		Integer iValue = null;
@@ -179,7 +179,7 @@ public class VisualEffectBlock {
 		
 		// Some effects are anonymous and therefore, don't specify a name
 		if (!isAnonymous && line.getArguments(args, 0, 1) && args.size() == 1) {
-			component = stream.getData().getComponent(args.get(0), type, line.getKeyword());
+			component = stream.getData().getComponent(args.get(0), type);
 			
 			if (component == null) {
 				stream.addError(line.createErrorForArgument(stream.getData().getLastError(), 0));
@@ -393,14 +393,14 @@ public class VisualEffectBlock {
 		}
 	}
 	
-	public static ArgScriptParser<EffectUnit> createGroupParser(int typeCode, Class<?> type) {
+	public static ArgScriptParser<EffectUnit> createGroupParser(int type) {
 		
 		return new ArgScriptParser<EffectUnit>() {
 			@Override
 			public void parse(ArgScriptLine line) {
 				// Add it to the effect
 				VisualEffectBlock block = new VisualEffectBlock(data.getEffectDirectory());
-				block.blockType = typeCode;
+				block.blockType = type;
 				block.parse(stream, line, type, false);
 				
 				data.getCurrentEffect().blocks.add(block);

@@ -244,7 +244,7 @@ public class GameModelEffect extends EffectComponent {
 			object.type = in.readByte();
 			int index = in.readInt();
 			if (object.type == SPLIT_CONTROL) {
-				object.splitter = effectDirectory.getEffect(MetaparticleEffect.TYPE_CODE, index);
+				object.splitter = effectDirectory.getEffect(MetaParticleEffect.TYPE_CODE, index);
 			} else {
 				object.splitter = null;
 			}
@@ -298,7 +298,7 @@ public class GameModelEffect extends EffectComponent {
 			out.writeByte(split.type);
 			
 			if (split.type == SPLIT_CONTROL) {
-				out.writeInt(effectDirectory.getIndex(MetaparticleEffect.TYPE_CODE, split.splitter));
+				out.writeInt(effectDirectory.getIndex(MetaParticleEffect.TYPE_CODE, split.splitter));
 			}
 			else if (split.type == SPLIT_FILTER) {
 				out.writeInt(splitters.size());
@@ -504,7 +504,7 @@ public class GameModelEffect extends EffectComponent {
 							return;
 						}
 						
-						item.splitter = parser.getData().getComponent(args, index, MetaparticleEffect.class, "metaParticles");
+						item.splitter = parser.getData().getComponent(args, index, MetaParticleEffect.TYPE_CODE);
 						if (item.splitter != null) {
 							args.addHyperlink(PfxEditor.getHyperlinkType(item.splitter), item.splitter, index);
 						}
@@ -591,7 +591,7 @@ public class GameModelEffect extends EffectComponent {
 				block.component = effect;
 			}
 			
-			block.parse(stream, line, GameModelEffect.class, args.size() == 0);
+			block.parse(stream, line, GameModelEffect.TYPE_CODE, args.size() == 0);
 		}
 	}
 	

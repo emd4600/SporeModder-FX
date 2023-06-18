@@ -18,23 +18,16 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 
-import sporemodder.file.filestructures.Stream;
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureCondition;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureFieldEndian;
-import sporemodder.file.filestructures.StructureFieldMethod;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.StructureUnsigned;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
+import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
@@ -42,16 +35,27 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.Stream;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureFieldMethod;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.StructureUnsigned;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
 import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
-public class MetaparticleEffect extends EffectComponent {
+public class MetaParticleEffect extends EffectComponent {
 	
 	/**
 	 * The structure metadata used for reading/writing this class.
 	 */
-	public static final StructureMetadata<MetaparticleEffect> STRUCTURE_METADATA = StructureMetadata.generate(MetaparticleEffect.class);
+	public static final StructureMetadata<MetaParticleEffect> STRUCTURE_METADATA = StructureMetadata.generate(MetaParticleEffect.class);
 	
 	public static final String KEYWORD = "metaParticles";
 	public static final int TYPE_CODE = 0x0002;
@@ -61,69 +65,56 @@ public class MetaparticleEffect extends EffectComponent {
 	
 	public static final ArgScriptEnum ENUM_ALIGNMENT = new ArgScriptEnum();
 	static {
-		ENUM_ALIGNMENT.add(0, "camera");
+		ENUM_ALIGNMENT.add(0, "default");
 		ENUM_ALIGNMENT.add(1, "ground");
-		ENUM_ALIGNMENT.add(5, "source");
 		ENUM_ALIGNMENT.add(2, "dirX");
 		ENUM_ALIGNMENT.add(3, "dirY");
 		ENUM_ALIGNMENT.add(4, "dirZ");
-		ENUM_ALIGNMENT.add(6, "zPole");
-		ENUM_ALIGNMENT.add(7, "sunPole");
-		ENUM_ALIGNMENT.add(8, "cameraLocation");
 	}
 
-	public static final int SOURCE_ROUND = 0x10;
-	public static final int SOURCE_SCALEPARTICLES = 0x800;
-	public static final int SOURCE_RESETINCOMING = 0x4000000;
+	public static final int FLAGBIT_INJECT = 0;
+	public static final int FLAGBIT_MAINTAIN = 1;
+	public static final int FLAGBIT_RATE_SUSTAIN = 2;
+	public static final int FLAGBIT_EMIT_BASE = 3;
+	public static final int FLAGBIT_SOURCE_ROUND = 4;
+	public static final int FLAGBIT_MAP_EMIT_PIN_TO_SURFACE = 5;
+	public static final int FLAGBIT_MAP_EMIT_HEIGHT_RANGE = 6;
+	public static final int FLAGBIT_MAP_EMIT_DENSITY = 7;
+	public static final int FLAGBIT_RATE_SIZE_SCALE = 8;
+	public static final int FLAGBIT_RATE_AREA_SCALE = 9;
+	public static final int FLAGBIT_RATE_VOLUME_SCALE = 0xa;
+	public static final int FLAGBIT_SOURCE_SCALE_PARTICLES = 0xb;
+	public static final int FLAGBIT_SURFACE = 0xc;
+	public static final int FLAGBIT_MAP_COLLIDE = 0xd;
+	public static final int FLAGBIT_MAP_REPEL = 0xe;
+	public static final int FLAGBIT_MAP_ADVECT = 0xf;
+	public static final int FLAGBIT_MAP_FORCE = 0x10;
+	public static final int FLAGBIT_KILL_OUTSIDE_MAP = 0x11;
+	public static final int FLAGBIT_MAP_COLLIDE_PIN_TO_MAP = 0x12;
+	public static final int FLAGBIT_RANDOM_WALK_SYNC = 0x13;
+	public static final int FLAGBIT_RANDOM_WALK_NO_SYNC = 0x14;
+	public static final int FLAGBIT_RANDOM_WALK_WAIT = 0x14;
+	public static final int FLAGBIT_ATTRACTOR_AFFECTS_ALPHA = 0x16;
+	public static final int FLAGBIT_ATTRACTOR = 0x17;
+	public static final int FLAGBIT_NOT_PRESET_ATTRACTOR = 0x18;
+	public static final int FLAGBIT_TRACTOR = 0x19;
+	public static final int FLAGBIT_PATH = 0x1a;
+	public static final int FLAGBIT_ALIGN_WIND_BANK = 0x1b;
 	
-	public static final int EMIT_SCALEEXISTING = 0x2000000;
-	public static final int EMIT_BASE = 8;
+	public static final int FLAGBIT_SOURCE_RESET_INCOMING = 0x1d;
+	public static final int FLAGBIT_RATE_KILL = 0x1e;
+	public static final int FLAGBIT_RATE_HOLD = 0x1f;
+	public static final int FLAGBIT_WARP_SPIRAL = 0x20;
+	public static final int FLAGBIT_LOOPBOX = 0x21;
+	public static final int FLAGBIT_ALIGN_SURFACE = 0x22;
+	public static final int FLAGBIT_ALIGN_SURFACE_PARENT = 0x23;
+	public static final int FLAGBIT_TICK = 0x24;
+	public static final int FLAGBIT_DEATH_INHERIT = 0x25;
+	public static final int FLAGBIT_PROPAGATE_ALWAYS = 0x26;
+	public static final int FLAGBIT_PROPAGATE_IF_KILLED = 0x27;
 	
-	public static final int WARP_SPIRAL = 0x20000000;
-	
-	public static final int ATTRACTOR_LOCATION = 0x1000000;
-	
-	// public static final int FLAG_RANDOMWALK = 0x80000; ??
-	// public static final int RANDOMWALK_WAIT = 0x100000;
-	
-	public static final int RANDOMWALK = 0x100000;
-	
-	public static final int LIFE_PROPAGATEALWAYS = 1;
-	public static final int LIFE_PROPAGATEIFKILLED = 2;
-	
-	public static final int FLAG_SUSTAIN = 4;
-	public static final int FLAG_HOLD = 0x10000000;
-	public static final int FLAG_KILL = 0x8000000;
-	public static final int FLAG_INJECT = 1;
-	public static final int FLAG_MAINTAIN = 2;
-	public static final int RATE_SIZESCALE = 0x100;
-	public static final int RATE_AREASCALE = 0x200;
-	public static final int RATE_VOLUMESCALE = 0x400;
-	
-	public static final int FLAG_ACCEPTCOMPOSITE = 0x400000;
-	
-	public static final int FLAG_LOOPBOX = 0x40000000;
-	
-	public static final int EMITMAP_PINTOSURFACE = 0x20;
-	public static final int EMITMAP_HEIGHT = 0x40;
-	public static final int EMITMAP_DENSITY = 0x80;
-	
-	public static final int FLAG_SURFACES = 0x1000;
-	public static final int FLAG_COLLIDEMAP = 0x2000;
-	public static final int COLLIDE_PINTOMAP = 0x40000;
-	public static final int FLAG_KILLOUTSIDEMAP = 0x20000;
-	public static final int FLAG_REPULSEMAP = 0x4000;
-	public static final int FLAG_ADVECTMAP = 0x8000;
-	public static final int FLAG_FORCEMAP = 0x10000;
-	
-	private static final int FLAG_MASK = SOURCE_ROUND | SOURCE_SCALEPARTICLES | SOURCE_RESETINCOMING | EMIT_SCALEEXISTING
-			| EMIT_BASE | WARP_SPIRAL | ATTRACTOR_LOCATION | RANDOMWALK | FLAG_SUSTAIN | FLAG_HOLD | FLAG_KILL
-			| FLAG_INJECT | FLAG_MAINTAIN | RATE_SIZESCALE | RATE_AREASCALE | RATE_VOLUMESCALE | FLAG_ACCEPTCOMPOSITE
-			| FLAG_LOOPBOX | EMITMAP_PINTOSURFACE | EMITMAP_HEIGHT | EMITMAP_DENSITY | FLAG_COLLIDEMAP
-| 			COLLIDE_PINTOMAP | FLAG_KILLOUTSIDEMAP | FLAG_REPULSEMAP | FLAG_ADVECTMAP | FLAG_FORCEMAP;
-	
-	public int unkFlags;
-	public int flags;
+	@StructureFieldMethod(read="readFlags", write="writeFlags")
+	public final BitSet flags = new BitSet(64);  // actually only 41, but leave extra space for potential unused flags
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] life = new float[2];
 	public float prerollTime;
 	@StructureFieldEndian(StructureEndian.LITTLE_ENDIAN) public final float[] emitDelay = {-1, -1};
@@ -160,9 +151,7 @@ public class MetaparticleEffect extends EffectComponent {
 	public float alphaVary;
 	
 	@StructureFieldMethod(read="readEffect", write="writeEffect")
-	public EffectComponent effect;
-	@StructureCondition("isVersion2")
-	public int field_12C;  // only in version 2
+	public EffectComponent component;
 	@StructureFieldMethod(read="readDeathEffect", write="writeDeathEffect")
 	public EffectComponent deathEffect;
 	@StructureUnsigned(8) public int alignMode;
@@ -215,15 +204,15 @@ public class MetaparticleEffect extends EffectComponent {
 	@StructureLength.Value(32) public final List<ParticlePathPoint> pathPoints = new ArrayList<ParticlePathPoint>();
 	public float tractorResetSpeed;
 	
-	public MetaparticleEffect(EffectDirectory effectDirectory, int version) {
+	public MetaParticleEffect(EffectDirectory effectDirectory, int version) {
 		super(effectDirectory, version);
 	}
 	
 	@Override public void copy(EffectComponent _effect) {
-		MetaparticleEffect effect = (MetaparticleEffect) _effect;
+		MetaParticleEffect effect = (MetaParticleEffect) _effect;
 		
-		unkFlags = effect.unkFlags;
-		flags = effect.flags;
+		flags.clear();
+		flags.or(effect.flags);
 		EffectDirectory.copyArray(life, effect.life);
 		prerollTime = effect.prerollTime;
 		EffectDirectory.copyArray(emitDelay, effect.emitDelay);
@@ -255,8 +244,7 @@ public class MetaparticleEffect extends EffectComponent {
 		color.addAll(effect.color);
 		colorVary.copy(effect.colorVary);
 		
-		this.effect = effect.effect;
-		field_12C = effect.field_12C;
+		component = effect.component;
 		deathEffect = effect.deathEffect;
 		alignMode = effect.alignMode;
 		
@@ -329,21 +317,48 @@ public class MetaparticleEffect extends EffectComponent {
 		}
 	}
 	
+	void readFlags(String fieldName, StreamReader in) throws IOException {
+		int flags1 = in.readInt();
+		int flags2 = in.readInt();
+		for (int i = 0; i < 32; i++) {
+			flags.set(i, ((flags2 >> i) & 1) != 0);
+		}
+		for (int i = 0; i < 32; i++) {
+			flags.set(32 + i, ((flags1 >> i) & 1) != 0);
+		}
+	}
+	
+	void writeFlags(String fieldName, StreamWriter out, Object value) throws IOException {
+		int bitflags2 = 0;
+		for (int i = 0; i < 32; i++) {
+			if (flags.get(i)) bitflags2 |= 1 << i;
+		}
+		int bitflags1 = 0;
+		for (int i = 0; i < 32; i++) {
+			if (flags.get(32 + i)) bitflags1 |= 1 << i;
+		}
+		out.writeInt(bitflags1);
+		out.writeInt(bitflags2);
+	}
+	
 	void readEffect(String fieldName, StreamReader in) throws IOException {
 		int index = in.readInt();
+		int typeCode = in.readInt();
 		
 		if (index == -1) {
-			effect = null;
+			component = null;
 		} else {
-			effect = effectDirectory.getEffect(VisualEffect.TYPE_CODE, index);
+			component = effectDirectory.getEffect(typeCode, index);
 		}
 	}
 	
 	void writeEffect(String fieldName, StreamWriter out, Object value) throws IOException {
-		if (effect == null) {
+		if (component == null) {
 			out.writeInt(-1);
+			out.writeInt(0);
 		} else {
-			out.writeInt(effectDirectory.getIndex(VisualEffect.TYPE_CODE, effect));
+			out.writeInt(effectDirectory.getIndex(component.getFactory().getTypeCode(), component));
+			out.writeInt(component.getFactory().getTypeCode());
 		}
 	}
 	
@@ -365,10 +380,10 @@ public class MetaparticleEffect extends EffectComponent {
 		}
 	}
 	
-	protected static class Parser extends EffectBlockParser<MetaparticleEffect> {
+	protected static class Parser extends EffectBlockParser<MetaParticleEffect> {
 		@Override
-		protected MetaparticleEffect createEffect(EffectDirectory effectDirectory) {
-			return new MetaparticleEffect(effectDirectory, FACTORY.getMaxVersion());
+		protected MetaParticleEffect createEffect(EffectDirectory effectDirectory) {
+			return new MetaParticleEffect(effectDirectory, FACTORY.getMaxVersion());
 		}
 
 		@Override
@@ -469,7 +484,7 @@ public class MetaparticleEffect extends EffectComponent {
 				if (line.getOptionArguments(args, "offset", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.yawOffset = value.floatValue();
 				}
-			}), "yaw", "heading");
+			}), "yaw", "heading", "rotate");
 			
 			parseSource();
 			parseEmit();
@@ -482,59 +497,83 @@ public class MetaparticleEffect extends EffectComponent {
 			parseMaintain();
 			
 			this.addParser("effect", ArgScriptParser.create((parser, line) -> {
-				if (line.getArguments(args, 0, 1)) {
-					if (args.size() == 1) {
-						effect.effect = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
-						if (effect.effect != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.effect), effect.effect, 0);
-					} else if (!line.hasOption("death")) {
-						stream.addError(line.createError("Must atleast specify effect or -death effect"));
-					}
-				}
-				
-				if (line.getOptionArguments(args, "death", 1)) {
-					effect.deathEffect = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
-					if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(PfxEditor.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
-				}
-			}));
-			
-			this.addParser("field_12C", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseInt(args, 0)) != null) {
-					effect.field_12C = value.intValue();
-				}
-			}));
-			
-			this.addParser("tractorResetSpeed", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.tractorResetSpeed = value.floatValue();
-				}
-			}));
-			
-			this.addParser("damping", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getOptionArguments(args, "align", 1) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.alignDamping  = value.floatValue();
-				}
-				
-				if (line.getOptionArguments(args, "bank", 2) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.bankAmount = value.floatValue();
+				if (line.getArguments(args, 1)) {
+					effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
+					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
 					
-					if ((value = stream.parseFloat(args, 1)) != null) {
-						effect.bankDamping = value.floatValue();
+					if (line.hasFlag("tick")) {
+						effect.flags.set(FLAGBIT_TICK);
+					}
+					
+					if (line.getOptionArguments(args, "death", 1)) {
+						effect.deathEffect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
+						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(PfxEditor.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
+						
+						if (line.hasFlag("inherit")) {
+							effect.flags.set(FLAGBIT_DEATH_INHERIT);
+						}
 					}
 				}
 			}));
+			
+			this.addParser(ArgScriptParser.create((parser, line) -> {
+				if (line.getArguments(args, 1, 2)) {
+					if (args.size() > 1) {
+						for (EffectComponentFactory factory : EffectDirectory.getFactories()) {
+							if (factory.getKeyword().equals(args.get(0))) {
+								effect.component = parser.getData().getComponent(args, 1, factory.getTypeCode());
+								break;
+							}
+						}
+						stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
+						return;
+					}
+					else {
+						effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
+					}
+					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+					
+					if (line.getOptionArguments(args, "death", 1)) {
+						effect.deathEffect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
+						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(PfxEditor.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
+						
+						if (line.hasFlag("inherit")) {
+							effect.flags.set(FLAGBIT_DEATH_INHERIT);
+						}
+					}
+				}
+			}), "attach", "component");
 			
 			this.addParser("align", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.alignMode = (byte) ENUM_ALIGNMENT.get(args, 0);
 				}
+				
+				if (line.getOptionArguments(args, "damp", 1)) {
+					effect.alignDamping = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+				}
+				
+				if (line.getOptionArguments(args, "bank", 2)) {
+					effect.bankAmount = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f) * 100.0f;
+					effect.bankDamping = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0f);
+				}
+				else if (line.getOptionArguments(args, "windBank", 2)) {
+					effect.bankAmount = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+					effect.bankDamping = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0f);
+					effect.flags.set(FLAGBIT_ALIGN_WIND_BANK);
+				}
+				
+				if (line.hasFlag("surface")) {
+					effect.flags.set(FLAGBIT_ALIGN_SURFACE);
+					if (line.hasFlag("parent")) {
+						effect.flags.set(FLAGBIT_ALIGN_SURFACE_PARENT);
+					}
+				}
 			}));
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOPBOX);
 					effect.loopBoxColor.clear();
 					stream.parseColorRGBs(args, effect.loopBoxColor);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -543,7 +582,7 @@ public class MetaparticleEffect extends EffectComponent {
 			
 			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOPBOX);
 					effect.loopBoxColor.clear();
 					stream.parseColorRGB255s(args, effect.loopBoxColor);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -552,7 +591,7 @@ public class MetaparticleEffect extends EffectComponent {
 			
 			this.addParser("loopBoxAlpha", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOPBOX);
 					effect.loopBoxAlpha.clear();
 					stream.parseFloats(args, effect.loopBoxAlpha);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -561,7 +600,7 @@ public class MetaparticleEffect extends EffectComponent {
 			
 			this.addParser("loopBoxAlpha255", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
-					effect.flags |= FLAG_LOOPBOX;
+					effect.flags.set(FLAGBIT_LOOPBOX);
 					effect.loopBoxAlpha.clear();
 					stream.parseFloat255s(args, effect.loopBoxAlpha);
 					// Spore parses the flag "orient", but it doesn't use it
@@ -577,7 +616,7 @@ public class MetaparticleEffect extends EffectComponent {
 				surface.parse(stream, line);
 				effect.surfaces.add(surface);
 				
-				effect.flags |= FLAG_SURFACES;
+				effect.flags.set(FLAGBIT_SURFACE);
 			}));
 			
 			parseEmitMap();
@@ -601,23 +640,18 @@ public class MetaparticleEffect extends EffectComponent {
 				effect.pathPoints.add(point);
 			}));
 			
-			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
-				Number value = null;
-				if (line.getArguments(args, 1) && (value = stream.parseUInt(args, 0)) != null) {
-					effect.flags |= value.intValue() & ~FLAG_MASK;
-					// effect.flags = value.intValue();
-				}
-			}));
+			//TODO
+//			this.addParser("flags", ArgScriptParser.create((parser, line) -> {
+//				Number value = null;
+//				if (line.getArguments(args, 2) && (value = stream.parseUInt(args, 0)) != null) {
+//					effect.flags |= value.intValue() & ~FLAG_MASK;
+//					// effect.flags = value.intValue();
+//				}
+//			}));
 			
 			this.addParser("globalForcesSum", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					stream.parseVector3(args, 0, effect.globalForcesSum);
-				}
-			}));
-			
-			this.addParser("randomWalkPreferredDir", ArgScriptParser.create((parser, line) -> {
-				if (line.getArguments(args, 1)) {
-					stream.parseVector3(args, 0, effect.randomWalkPreferredDir);
 				}
 			}));
 		}
@@ -630,7 +664,7 @@ public class MetaparticleEffect extends EffectComponent {
 				Number value2 = null;
 				
 				// disable round source
-				effect.flags &= ~SOURCE_ROUND;
+				effect.flags.clear(FLAGBIT_SOURCE_ROUND);
 				float min_x = 0;
 				float min_y = 0;
 				float min_z = 0;
@@ -680,7 +714,7 @@ public class MetaparticleEffect extends EffectComponent {
 						}
 					}
 					else if (line.getOptionArguments(args, "circle", 1) && (value = stream.parseFloat(args, 0)) != null) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float size = value.floatValue();
 						min_x -= size;
 						min_y -= size;
@@ -688,7 +722,7 @@ public class MetaparticleEffect extends EffectComponent {
 						max_y += size;
 					}
 					else if (line.getOptionArguments(args, "sphere", 1) && (value = stream.parseFloat(args, 0)) != null) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float size = value.floatValue();
 						min_x -= size;
 						min_y -= size;
@@ -698,7 +732,7 @@ public class MetaparticleEffect extends EffectComponent {
 						max_z += size;
 					}
 					else if (line.getOptionArguments(args, "ellipse", 1) || line.getOptionArguments(args, "ellipsoid", 1)) {
-						effect.flags |= SOURCE_ROUND;
+						effect.flags.set(FLAGBIT_SOURCE_ROUND);
 						float[] array = new float[3];
 						if (stream.parseVector3(args, 0, array)) {
 							min_x -= array[0];
@@ -754,10 +788,10 @@ public class MetaparticleEffect extends EffectComponent {
 				effect.emitVolumeBBMax[2] = max_z;
 				
 				if (line.hasFlag("scaleParticles")) {
-					effect.flags |= SOURCE_SCALEPARTICLES;
+					effect.flags.set(FLAGBIT_SOURCE_SCALE_PARTICLES);
 				}
 				if (line.hasFlag("resetIncoming")) {
-					effect.flags |= SOURCE_RESETINCOMING;
+					effect.flags.set(FLAGBIT_SOURCE_RESET_INCOMING);
 				}
 			}));
 		}
@@ -796,8 +830,7 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.emitDirectionBBMax[2] = point[2] * normalize + vary[2];
 				}
 				
-				if (line.hasFlag("base")) effect.flags |= EMIT_BASE;
-				if (line.hasFlag("scaleExisting")) effect.flags |= EMIT_SCALEEXISTING;
+				if (line.hasFlag("base")) effect.flags.set(FLAGBIT_EMIT_BASE);
 			}));
 		}
 		
@@ -855,11 +888,13 @@ public class MetaparticleEffect extends EffectComponent {
 					stream.parseVector3(args, 0, effect.attractorOrigin);
 					
 					index++;
-					effect.flags |= ATTRACTOR_LOCATION;
+					effect.flags.set(FLAGBIT_ATTRACTOR);
+					effect.flags.set(FLAGBIT_NOT_PRESET_ATTRACTOR);
 					validArguments = true;
 				}
 				else if (line.getOptionArguments(args, "presetAttractor", 2, Integer.MAX_VALUE)) {
-					effect.flags &= ~ATTRACTOR_LOCATION;
+					effect.flags.set(FLAGBIT_ATTRACTOR);
+					effect.flags.clear(FLAGBIT_NOT_PRESET_ATTRACTOR);
 					validArguments = true;
 				}
 				
@@ -879,6 +914,35 @@ public class MetaparticleEffect extends EffectComponent {
 					if (line.getOptionArguments(args, "killRange", 1) && (value = stream.parseFloat(args, 0)) != null) {
 						effect.attractor.killRange = value.floatValue();
 					}
+					
+					if (line.hasFlag("affectsAlpha")) {
+						effect.flags.set(FLAGBIT_ATTRACTOR_AFFECTS_ALPHA);
+					}
+				}
+				
+				// Tractor
+				boolean hasTractor = false;
+				boolean tractorIsRelative = false;
+				if (line.getOptionArguments(args, "tractorRel", 2, 3)) {
+					hasTractor = true;
+					tractorIsRelative = true;
+				}
+				else {
+					hasTractor = line.getOptionArguments(args, "tractor", 2, 3);
+				}
+				if (hasTractor) {
+					
+					//TODO
+					
+					effect.flags.set(FLAGBIT_TRACTOR);
+					
+					if (line.getOptionArguments(args, "tractorResetSpeed", 1)) {
+						effect.tractorResetSpeed = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+					}
+				}
+				
+				if (line.hasFlag("path")) {
+					effect.flags.set(FLAGBIT_PATH);
 				}
 			}));
 		}
@@ -897,28 +961,22 @@ public class MetaparticleEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "spiral", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.screwRate = value.floatValue();
-					effect.flags |= WARP_SPIRAL;
+					effect.flags.set(FLAGBIT_WARP_SPIRAL);
 				}
 				
-				// Spore does something really strange here, so we just disable (wiggle can be added manually with 'wiggleDir')
-//				if (line.getOptionArguments(args, "wiggle", 4) && (value = stream.parseFloat(args, 0)) != null) {
-//					ParticleWiggle item = new ParticleWiggle();
-//					item.rateDirection[0] = 0.0f;
-//					item.rateDirection[1] = 0.0f;
-//					item.rateDirection[2] = value.floatValue();
-//					
-//					if ((value = stream.parseFloat(args, 1)) != null) {
-//						item.timeRate = value.floatValue();
-//					}
-//					
-//					Number value2 = null;
-//					if ((value = stream.parseFloat(args, 2)) != null && (value2 = stream.parseFloat(args, 3, 0.0f, 1.0f)) != null) {
-//						float val = value.floatValue();
-//						float vary = value2.floatValue();
-//						
-//						val1 = vary * 16;  // vary * 2PI * (16 / 2PI)
-//					}
-//				}
+				if (line.getOptionArguments(args, "wiggle", 4)) {
+					ParticleWiggle item = new ParticleWiggle();
+					item.rateDirection[0] = 0.0f;
+					item.rateDirection[1] = 0.0f;
+					item.rateDirection[2] = Optional.ofNullable(stream.parseFloat(args, 0)).orElse(0f);
+					item.timeRate = Optional.ofNullable(stream.parseFloat(args, 1)).orElse(0f);
+					float scale = Optional.ofNullable(stream.parseFloat(args, 2)).orElse(0f);
+					float ratio = Optional.ofNullable(stream.parseFloat(args, 3, 0f, 1f)).orElse(0f);
+					item.wiggleDirection[0] = (float)Math.cos(ratio * Math.PI * 2) * scale;
+					item.wiggleDirection[1] = (float)Math.sin(ratio * Math.PI * 2) * -scale;
+					item.wiggleDirection[2] = 0f;
+					effect.wiggles.add(item);
+				}
 				
 				if (line.getOptionArguments(args, "wiggleDir", 2, 3) && (value = stream.parseFloat(args, 0)) != null) {
 					ParticleWiggle item = new ParticleWiggle();
@@ -953,7 +1011,6 @@ public class MetaparticleEffect extends EffectComponent {
 			}));
 		}
 		
-		//TODO this is mostly temporary. we do not know how the two random walks in metaparticles work
 		private class RandomWalkParser extends ArgScriptParser<EffectUnit> {
 			private boolean isDirectedWalk;
 			private boolean isSecondaryWalk;
@@ -970,6 +1027,12 @@ public class MetaparticleEffect extends EffectComponent {
 				ArgScriptArguments args = new ArgScriptArguments();
 				Number value = null;
 				
+				if (line.hasFlag("sync")) {
+					effect.flags.set(FLAGBIT_RANDOM_WALK_SYNC);
+				} else {
+					effect.flags.set(FLAGBIT_RANDOM_WALK_NO_SYNC);
+				}
+				
 				if (isDirectedWalk) {
 					if (line.getArguments(args, 0, Integer.MAX_VALUE) && args.size() != 0) {
 						for (int i = 0; i < args.size(); i++) {
@@ -985,8 +1048,6 @@ public class MetaparticleEffect extends EffectComponent {
 				} else {
 					line.getArguments(args, 0);
 				}
-				
-				effect.flags |= RANDOMWALK;
 				
 				if (line.getOptionArguments(args, "delay", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
 					float delay = value.floatValue();
@@ -1031,7 +1092,11 @@ public class MetaparticleEffect extends EffectComponent {
 					else if (line.hasFlag("loop")) randomWalk.loopType = 0;
 				}
 				
-				// if (line.hasFlag("wait")) effect.flags |= RANDOMWALK_WAIT;
+				if (line.hasFlag("wait")) effect.flags.set(FLAGBIT_RANDOM_WALK_WAIT);
+				
+				if (line.getOptionArguments(args, "preferDir", 1)) {
+					stream.parseVector3(args, 0, effect.randomWalkPreferredDir);
+				}
 			}
 		}
 		
@@ -1064,14 +1129,14 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.prerollTime = value.floatValue();
 				}
 				else {
-					effect.prerollTime = value.floatValue() > 0.5f ? value.floatValue() : 0.5f;
+					effect.prerollTime = 0.5f;
 				}
 				
 				if (line.hasFlag("propagateAlways")) {
-					effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+					effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
 				}
 				if (line.hasFlag("propagateIfKilled")) {
-					effect.unkFlags |= LIFE_PROPAGATEIFKILLED;
+					effect.flags.set(FLAGBIT_PROPAGATE_IF_KILLED);
 				}
 			}));
 		}
@@ -1089,25 +1154,25 @@ public class MetaparticleEffect extends EffectComponent {
 				effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 			}
 			else if (line.getOptionArguments(args, "sustain", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-				effect.flags |= FLAG_SUSTAIN;
+				effect.flags.set(FLAGBIT_RATE_SUSTAIN);
 				effect.rateLoop = value.floatValue();
 				effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 			}
 			else if (line.getOptionArguments(args, "hold", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-				effect.flags |= FLAG_HOLD;
+				effect.flags.set(FLAGBIT_RATE_HOLD);
 				effect.rateLoop = value.floatValue();
 				effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 			}
 			else if (line.getOptionArguments(args, "kill", 0, 1)) {
-				effect.flags |= FLAG_KILL;
-				effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+				effect.flags.set(FLAGBIT_RATE_KILL);
+				effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
 				effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 				effect.rateCurveCycles = 1;
 			}
 			
-			if (line.hasFlag("sizeScale")) effect.flags |= RATE_SIZESCALE;
-			if (line.hasFlag("areaScale")) effect.flags |= RATE_AREASCALE;
-			if (line.hasFlag("volumeScale")) effect.flags |= RATE_VOLUMESCALE;
+			if (line.hasFlag("sizeScale")) effect.flags.set(FLAGBIT_RATE_SIZE_SCALE);
+			if (line.hasFlag("areaScale")) effect.flags.set(FLAGBIT_RATE_AREA_SCALE);
+			if (line.hasFlag("volumeScale")) effect.flags.set(FLAGBIT_RATE_VOLUME_SCALE);
 			
 			if (line.getOptionArguments(args, "delay", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
 				effect.emitDelay[0] = effect.emitDelay[1] = value.floatValue();
@@ -1149,7 +1214,7 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.rate.add(value.floatValue());
 				}
 				
-				effect.flags |= FLAG_INJECT;
+				effect.flags.set(FLAGBIT_INJECT);
 				effect.rateLoop = 0.01f;
 				effect.rateCurveCycles = 1;
 				parseRateMain(line);
@@ -1166,7 +1231,7 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.rate.add(value.floatValue());
 				}
 				
-				effect.flags |= FLAG_MAINTAIN;
+				effect.flags.set(FLAGBIT_MAINTAIN);
 
 				if (line.getOptionArguments(args, "delay", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.emitDelay[0] = effect.emitDelay[1] = value.floatValue();
@@ -1177,13 +1242,13 @@ public class MetaparticleEffect extends EffectComponent {
 				}
 				
 				if (line.getOptionArguments(args, "hold", 1, 2) && (value = stream.parseFloat(args, 0)) != null) {
-					effect.flags |= FLAG_HOLD;
+					effect.flags.set(FLAGBIT_RATE_HOLD);
 					effect.rateLoop = value.floatValue();
 					effect.rateCurveCycles = Optional.ofNullable(args.size() == 2 ? stream.parseInt(args, 1, Short.MIN_VALUE, Short.MAX_VALUE) : null).orElse(1).shortValue();
 				}
 				else if (line.getOptionArguments(args, "kill", 0, 1)) {
-					effect.flags |= FLAG_KILL;
-					effect.unkFlags |= LIFE_PROPAGATEALWAYS;
+					effect.flags.set(FLAGBIT_RATE_KILL);
+					effect.flags.set(FLAGBIT_PROPAGATE_ALWAYS);
 					effect.rateLoop = Optional.ofNullable(args.size() == 1 ? stream.parseFloat(args, 0) : null).orElse(0.1f);
 					effect.rateCurveCycles = 1;
 				}
@@ -1202,9 +1267,11 @@ public class MetaparticleEffect extends EffectComponent {
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				if (line.getOptionArguments(args, "aboveHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[0] = value.floatValue();
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				if (line.getOptionArguments(args, "heightRange", 2)) {
 					if ((value = stream.parseFloat(args, 0)) != null) {
@@ -1213,10 +1280,11 @@ public class MetaparticleEffect extends EffectComponent {
 					if ((value = stream.parseFloat(args, 1)) != null) {
 						effect.altitudeRange[1] = value.floatValue();
 					}
+					effect.flags.set(FLAGBIT_MAP_EMIT_HEIGHT_RANGE);
 				}
 				
-				if (line.hasFlag("pinToSurface")) effect.flags |= EMITMAP_PINTOSURFACE;
-				if (line.hasFlag("density")) effect.flags |= EMITMAP_DENSITY;
+				if (line.hasFlag("pinToSurface")) effect.flags.set(FLAGBIT_MAP_EMIT_PIN_TO_SURFACE);
+				if (line.hasFlag("density")) effect.flags.set(FLAGBIT_MAP_EMIT_DENSITY);
 			}));
 		}
 		
@@ -1237,17 +1305,17 @@ public class MetaparticleEffect extends EffectComponent {
 					}
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
 				
 				if (line.hasFlag("pinToMap")) {
-					effect.flags |= COLLIDE_PINTOMAP;
+					effect.flags.set(FLAGBIT_MAP_COLLIDE_PIN_TO_MAP);
 					effect.mapBounce = 0;
 				}
 				else if (line.getOptionArguments(args, "bounce", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapBounce = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 				if (line.getOptionArguments(args, "death", 1) && (value = stream.parseFloat(args, 0, 0.0f, 1.0f)) != null) {
 					effect.probabilityDeath = value.floatValue();
@@ -1282,8 +1350,8 @@ public class MetaparticleEffect extends EffectComponent {
 					}
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_REPULSEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_REPEL);
 
 				if (line.getOptionArguments(args, "scout", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseScoutDistance = value.floatValue();
@@ -1297,7 +1365,7 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.mapRepulseKillHeight = value.floatValue();
 				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1313,14 +1381,17 @@ public class MetaparticleEffect extends EffectComponent {
 					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_ADVECTMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_ADVECT);
 
 				if (line.getOptionArguments(args, "strength", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseStrength = value.floatValue();
 				}
+				else {
+					effect.mapRepulseStrength = 1.0f;
+				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1334,14 +1405,17 @@ public class MetaparticleEffect extends EffectComponent {
 					effect.mapForce.parseSpecial(args, 0);
 				}
 				
-				effect.flags |= FLAG_COLLIDEMAP;
-				effect.flags |= FLAG_FORCEMAP;
+				effect.flags.set(FLAGBIT_MAP_COLLIDE);
+				effect.flags.set(FLAGBIT_MAP_FORCE);
 
 				if (line.getOptionArguments(args, "strength", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.mapRepulseStrength = value.floatValue();
 				}
+				else {
+					effect.mapRepulseStrength = 1.0f;
+				}
 				
-				if (line.hasFlag("killOutsideMap")) effect.flags |= FLAG_KILLOUTSIDEMAP;
+				if (line.hasFlag("killOutsideMap")) effect.flags.set(FLAGBIT_KILL_OUTSIDE_MAP);
 
 			}));
 		}
@@ -1349,7 +1423,7 @@ public class MetaparticleEffect extends EffectComponent {
 	
 	public static class Factory implements EffectComponentFactory {
 		@Override public Class<? extends EffectComponent> getComponentClass() {
-			return MetaparticleEffect.class;
+			return MetaParticleEffect.class;
 		}
 		@Override public String getKeyword() {
 			return KEYWORD;
@@ -1376,12 +1450,12 @@ public class MetaparticleEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, MetaparticleEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override
 		public EffectComponent create(EffectDirectory effectDirectory, int version) {
-			return new MetaparticleEffect(effectDirectory, version);
+			return new MetaParticleEffect(effectDirectory, version);
 		}
 
 		@Override
@@ -1409,27 +1483,33 @@ public class MetaparticleEffect extends EffectComponent {
 	public void toArgScript(ArgScriptWriter writer) {
 		writer.command(KEYWORD).arguments(name).startBlock();
 		
-		writer.command("color").colors(color);
-		if (!colorVary.isBlack()) writer.option("vary").color(colorVary);
+		if (!writer.isDefaultColor(color) || !colorVary.isBlack()) {
+			writer.command("color").colors(color);
+			if (!colorVary.isBlack()) writer.option("vary").color(colorVary);
+		}
 		
-		writer.command("alpha").floats(alpha);
-		if (alphaVary != 0) writer.option("vary").floats(alphaVary);
+		if (!writer.isDefault(alpha, 1.0f) || alphaVary != 0) {
+			writer.command("alpha").floats(alpha);
+			if (alphaVary != 0) writer.option("vary").floats(alphaVary);
+		}
 		
-		writer.command("size").floats(size);
-		if (sizeVary != 0) writer.option("vary").floats(sizeVary);
+		if (!writer.isDefault(size, 1.0f) || sizeVary != 0) {
+			writer.command("size").floats(size);
+			if (sizeVary != 0) writer.option("vary").floats(sizeVary);
+		}
 		
-		if (!writer.isDefault(pitch) || pitchVary != 0 || pitchOffset != 0) {
+		if (!writer.isDefault(pitch, 0.0f) || pitchVary != 0 || pitchOffset != 0) {
 			writer.command("pitch").floats(pitch);
 			if (pitchVary != 0) writer.option("vary").floats(pitchVary);
 			if (pitchOffset != 0) writer.option("offset").floats(pitchOffset);
 		}
-		if (!writer.isDefault(roll) || rollVary != 0 || rollOffset != 0) {
+		if (!writer.isDefault(roll, 0.0f) || rollVary != 0 || rollOffset != 0) {
 			writer.command("roll").floats(pitch);
 			if (rollVary != 0) writer.option("vary").floats(rollVary);
 			if (rollOffset != 0) writer.option("offset").floats(rollOffset);
 		}
-		if (!writer.isDefault(yaw) || yawVary != 0 || yawOffset != 0) {
-			writer.command("yaw").floats(yaw);
+		if (!writer.isDefault(yaw, 0.0f) || yawVary != 0 || yawOffset != 0) {
+			writer.command("heading").floats(yaw);
 			if (yawVary != 0) writer.option("vary").floats(yawVary);
 			if (yawOffset != 0) writer.option("offset").floats(yawOffset);
 		}
@@ -1438,18 +1518,22 @@ public class MetaparticleEffect extends EffectComponent {
 		writeEmit(writer);
 		writeForce(writer);
 		writeWarp(writer);
-		writeWiggles(writer);
 		writeWalk(writer);
 		writeLife(writer);
 		writeRate(writer);
 		
-		if (effect != null || deathEffect != null) {
-			writer.command("effect");
-			if (effect != null) writer.arguments(effect.getName());
+		if (component != null) {
+			if (component.getFactory().getTypeCode() == VisualEffect.TYPE_CODE) {
+				writer.command("effect").arguments(component.getName());
+			}
+			else {
+				writer.command("component").arguments(component.getFactory().getKeyword(), component.getName());
+			}
 			if (deathEffect != null) writer.option("death").arguments(deathEffect.getName());
+			
+			writer.flag("inherit", flags.get(FLAGBIT_DEATH_INHERIT));
 		}
 		
-		if (field_12C != 0) writer.command("field_12C").ints(field_12C);
 		if (tractorResetSpeed != 0) writer.command("tractorResetSpeed").floats(tractorResetSpeed);
 		if (alignDamping != 0 || bankAmount != 0 || bankDamping != 0) {
 			writer.command("damping");
@@ -1457,8 +1541,29 @@ public class MetaparticleEffect extends EffectComponent {
 			if (bankAmount != 0 || bankDamping != 0) writer.option("bank").floats(bankAmount, bankDamping);
 		}
 		
-		if (alignMode != 0) writer.command("align").arguments(ENUM_ALIGNMENT.get(alignMode));
-		if ((flags & FLAG_LOOPBOX) == FLAG_LOOPBOX) {
+		if (alignMode != 0 || alignDamping != 0.0f || bankAmount != 0.0f || bankDamping != 0.0f
+				|| flags.get(FLAGBIT_ALIGN_SURFACE))
+		{
+			writer.command("align").arguments(ENUM_ALIGNMENT.get(alignMode));
+			
+			if (alignDamping != 0.0f) {
+				writer.option("damp").floats(alignDamping);
+			}
+			if (flags.get(FLAGBIT_ALIGN_WIND_BANK)) {
+				writer.option("windBank").floats(bankAmount, bankDamping);
+			}
+			else if (bankAmount != 0.0f || bankDamping != 0.0f) {
+				writer.option("bank").floats(bankAmount / 100.0f, bankDamping);
+			}
+			if (flags.get(FLAGBIT_ALIGN_SURFACE)) {
+				writer.option("surface");
+				if (flags.get(FLAGBIT_ALIGN_SURFACE_PARENT)) {
+					writer.option("parent");
+				}
+			}
+		}
+		
+		if (flags.get(FLAGBIT_LOOPBOX)) {
 			if (!loopBoxColor.isEmpty()) writer.command("loopBoxColor").colors(loopBoxColor);
 			if (!loopBoxAlpha.isEmpty()) writer.command("loopBoxAlpha").floats(loopBoxAlpha);
 		}
@@ -1484,16 +1589,8 @@ public class MetaparticleEffect extends EffectComponent {
 			}
 		}
 		
-		if ((flags & ~FLAG_MASK) != 0) {
-			writer.command("flags").arguments("0x" + Integer.toHexString(flags & ~FLAG_MASK));
-		}
-		
 		if (globalForcesSum[0] != 0 || globalForcesSum[1] != 0 || globalForcesSum[2] != 0) {
 			writer.command("globalForcesSum").vector(globalForcesSum);
-		}
-		
-		if (randomWalkPreferredDir[0] != 0 || randomWalkPreferredDir[1] != 0 || randomWalkPreferredDir[2] != 0) {
-			writer.command("randomWalkPreferredDir").vector(randomWalkPreferredDir);
 		}
 		
 		//TODO finish this
@@ -1501,11 +1598,11 @@ public class MetaparticleEffect extends EffectComponent {
 		writer.endBlock().commandEND();
 	}
 	
-private void writeSource(ArgScriptWriter writer) {
+	private void writeSource(ArgScriptWriter writer) {
 		
 		if (emitVolumeBBMin[0] != 0 || emitVolumeBBMin[1] != 0 || emitVolumeBBMin[2] != 0 
 				|| emitVolumeBBMax[0] != 0 || emitVolumeBBMax[1] != 0 || emitVolumeBBMax[2] != 0
-				|| torusWidth != -1 || (flags & (SOURCE_SCALEPARTICLES | SOURCE_RESETINCOMING)) != 0) {
+				|| torusWidth != -1 || flags.get(FLAGBIT_SOURCE_SCALE_PARTICLES) || flags.get(FLAGBIT_SOURCE_RESET_INCOMING)) {
 			
 			float[] offset = new float[3];
 			float min_x = (emitVolumeBBMin[0] - emitVolumeBBMax[0]) / 2;
@@ -1520,7 +1617,7 @@ private void writeSource(ArgScriptWriter writer) {
 			
 			writer.command("source");
 			
-			if ((flags & SOURCE_ROUND) == SOURCE_ROUND) {
+			if (flags.get(FLAGBIT_SOURCE_ROUND)) {
 				if (max_x == max_y && max_y == max_z) writer.option("sphere").floats(max_x);
 				else writer.option("ellipse").vector(max_x, max_y, max_z);
 			}
@@ -1544,8 +1641,8 @@ private void writeSource(ArgScriptWriter writer) {
 				writer.option("offset").vector(offset);
 			}
 			
-			writer.flag("scaleParticles", (flags & SOURCE_SCALEPARTICLES) == SOURCE_SCALEPARTICLES);
-			writer.flag("resetIncoming", (flags & SOURCE_RESETINCOMING) == SOURCE_RESETINCOMING);
+			writer.flag("scaleParticles", flags.get(FLAGBIT_SOURCE_SCALE_PARTICLES));
+			writer.flag("resetIncoming", flags.get(FLAGBIT_SOURCE_RESET_INCOMING));
 		}
 	}
 
@@ -1581,15 +1678,10 @@ private void writeSource(ArgScriptWriter writer) {
 			if (vary[0] != 0 || vary[1] != 0 || vary[2] != 0) writer.vector(vary);
 		}
 		
-		if ((flags & EMIT_BASE) == EMIT_BASE) {
+		if (flags.get(FLAGBIT_EMIT_BASE)) {
 			if (!commandWritten) writer.command("emit");
 			commandWritten = true;
 			writer.option("base");
-		}
-		
-		if ((flags & EMIT_SCALEEXISTING) == EMIT_SCALEEXISTING) {
-			if (!commandWritten) writer.command("emit");
-			writer.option("scaleExisting");
 		}
 	}
 	
@@ -1630,26 +1722,21 @@ private void writeSource(ArgScriptWriter writer) {
 				}
 			}
 			
-			if (!attractor.attractorStrength.isEmpty()) {
-				if ((flags & ATTRACTOR_LOCATION) == ATTRACTOR_LOCATION) writer.option("attractor").vector(attractorOrigin);
+			if (flags.get(FLAGBIT_ATTRACTOR)) {
+				if (flags.get(FLAGBIT_NOT_PRESET_ATTRACTOR)) writer.option("attractor").vector(attractorOrigin);
 				else writer.option("presetAttractor");
 				
 				writer.floats(attractor.range).floats(attractor.attractorStrength);
 				if (attractor.killRange != 0) writer.option("killRange").floats(attractor.killRange);
+				
+				writer.flag("affectsAlpha", flags.get(FLAGBIT_ATTRACTOR_AFFECTS_ALPHA));
 			}
-		}
-	}
-	
-	private void writeWiggles(ArgScriptWriter writer) {
-		if (!wiggles.isEmpty()) {
-			writer.blankLine();
-			for (ParticleWiggle w : wiggles) {
-				writer.command("warp").option("wiggleDir").floats(w.timeRate).vector(w.wiggleDirection);
-				if (w.rateDirection[0] != 0 || w.rateDirection[1] != 0 || w.rateDirection[2] != 0) {
-					writer.vector(w.rateDirection);
-				}
+			
+			if (flags.get(FLAGBIT_TRACTOR)) {
+				//TODO
 			}
-			writer.blankLine();
+			
+			writer.flag("path", flags.get(FLAGBIT_PATH));
 		}
 	}
 	
@@ -1659,7 +1746,7 @@ private void writeSource(ArgScriptWriter writer) {
 			if (!commandWritten) writer.command("warp");
 			commandWritten = true;
 			
-			if ((flags & WARP_SPIRAL) == WARP_SPIRAL) writer.option("spiral");
+			if (flags.get(FLAGBIT_WARP_SPIRAL)) writer.option("spiral");
 			else writer.option("screw");
 			writer.floats(screwRate);
 		}
@@ -1673,12 +1760,24 @@ private void writeSource(ArgScriptWriter writer) {
 			commandWritten = true;
 			writer.option("bloomSize").floats(screenBloomScaleBase / 255.0f, (screenBloomScaleRate / 255.0f) / 0.0625f);
 		}
+		if (!wiggles.isEmpty()) {
+			if (!commandWritten) writer.command("warp");
+			commandWritten = true;
+			for (ParticleWiggle w : wiggles) {
+				writer.option("wiggleDir").floats(w.timeRate).vector(w.wiggleDirection);
+				if (w.rateDirection[0] != 0 || w.rateDirection[1] != 0 || w.rateDirection[2] != 0) {
+					writer.vector(w.rateDirection);
+				}
+			}
+		}
 	}
 	
-	private static void writeWalk(ArgScriptWriter writer, ParticleRandomWalk randomWalk, String directedKeyword, String keyword) {
+	private void writeWalk(ArgScriptWriter writer, ParticleRandomWalk randomWalk, String directedKeyword, String keyword, boolean isSecond) {
 		boolean isDirectedWalk = !randomWalk.turnOffsetCurve.isEmpty();
 		
 		writer.command(isDirectedWalk ? directedKeyword : keyword).floats(randomWalk.turnOffsetCurve);
+		
+		writer.flag("sync", flags.get(FLAGBIT_RANDOM_WALK_SYNC));
 		
 		float vary = (randomWalk.time[1] - randomWalk.time[0]) / 2;
 		float value = randomWalk.time[0] + vary;
@@ -1698,12 +1797,20 @@ private void writeSource(ArgScriptWriter writer) {
 		if (randomWalk.loopType == 1) writer.option("sustain");
 		else if (randomWalk.loopType == 0) writer.option("loop");
 		if (randomWalk.mix != 0) writer.option("mix").floats(randomWalk.mix);
+		
+		writer.flag("wait", flags.get(FLAGBIT_RANDOM_WALK_WAIT));
+		
+		if (!isSecond && (randomWalkPreferredDir[0] != 0.0f || 
+				randomWalkPreferredDir[1] != 0.0f ||
+				randomWalkPreferredDir[2] != 0.0f)) {
+			writer.option("preferDir").vector(randomWalkPreferredDir);
+		}
 	}
 	
 	private void writeWalk(ArgScriptWriter writer) {
-		if ((flags & RANDOMWALK) == RANDOMWALK) {
-			writeWalk(writer, randomWalk, "directedWalk", "randomWalk");
-			writeWalk(writer, randomWalk2, "directedWalk2", "randomWalk2");
+		if (flags.get(FLAGBIT_RANDOM_WALK_SYNC) || flags.get(FLAGBIT_RANDOM_WALK_NO_SYNC)) {
+			writeWalk(writer, randomWalk, "directedWalk", "randomWalk", false);
+			writeWalk(writer, randomWalk2, "directedWalk2", "randomWalk2", true);
 		}
 	}
 	
@@ -1718,24 +1825,24 @@ private void writeSource(ArgScriptWriter writer) {
 			writer.option("preroll").floats(prerollTime);
 		}
 		
-		writer.flag("propagateAlways", (unkFlags & LIFE_PROPAGATEALWAYS) == LIFE_PROPAGATEALWAYS);
-		writer.flag("propagateIfKilled", (unkFlags & LIFE_PROPAGATEIFKILLED) == LIFE_PROPAGATEIFKILLED);
+		writer.flag("propagateAlways", flags.get(FLAGBIT_PROPAGATE_ALWAYS));
+		writer.flag("propagateIfKilled", flags.get(FLAGBIT_PROPAGATE_IF_KILLED));
 	}
 	
 	private void writeRate(ArgScriptWriter writer) {
-		if ((flags & FLAG_INJECT) == FLAG_INJECT) {
+		if (flags.get(FLAGBIT_INJECT)) {
 			writer.command("inject").floats(rate.get(0));
-		} else if ((flags & FLAG_MAINTAIN) == FLAG_MAINTAIN) {
+		} else if (flags.get(FLAGBIT_MAINTAIN)) {
 			writer.command("maintain").floats(rate.get(0));
 			if (emitDelay[0] != -1 || emitDelay[1] != -1) {
 				writer.option("delay").floats(emitDelay[0]);
 				if (emitDelay[1] != emitDelay[0]) writer.floats(emitDelay[1]);
 			}
-			if ((flags & FLAG_HOLD) == FLAG_HOLD) {
+			if (flags.get(FLAGBIT_RATE_HOLD)) {
 				writer.option("hold").floats(rateLoop);
 				if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 			} 
-			else if ((flags & FLAG_KILL) == FLAG_KILL) {
+			else if (flags.get(FLAGBIT_RATE_KILL)) {
 				writer.option("kill").floats(rateLoop);
 			}
 			// This has no more options
@@ -1744,15 +1851,19 @@ private void writeSource(ArgScriptWriter writer) {
 			writer.command("rate").floats(rate);
 		}
 		
-		if ((flags & FLAG_SUSTAIN) == FLAG_SUSTAIN) {
+		writer.flag("sizeScale", flags.get(FLAGBIT_RATE_SIZE_SCALE));
+		writer.flag("areaScale", flags.get(FLAGBIT_RATE_AREA_SCALE));
+		writer.flag("volumeScale", flags.get(FLAGBIT_RATE_VOLUME_SCALE));
+		
+		if (flags.get(FLAGBIT_RATE_SUSTAIN)) {
 			writer.option("sustain").floats(rateLoop);
 			if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 		}
-		else if ((flags & FLAG_HOLD) == FLAG_HOLD) {
+		else if (flags.get(FLAGBIT_RATE_HOLD)) {
 			writer.option("hold").floats(rateLoop);
 			if (rateCurveCycles != 1) writer.ints(rateCurveCycles);
 		} 
-		else if ((flags & FLAG_KILL) == FLAG_KILL) {
+		else if (flags.get(FLAGBIT_RATE_KILL)) {
 			writer.option("kill").floats(rateLoop);
 		}
 		else if (rateLoop != 0.1f && rateCurveCycles == 1) {
@@ -1762,13 +1873,25 @@ private void writeSource(ArgScriptWriter writer) {
 			writer.option("loop").floats(rateLoop);
 			if (rateCurveCycles != 0) writer.ints(rateCurveCycles);
 		}
+		
+		if (emitDelay[0] != 0.0f || emitDelay[1] != 0.0f) {
+			writer.option("delay").floats(emitDelay[0]);
+			if (emitDelay[1] != emitDelay[0]) {
+				writer.floats(emitDelay[1]);
+			}
+		}
+		if (emitRetrigger[0] != 0.0f || emitRetrigger[1] != 0.0f) {
+			writer.option("trigger").floats(emitRetrigger[0]);
+			if (emitRetrigger[1] != emitRetrigger[0]) {
+				writer.floats(emitRetrigger[1]);
+			}
+		}
 	}
 	
 	private void writeEmitMap(ArgScriptWriter writer) {
 		if (!mapEmit.isDefault()) {
 			writer.command("mapEmit").arguments(mapEmit);
-			if ((flags & EMITMAP_PINTOSURFACE) == EMITMAP_PINTOSURFACE) writer.option("pinToSurface");
-			if ((flags & EMITMAP_HEIGHT) == EMITMAP_HEIGHT) {
+			if (flags.get(FLAGBIT_MAP_EMIT_HEIGHT_RANGE)) {
 				if (altitudeRange[0] != -10000.0f && altitudeRange[1] != 10000.0f) {
 					writer.option("heightRange").floats(altitudeRange);
 				}
@@ -1777,26 +1900,27 @@ private void writeSource(ArgScriptWriter writer) {
 				}
 				else writer.option("aboveHeight").floats(altitudeRange[0]);
 			}
-			if ((flags & EMITMAP_DENSITY) == EMITMAP_DENSITY) writer.option("density");
+			writer.flag("pinToSurface", flags.get(FLAGBIT_MAP_EMIT_PIN_TO_SURFACE));
+			writer.flag("density", flags.get(FLAGBIT_MAP_EMIT_DENSITY));
 		}
 	}
 	
 	private void writeCollideMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_COLLIDEMAP) == FLAG_COLLIDEMAP) {
+		if (flags.get(FLAGBIT_MAP_COLLIDE)) {
 			writer.command("mapCollide");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
-			if ((flags & COLLIDE_PINTOMAP) == COLLIDE_PINTOMAP) writer.option("pinToMap");
+			if (flags.get(FLAGBIT_MAP_COLLIDE_PIN_TO_MAP)) writer.option("pinToMap");
 			else if (mapBounce != 1.0f) writer.option("bounce").floats(mapBounce);
 			
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 			
 			if (probabilityDeath != 0) writer.option("death").floats(probabilityDeath);
 		}
 	}
 	
 	private void writeRepelMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_REPULSEMAP) == FLAG_REPULSEMAP) {
+		if (flags.get(FLAGBIT_MAP_REPEL)) {
 			writer.command("mapRepel");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
@@ -1806,27 +1930,27 @@ private void writeSource(ArgScriptWriter writer) {
 			if (mapRepulseVertical != 0) writer.option("vertical").floats(mapRepulseVertical);
 			if (mapRepulseKillHeight != -1000000000.0f) writer.option("killHeight").floats(mapRepulseKillHeight);
 			
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
 	private void writeAdvectMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_ADVECTMAP) == FLAG_ADVECTMAP) {
+		if (flags.get(FLAGBIT_MAP_ADVECT)) {
 			writer.command("mapAdvect");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
 			if (mapRepulseStrength != 0) writer.option("strength").floats(mapRepulseStrength);
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
 	private void writeForceMap(ArgScriptWriter writer) {
-		if ((flags & FLAG_FORCEMAP) == FLAG_FORCEMAP) {
+		if (flags.get(FLAGBIT_MAP_FORCE)) {
 			writer.command("mapForce");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			
-			if (mapRepulseStrength != 0) writer.option("strength").floats(mapRepulseStrength);
-			writer.flag("killOutsideMap", (flags & FLAG_KILLOUTSIDEMAP) == FLAG_KILLOUTSIDEMAP);
+			if (mapRepulseStrength != 1.0f) writer.option("strength").floats(mapRepulseStrength);
+			writer.flag("killOutsideMap", flags.get(FLAGBIT_KILL_OUTSIDE_MAP));
 		}
 	}
 	
@@ -1843,9 +1967,35 @@ private void writeSource(ArgScriptWriter writer) {
 		list.add(effectDirectory.getResource(MapResource.TYPE_CODE, mapForce));
 		list.add(effectDirectory.getResource(MapResource.TYPE_CODE, mapEmit));
 		
-		list.add(effect);
+		list.add(component);
 		list.add(deathEffect);
 		
 		return list;
+	}
+	
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		MainApp.testInit();
+		
+		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~");
+		for (File file : folder.listFiles()) {
+			if (file.getName().endsWith(".effdir")) {
+				EffectDirectory effdir = new EffectDirectory();
+				try (StreamReader stream = new FileStream(file, "r")) {
+					effdir.read(stream);
+					for (EffectComponent component : effdir.getComponents(MetaParticleEffect.TYPE_CODE)) {
+						ArgScriptWriter writer = new ArgScriptWriter();
+						component.toArgScript(writer);
+						System.out.println(writer.toString());
+						System.out.println();
+						
+						MetaParticleEffect metaParticle = (MetaParticleEffect)component;
+						if (metaParticle.flags.get(FLAGBIT_TRACTOR)) {
+							System.err.println("ERROR:   " + component.name);
+						}
+					}
+				}
+			}
+		}
 	}
 }

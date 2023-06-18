@@ -21,6 +21,7 @@ package sporemodder.file.effects;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
@@ -30,23 +31,50 @@ import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 
 public class EffectUnit {
+	
+	public static class ComponentReference {
+		public String name;
+		public int type;
+		
+		public ComponentReference(String name, int type) {
+			this.name = name;
+			this.type = type;
+		}
 
-	/** A map that assigns a name for each effect component in this PFX unit. All components are stored here
-	 * regardless of its type, since there cannot be two effect components with the same name. */
-	private final Map<String, EffectComponent> components = new HashMap<String, EffectComponent>();
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, type);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ComponentReference other = (ComponentReference) obj;
+			return Objects.equals(name, other.name) && type == other.type;
+		}
+	}
+
+	/** A map that assigns a name and component type for each effect component in this PFX unit. 
+	 * There can be several components with the same name, as long as they have different types. */
+	private final Map<ComponentReference, EffectComponent> components = new HashMap<>();
 	
 	/** A map that assigns a name for each effect resource in this PFX unit. All components are stored here
 	 * regardless of its type, since there cannot be two effect resources with the same name. */
-	private final Map<String, EffectResource> resources = new HashMap<String, EffectResource>();
+	private final Map<String, EffectResource> resources = new HashMap<>();
 	
 	/** To avoid throwing exceptions, we instead store the error here and let the user retrieve it if necessary. */
 	private String lastError;
 	
 	/** A map that assigns a visual effect to the name with which the effect is exported. */
-	private final Map<String, VisualEffect> exports = new HashMap<String, VisualEffect>();
+	private final Map<String, VisualEffect> exports = new HashMap<>();
 	
 	/** A map that assigns an imported effect to the name with which the effect is exported. */
-	private final Map<String, ImportEffect> exportedImports = new HashMap<String, ImportEffect>();
+	private final Map<String, ImportEffect> exportedImports = new HashMap<>();
 	
 	/** Contains the start positions of each one of the components/resources. */
 	private final ObservableMap<EffectFileElement, Integer> elementPositions = FXCollections.observableMap(new LinkedHashMap<>());
@@ -91,7 +119,7 @@ public class EffectUnit {
 		this.isParsingComponent = isParsingComponent;
 	}
 
-	public Map<String, EffectComponent> getComponents() {
+	public Map<ComponentReference, EffectComponent> getComponents() {
 		return components;
 	}
 	
@@ -143,8 +171,8 @@ public class EffectUnit {
 	 * @param name
 	 * @return
 	 */
-	public boolean hasComponent(String name) {
-		return components.containsKey(name);
+	public boolean hasComponent(String name, int type) {
+		return components.containsKey(new ComponentReference(name, type));
 	}
 	
 	/**
@@ -161,32 +189,22 @@ public class EffectUnit {
 	 * If no component with this name exists, or it does exist but it does not have the correct type, the method returns null;
 	 * the error can be retrieved using the {@link #getLastError()} method.
 	 * @param name The name of the effect component.
-	 * @param type The class of the required effect type, such as <code>SoundEffect.class</code>
-	 * @param typeName For error displaying, the name of the component type, such as <i>sound</i>
+	 * @param type The type code of the required effect type, such as <code>SoundEffect.TYPE_CODE</code>
 	 * @return The effect component, or null if there was an error.
 	 */
-	public EffectComponent getComponent(String name, Class<?> type, String typeName) {
-		EffectComponent component = components.getOrDefault(name, null);
+	public EffectComponent getComponent(String name, int type) {
+		EffectComponent component = components.getOrDefault(new ComponentReference(name, type), null);
 		
 		if (component == null) {
-			lastError = String.format("There is no effect component called '%s' in this PFX unit.", name);
+			lastError = String.format("There is no '" + EffectDirectory.getFactories()[type].getKeyword() + "' component called '%s' in this PFX unit.", name);
 			return null;
-		}
-		
-		if (component.getClass() != type) {
-			
-			// Special case: import effects are considered visual effects as well
-			if (!(type == VisualEffect.class && component instanceof ImportEffect)) {
-				lastError = String.format("Effect component '%s' is not a %s component.", name, typeName);
-				return null;
-			}
 		}
 		
 		return component;
 	}
 	
-	public EffectComponent getComponent(ArgScriptArguments args, int index, Class<?> type, String typeName) {
-		EffectComponent component = getComponent(args.get(index), type, typeName);
+	public EffectComponent getComponent(ArgScriptArguments args, int index, int type) {
+		EffectComponent component = getComponent(args.get(index), type);
 		if (component == null) {
 			args.getStream().addError(new DocumentError(lastError, args.getRealPosition(args.getPosition(index)), args.getRealPosition(args.getEndPosition(index))));
 		}
@@ -236,7 +254,7 @@ public class EffectUnit {
 	 * @param component
 	 */
 	public void addComponent(String name, EffectComponent component) {
-		components.put(name, component);
+		components.put(new ComponentReference(name, component.getFactory().getTypeCode()), component);
 	}
 	
 	/**
@@ -295,12 +313,12 @@ public class EffectUnit {
 			if (line.getArguments(args, 1)) {
 				ImportEffect effect = new ImportEffect(stream.getData().getEffectDirectory());
 				effect.setName(args.get(0));
-				if (parser.getData().hasComponent(args.get(0))) {
-					stream.addError(line.createErrorForArgument("A component with this name already exists in this file.", 0));
+				if (parser.getData().hasComponent(args.get(0), VisualEffect.TYPE_CODE)) {
+					stream.addError(line.createErrorForArgument("An 'effect' component with this name already exists in this file.", 0));
 				}
 				
 				parser.getData().setPosition(effect, stream.getLinePositions().get(stream.getCurrentLine()));
-				parser.getData().addComponent(effect.getName(), effect);
+				parser.getData().components.put(new ComponentReference(effect.getName(), VisualEffect.TYPE_CODE), effect);
 			}
 		}));
 		
@@ -311,7 +329,7 @@ public class EffectUnit {
 				String name = args.get(0);
 				String exportName = args.size() == 1 ? name : args.get(1);
 				
-				EffectComponent component = components.getOrDefault(name, null);
+				EffectComponent component = components.getOrDefault(new ComponentReference(name, VisualEffect.TYPE_CODE), null);
 				
 				if (component == null) {
 					lastError = String.format("There is no effect called '%s' in this PFX unit.", name);

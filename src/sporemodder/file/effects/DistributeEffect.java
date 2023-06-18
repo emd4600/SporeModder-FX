@@ -484,7 +484,7 @@ public class DistributeEffect extends EffectComponent {
 			
 			this.addParser("effect", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
-					effect.component = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
+					effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
 				}
 				
@@ -505,7 +505,7 @@ public class DistributeEffect extends EffectComponent {
 						for (EffectComponentFactory factory : EffectDirectory.getFactories()) {
 							if (factory.getKeyword().equals(args.get(0))) {
 								int componentType = factory.getTypeCode();
-								effect.component = parser.getData().getComponent(args, 1, factory.getComponentClass(), factory.getKeyword());
+								effect.component = parser.getData().getComponent(args, 1, factory.getTypeCode());
 								
 								if (componentType == DistributeEffect.TYPE_CODE) {
 									effect.flags |= FLAGS_ATTACH;
@@ -517,7 +517,7 @@ public class DistributeEffect extends EffectComponent {
 						return;
 					}
 					else {
-						effect.component = parser.getData().getComponent(args, 0, VisualEffect.class, "effect");
+						effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 					}
 					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
 				}
@@ -744,7 +744,7 @@ public class DistributeEffect extends EffectComponent {
 		
 		@Override
 		public void addGroupEffectParser(ArgScriptBlock<EffectUnit> effectBlock) {
-			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE, DistributeEffect.class));
+			effectBlock.addParser(KEYWORD, VisualEffectBlock.createGroupParser(TYPE_CODE));
 		}
 
 		@Override

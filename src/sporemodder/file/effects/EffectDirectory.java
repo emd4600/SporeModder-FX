@@ -372,8 +372,6 @@ public class EffectDirectory {
 				
 				String keyword = factories[type].getKeyword();
 				
-				System.out.println(keyword + ": " + stream.getFilePointer());
-				
 				for (int i = 0; i < count; ++i) {
 					EffectComponent component = factories[type].create(this, version);
 					component.setName(keyword + '-' + Integer.toString(i));
@@ -381,7 +379,7 @@ public class EffectDirectory {
 				}
 			}
 			else {
-				System.out.println("0x" + Integer.toHexString(type) + " UNSUPPORTED version " + version + ": " + offset);
+				System.err.println("0x" + Integer.toHexString(type) + " UNSUPPORTED effect version " + version + ": " + offset);
 			}
 			
 			stream.seek(offset + size);

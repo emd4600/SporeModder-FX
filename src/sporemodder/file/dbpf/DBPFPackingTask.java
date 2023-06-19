@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import sporemodder.file.filestructures.StreamWriter;
 import javafx.concurrent.Task;
@@ -62,6 +63,9 @@ public class DBPFPackingTask extends Task<Void> {
 	
 	private final AtomicBoolean running = new AtomicBoolean(true);
 	
+	private boolean noJavaFX = false;
+	private Consumer<Double> noJavaFXProgressListener;
+	
 	public DBPFPackingTask(Project project, boolean storeDebugInformation) {
 		this.inputFolder = project.getFolder();
 		this.outputFile = project.getOutputPackage();
@@ -85,6 +89,29 @@ public class DBPFPackingTask extends Task<Void> {
 		this.outputFile = null;
 		this.outputStream = outputStream;
 		this.packageSignature = PackageSignature.NONE;
+	}
+	
+	public void setNoJavaFX() {
+		this.noJavaFX = true;
+	}
+	
+	public void setNoJavaFXProgressListener(Consumer<Double> listener) {
+		noJavaFXProgressListener = listener;
+	}
+	
+	@Override protected void updateMessage(String message) {
+		if (!noJavaFX) {
+			super.updateMessage(message);
+		}
+	}
+	
+	@Override protected void updateProgress(double workDone, double max) {
+		if (noJavaFX) {
+			noJavaFXProgressListener.accept(workDone);
+		}
+		else {
+			super.updateProgress(workDone, max);
+		}
 	}
 	
 	/**
@@ -258,9 +285,7 @@ public class DBPFPackingTask extends Task<Void> {
 	}
 
 	@Override
-	protected Void call() throws Exception {
-		
-		long time = System.currentTimeMillis();
+	public Void call() throws Exception {
 		
 		try {
 			DBPFPacker packer;
@@ -288,9 +313,6 @@ public class DBPFPackingTask extends Task<Void> {
 		
 		// Once done, we can disable updating the project registry
 		HashManager.get().setUpdateProjectRegistry(false);
-		
-		time = System.currentTimeMillis() - time;
-		System.out.println("Packed in " + time + " ms");
 		
 		return null;
 	}

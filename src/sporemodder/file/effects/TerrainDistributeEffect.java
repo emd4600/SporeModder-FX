@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptLine;
@@ -31,7 +29,8 @@ import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.effects.TerrainDistributeLevel.TerrainDistEffect;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class TerrainDistributeEffect extends EffectComponent {
 
@@ -167,7 +166,7 @@ public class TerrainDistributeEffect extends EffectComponent {
 						
 						if (line.getArguments(args, 1)) {
 							instance.effect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-							if (instance.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(instance.effect), instance.effect, 0);
+							if (instance.effect != null) args.addHyperlink(EffectDirectory.getHyperlinkType(instance.effect), instance.effect, 0);
 						}
 						
 						if (line.getOptionArguments(args, "heightRange", 2)) {

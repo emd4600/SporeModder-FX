@@ -23,14 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureFieldEndian;
-import sporemodder.file.filestructures.StructureFieldMethod;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.HashManager;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
@@ -40,8 +32,15 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureFieldMethod;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class SkinpaintParticleEffect extends EffectComponent {
@@ -285,7 +284,7 @@ public class SkinpaintParticleEffect extends EffectComponent {
 					stream.parseFileIDs(args, effect.brushes);
 					
 					for (int i = 0; i < args.size(); ++i) {
-						args.addHyperlink(PfxEditor.HYPERLINK_TEXTURE, new String[] {null, args.get(i)}, i);
+						args.addHyperlink(EffectDirectory.HYPERLINK_TEXTURE, new String[] {null, args.get(i)}, i);
 					}
 				}
 				if (line.hasFlag("random")) effect.flags |= BRUSH_RANDOM;
@@ -301,7 +300,7 @@ public class SkinpaintParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					effect.chainParticles = data.getComponent(args, 0, SkinpaintParticleEffect.TYPE_CODE);
 					if (effect.chainParticles != null)
-						args.addHyperlink(PfxEditor.getHyperlinkType(effect.chainParticles), effect.chainParticles, 0);
+						args.addHyperlink(EffectDirectory.getHyperlinkType(effect.chainParticles), effect.chainParticles, 0);
 				}
 			}));
 			

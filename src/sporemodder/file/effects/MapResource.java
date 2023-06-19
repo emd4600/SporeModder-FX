@@ -34,7 +34,6 @@ import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.Vector4;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class MapResource extends EffectResource {
@@ -161,7 +160,7 @@ public class MapResource extends EffectResource {
 						String[] words = new String[2];
 						resource.imageID.parse(args, 0, words);
 						resource.mapType = (byte) ENUM_MAPTYPE.get(key);
-						line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, key, 0);
+						line.addHyperlinkForOptionArgument(EffectDirectory.HYPERLINK_IMAGEMAP, words, key, 0);
 						hasImage = true;
 						break;
 					}
@@ -188,7 +187,7 @@ public class MapResource extends EffectResource {
 								resource.opArgMaps[i-1] = new ResourceID();
 								String[] words = new String[2];
 								if (resource.opArgMaps[i-1].parse(args, i)) {
-									line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_IMAGEMAP, words, "op", i);
+									line.addHyperlinkForOptionArgument(EffectDirectory.HYPERLINK_IMAGEMAP, words, "op", i);
 								}
 							}
 						}

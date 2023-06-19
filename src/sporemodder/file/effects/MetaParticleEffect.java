@@ -43,7 +43,6 @@ import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.StructureUnsigned;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class MetaParticleEffect extends EffectComponent {
@@ -495,7 +494,7 @@ public class MetaParticleEffect extends EffectComponent {
 			this.addParser("effect", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+					if (effect.component != null) line.addHyperlinkForArgument(EffectDirectory.getHyperlinkType(effect.component), effect.component, 0);
 					
 					if (line.hasFlag("tick")) {
 						effect.flags.set(FLAGBIT_TICK);
@@ -503,7 +502,7 @@ public class MetaParticleEffect extends EffectComponent {
 					
 					if (line.getOptionArguments(args, "death", 1)) {
 						effect.deathEffect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(PfxEditor.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
+						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(EffectDirectory.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
 						
 						if (line.hasFlag("inherit")) {
 							effect.flags.set(FLAGBIT_DEATH_INHERIT);
@@ -515,23 +514,27 @@ public class MetaParticleEffect extends EffectComponent {
 			this.addParser(ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1, 2)) {
 					if (args.size() > 1) {
+						boolean foundFactory = false;
 						for (EffectComponentFactory factory : EffectDirectory.getFactories()) {
 							if (factory.getKeyword().equals(args.get(0))) {
 								effect.component = parser.getData().getComponent(args, 1, factory.getTypeCode());
+								foundFactory = true;
 								break;
 							}
 						}
-						stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
-						return;
+						if (!foundFactory) {
+							stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
+							return;
+						}
 					}
 					else {
 						effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 					}
-					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+					if (effect.component != null) line.addHyperlinkForArgument(EffectDirectory.getHyperlinkType(effect.component), effect.component, 0);
 					
 					if (line.getOptionArguments(args, "death", 1)) {
 						effect.deathEffect = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(PfxEditor.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
+						if (effect.deathEffect != null) line.addHyperlinkForOptionArgument(EffectDirectory.getHyperlinkType(effect.deathEffect), effect.deathEffect, "death", 0);
 						
 						if (line.hasFlag("inherit")) {
 							effect.flags.set(FLAGBIT_DEATH_INHERIT);
@@ -621,7 +624,7 @@ public class MetaParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmitColor.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 			}));
 			
@@ -1259,7 +1262,7 @@ public class MetaParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmit.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
@@ -1293,7 +1296,7 @@ public class MetaParticleEffect extends EffectComponent {
 					if (args.size() == 1) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 					}
 					else {
 						effect.mapForce.setGroupID(0);
@@ -1322,15 +1325,15 @@ public class MetaParticleEffect extends EffectComponent {
 		private void parseRepelMap() {
 			final ArgScriptArguments args = new ArgScriptArguments();
 			
-			this.addParser("mapCollide", ArgScriptParser.create((parser, line) -> {
+			this.addParser("mapRepel", ArgScriptParser.create((parser, line) -> {
 				Number value = null;
 				if (line.getArguments(args, 2, 3)) {
 					int index = 0;
 					
-					if (args.size() == 1) {
+					if (args.size() == 3) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 						index++;
 					}
 					else {
@@ -1374,7 +1377,7 @@ public class MetaParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapForce.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				
 				effect.flags.set(FLAGBIT_MAP_COLLIDE);
@@ -1500,7 +1503,7 @@ public class MetaParticleEffect extends EffectComponent {
 			if (pitchOffset != 0) writer.option("offset").floats(pitchOffset);
 		}
 		if (!writer.isDefault(roll, 0.0f) || rollVary != 0 || rollOffset != 0) {
-			writer.command("roll").floats(pitch);
+			writer.command("roll").floats(roll);
 			if (rollVary != 0) writer.option("vary").floats(rollVary);
 			if (rollOffset != 0) writer.option("offset").floats(rollOffset);
 		}
@@ -1528,13 +1531,6 @@ public class MetaParticleEffect extends EffectComponent {
 			if (deathEffect != null) writer.option("death").arguments(deathEffect.getName());
 			
 			writer.flag("inherit", flags.get(FLAGBIT_DEATH_INHERIT));
-		}
-		
-		if (tractorResetSpeed != 0) writer.command("tractorResetSpeed").floats(tractorResetSpeed);
-		if (alignDamping != 0 || bankAmount != 0 || bankDamping != 0) {
-			writer.command("damping");
-			if (alignDamping != 0) writer.option("align").floats(alignDamping);
-			if (bankAmount != 0 || bankDamping != 0) writer.option("bank").floats(bankAmount, bankDamping);
 		}
 		
 		if (alignMode != 0 || alignDamping != 0.0f || bankAmount != 0.0f || bankDamping != 0.0f
@@ -1729,7 +1725,11 @@ public class MetaParticleEffect extends EffectComponent {
 			}
 			
 			if (flags.get(FLAGBIT_TRACTOR)) {
-				//TODO
+				writer.option("tractor").floats(0f, 0f);
+				
+				if (tractorResetSpeed != 0.0f) {
+					writer.option("tractorResetSpeed").floats(tractorResetSpeed);
+				}
 			}
 			
 			writer.flag("path", flags.get(FLAGBIT_PATH));
@@ -1902,7 +1902,10 @@ public class MetaParticleEffect extends EffectComponent {
 	}
 	
 	private void writeCollideMap(ArgScriptWriter writer) {
-		if (flags.get(FLAGBIT_MAP_COLLIDE)) {
+		if (flags.get(FLAGBIT_MAP_COLLIDE) &&
+				!flags.get(FLAGBIT_MAP_REPEL) &&
+				!flags.get(FLAGBIT_MAP_ADVECT) &&
+				!flags.get(FLAGBIT_MAP_FORCE)) {
 			writer.command("mapCollide");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			

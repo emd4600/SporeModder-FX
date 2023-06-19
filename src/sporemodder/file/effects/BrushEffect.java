@@ -24,13 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureFieldEndian;
-import sporemodder.file.filestructures.StructureLength;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptEnum;
@@ -38,7 +31,13 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureLength;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class BrushEffect extends EffectComponent {
@@ -331,7 +330,7 @@ public class BrushEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] originals = new String[2];
 					effect.textureID.parse(args, 0, originals);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, originals, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_TEXTURE, originals, 0);
 				}
 				
 				if (line.getOptionArguments(args, "draw", 1, 3)) {

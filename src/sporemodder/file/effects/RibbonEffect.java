@@ -39,7 +39,6 @@ import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class RibbonEffect extends EffectComponent {
@@ -468,12 +467,12 @@ public class RibbonEffect extends EffectComponent {
 			
 			this.addParser("material", ArgScriptParser.create((parser, line) -> {
 				effect.texture.drawMode = TextureSlot.DRAWMODE_NONE;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_MATERIAL);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_MATERIAL);
 			}));
 			
 			this.addParser("texture", ArgScriptParser.create((parser, line) -> {
 				effect.texture.drawMode = 0;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_TEXTURE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_TEXTURE);
 				
 //				if (line.getOptionArguments(args, "repeat", 1)) {
 //					effect.repeat
@@ -496,7 +495,7 @@ public class RibbonEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmitColor.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 			}));
 			
@@ -513,7 +512,7 @@ public class RibbonEffect extends EffectComponent {
 					else {
 						String[] words = new String[2];
 						effect.mapForce.parse(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 					}
 					
 					effect.flags |= FLAGS_MAP_ADVECT;
@@ -635,10 +634,11 @@ public class RibbonEffect extends EffectComponent {
 		if (segmentLength != 0) writer.command("segmentLength").floats(segmentLength);
 		
 		if ((flags & FLAGS_FACE_TWIST) == 0) {
-			writer.command("face").option("noTwist");
+			writer.command("face").ints(1).option("noTwist");
 		}
-		else if ((flags & FLAGS_FACE) == 0) {
-			writer.command("face");
+		else if ((flags & FLAGS_FACE) == 0 &&
+				((flags & FLAGS_FACE_ROTATE90) != 0 || (flags & FLAGS_FACE_ORIENT) != 0)) {
+			writer.command("face").ints(0);
 			writer.flag("rotate90", (flags & FLAGS_FACE_ROTATE90) != 0);
 			writer.flag("orient", (flags & FLAGS_FACE_ORIENT) != 0);
 		}

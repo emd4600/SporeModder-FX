@@ -30,16 +30,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import sporemodder.file.filestructures.FileStream;
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
-import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.dbpf.DBPFPacker;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class EffectDirectory {
+	
+	public static final String HYPERLINK_FILE = "file";
+	public static final String HYPERLINK_TEXTURE = "file-texture";
+	public static final String HYPERLINK_IMAGEMAP = "file-imagemap";
+	public static final String HYPERLINK_MATERIAL = "material";
+	public static final String HYPERLINK_MAP = "map";
+	public static final String HYPERLINK_SPLITTER = "splitter";
+	
+	public static String getHyperlinkType(EffectComponent element) {
+		if (element.getFactory() == null) return ImportEffect.KEYWORD;
+		else return element.getFactory().getKeyword();
+	}
 	
 	private static final int MAX_TYPECODE = 0x40;
 	private static final int MAX_RESOURCECODE = 0x16;
@@ -401,6 +411,9 @@ public class EffectDirectory {
 			
 			for (int i = 0; i < count; ++i) {
 				EffectResource resource = resourceFactories[type].create(this, version);
+				if (resource instanceof SplitterResource) {
+					((SplitterResource)resource).name = resourceFactories[type].getKeyword() + '-' + Integer.toString(i);
+				}
 				list.add(resource);
 			}
 			
@@ -791,58 +804,5 @@ public class EffectDirectory {
 	
 	public static <T> void copyArray(T[] dest, T[] source) {
 		for (int i = 0; i < dest.length; ++i) dest[i] = source[i];
-	}
-	
-//	public static boolean buildInspector(InspectorUnit<ArgScriptStream<EffectUnit>> inspector, DocumentFragment fragment) {
-//		
-//		for (EffectComponentFactory factory : factories) {
-//			if (factory != null && factory.buildInspector(inspector, fragment)) {
-//				return true;
-//			}
-//		}
-//		
-//		//TODO resources
-//		
-//		return false;
-//	}
-//	
-//	public static void test() throws IOException {
-//		long time1 = System.currentTimeMillis();
-//		
-//		File folder = new File("E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\DebuggingTest\\EffectsTest\\");
-//		
-//		EffectDirectory directory = new EffectDirectory();
-//		directory.process(folder);
-//		
-//		try (FileStream out = new FileStream(new File(folder, "output.effdir"), "rw")) {
-//			directory.write(out);
-//		}
-//		
-//		System.out.println("Test successful!");
-//		
-//		System.out.println(System.currentTimeMillis() - time1);
-//	}
-	
-	public static void main(String[] args) throws IOException {
-		MainApp.testInit();
-		
-//		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir";
-//		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effect Editor\\gameEffects_3~\\editors.effdir.unpacked";
-		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\ep1_effects_3~\\games.effdir";
-		String outputPath = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\ep1_effects_3~\\games.effdir.unpacked";
-		
-		long time = System.currentTimeMillis();
-		
-		try (FileStream in = new FileStream(path, "r")) {
-			EffectDirectory effdir = new EffectDirectory();
-			effdir.read(in);
-			
-			effdir.toArgScript(new File(outputPath));
-		}
-		
-		time = System.currentTimeMillis() - time;
-		
-		System.out.println(time + " ms");
 	}
 }

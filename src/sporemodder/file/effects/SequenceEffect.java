@@ -32,7 +32,6 @@ import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.view.editors.PfxEditor;
 
 public class SequenceEffect extends EffectComponent {
 	
@@ -158,7 +157,7 @@ public class SequenceEffect extends EffectComponent {
 				
 				if (line.getArguments(args, 1, 3)) {
 					ins.effect = data.getComponent(args, 0, VisualEffect.TYPE_CODE);
-					if (ins.effect != null) args.addHyperlink(PfxEditor.getHyperlinkType(ins.effect), ins.effect, 0);
+					if (ins.effect != null) args.addHyperlink(EffectDirectory.getHyperlinkType(ins.effect), ins.effect, 0);
 					
 					ins.timeRange[0] = ins.timeRange[1] = -1.0f;
 					

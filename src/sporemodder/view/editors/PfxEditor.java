@@ -32,6 +32,7 @@ import sporemodder.HashManager;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.effects.EffectComponent;
+import sporemodder.file.effects.EffectDirectory;
 import sporemodder.file.effects.EffectFileElement;
 import sporemodder.file.effects.EffectUnit;
 import sporemodder.file.effects.ImportEffect;
@@ -44,13 +45,6 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 		EffectComponent component;
 		String exportName;
 	}
-	
-	public static final String HYPERLINK_FILE = "file";
-	public static final String HYPERLINK_TEXTURE = "file-texture";
-	public static final String HYPERLINK_IMAGEMAP = "file-imagemap";
-	public static final String HYPERLINK_MATERIAL = "material";
-	public static final String HYPERLINK_MAP = "map";
-	public static final String HYPERLINK_SPLITTER = "splitter";
 	
 	private static final double TAB_PANE_HEIGHT = 300;
 	
@@ -103,19 +97,14 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 		showInspector(isActive);
 	}
 	
-	public static String getHyperlinkType(EffectComponent element) {
-		if (element.getFactory() == null) return ImportEffect.KEYWORD;
-		else return element.getFactory().getKeyword();
-	}
-	
 	@Override protected void onHyperlinkAction(HyperlinkData hyperlink) {
 		super.onHyperlinkAction(hyperlink);
 		
 		String[] names;
 		
 		switch (hyperlink.type) {
-		case HYPERLINK_FILE:
-		case HYPERLINK_IMAGEMAP:  //TODO ?
+		case EffectDirectory.HYPERLINK_FILE:
+		case EffectDirectory.HYPERLINK_IMAGEMAP:  //TODO ?
 			String[] strs = (String[]) hyperlink.object;
 			if (strs.length == 2) {
 				strs = new String[] {strs[0], strs[1], null};
@@ -123,7 +112,7 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 			hyperlinkOpenFile((String[]) hyperlink.object);
 			break;
 			
-		case HYPERLINK_TEXTURE:
+		case EffectDirectory.HYPERLINK_TEXTURE:
 			names = (String[]) hyperlink.object;
 			
 			if (names[0] != null) {
@@ -131,9 +120,9 @@ public class PfxEditor extends ArgScriptEditor<EffectUnit> {
 			}
 			break;
 			
-		case HYPERLINK_SPLITTER:
-		case HYPERLINK_MATERIAL:
-		case HYPERLINK_MAP:
+		case EffectDirectory.HYPERLINK_SPLITTER:
+		case EffectDirectory.HYPERLINK_MATERIAL:
+		case EffectDirectory.HYPERLINK_MAP:
 			names = (String[]) hyperlink.object;
 			String name = names[1];
 			if (names[0] != null) {

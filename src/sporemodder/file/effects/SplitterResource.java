@@ -59,12 +59,17 @@ public class SplitterResource extends EffectResource {
 		ENUM_TYPE.add(CYLINDER, "cylinder");
 	}
 	
+	public String name;
 	public int type = -1;
 	public final SplitKernelPlane[] plane = new SplitKernelPlane[2];
 	public final SplitKernelCylinder[] cylinder = new SplitKernelCylinder[2];
 	
 	public SplitterResource(EffectDirectory effectDirectory, int version) {
 		super(effectDirectory, version);
+	}
+	
+	@Override public String getName() {
+		return name;
 	}
 	
 	@Override public void read(StreamReader in) throws IOException {
@@ -107,7 +112,6 @@ public class SplitterResource extends EffectResource {
 	
 	protected static class Parser extends ArgScriptBlock<EffectUnit> {
 		protected SplitterResource resource;
-		protected String name;
 		
 		@Override
 		public void parse(ArgScriptLine line) {
@@ -115,11 +119,10 @@ public class SplitterResource extends EffectResource {
 			
 			ArgScriptArguments args = new ArgScriptArguments();
 			if (line.getArguments(args, 1)) {
-				name = args.get(0);
-				if (getData().hasResource(name)) {
+				resource.name = args.get(0);
+				if (getData().hasResource(resource.name)) {
 					stream.addError(line.createErrorForArgument("A resource with this name already exists in this file.", 0));
 				}
-				resource.resourceID.parse(args, 0);
 			}
 			
 			data.setPosition(resource, stream.getLinePositions().get(stream.getCurrentLine()));
@@ -129,7 +132,7 @@ public class SplitterResource extends EffectResource {
 
 		@Override
 		public void onBlockEnd() {
-			data.addResource(name, resource);
+			data.addResource(resource.name, resource);
 		}
 		
 		@Override
@@ -320,7 +323,7 @@ public class SplitterResource extends EffectResource {
 
 	@Override
 	public void toArgScript(ArgScriptWriter writer) {
-		writer.command(KEYWORD).arguments(resourceID).startBlock();
+		writer.command(KEYWORD).arguments(getName()).startBlock();
 		
 		writer.command("type").arguments(ENUM_TYPE.get(type));
 		

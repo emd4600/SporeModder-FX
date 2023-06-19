@@ -38,7 +38,6 @@ import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class DecalEffect extends EffectComponent {
@@ -257,7 +256,7 @@ public class DecalEffect extends EffectComponent {
 			}));
 			
 			this.addParser("texture", ArgScriptParser.create((parser, line) -> {
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_TEXTURE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_TEXTURE);
 				
 				Number value = null;
 				if (line.getOptionArguments(args, "repeat", 1) && (value = stream.parseFloat(args, 0)) != null) {
@@ -271,7 +270,7 @@ public class DecalEffect extends EffectComponent {
 			}));
 			this.addParser("material", ArgScriptParser.create((parser, line) -> {
 				effect.texture.drawMode = TextureSlot.DRAWMODE_NONE;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_MATERIAL);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_MATERIAL);
 				
 				Number value = null;
 				if (line.getOptionArguments(args, "repeat", 1) && (value = stream.parseFloat(args, 0)) != null) {
@@ -290,15 +289,6 @@ public class DecalEffect extends EffectComponent {
 				}
 			}));
 		}
-	}
-	
-	public void toArgScript(ArgScriptWriter writer, int index) {
-		writer.startBlock().command("decal").arguments("decal-" + index);
-		
-		writer.command("life").floats(lifeTime);
-		if (textureRepeat != 1.0f) writer.option("repeat").floats(textureRepeat);
-		
-		writer.endBlock();
 	}
 	
 	public static class Factory implements EffectComponentFactory {
@@ -365,8 +355,8 @@ public class DecalEffect extends EffectComponent {
 		
 		// Some of the user types are probably: terrainCircle, fastTerrain, light, lightRegion
 		
-		int maskedFlags = MASK_FLAGS;
-		if (maskedFlags != 0) writer.command("flags").arguments("0x" + HashManager.get().hexToString(maskedFlags));
+		int maskedFlags = flags & ~MASK_FLAGS;
+		if (maskedFlags != 0) writer.command("flags").arguments(HashManager.get().hexToString(maskedFlags));
 		
 		writer.command("type").arguments(ENUM_TYPE.get(type));
 		

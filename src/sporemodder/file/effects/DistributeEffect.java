@@ -35,7 +35,6 @@ import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.Transform;
-import sporemodder.view.editors.PfxEditor;
 
 public class DistributeEffect extends EffectComponent {
 
@@ -485,7 +484,7 @@ public class DistributeEffect extends EffectComponent {
 			this.addParser("effect", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+					if (effect.component != null) line.addHyperlinkForArgument(EffectDirectory.getHyperlinkType(effect.component), effect.component, 0);
 				}
 				
 				effect.transform.parse(stream, line);
@@ -502,6 +501,7 @@ public class DistributeEffect extends EffectComponent {
 				
 				if (line.getArguments(args, 1, 2)) {
 					if (args.size() > 1) {
+						boolean hasFoundFactory = false;
 						for (EffectComponentFactory factory : EffectDirectory.getFactories()) {
 							if (factory.getKeyword().equals(args.get(0))) {
 								int componentType = factory.getTypeCode();
@@ -510,16 +510,19 @@ public class DistributeEffect extends EffectComponent {
 								if (componentType == DistributeEffect.TYPE_CODE) {
 									effect.flags |= FLAGS_ATTACH;
 								}
+								hasFoundFactory = true;
 								break;
 							}
 						}
-						stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
-						return;
+						if (!hasFoundFactory) {
+							stream.addError(line.createErrorForArgument("First argument must be component type, such as 'particle', 'sound', etc", 0));
+							return;
+						}
 					}
 					else {
 						effect.component = parser.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
 					}
-					if (effect.component != null) line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(effect.component), effect.component, 0);
+					if (effect.component != null) line.addHyperlinkForArgument(EffectDirectory.getHyperlinkType(effect.component), effect.component, 0);
 				}
 				
 				effect.transform.parse(stream, line);
@@ -614,7 +617,7 @@ public class DistributeEffect extends EffectComponent {
 				}
 				
 				effect.resource.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				effect.resource.parse(stream, line, EffectDirectory.HYPERLINK_FILE);
 				
 				effect.transform.parse(stream, line);
 			}));
@@ -639,7 +642,7 @@ public class DistributeEffect extends EffectComponent {
 					effect.flags |= FLAGS_ALPHA_FROM_TIME;
 				}
 				
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				effect.resource.parse(stream, line, EffectDirectory.HYPERLINK_FILE);
 				
 				effect.transform.parse(stream, line);
 			}));
@@ -665,7 +668,7 @@ public class DistributeEffect extends EffectComponent {
 					effect.flags |= FLAGS_ALPHA_FROM_TIME;
 				}
 				
-				effect.resource.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				effect.resource.parse(stream, line, EffectDirectory.HYPERLINK_FILE);
 				
 				effect.transform.parse(stream, line);
 			}));
@@ -679,6 +682,8 @@ public class DistributeEffect extends EffectComponent {
 				if (line.hasFlag("keepAlive")) {
 					effect.flags |= FLAGS_MESSAGE_KEEP_ALIVE;
 				}
+				
+				effect.transform.parse(stream, line);
 			}));
 			
 			this.addParser("clusters", ArgScriptParser.create((parser, line) -> {
@@ -777,7 +782,7 @@ public class DistributeEffect extends EffectComponent {
 		}
 		else {
 			writer.command("density").ints(density);
-			if (sourceScale != 1.0f) writer.option("start").floats(sourceScale);
+			if (start != 0) writer.option("start").ints(start);
 			writer.flag("noBudget", hasNoBudget);
 			writer.flag("sync", hasSync);
 		}

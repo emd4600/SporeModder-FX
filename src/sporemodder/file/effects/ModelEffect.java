@@ -36,7 +36,6 @@ import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class ModelEffect extends EffectComponent {
@@ -94,7 +93,7 @@ public class ModelEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.resourceID.parse(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_FILE, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_FILE, words, 0);
 				}
 			}));
 			
@@ -128,7 +127,7 @@ public class ModelEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.materialID.parse(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MATERIAL, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MATERIAL, words, 0);
 				}
 			}));
 			

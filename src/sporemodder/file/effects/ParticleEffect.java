@@ -42,7 +42,6 @@ import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.StructureUnsigned;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class ParticleEffect extends EffectComponent {
@@ -516,7 +515,7 @@ public class ParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmitColor.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 			}));
 			
@@ -1116,7 +1115,7 @@ public class ParticleEffect extends EffectComponent {
 				}
 				
 				effect.texture.drawMode = TextureSlot.DRAWMODE_NONE;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_MATERIAL);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_MATERIAL);
 				
 				effect.flags.clear(FLAGBIT_MODEL);
 				
@@ -1128,8 +1127,13 @@ public class ParticleEffect extends EffectComponent {
 		}
 		
 		private static boolean isPowerOfTwo(int value) {
-			return ((value - 1) & 0xFFFFFF00) != 0 ||
-					(value & (value - 1)) != 0;
+			while (value != 1) {
+				if (value % 2 != 0) {
+					return false;
+				}
+				value = value / 2;
+			}
+			return true;
 		}
 		
 		private void parseTexture() {
@@ -1140,7 +1144,7 @@ public class ParticleEffect extends EffectComponent {
 					effect.texture.resource.parse(args, 0);
 				}
 				
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_TEXTURE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_TEXTURE);
 				
 				effect.flags.set(FLAGBIT_MODEL);
 				
@@ -1151,10 +1155,10 @@ public class ParticleEffect extends EffectComponent {
 					effect.tileCount[1] = Optional.ofNullable(args.size() == 2 ? stream.parseByte(args, 1) : null).orElse((byte) 1);
 					
 					if (!isPowerOfTwo(effect.tileCount[0])) {
-						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 0));
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 1));
 					}
 					if (!isPowerOfTwo(effect.tileCount[1])) {
-						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 1));
+						stream.addError(line.createErrorForOptionArgument("tile", "Tile counts must be powers of two", 2));
 					}
 				}
 				
@@ -1188,7 +1192,7 @@ public class ParticleEffect extends EffectComponent {
 				}
 				
 				effect.texture.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_FILE);
 			}));
 		}
 		
@@ -1241,7 +1245,7 @@ public class ParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmit.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
@@ -1275,7 +1279,7 @@ public class ParticleEffect extends EffectComponent {
 					if (args.size() == 1) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 					}
 					else {
 						effect.mapForce.setGroupID(0);
@@ -1312,7 +1316,7 @@ public class ParticleEffect extends EffectComponent {
 					if (args.size() == 3) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 						index++;
 					}
 					else {
@@ -1356,7 +1360,7 @@ public class ParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapForce.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				
 				effect.flags.set(FLAGBIT_MAP_COLLIDE);
@@ -1379,7 +1383,7 @@ public class ParticleEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapForce.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				
 				effect.flags.set(FLAGBIT_MAP_COLLIDE);
@@ -1864,7 +1868,10 @@ public class ParticleEffect extends EffectComponent {
 	}
 	
 	private void writeCollideMap(ArgScriptWriter writer) {
-		if (flags.get(FLAGBIT_MAP_COLLIDE)) {
+		if (flags.get(FLAGBIT_MAP_COLLIDE) &&
+				!flags.get(FLAGBIT_MAP_REPEL) &&
+				!flags.get(FLAGBIT_MAP_ADVECT) &&
+				!flags.get(FLAGBIT_MAP_FORCE)) {
 			writer.command("mapCollide");
 			if (!mapForce.isZero()) writer.arguments(mapForce);
 			

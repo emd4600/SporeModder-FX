@@ -23,14 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class VolumeEffect extends EffectComponent {
 	
@@ -112,7 +111,7 @@ public class VolumeEffect extends EffectComponent {
 			this.addParser("material", ArgScriptParser.create((parser, line) -> {
 				String[] originals = new String[2];
 				if (line.getArguments(args, 1) && effect.material.parse(args, 0, originals)) {
-					args.addHyperlink(PfxEditor.HYPERLINK_MATERIAL, originals, 0);
+					args.addHyperlink(EffectDirectory.HYPERLINK_MATERIAL, originals, 0);
 				}
 			}));
 			

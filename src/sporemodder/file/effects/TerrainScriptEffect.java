@@ -20,8 +20,6 @@ package sporemodder.file.effects;
 
 import java.io.IOException;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -29,7 +27,8 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class TerrainScriptEffect extends EffectComponent {
 	
@@ -86,7 +85,7 @@ public class TerrainScriptEffect extends EffectComponent {
 			if (line.getArguments(args, 1)) {
 				String[] words = new String[2];
 				effect.key.parse(args, 0, words);
-				args.addHyperlink(PfxEditor.HYPERLINK_FILE, words, 0);
+				args.addHyperlink(EffectDirectory.HYPERLINK_FILE, words, 0);
 			}
 			
 			if (line.hasFlag("loop")) effect.flags |= FLAG_LOOP;

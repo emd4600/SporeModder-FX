@@ -21,6 +21,7 @@ package sporemodder.view.dialogs;
 import java.io.File;
 import java.io.IOException;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -115,7 +116,7 @@ public class PackProgressUI implements Controller {
 			dialog.close();
 			
 			if (task.getFailException() != null) {
-				showErrorDialog(inputFolder, task);
+				Platform.runLater(() -> showErrorDialog(inputFolder, task));
 				
 				String relativePath = task.getCurrentFile().getAbsolutePath().substring(inputFolder.getAbsolutePath().length() + 1);
 				ProjectItem item = ProjectManager.get().getItem(relativePath);
@@ -163,7 +164,7 @@ public class PackProgressUI implements Controller {
 		alert.setContentText(errorText + ":\n" + task.getFailException().getLocalizedMessage());
 		alert.getDialogPane().setExpandableContent(UIManager.get().createExceptionArea(task.getFailException()));
 		
-		UIManager.get().showDialog(alert, false);
+		UIManager.get().showDialog(alert, true);
 	}
 	
 	public static boolean show(Project project, boolean storeDebugInformation) {

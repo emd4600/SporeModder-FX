@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -147,22 +148,25 @@ public class UnpackPackageUI implements Controller {
 				progressDialog.setTitle("Unpacking " + packageFile.getName());
 				
 				progressUI.setOnSucceeded(() -> {
-					if (task.getValue() != null) {
-						UIManager.get().showErrorDialog(task.getValue(), "Could not unpack file.", false);
-					}
-					else if (task.getExceptions().isEmpty()) {
-						Alert alert = new Alert(AlertType.INFORMATION, "Unpack finished", ButtonType.OK);
-						alert.setContentText("Successfully unpacked in " + (task.getEllapsedTime() / 1000.0f) + " seconds.");
-						UIManager.get().showDialog(alert);
-					}
-					else {
-						showErrorDialog(task);
-					}
+					Platform.runLater(() -> {
+						if (task.getValue() != null) {
+							UIManager.get().showErrorDialog(task.getValue(), "Could not unpack file.", false);
+						}
+						else if (task.getExceptions().isEmpty()) {
+							Alert alert = new Alert(AlertType.INFORMATION, "Unpack finished", ButtonType.OK);
+							alert.setContentText("Successfully unpacked in " + (task.getEllapsedTime() / 1000.0f) + " seconds.");
+							UIManager.get().showDialog(alert);
+						}
+						else {
+							showErrorDialog(task);
+						}
+					});
 				});
 				
 				progressUI.setOnFailed(() -> {
-					UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true);
+					Platform.runLater(() -> UIManager.get().showErrorDialog(task.getException(), "Fatal error, file could not be unpacked", true));
 				});
+				
 				
 				// Show progress
 				progressUI.getProgressBar().progressProperty().bind(task.progressProperty());

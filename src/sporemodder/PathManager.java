@@ -21,6 +21,7 @@ package sporemodder;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -44,25 +45,32 @@ public class PathManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
-		// First we try to get the program folder from two different sources
-		//programFolder = new File(System.getProperty("user.dir"));
-		try {
-			programFolder = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		if (programFolder == null || !programFolder.exists())
-		{
+		String protocol = PathManager.class.getResource("PathManager.class").getProtocol();
+		if (Objects.equals(protocol, "jar")) {
+		    // run in jar
+			// First we try to get the program folder from two different sources
+			//programFolder = new File(System.getProperty("user.dir"));
 			try {
-				programFolder = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath());
-			} catch (URISyntaxException e) {
+				programFolder = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+			} catch (URISyntaxException e1) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				e1.printStackTrace();
 			}
-		}
-		
-		if (programFolder == null || !programFolder.exists()) {
+			if (programFolder == null || !programFolder.exists())
+			{
+				try {
+					programFolder = new File(ClassLoader.getSystemClassLoader().getResource(".").toURI().getPath());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if (programFolder == null || !programFolder.exists()) {
+				programFolder = new File(System.getProperty("user.dir"));
+			}
+		} else if (Objects.equals(protocol, "file")) {
+		    // run in ide
 			programFolder = new File(System.getProperty("user.dir"));
 		}
 		

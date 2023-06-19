@@ -161,6 +161,22 @@ public class TextEditor extends AbstractEditableEditor implements ItemEditor, Se
 			}
 		}));
 		
+		Nodes.addInputMap(codeArea, InputMap.consume(EventPattern.keyPressed(KeyCode.D, KeyCodeCombination.CONTROL_DOWN), event -> {
+			if (codeArea.getSelection().getLength() != 0) {
+				int end = codeArea.getSelection().getEnd();
+				codeArea.insertText(end, codeArea.getSelectedText());
+				codeArea.selectRange(end, end + codeArea.getSelectedText().length());
+			}
+			else {
+				String text = codeArea.getText();
+				int position = codeArea.getCaretPosition();
+				if (position >= text.length() || TextUtils.isNewLine(text, position)) position--;
+				int lineStart = TextUtils.scanLineStart(text, position);
+				int lineEnd = TextUtils.scanLineEnd(text, position);
+				codeArea.insertText(lineEnd, "\n" + text.substring(lineStart, lineEnd));
+			}
+		}));
+		
 		// -- Tooltips -- //
 		popupMsg.getStyleClass().add("tooltip");
 		popup.getContent().add(popupMsg);

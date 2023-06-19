@@ -64,6 +64,7 @@ import sporemodder.view.editors.ItemEditor;
 import sporemodder.view.editors.LvlEditorFactory;
 import sporemodder.view.editors.PctpEditorFactory;
 import sporemodder.view.editors.PfxEditorFactory;
+import sporemodder.view.editors.PollenMetadataEditor;
 import sporemodder.view.editors.PropEditorFactory;
 import sporemodder.view.editors.RWModelViewer;
 import sporemodder.view.editors.SearchableEditor;
@@ -137,6 +138,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new PollenMetadataEditor.Factory());
 		editorFactories.add(new SummaryEditor.Factory());
 		editorFactories.add(new ArithmeticaEditorFactory());
 		editorFactories.add(new CellLookTableEditorFactory());

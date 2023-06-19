@@ -254,7 +254,7 @@ public class Launcher {
 				return -1;
 			}
 			else {
-				try (StreamWriter stream = new FileStream(output, "w")) {
+				try (StreamWriter stream = new FileStream(output, "rw")) {
 					if (!converter.encode(input, stream)) {
 						System.err.println("Trying to convert format '" + converter.getName() + "' failed.");
 						return -1;

@@ -33,7 +33,6 @@ import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
 import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class SoundEffect extends EffectComponent {
@@ -108,7 +107,7 @@ public class SoundEffect extends EffectComponent {
 			if (line.getOptionArguments(args, "name", 1)) {
 				String[] words = new String[2];
 				effect.soundID.parse(args, 0, words);
-				args.addHyperlink(PfxEditor.HYPERLINK_FILE, words, 0);
+				args.addHyperlink(EffectDirectory.HYPERLINK_FILE, words, 0);
 			}
 			else {
 				stream.addError(line.createError(String.format("Need at least option '-name' for anonymous '%s' effect.", KEYWORD)));

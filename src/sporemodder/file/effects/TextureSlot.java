@@ -18,15 +18,14 @@
 ****************************************************************************/
 package sporemodder.file.effects;
 
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptEnum;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class TextureSlot {
@@ -103,7 +102,7 @@ public class TextureSlot {
 			if (line.getOptionArguments(args, "texture", 1)) {
 				String[] originals = new String[2];
 				resource2.parse(args, 0, originals);
-				line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_TEXTURE, originals, "texture", 0);
+				line.addHyperlinkForOptionArgument(EffectDirectory.HYPERLINK_TEXTURE, originals, "texture", 0);
 			}
 		}
 		else {
@@ -114,7 +113,7 @@ public class TextureSlot {
 					String[] originals = new String[2];
 					resource2.parse(args, 1, originals);
 					// probably material?
-					line.addHyperlinkForOptionArgument(PfxEditor.HYPERLINK_MATERIAL, originals, "draw", 1);
+					line.addHyperlinkForOptionArgument(EffectDirectory.HYPERLINK_MATERIAL, originals, "draw", 1);
 				}
 			}
 		}

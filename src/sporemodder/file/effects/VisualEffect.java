@@ -76,7 +76,7 @@ public class VisualEffect extends EffectComponent {
 	public static final int FLAGS_SOFT_LOD_TRANSITION = 0x200000;  // 1 << 21
 	
 	public static final int MASK_FLAGS = FLAGS_VIEW_RELATIVE | FLAGS_CAMERA_FACING |
-			FLAGS_CAMERA_ATTACHED | FLAGS_CAMERA_ATTACHED_RIGID | 
+			FLAGS_CAMERA_ATTACHED | FLAGS_CAMERA_ATTACHED_RIGID | FLAGS_NO_AUTO_STOP |
 			FLAGS_HARD_STOP | FLAGS_RIGID | FLAGS_IGNORE_PARAMS | FLAGS_APPLY_CURSOR |
 			FLAGS_IGNORE_SCALE | FLAGS_IGNORE_ORIENTATION | FLAGS_ORIENT_Z_POLE |
 			FLAGS_GAME_TIME | FLAGS_REAL_TIME | FLAGS_DETACH | FLAGS_CLAMP_SCREEN_SIZE |
@@ -477,6 +477,7 @@ public class VisualEffect extends EffectComponent {
 		writer.flag("cameraAttached", (flags & FLAGS_CAMERA_ATTACHED) != 0);
 		writer.flag("cameraAttachedRigid", (flags & FLAGS_CAMERA_ATTACHED_RIGID) != 0);
 		writer.flag("hardStop", (flags & FLAGS_HARD_STOP) != 0);
+		writer.flag("noAutoStop", (flags & FLAGS_NO_AUTO_STOP) != 0);
 		writer.flag("hardLODTransition", (flags & FLAGS_HARD_LOD_TRANSITION) != 0);
 		writer.flag("softLODTransition", (flags & FLAGS_SOFT_LOD_TRANSITION) != 0);
 		writer.flag("ignoreParams", (flags & FLAGS_IGNORE_PARAMS) != 0);

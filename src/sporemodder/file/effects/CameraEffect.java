@@ -36,7 +36,6 @@ import sporemodder.file.filestructures.Structure;
 import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class CameraEffect extends EffectComponent {
@@ -255,7 +254,7 @@ public class CameraEffect extends EffectComponent {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					String[] originals = new String[2];
 					effect.cameraID.parse(args, 0, originals);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_FILE, originals, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_FILE, originals, 0);
 					
 					effect.flags |= FLAGS_NO_RESTORE;
 				}
@@ -265,7 +264,7 @@ public class CameraEffect extends EffectComponent {
 				if (line.getArguments(args, 1, Integer.MAX_VALUE)) {
 					String[] originals = new String[2];
 					effect.cameraID.parse(args, 0, originals);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_FILE, originals, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_FILE, originals, 0);
 					
 					effect.flags &= ~FLAGS_NO_RESTORE;
 				}

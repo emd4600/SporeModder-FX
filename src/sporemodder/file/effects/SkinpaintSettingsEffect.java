@@ -20,6 +20,12 @@ package sporemodder.file.effects;
 
 import java.io.IOException;
 
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptLine;
+import sporemodder.file.argscript.ArgScriptParser;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.filestructures.Stream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
@@ -28,14 +34,7 @@ import sporemodder.file.filestructures.StructureCondition;
 import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.file.argscript.ArgScriptArguments;
-import sporemodder.file.argscript.ArgScriptBlock;
-import sporemodder.file.argscript.ArgScriptLine;
-import sporemodder.file.argscript.ArgScriptParser;
-import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class SkinpaintSettingsEffect extends EffectComponent {
@@ -236,7 +235,7 @@ public class SkinpaintSettingsEffect extends EffectComponent {
 				effect.flags |= FLAG_HAIRTEXTURE;
 				String[] words = new String[2];
 				effect.hairTexture.parse(args, 0, words);
-				args.addHyperlink(PfxEditor.HYPERLINK_TEXTURE, words, 0);
+				args.addHyperlink(EffectDirectory.HYPERLINK_TEXTURE, words, 0);
 			}
 			
 			if (line.getOptionArguments(args, "hairPrintGeom", 1)) {
@@ -244,7 +243,7 @@ public class SkinpaintSettingsEffect extends EffectComponent {
 				String[] words = new String[2];
 				effect.hairPrintGeom.parse(args, 0, words);
 				// No idea of the type
-				args.addHyperlink(PfxEditor.HYPERLINK_TEXTURE, words, 0);
+				args.addHyperlink(EffectDirectory.HYPERLINK_TEXTURE, words, 0);
 			}
 			
 			// It must not have any arguments

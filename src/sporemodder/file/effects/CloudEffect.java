@@ -24,6 +24,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import sporemodder.HashManager;
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptEnum;
+import sporemodder.file.argscript.ArgScriptLine;
+import sporemodder.file.argscript.ArgScriptParser;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.filestructures.Structure;
@@ -33,16 +41,7 @@ import sporemodder.file.filestructures.StructureFieldMethod;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.StructureUnsigned;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.HashManager;
-import sporemodder.file.argscript.ArgScriptArguments;
-import sporemodder.file.argscript.ArgScriptBlock;
-import sporemodder.file.argscript.ArgScriptEnum;
-import sporemodder.file.argscript.ArgScriptLine;
-import sporemodder.file.argscript.ArgScriptParser;
-import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class CloudEffect extends EffectComponent {
@@ -497,7 +496,7 @@ public class CloudEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmitColor.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 			}));
 			
@@ -1092,7 +1091,7 @@ public class CloudEffect extends EffectComponent {
 				}
 				
 				effect.texture.drawMode = TextureSlot.DRAWMODE_NONE;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_MATERIAL);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_MATERIAL);
 				
 				effect.flags &= ~FLAG_MODEL;
 				
@@ -1111,7 +1110,7 @@ public class CloudEffect extends EffectComponent {
 					effect.texture.resource.parse(args, 0);
 				}
 				
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_TEXTURE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_TEXTURE);
 				
 				effect.flags &= ~FLAG_MODEL;
 				
@@ -1152,7 +1151,7 @@ public class CloudEffect extends EffectComponent {
 				}
 				
 				effect.texture.drawFlags |= TextureSlot.DRAWFLAG_SHADOW;
-				effect.texture.parse(stream, line, PfxEditor.HYPERLINK_FILE);
+				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_FILE);
 			}));
 		}
 		
@@ -1188,7 +1187,7 @@ public class CloudEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapEmit.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				if (line.getOptionArguments(args, "belowHeight", 1) && (value = stream.parseFloat(args, 0)) != null) {
 					effect.altitudeRange[1] = value.floatValue();
@@ -1219,7 +1218,7 @@ public class CloudEffect extends EffectComponent {
 					if (args.size() == 1) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 					}
 					else {
 						effect.mapForce.setGroupID(0);
@@ -1256,7 +1255,7 @@ public class CloudEffect extends EffectComponent {
 					if (args.size() == 3) {
 						String[] words = new String[2];
 						effect.mapForce.parseSpecial(args, 0, words);
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 						index++;
 					}
 					else {
@@ -1300,7 +1299,7 @@ public class CloudEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapForce.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				
 				effect.flags |= FLAG_COLLIDEMAP;
@@ -1323,7 +1322,7 @@ public class CloudEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.mapForce.parseSpecial(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_MAP, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_MAP, words, 0);
 				}
 				
 				effect.flags |= FLAG_COLLIDEMAP;

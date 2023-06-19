@@ -22,14 +22,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.Vector3;
-import sporemodder.view.editors.PfxEditor;
 
 public class Surface {
 
@@ -109,7 +108,7 @@ public class Surface {
 		if (line.getArguments(args, 0, 1) && args.size() == 1) {
 			String[] words = new String[2];
 			surfaceMapID.parseSpecial(args, 0, words);
-			args.addHyperlink(PfxEditor.HYPERLINK_MAP, words, 0);
+			args.addHyperlink(EffectDirectory.HYPERLINK_MAP, words, 0);
 		}
 		
 		if (line.hasFlag("pin")) {
@@ -153,12 +152,12 @@ public class Surface {
 		
 		if (line.getOptionArguments(args, "collideEffect", 1)) {
 			collideEffect = stream.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-			if (collideEffect != null) args.addHyperlink(PfxEditor.getHyperlinkType(collideEffect), collideEffect, 0);
+			if (collideEffect != null) args.addHyperlink(EffectDirectory.getHyperlinkType(collideEffect), collideEffect, 0);
 		}
 		
 		if (line.getOptionArguments(args, "deathEffect", 1)) {
 			deathEffect = stream.getData().getComponent(args, 0, VisualEffect.TYPE_CODE);
-			if (deathEffect != null) args.addHyperlink(PfxEditor.getHyperlinkType(deathEffect), deathEffect, 0);
+			if (deathEffect != null) args.addHyperlink(EffectDirectory.getHyperlinkType(deathEffect), deathEffect, 0);
 		}
 		
 		if (line.hasFlag("sourceSpace")) flags |= FLAG_SOURCE_SPACE;

@@ -43,7 +43,6 @@ import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.Vector2;
 import sporemodder.util.Vector3;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class ScreenEffect extends EffectComponent {
@@ -272,7 +271,7 @@ public class ScreenEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.texture.parse(args, 0, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, words, 0);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_TEXTURE, words, 0);
 				}
 			}));
 			
@@ -398,7 +397,7 @@ public class ScreenEffect extends EffectComponent {
 						if (bufferIndex == null) {
 							String[] words = new String[2];
 							dest.parse(args, index, words);
-							args.addHyperlink(PfxEditor.HYPERLINK_TEXTURE, words, index);
+							args.addHyperlink(EffectDirectory.HYPERLINK_TEXTURE, words, index);
 							dest.parse(args, index);
 						}
 						else {
@@ -731,7 +730,7 @@ public class ScreenEffect extends EffectComponent {
 		if (!writer.isDefault(strength, 1.0f) || falloff != 0) {
 			writer.command("strength").floats(strength);
 			if (falloff != 0) {
-				writer.command((flags & FLAGS_FALLOFF_3D) != 0 ? "falloff3D" : "falloff").floats(falloff);
+				writer.option((flags & FLAGS_FALLOFF_3D) != 0 ? "falloff3D" : "falloff").floats(falloff);
 			}
 		}
 		
@@ -740,7 +739,7 @@ public class ScreenEffect extends EffectComponent {
 			writer.command("length").floats(lifeTime);
 			
 			if (delay != 0) {
-				writer.command("delay").floats(delay);
+				writer.option("delay").floats(delay);
 			}
 			
 			writer.flag("loop", (flags & FLAGS_LOOP) != 0);

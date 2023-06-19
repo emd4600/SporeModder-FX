@@ -23,6 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import sporemodder.HashManager;
+import sporemodder.file.argscript.ArgScriptArguments;
+import sporemodder.file.argscript.ArgScriptBlock;
+import sporemodder.file.argscript.ArgScriptParser;
+import sporemodder.file.argscript.ArgScriptStream;
+import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
@@ -32,15 +38,8 @@ import sporemodder.file.filestructures.StructureEndian;
 import sporemodder.file.filestructures.StructureFieldEndian;
 import sporemodder.file.filestructures.StructureLength;
 import sporemodder.file.filestructures.metadata.StructureMetadata;
-import sporemodder.HashManager;
-import sporemodder.file.argscript.ArgScriptArguments;
-import sporemodder.file.argscript.ArgScriptBlock;
-import sporemodder.file.argscript.ArgScriptParser;
-import sporemodder.file.argscript.ArgScriptStream;
-import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.locale.LocaleUnit;
 import sporemodder.util.ColorRGB;
-import sporemodder.view.editors.PfxEditor;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class TextEffect extends EffectComponent {
@@ -148,7 +147,7 @@ public class TextEffect extends EffectComponent {
 				if (line.getArguments(args, 1)) {
 					String[] words = new String[2];
 					effect.fontID.parse(args, 0, words);
-					args.addHyperlink(PfxEditor.HYPERLINK_FILE, words, 0);
+					args.addHyperlink(EffectDirectory.HYPERLINK_FILE, words, 0);
 				}
 				
 				Number value = null;

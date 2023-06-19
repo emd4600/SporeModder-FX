@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -32,7 +30,8 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 
 public class MaterialResource extends EffectResource {
 	
@@ -530,7 +529,7 @@ public class MaterialResource extends EffectResource {
 					
 					String[] words = new String[2];
 					property.valueRes.parse(args, 1, words);
-					line.addHyperlinkForArgument(PfxEditor.HYPERLINK_TEXTURE, words, 1);
+					line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_TEXTURE, words, 1);
 					
 					property.name.setGroupID(0);
 					if (args.get(0).equals("diffuse")) {

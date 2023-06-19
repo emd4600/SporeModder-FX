@@ -22,13 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
-import sporemodder.file.filestructures.Structure;
-import sporemodder.file.filestructures.StructureEndian;
-import sporemodder.file.filestructures.StructureFieldEndian;
-import sporemodder.file.filestructures.StructureFieldMethod;
-import sporemodder.file.filestructures.metadata.StructureMetadata;
 import sporemodder.file.DocumentError;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptBlock;
@@ -37,7 +30,13 @@ import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptSpecialBlock;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
-import sporemodder.view.editors.PfxEditor;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.filestructures.Structure;
+import sporemodder.file.filestructures.StructureEndian;
+import sporemodder.file.filestructures.StructureFieldEndian;
+import sporemodder.file.filestructures.StructureFieldMethod;
+import sporemodder.file.filestructures.metadata.StructureMetadata;
 
 @Structure(StructureEndian.BIG_ENDIAN)
 public class SkinpaintDistributeEffect extends EffectComponent {
@@ -176,7 +175,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 			this.addParser("particle", ArgScriptParser.create((parser, line) -> {
 				if (line.getArguments(args, 1)) {
 					effect.particle = parser.getData().getComponent(args, 0, SkinpaintParticleEffect.TYPE_CODE);
-					if (effect.particle != null) args.addHyperlink(PfxEditor.getHyperlinkType(effect.particle), effect.particle, 0);
+					if (effect.particle != null) args.addHyperlink(EffectDirectory.getHyperlinkType(effect.particle), effect.particle, 0);
 				}
 			}));
 			
@@ -206,7 +205,7 @@ public class SkinpaintDistributeEffect extends EffectComponent {
 						EffectComponent component = getData().getComponent(line.getKeyword(), SkinpaintParticleEffect.TYPE_CODE);
 						if (component != null) {
 							// -1 cause it's the first split, 0 is the second split
-							line.addHyperlinkForArgument(PfxEditor.getHyperlinkType(component), component, -1);
+							line.addHyperlinkForArgument(EffectDirectory.getHyperlinkType(component), component, -1);
 						}
 						
 						if (component == null) {

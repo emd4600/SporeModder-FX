@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sporemodder.file.filestructures.StreamReader;
-import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptArguments;
@@ -33,9 +31,10 @@ import sporemodder.file.argscript.ArgScriptLine;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
+import sporemodder.file.filestructures.StreamReader;
+import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.util.ColorRGB;
 import sporemodder.util.Transform;
-import sporemodder.view.editors.PfxEditor;
 
 public class GameModelEffect extends EffectComponent {
 	
@@ -345,7 +344,7 @@ public class GameModelEffect extends EffectComponent {
 						effect.instanceID = key.getInstanceID();
 						effect.groupID = key.getGroupID();
 						
-						line.addHyperlinkForArgument(PfxEditor.HYPERLINK_FILE, keys, 0);
+						line.addHyperlinkForArgument(EffectDirectory.HYPERLINK_FILE, keys, 0);
 					}
 				}
 				
@@ -506,7 +505,7 @@ public class GameModelEffect extends EffectComponent {
 						
 						item.splitter = parser.getData().getComponent(args, index, MetaParticleEffect.TYPE_CODE);
 						if (item.splitter != null) {
-							args.addHyperlink(PfxEditor.getHyperlinkType(item.splitter), item.splitter, index);
+							args.addHyperlink(EffectDirectory.getHyperlinkType(item.splitter), item.splitter, index);
 						}
 						
 						index++;
@@ -692,7 +691,7 @@ public class GameModelEffect extends EffectComponent {
 		if (!splitters.isEmpty()) {
 			writer.blankLine();
 			for (ModelSplitter splitter : splitters) {
-				writer.command("splitter").arguments(splitter.splitterKernel.resourceID,
+				writer.command("splitter").arguments(splitter.splitterKernel.getName(),
 						ENUM_SPLITTER_TYPE.get(splitter.splitType), ENUM_SPLITTER_PREFERENCE.get(splitter.preference));
 			}
 		}

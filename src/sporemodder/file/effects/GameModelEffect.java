@@ -653,11 +653,15 @@ public class GameModelEffect extends EffectComponent {
 		
 		writer.flag("noAttachments", (flags & FLAGS_NO_ATTACHMENTS) == FLAGS_NO_ATTACHMENTS);
 		
-		writer.command("size").floats(size);
-		writer.flag("fixed", (flags & FLAGS_FIXED_SIZE) == FLAGS_FIXED_SIZE);
+		boolean isFixed = (flags & FLAGS_FIXED_SIZE) != 0;
+		if (size != 1.0f || isFixed) {
+			writer.command("size").floats(size);
+			writer.flag("flag", isFixed);
+		}
 		
-		writer.command("color").color(color);
-		writer.command("alpha").floats(alpha);
+		if (!color.isWhite()) writer.command("color").color(color);
+		
+		if (alpha != 1.0f) writer.command("alpha").floats(alpha);
 		
 		if (worldID != 0) writer.command("world").arguments(HashManager.get().getFileName(worldID));
 		

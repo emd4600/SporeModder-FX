@@ -71,6 +71,7 @@ import sporemodder.view.editors.ShaderBuilderEditorFactory;
 import sporemodder.view.editors.ShaderFragmentEditorFactory;
 import sporemodder.view.editors.SmtTextEditorFactory;
 import sporemodder.view.editors.SpuiEditorFactory;
+import sporemodder.view.editors.SummaryEditor;
 import sporemodder.view.editors.TextEditorFactory;
 import sporemodder.view.editors.TlsaEditorFactory;
 import sporemodder.view.editors.XmlEditorFactory;
@@ -136,6 +137,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 		// Default editors
 		// The default one goes first, as it will be the last one to be checked
 		editorFactories.add(defaultEditorFactory);
+		editorFactories.add(new SummaryEditor.Factory());
 		editorFactories.add(new ArithmeticaEditorFactory());
 		editorFactories.add(new CellLookTableEditorFactory());
 		editorFactories.add(new CellEffectMapEditorFactory());

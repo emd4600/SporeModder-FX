@@ -46,6 +46,7 @@ import sporemodder.file.dbpf.DBPFConverter;
 import sporemodder.file.effects.EffectsConverter;
 import sporemodder.file.gait.GaitConverter;
 import sporemodder.file.lvl.LvlConverter;
+import sporemodder.file.otdb.SummaryConverter;
 import sporemodder.file.pctp.PCTPConverter;
 import sporemodder.file.prop.PropConverter;
 import sporemodder.file.raster.RasterConverter;
@@ -69,6 +70,7 @@ public class FormatManager extends AbstractManager {
 	
 	@Override
 	public void initialize(Properties properties) {
+		converters.add(new SummaryConverter());
 		converters.add(new ArithmeticaConverter());
 		converters.add(new CellLookTableConverter());
 		converters.add(new CellEffectMapConverter());

@@ -67,7 +67,7 @@ public class FileManager extends AbstractManager {
 				"cell_t", "globals_t", "look_algorithm_t", "look_table_t",
 				"lootTable_t", "populate_t", "powers_t",
 				"random_creature_t", "structure_t", "world_t",
-				"arth_t"));
+				"arth_t", "summary_t"));
 		
 		protectedPackages.addAll(Arrays.asList("patchdata.package", "spore_audio1.package", "spore_audio2.package", 
 				"spore_content.package", "spore_game.package", "spore_graphics.package", "spore_pack_03.package", 

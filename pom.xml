@@ -75,6 +75,11 @@
 	</repositories>
 	<dependencies>
 		<dependency>
+		    <groupId>info.picocli</groupId>
+		    <artifactId>picocli</artifactId>
+		    <version>4.7.4</version>
+		</dependency>
+		<dependency>
 			<groupId>net.nikr</groupId>
 			<artifactId>dds</artifactId>
 			<version>1.0.0</version>

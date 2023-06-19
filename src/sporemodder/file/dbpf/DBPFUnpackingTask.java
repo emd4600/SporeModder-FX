@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,16 +34,17 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
+import java.util.function.Consumer;
 
+import sporemodder.HashManager;
+import sporemodder.MessageManager;
+import sporemodder.MessageManager.MessageType;
+import sporemodder.ProjectManager;
+import sporemodder.file.Converter;
+import sporemodder.file.ResourceKey;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.StreamReader;
-import sporemodder.HashManager;
-import sporemodder.MessageManager;
-import sporemodder.ProjectManager;
-import sporemodder.MessageManager.MessageType;
-import sporemodder.file.Converter;
-import sporemodder.file.ResourceKey;
 import sporemodder.util.Project;
 import sporemodder.util.Project.PackageSignature;
 import sporemodder.util.ResumableTask;
@@ -95,6 +95,9 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	//TODO it's faster, but apparently it causes problems; I can't reproduce the bug
 	private boolean isParallel = true;
 	
+	private boolean noJavaFX = false;
+	private Consumer<Double> noJavaFXProgressListener;
+	
 	public DBPFUnpackingTask(File inputFile, File outputFolder, Project project, List<Converter> converters) {
 		this.inputFiles.add(inputFile);
 		this.outputFolder = outputFolder;
@@ -116,6 +119,29 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		this.outputFolder = outputFolder;
 		this.converters = converters;
 		this.project = project;
+	}
+	
+	public void setNoJavaFX() {
+		this.noJavaFX = true;
+	}
+	
+	public void setNoJavaFXProgressListener(Consumer<Double> listener) {
+		noJavaFXProgressListener = listener;
+	}
+	
+	@Override protected void updateMessage(String message) {
+		if (!noJavaFX) {
+			super.updateMessage(message);
+		}
+	}
+	
+	@Override protected void updateProgress(double workDone, double max) {
+		if (noJavaFX) {
+			noJavaFXProgressListener.accept(workDone);
+		}
+		else {
+			super.updateProgress(workDone, max);
+		}
 	}
 	
 	public void setPackageSignature(boolean value) {
@@ -198,8 +224,6 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 		
 		DBPFIndex index = header.index;
 		index.readItems(packageStream, header.indexCount, header.isDBBF);
-		
-		System.out.println("File index successfully read, " + index.items.size() + " items.");
 		
 		incProgress(INDEX_PROGRESS * progressFraction);
 		// How much each file adds to the progress
@@ -288,7 +312,7 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 	}
 	
 	@Override
-	protected Exception call() throws Exception {
+	public Exception call() throws Exception {
 		
 		MessageManager.get().postMessage(MessageType.BeforeDbpfUnpack, this);
 		
@@ -346,15 +370,12 @@ public class DBPFUnpackingTask extends ResumableTask<Exception> {
 					continue;
 				}
 				
-				System.out.println("Unpacking " + inputFile.getName() + " ...");
 				try (StreamReader packageStream = new FileStream(inputFile, "r"))  {
 					unpackStream(packageStream, checkFiles ? writtenFiles : null, projectProgress);
 				}
 				catch (Exception e) {
 					return e;
 				}
-				System.out.println("Finished unpacking " + inputFile.getName());
-				System.out.println();
 				++i;
 			}
 		}

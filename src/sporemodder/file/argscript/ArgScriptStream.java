@@ -1146,11 +1146,40 @@ public class ArgScriptStream<T> {
 		return result;
 	}
 	
-	public Byte parseLong(ArgScriptArguments args, int index) {
-		Integer result = parseInt(args, index, Long.MIN_VALUE, Long.MAX_VALUE);
-		if (result == null) return null;
+	public Long parseLong(ArgScriptArguments args, int index) {
+		if (index >= args.size()) {
+			DocumentError error = new DocumentError("Expected a 64-bit int at argument position " + index + ".", 
+					args.getRealPosition(args.getStartPosition()), args.getRealPosition(args.getEndPosition()));
+			addError(error);
+			return null;
+		}
 		
-		return result.byteValue();
+		String text = args.get(index);
+		
+		if (text.isEmpty()) {
+			addError(new DocumentError("Empty expression.", args.getPosition(index), args.getPosition(index)+1));
+			return null;
+		}
+		
+		try {
+			long value = Long.parseLong(text.trim());
+			
+			int endIndex = lexer.getIndex();
+			lexer.skipWhitespaces();
+			if (lexer.available()) {
+				throw new DocumentException(new DocumentError("Garbage at end of expression", endIndex, lexer.getChars().length));
+			}
+			
+			return value;
+		} 
+		catch (DocumentException e) {
+			int startPosition = args.getPosition(index);
+			DocumentError error = e.getError();
+			error.setStartPosition(args.getRealPosition(error.getStartPosition() + startPosition));
+			error.setEndPosition(args.getRealPosition(error.getEndPosition() + startPosition));
+			addError(error);
+			return null;
+		}
 	}
 	
 	/**

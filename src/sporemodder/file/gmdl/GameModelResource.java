@@ -179,8 +179,8 @@ public class GameModelResource {
 		public final List<TextureEntry> textures = new ArrayList<>();
 		public final Map<Integer, byte[]> shaderData = new HashMap<>();
 		
-		public void read(StreamReader stream) throws IOException {
-			if (stream.readInt() != 0) {
+		public void read(StreamReader stream, int version) throws IOException {
+			if (version != 9 || stream.readInt() != 0) {
 				int count = stream.readLEInt();
 				for (int i = 0; i < count; i++) {
 					int dataIndex = stream.readLEInt();
@@ -307,7 +307,7 @@ public class GameModelResource {
 	public void read(StreamReader stream) throws IOException
 	{
 		int version = stream.readLEInt();
-		if (version != 9)
+		if (version > 9)
 			throw new IOException("Unsupported GMDL version " + version);
 		
 		int count = stream.readInt();
@@ -361,7 +361,7 @@ public class GameModelResource {
 		int materialInfoCount = stream.readLEInt();
 		for (int i = 0; i < materialInfoCount; i++) {
 			MaterialInfo info = new MaterialInfo();
-			info.read(stream);
+			info.read(stream, version);
 			materialInfos.add(info);
 		}
 		

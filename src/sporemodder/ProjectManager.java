@@ -1358,11 +1358,13 @@ public class ProjectManager extends AbstractManager {
  		return getFile(relativePath);
 	}
 	
-	public void unpackPresets(List<ProjectPreset> presets) {
+	public void unpackPresets(List<ProjectPreset> presets, List<Converter> converters) {
 		
-		List<Converter> converters = new ArrayList<Converter>();
-		for (Converter c : FormatManager.get().getConverters()) {
-			if (c.isEnabledByDefault()) converters.add(c);
+		if (converters == null) {
+			converters = new ArrayList<Converter>();
+			for (Converter c : FormatManager.get().getConverters()) {
+				if (c.isEnabledByDefault()) converters.add(c);
+			}
 		}
 		
 		// We will use this to tell the user which files could not be unpacked (because they didn't exist)

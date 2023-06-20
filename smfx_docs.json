@@ -9,6 +9,10 @@
 			"url": "https://github.com/emd4600/SporeModder-FX/wiki"
 		},
 		{
+			"title": "List of Open Source Mods",
+			"url": "https://github.com/emd4600/SporeModder-FX/wiki/List-of-open-source-mods"
+		},
+		{
 			"title": "Property Lists",
 			"url": "https://github.com/emd4600/SporeModder-FX/wiki/Property-Lists-(.prop)"
 		},
@@ -19,10 +23,6 @@
 		{
 			"title": "How to import creations into Blender",
 			"url": "https://github.com/emd4600/SporeModder-FX/wiki/How-to-import-creations-into-Blender"
-		},
-		{
-			"title": "[FUTURE] Creating custom parts",
-			"url": ""
 		},
 		{
 			"title": "Shaders & Materials",

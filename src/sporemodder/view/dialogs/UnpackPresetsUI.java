@@ -20,6 +20,7 @@ package sporemodder.view.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -28,8 +29,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import sporemodder.FormatManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
+import sporemodder.file.Converter;
 import sporemodder.util.ProjectPreset;
 import sporemodder.view.Controller;
 
@@ -40,9 +44,13 @@ private Dialog<ButtonType> dialog;
 	@FXML private Pane mainNode;
 	@FXML private Pane presetsPane;
 	@FXML private Label label;
+	@FXML private VBox settingsPane;
 	
 	private final List<CheckBox> presetBoxes = new ArrayList<CheckBox>();
 	private boolean requiresPresets = true;
+	
+	private final List<CheckBox> converterBoxes = new ArrayList<CheckBox>();
+	private final List<Converter> converters = new ArrayList<>();
 	
 	@Override
 	public Pane getMainNode() {
@@ -62,7 +70,14 @@ private Dialog<ButtonType> dialog;
 				}
 				
 				if (!selectedPresets.isEmpty()) {
-					ProjectManager.get().unpackPresets(selectedPresets);
+					List<Converter> selectedConverters = new ArrayList<Converter>();
+					for (int i = 0; i < converters.size(); i++) {
+						if (converterBoxes.get(i).isSelected()) {
+							selectedConverters.add(converters.get(i));
+						}
+					}
+					
+					ProjectManager.get().unpackPresets(selectedPresets, selectedConverters);
 				}
 			}
 		});
@@ -125,7 +140,19 @@ private Dialog<ButtonType> dialog;
 				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!selected && requiresPresets);
 			});
 			
-			mainNode.getChildren().add(checkBox);
+			presetsPane.getChildren().add(checkBox);
+		}
+		
+		List<Converter> converters = FormatManager.get().getConverters();
+		ListIterator<Converter> it = converters.listIterator(converters.size());
+		while (it.hasPrevious()) {
+			Converter converter = it.previous();
+			CheckBox cb = new CheckBox(converter.getName());
+			cb.setSelected(converter.isEnabledByDefault());
+			
+			converterBoxes.add(cb);
+			settingsPane.getChildren().add(cb);
+			this.converters.add(converter);
 		}
 	}
 }

@@ -44,12 +44,16 @@
 * {
 }
 
+.bigger-text {
+	-fx-font-size: 1.15em;
+}
+
 /**
 *  -- For the introduction UI. --
 */
 #introUI-projectList {
 	-fx-background-color: derive(-fx-background, 10%);
-	-fx-font-size: 18px;
+	-fx-font-size: 1.5em;
 }
 
 
@@ -206,12 +210,12 @@
 	-fx-padding: 10 10 10 10;
 	
 	/** I feel default text is too small. We shouldn't apply it globally, though. */
-	-fx-font-size: 1em; /*16px;*/
+	/*-fx-font-size: 1em;*/ /*16px;*/
 }
 
 .dialog-pane > .content {
 	/** I feel default text is too small. We shouldn't apply it globally, though. */
-	-fx-font-size: 1em; /*16px;*/
+	/*-fx-font-size: 1em;*/ /*16px;*/
 }
 
 /* Exception informatino show under the "More details" button in error dialogs. */

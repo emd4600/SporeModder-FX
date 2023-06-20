@@ -260,14 +260,14 @@ public class GameModelResource {
 	}
 	
 	public static class GameModelAnimData {
-		public final Transform field_0 = new Transform();
+		public final Transform transform = new Transform();
 		public final Transform field_38 = new Transform();
 		public int field_70;
 		public final ResourceKey key = new ResourceKey();
 		public final List<BakedDeforms> bakedDeforms = new ArrayList<>();
 		
 		public void read(StreamReader stream) throws IOException {
-			field_0.readComplete(stream);
+			transform.readComplete(stream);
 			field_38.readComplete(stream);
 			field_70 = stream.readLEInt();
 			key.readLE(stream);
@@ -281,7 +281,7 @@ public class GameModelResource {
 		}
 		
 		public void write(StreamWriter stream) throws IOException {
-			field_0.writeComplete(stream);
+			transform.writeComplete(stream);
 			field_38.writeComplete(stream);
 			stream.writeLEInt(field_70);
 			key.writeLE(stream);

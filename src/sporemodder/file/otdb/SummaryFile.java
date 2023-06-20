@@ -218,7 +218,7 @@ public class SummaryFile {
 			if (line.getArguments(args, 3)) {
 				AMTag tag = new AMTag();
 
-				if (args.get(1).charAt(0) == '0') {
+				if (args.get(0).charAt(0) == '0') {
 					tag.tagGroup = Optional.ofNullable(stream.parseFileID(args, 0)).orElse(0);
 				}
 				else {

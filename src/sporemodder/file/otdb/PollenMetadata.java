@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Optional;
 
 import sporemodder.HashManager;
-import sporemodder.MainApp;
 import sporemodder.file.ResourceKey;
 import sporemodder.file.argscript.ArgScriptArguments;
 import sporemodder.file.argscript.ArgScriptParser;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.effects.ResourceID;
-import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.Stream.StringEncoding;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;

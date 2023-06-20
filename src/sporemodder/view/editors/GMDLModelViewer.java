@@ -23,6 +23,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
@@ -393,8 +395,6 @@ public class GMDLModelViewer extends AbstractEditableEditor implements ItemEdito
 	private void loadImages() throws IOException {
 		for (GameModelResource.MaterialInfo materialInfo : gmdl.materialInfos) {
 			for (GameModelResource.TextureEntry texture : materialInfo.textures) {
-				System.out.println("  texture: " + HashManager.get().getFileName(texture.groupID) + "!" + HashManager.get().getFileName(texture.instanceID));
-				
 				ResourceKey key = new ResourceKey();
 				key.setInstanceID(texture.instanceID);
 				key.setGroupID(texture.groupID);
@@ -571,6 +571,54 @@ public class GMDLModelViewer extends AbstractEditableEditor implements ItemEdito
 				
 				i++;
 			}
+			
+			i = 0;
+			for (GameModelResource.BoneRange boneRange : gmdl.boneRanges) {
+				String name = "Bone Range " + i;
+				
+				TreeItem<String> boneRangeItem = new TreeItem<String>(name);
+				boneRangeItem.setExpanded(true);
+				itemsMap.put(name, boneRangeItem);
+				nameMap.put(name, boneRange);
+				tiGMDL.getChildren().add(boneRangeItem);
+				
+				i++;
+			}
+			
+			i = 0;
+			for (GameModelResource.GameModelAnimData animData : gmdl.animDatas) {
+				String name = "Animation Data " + i;
+				
+				TreeItem<String> animDataItem = new TreeItem<String>(name);
+				animDataItem.setExpanded(true);
+				itemsMap.put(name, animDataItem);
+				nameMap.put(name, animData);
+				tiGMDL.getChildren().add(animDataItem);
+				
+				for (int j = 0; j < animData.bakedDeforms.size(); j++) {
+					GameModelResource.BakedDeforms deform = animData.bakedDeforms.get(j);
+					name = "Baked Deform " + j;
+					
+					TreeItem<String> deformItem = new TreeItem<String>(name);
+					deformItem.setExpanded(true);
+					itemsMap.put(name, deformItem);
+					nameMap.put(name, deform);
+					animDataItem.getChildren().add(deformItem);
+					
+					for (int k = 0; k < deform.boneInfos.size(); k++) {
+						GameModelResource.BakedDeformBoneInfo boneInfo = deform.boneInfos.get(j);
+						name = "Bone Info " + k;
+						
+						TreeItem<String> boneItem = new TreeItem<String>(name);
+						boneItem.setExpanded(true);
+						itemsMap.put(name, boneItem);
+						nameMap.put(name, boneInfo);
+						deformItem.getChildren().add(boneItem);
+					}
+				}
+				
+				i++;
+			}
 		}
 	}
 	
@@ -585,25 +633,18 @@ public class GMDLModelViewer extends AbstractEditableEditor implements ItemEdito
 			fillMaterialPane(selectedName, (GameModelResource.MaterialInfo)object);
 			return;
 		}
-		
-//		if (object instanceof RWMorphHandle) {
-//			fillMorphPane(item, selectedName, (RWMorphHandle) object);
-//			return;
-//		}
-//		else if (object instanceof RWRaster) {
-//			fillTexturePane(selectedName, (RWRaster) object);
-//			return;
-//		}
-//		else if (object instanceof RWTextureOverride) {
-//			fillExternalTexturePane(item, selectedName, (RWTextureOverride) object);
-//			return;
-//		}
-//		else if (object instanceof RWCompiledState) {
-//			UIManager.get().tryAction(() -> {
-//				showCompiledStateEditor(selectedName);
-//			}, "Error with compiled state.");
-//			// We don't return because we want to empty the properties container
-//		}
+		else if (object instanceof GameModelResource.GameModelAnimData) {
+			fillAnimDataPane(selectedName, (GameModelResource.GameModelAnimData)object);
+			return;
+		}
+		else if (object instanceof GameModelResource.BoneRange) {
+			fillBoneRangePane(selectedName, (GameModelResource.BoneRange)object);
+			return;
+		}
+		else if (object instanceof GameModelResource.BakedDeformBoneInfo) {
+			fillBoneInfoPane(selectedName, (GameModelResource.BakedDeformBoneInfo)object);
+			return;
+		}
 		
 		propertiesContainer.setContent(null);
 	}
@@ -659,6 +700,73 @@ public class GMDLModelViewer extends AbstractEditableEditor implements ItemEdito
 				showMaterialEditor(name);
 			}, "Error with compiled state.");
 		});
+	}
+	
+	private void fillBoneRangePane(String name, GameModelResource.BoneRange boneRange) {
+		ArgScriptWriter writer = new ArgScriptWriter();
+		
+		writer.command("boneRange").ints(boneRange.field_0, boneRange.field_4);
+		
+		TextArea textArea = new TextArea();
+		textArea.setEditable(false);
+		textArea.setText(writer.toString());
+		
+		ScrollPane scrollPane = new ScrollPane(textArea);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+		
+		propertiesContainer.setContent(scrollPane);
+	}
+	
+	private void fillAnimDataPane(String name, GameModelResource.GameModelAnimData animData) {
+		ArgScriptWriter writer = new ArgScriptWriter();
+		
+		writer.command("transform");
+		animData.transform.toArgScript(writer, false);
+		
+		writer.command("field_38");
+		animData.field_38.toArgScript(writer, false);
+		
+		writer.command("field_70").ints(animData.field_70);
+		writer.command("key").arguments(animData.key);
+		
+		TextArea textArea = new TextArea();
+		textArea.setEditable(false);
+		textArea.setText(writer.toString());
+		
+		ScrollPane scrollPane = new ScrollPane(textArea);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+		
+		propertiesContainer.setContent(scrollPane);
+	}
+	
+	private void fillBoneInfoPane(String name, GameModelResource.BakedDeformBoneInfo boneInfo) {
+		StringBuilder sb = new StringBuilder();
+		int bytesPerLine = 8;
+		for (int i = 0; i < boneInfo.data.length; i++) {
+			String text = Integer.toHexString(((int)boneInfo.data[i]) & 0xFF);
+			if (text.length() == 1) {
+				sb.append('0');
+			}
+			sb.append(text);
+			
+			if ((i + 1) % bytesPerLine == 0) sb.append('\n');
+			else sb.append(' ');
+		}
+		
+		TextArea textArea = new TextArea();
+		textArea.setEditable(false);
+		textArea.setText(sb.toString());
+		
+		ScrollPane scrollPane = new ScrollPane(textArea);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setFitToWidth(true);
+		scrollPane.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+		
+		propertiesContainer.setContent(scrollPane);
 	}
 	
 	@Override

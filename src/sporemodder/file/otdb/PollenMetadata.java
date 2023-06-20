@@ -400,18 +400,21 @@ public class PollenMetadata {
 			if (line.getArguments(args, 1)) {
 				authorNameLocale = new ResourceID();
 				authorNameLocale.parse(args, 0);
+				useLocale = 1;
 			}
 		}));
 		stream.addParser("nameLocale", ArgScriptParser.create((parser, line) -> {
 			if (line.getArguments(args, 1)) {
 				nameLocale = new ResourceID();
 				nameLocale.parse(args, 0);
+				useLocale = 1;
 			}
 		}));
 		stream.addParser("descriptionLocale", ArgScriptParser.create((parser, line) -> {
 			if (line.getArguments(args, 1)) {
 				descriptionLocale = new ResourceID();
 				descriptionLocale.parse(args, 0);
+				useLocale = 1;
 			}
 		}));
 		

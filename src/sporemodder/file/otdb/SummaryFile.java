@@ -57,6 +57,11 @@ public class SummaryFile {
 		ENUM_PARAMETERS.add(0x5AC2B98, "sprintCapRange");
 		ENUM_PARAMETERS.add(0x68DE3E8, "senseCapRange");
 		ENUM_PARAMETERS.add(0x5AC2B99, "healthCapRange");
+		
+		ENUM_PARAMETERS.add(0x2E0FCC74, "editorModelSaveLastChild");
+		ENUM_PARAMETERS.add(0x99524FAF, "editorModelForceSaveOver");
+		ENUM_PARAMETERS.add(0xAE773A29, "editorModelCopyConsequence");
+		ENUM_PARAMETERS.add(0xEC2942CD, "isMyCaptain");
 	}
 	
 	public static final ArgScriptEnum ENUM_AMTAGS = new ArgScriptEnum();
@@ -156,7 +161,7 @@ public class SummaryFile {
 			
 			String parameterString = ENUM_PARAMETERS.get(entry.getKey());
 			if (parameterString == null) {
-				parameterString = HashManager.get().getFileName(entry.getKey());
+				parameterString = HashManager.get().hexToString(entry.getKey());
 			}
 			
 			writer.command("parameter").arguments(

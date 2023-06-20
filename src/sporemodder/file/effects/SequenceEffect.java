@@ -246,8 +246,6 @@ public class SequenceEffect extends EffectComponent {
 					}
 				}
 			}
-			
-			if (ins.timeRange[0] != -1 || ins.timeRange[1] != -1) writer.option("range").floats(ins.timeRange);
 		}
 		
 		int maskedFlags = flags & ~MASK_FLAGS;

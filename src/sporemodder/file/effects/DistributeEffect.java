@@ -266,11 +266,12 @@ public class DistributeEffect extends EffectComponent {
 		out.writeInt(flags);
 		out.writeInt(density);
 		if (component != null) {
-			out.writeInt(effectDirectory.getIndex(component.getFactory().getTypeCode(), component));
-			out.writeByte(component.getFactory().getTypeCode());
+			int typeCode = component.getFactory() == null ? VisualEffect.TYPE_CODE : component.getFactory().getTypeCode();
+			out.writeInt(effectDirectory.getIndex(typeCode, component));
+			out.writeByte(typeCode);
 		}
 		else {
-			out.writeInt(0);
+			out.writeInt(-1);
 			out.writeByte(0);
 		}
 		out.writeInt(start);
@@ -807,7 +808,7 @@ public class DistributeEffect extends EffectComponent {
 		
 		if ((flags & FLAGS_ATTACH) != 0) {
 			writer.command("attach");
-			if (component instanceof VisualEffect) {
+			if (component.getFactory() == null || component.getFactory().getTypeCode() == VisualEffect.TYPE_CODE) {
 				writer.arguments(component.getName());
 			}
 			else {
@@ -816,7 +817,7 @@ public class DistributeEffect extends EffectComponent {
 			transform.toArgScriptNoDefault(writer, false);
 		}
 		else if (component != null) {
-			if (component instanceof VisualEffect) {
+			if (component.getFactory() == null || component.getFactory().getTypeCode() == VisualEffect.TYPE_CODE) {
 				writer.command("effect").arguments(component.getName());
 			}
 			else {

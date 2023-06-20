@@ -352,8 +352,9 @@ public class MetaParticleEffect extends EffectComponent {
 			out.writeInt(-1);
 			out.writeInt(0);
 		} else {
-			out.writeInt(effectDirectory.getIndex(component.getFactory().getTypeCode(), component));
-			out.writeInt(component.getFactory().getTypeCode());
+			int typeCode = component.getFactory() == null ? VisualEffect.TYPE_CODE : component.getFactory().getTypeCode();
+			out.writeInt(effectDirectory.getIndex(typeCode, component));
+			out.writeInt(typeCode);
 		}
 	}
 	
@@ -1522,7 +1523,7 @@ public class MetaParticleEffect extends EffectComponent {
 		writeRate(writer);
 		
 		if (component != null) {
-			if (component.getFactory().getTypeCode() == VisualEffect.TYPE_CODE) {
+			if (component.getFactory() == null || component.getFactory().getTypeCode() == VisualEffect.TYPE_CODE) {
 				writer.command("effect").arguments(component.getName());
 			}
 			else {
@@ -1756,11 +1757,10 @@ public class MetaParticleEffect extends EffectComponent {
 			commandWritten = true;
 			writer.option("bloomSize").floats(screenBloomScaleBase / 255.0f, (screenBloomScaleRate / 255.0f) / 0.0625f);
 		}
+		
 		if (!wiggles.isEmpty()) {
-			if (!commandWritten) writer.command("warp");
-			commandWritten = true;
 			for (ParticleWiggle w : wiggles) {
-				writer.option("wiggleDir").floats(w.timeRate).vector(w.wiggleDirection);
+				writer.command("warp").option("wiggleDir").floats(w.timeRate).vector(w.wiggleDirection);
 				if (w.rateDirection[0] != 0 || w.rateDirection[1] != 0 || w.rateDirection[2] != 0) {
 					writer.vector(w.rateDirection);
 				}

@@ -144,7 +144,7 @@ public class GameEffect extends EffectComponent {
 					effect.messageString = args.get(0);
 				}
 				
-				if (line.hasOption("onStop")) {
+				if (line.hasFlag("onStop")) {
 					effect.flags |= FLAGS_MESSAGE_ON_STOP;
 				}
 				else {

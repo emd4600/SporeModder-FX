@@ -360,10 +360,12 @@ public class DecalEffect extends EffectComponent {
 		
 		writer.command("type").arguments(ENUM_TYPE.get(type));
 		
-		if (!(color.size() == 1 && color.get(0).isWhite())) writer.command("color").colors(color);
+		if (!writer.isDefaultColor(color)) writer.command("color").colors(color);
 		
-		if (!(alpha.size() == 1 && alpha.get(0) == 1.0f)) writer.command("alpha").floats(alpha);
-		if (alphaVary != 0.0f) writer.option("vary").floats(alphaVary);
+		if (!writer.isDefault(alpha, 1.0f) || alphaVary != 0.0f) {
+			writer.command("alpha").floats(alpha);
+			if (alphaVary != 0.0f) writer.option("vary").floats(alphaVary);
+		}
 		
 		writer.command("size").floats(size);
 		if (sizeVary != 0.0f) writer.option("vary").floats(sizeVary);

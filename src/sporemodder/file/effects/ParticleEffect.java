@@ -1730,8 +1730,8 @@ public class ParticleEffect extends EffectComponent {
 			writer.option("strength").floats(value);
 			if (vary != 0) writer.floats(vary);
 			
-			if (randomWalk.turnRange != 0 || randomWalk.turnOffset != 0) {
-				writer.option("turn").floats(randomWalk.turnRange);
+			if (randomWalk.turnRange != 0.25f || randomWalk.turnOffset != 0) {
+				writer.option(isDirectedWalk ? "randomTurn" : "turn").floats(randomWalk.turnRange);
 				if (randomWalk.turnOffset != 0) writer.floats(randomWalk.turnOffset);
 			}
 			

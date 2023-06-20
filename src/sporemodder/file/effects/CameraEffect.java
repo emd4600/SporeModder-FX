@@ -429,7 +429,7 @@ public class CameraEffect extends EffectComponent {
 			writer.command("flags").arguments(HashManager.get().hexToString(maskedFlags));
 		}
 		if (maskedControlFlags != 0) {
-			writer.option("controlFlags").arguments(HashManager.get().hexToString(maskedControlFlags));
+			writer.command("controlFlags").arguments(HashManager.get().hexToString(maskedControlFlags));
 		}
 		
 		writer.endBlock().commandEND();

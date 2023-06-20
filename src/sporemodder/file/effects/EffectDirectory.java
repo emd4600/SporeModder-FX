@@ -20,6 +20,7 @@ package sporemodder.file.effects;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,9 +32,11 @@ import java.util.Map;
 import java.util.Set;
 
 import sporemodder.HashManager;
+import sporemodder.MainApp;
 import sporemodder.file.argscript.ArgScriptStream;
 import sporemodder.file.argscript.ArgScriptWriter;
 import sporemodder.file.dbpf.DBPFPacker;
+import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 
@@ -804,5 +807,42 @@ public class EffectDirectory {
 	
 	public static <T> void copyArray(T[] dest, T[] source) {
 		for (int i = 0; i < dest.length; ++i) dest[i] = source[i];
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
+		MainApp.testInit();
+		
+		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Effects\\gameEffects_3~";
+		
+		for (File file : new File(path).listFiles()) {
+			if (file.getName().endsWith(".effdir")) {
+				File outputFolder = new File(path, file.getName() + ".unpacked");
+				try (StreamReader stream = new FileStream(file, "r")) {
+					EffectDirectory effdir = new EffectDirectory();
+					effdir.read(stream);
+					effdir.toArgScript(outputFolder);
+				}
+				
+				for (File pfxFile : outputFolder.listFiles()) {
+					EffectDirectory effdir = new EffectDirectory();
+					EffectUnit unit = new EffectUnit(effdir);
+					ArgScriptStream<EffectUnit> stream = unit.generateStream();
+					stream.process(pfxFile);
+
+					if (!stream.getErrors().isEmpty()) {
+						System.out.println("ERROR: " + pfxFile.getAbsolutePath());
+					}
+					if (!stream.getWarnings().isEmpty()) {
+						System.out.println("WARNING: " + pfxFile.getAbsolutePath());
+					}
+				}
+				
+				EffectDirectory effdir = new EffectDirectory();
+				effdir.process(outputFolder, null);
+				try (StreamWriter stream = new FileStream(outputFolder.getPath() + ".effdir", "rw")) {
+					effdir.write(stream);
+				}
+			}
+		}
 	}
 }

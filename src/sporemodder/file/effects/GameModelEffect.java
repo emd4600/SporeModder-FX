@@ -655,7 +655,7 @@ public class GameModelEffect extends EffectComponent {
 		boolean isFixed = (flags & FLAGS_FIXED_SIZE) != 0;
 		if (size != 1.0f || isFixed) {
 			writer.command("size").floats(size);
-			writer.flag("flag", isFixed);
+			writer.flag("fixed", isFixed);
 		}
 		
 		if (!color.isWhite()) writer.command("color").color(color);

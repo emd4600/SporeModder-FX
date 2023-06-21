@@ -1146,7 +1146,7 @@ public class ParticleEffect extends EffectComponent {
 				
 				effect.texture.parse(stream, line, EffectDirectory.HYPERLINK_TEXTURE);
 				
-				effect.flags.set(FLAGBIT_MODEL);
+				effect.flags.clear(FLAGBIT_MODEL);
 				
 				Number value = null;
 				

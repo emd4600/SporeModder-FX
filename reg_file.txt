@@ -105152,3 +105152,4 @@ ui_money_link
 UI_population_icon
 icon_motive_sleep
 icon_full_building
+UI_dna_self_lit

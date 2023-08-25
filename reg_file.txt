@@ -105154,3 +105154,88 @@ icon_motive_sleep
 icon_full_building
 UI_dna_self_lit
 CG_eggHatch_L0
+TerrainEditor_Camera
+CivGame_Harvest
+CivGame_Wall_Hit
+spg_nearencounter_00
+spg_nearencounter_01
+spg_nearencounter_02
+spg_nearencounter_03
+spg_nearencounter_04
+spg_nearencounter_05
+ci_diplo_citywalls_large_ads
+GGERolloverGroups
+city_large_planner_camera
+city_small_planner_camera
+CivGame_TribalScoreCultural
+CivGame_TribalScoreMilitary
+CivGame_TurretFireRate
+CivGame_VehicleFireRate
+CivGame_Vehicle_Stats
+tribe_camera1
+tribe_camera2
+tribe_camera3
+tribe_planner_camera
+button-oneclick-off
+button-oneclick-norm
+button-oneclick-hl
+button-oneclick-act
+button-oneclick-on-hl
+button-oneclick-on-act
+button-oneclick-on-norm
+ce-part-feet
+ce-part-grasper
+ce-part-mouth
+ce-part-detail
+ce-part-limb
+ce-part-sense
+ce-part-weapon
+FE_assembly_rootMetaballs_01
+FE_assembly_rootMetaballs_02
+FE_assembly_rootMetaballs_03
+FE_assembly_rootMetaballs_04
+FE_assembly_roots2_branch
+FE_assembly_roots3_branch
+FE_assembly_roots4_branch
+buildingModels_LOD3~	0x40636203
+buildingModelsDestroyed_LOD0~	0x40637E00
+buildingModelsDestroyed_LOD1~	0x40637E01
+buildingModelsDestroyed_LOD2~	0x40637E02
+buildingModelsDestroyed_LOD3~	0x40637E03
+buildingModelsHi~	0x40637100
+nearencouters-1
+nearencouters-2
+nearencouters-3
+nearencouters-4
+nearencouters-5
+badgeCivspromoted
+tweak_side
+Thicken
+Length
+Longer
+Flatten
+Width
+WidthHeight
+Invert
+EyeStretch
+DeformForwardB
+DeformAxisForwardB
+DeformAxisUpB
+SpaceMasterBadgeItem
+CRGPartUnlockItem
+HairSystemGlobal~	0x40606400
+palette_editorTextureDiffuse~	0x406B2900
+palette_editorTextureNormal~	0x406B2901
+cell_editorTextureDiffuse~	0x40612900
+cell_editorTextureNormal~	0x40612901
+creature_editorTextureDiffuse~	0x40622900
+creature_editorTextureNormal~	0x40622901
+building_editorTextureDiffuse~	0x40632900
+building_editorTextureNormal~	0x40632901
+vehicle_editorTextureDiffuse~	0x40642900
+vehicle_editorTextureNormal~	0x40642901
+ufo_editorTextureDiffuse~	0x40652900
+ufo_editorTextureNormal~	0x40652901
+flora_editorTextureDiffuse~	0x40662900
+flora_editorTextureNormal~	0x40662901
+VHE_HeaderVerbTray

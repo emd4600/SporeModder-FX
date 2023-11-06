@@ -53,7 +53,7 @@ public class GameManager extends AbstractManager {
 			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack",
 			"HKEY_LOCAL_MACHINE\\SOFTWARE\\Electronic Arts\\SPORE(TM) Creepy & Cute Parts Pack" };
 	
-	public static final String SPORE_SPOREBIN = "Sporebin";
+	public static final String SPORE_SPOREBIN = "SporeBin";
 	public static final String GA_SPOREBIN = "SporebinEP1";
 	
 	private static final String PROPERTY_commandLineArgs = "gameCommandLine";  
@@ -440,8 +440,8 @@ public class GameManager extends AbstractManager {
 
 	// This method returns the path to the folder that contains the executable
 	private static String moveToSporebin(String folderName, String path, boolean bRecursive) {
-		if (!path.endsWith("\\")) {
-			path += "\\";
+		if (!path.endsWith(File.separator)) {
+			path += File.separator;
 		}
 
 		if (new File(path, "SporeApp.exe").exists()) {
@@ -449,7 +449,7 @@ public class GameManager extends AbstractManager {
 		}
 
 		if (new File(path, folderName).exists()) {
-			return path + folderName + "\\";
+			return path + folderName + File.separator;
 		}
 
 		if (bRecursive) {

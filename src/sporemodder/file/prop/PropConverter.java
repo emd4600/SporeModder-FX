@@ -49,7 +49,8 @@ import sporemodder.util.ProjectItem;
 public class PropConverter implements Converter {
 	
 	private static String extension = null;
-	private static String soundExtension = null;
+	private static String audioExtension = null;
+	private static String submixExtension = null;
 	
 	private boolean decode(StreamReader stream, File outputFile) throws IOException {
 		PropertyList list = new PropertyList();
@@ -98,7 +99,13 @@ public class PropConverter implements Converter {
 		ResourceKey key = packer.getTemporaryName();
 		key.setInstanceID(HashManager.get().getFileHash(name));
 		key.setGroupID(groupID);
-		key.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // audioProp or prop
+		if (extension.startsWith(audioExtension)) {
+			key.setTypeID(0x02B9F662);
+		} else if (extension.startsWith(submixExtension)) {
+			key.setTypeID(0x02C9EFF2);
+		} else {
+			key.setTypeID(0x00B1B104);
+		}
 		packer.writeFile(key, data, length);
 	}
 	
@@ -117,7 +124,7 @@ public class PropConverter implements Converter {
 		String[] splits = input.getName().split("\\.", 2);
 		if (splits.length < 2) return false;  // no extension
 				
-		if (splits[1].equals(extension + ".xml") || splits[1].equals(soundExtension + ".xml")) {
+		if (splits[1].equals(extension + ".xml") || splits[1].equals(audioExtension + ".xml") || splits[1].equals(submixExtension + ".xml")) {
 			packer.setCurrentFile(input);
 			
 			try (InputStream in = new FileInputStream(input);
@@ -135,7 +142,7 @@ public class PropConverter implements Converter {
 				return true;
 			}
 		}
-		else if (splits[1].equals(extension + ".prop_t") || splits[1].equals(soundExtension + ".prop_t")) {
+		else if (splits[1].equals(extension + ".prop_t") || splits[1].equals(audioExtension + ".prop_t") || splits[1].equals(submixExtension + ".prop_t")) {
 			packer.setCurrentFile(input);
 			
 			try (MemoryStream output = new MemoryStream()) {
@@ -172,7 +179,8 @@ public class PropConverter implements Converter {
 	private void checkExtensions() {
 		if (extension == null) {
 			extension = HashManager.get().getTypeName(0x00B1B104);
-			soundExtension = HashManager.get().getTypeName(0x02B9F662);
+			audioExtension = HashManager.get().getTypeName(0x02B9F662);
+			submixExtension = HashManager.get().getTypeName(0x02C9EFF2);
 		}
 	}
 	
@@ -182,8 +190,10 @@ public class PropConverter implements Converter {
 		return file.isFile() && (
 				file.getName().endsWith("." + extension + ".xml") || 
 				file.getName().endsWith("." + extension + ".prop_t") ||
-				file.getName().endsWith("." + soundExtension + ".xml") || 
-				file.getName().endsWith("." + soundExtension + ".prop_t"));
+				file.getName().endsWith("." + audioExtension + ".xml") || 
+				file.getName().endsWith("." + audioExtension + ".prop_t") ||
+				file.getName().endsWith("." + submixExtension + ".xml") || 
+				file.getName().endsWith("." + submixExtension + ".prop_t"));
 	}
 
 	@Override
@@ -199,7 +209,12 @@ public class PropConverter implements Converter {
 	@Override
 	public int getOriginalTypeID(String extension) {
 		checkExtensions();
-		return extension.startsWith("." + soundExtension) ? 0x02B9F662 : 0x00B1B104;
+		if (extension.startsWith("." + audioExtension)) {
+			return 0x02B9F662;
+		} else if (extension.startsWith("." + submixExtension)) {
+			return 0x02C9EFF2;
+		}
+		return 0x00B1B104;
 	}
 	
 	public static String intoValidText(String text) {

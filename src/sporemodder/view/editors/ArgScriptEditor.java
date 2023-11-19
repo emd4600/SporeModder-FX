@@ -291,16 +291,23 @@ public abstract class ArgScriptEditor<T> extends TextEditorWithErrors {
 			path = HashManager.get().getFileName(0) + File.separatorChar + names[1];
 		}
 		
-		// By default, try .prop/.audioProp/.submix files
+		// By default, try .prop/.audioProp/.submix/.mode files
 		String prop = HashManager.get().getTypeName(0x00B1B104);
 		String soundProp = "soundProp"; // Deprecated, backwards compatibility only
 		String audioProp = HashManager.get().getTypeName(0x02B9F662);
 		String submix = HashManager.get().getTypeName(0x02C9EFF2);
+		String mode = HashManager.get().getTypeName(0x0497925E);
 		
 		if (names[2] != null) {
 			path = path + '.' + names[2];
 			
-			if (names[2].equals(prop) || names[2].equals(audioProp) || names[2].equals(soundProp) || names[2].equals(submix)) {
+			if (
+				names[2].equals(prop) ||
+				names[2].equals(audioProp) ||
+				names[2].equals(soundProp) ||
+				names[2].equals(submix) ||
+				names[2].equals(mode)
+			) {
 				path = path + ".prop_t";
 			}
 		} else {
@@ -312,6 +319,8 @@ public abstract class ArgScriptEditor<T> extends TextEditorWithErrors {
 				path = path + '.' + soundProp;
 			} else if (file.getName().contains(submix)) {
 				path = path + '.' + submix;
+			} else if (file.getName().contains(mode)) {
+				path = path + '.' + mode;
 			} else {
 				path = path + '.' + prop;
 			}

@@ -51,6 +51,7 @@ public class PropConverter implements Converter {
 	private static String extension = null;
 	private static String audioExtension = null;
 	private static String submixExtension = null;
+	private static String modeExtension = null;
 	
 	private boolean decode(StreamReader stream, File outputFile) throws IOException {
 		PropertyList list = new PropertyList();
@@ -103,6 +104,8 @@ public class PropConverter implements Converter {
 			key.setTypeID(0x02B9F662);
 		} else if (extension.startsWith(submixExtension)) {
 			key.setTypeID(0x02C9EFF2);
+		} else if (extension.startsWith(modeExtension)) {
+			key.setTypeID(0x0497925E);
 		} else {
 			key.setTypeID(0x00B1B104);
 		}
@@ -124,7 +127,12 @@ public class PropConverter implements Converter {
 		String[] splits = input.getName().split("\\.", 2);
 		if (splits.length < 2) return false;  // no extension
 				
-		if (splits[1].equals(extension + ".xml") || splits[1].equals(audioExtension + ".xml") || splits[1].equals(submixExtension + ".xml")) {
+		if (
+			splits[1].equals(extension + ".xml") ||
+			splits[1].equals(audioExtension + ".xml") ||
+			splits[1].equals(submixExtension + ".xml") || 
+			splits[1].equals(modeExtension + ".xml")
+		) {
 			packer.setCurrentFile(input);
 			
 			try (InputStream in = new FileInputStream(input);
@@ -142,7 +150,12 @@ public class PropConverter implements Converter {
 				return true;
 			}
 		}
-		else if (splits[1].equals(extension + ".prop_t") || splits[1].equals(audioExtension + ".prop_t") || splits[1].equals(submixExtension + ".prop_t")) {
+		else if (
+			splits[1].equals(extension + ".prop_t") ||
+			splits[1].equals(audioExtension + ".prop_t") ||
+			splits[1].equals(submixExtension + ".prop_t") ||
+			splits[1].equals(modeExtension + ".prop_t")
+		) {
 			packer.setCurrentFile(input);
 			
 			try (MemoryStream output = new MemoryStream()) {
@@ -181,6 +194,7 @@ public class PropConverter implements Converter {
 			extension = HashManager.get().getTypeName(0x00B1B104);
 			audioExtension = HashManager.get().getTypeName(0x02B9F662);
 			submixExtension = HashManager.get().getTypeName(0x02C9EFF2);
+			modeExtension = HashManager.get().getTypeName(0x0497925E);
 		}
 	}
 	
@@ -188,12 +202,15 @@ public class PropConverter implements Converter {
 	public boolean isEncoder(File file) {
 		checkExtensions();
 		return file.isFile() && (
-				file.getName().endsWith("." + extension + ".xml") || 
-				file.getName().endsWith("." + extension + ".prop_t") ||
-				file.getName().endsWith("." + audioExtension + ".xml") || 
-				file.getName().endsWith("." + audioExtension + ".prop_t") ||
-				file.getName().endsWith("." + submixExtension + ".xml") || 
-				file.getName().endsWith("." + submixExtension + ".prop_t"));
+			file.getName().endsWith("." + extension + ".xml") || 
+			file.getName().endsWith("." + extension + ".prop_t") ||
+			file.getName().endsWith("." + audioExtension + ".xml") || 
+			file.getName().endsWith("." + audioExtension + ".prop_t") ||
+			file.getName().endsWith("." + submixExtension + ".xml") || 
+			file.getName().endsWith("." + submixExtension + ".prop_t") ||
+			file.getName().endsWith("." + modeExtension + ".xml") || 
+			file.getName().endsWith("." + modeExtension + ".prop_t")
+		);
 	}
 
 	@Override
@@ -213,6 +230,8 @@ public class PropConverter implements Converter {
 			return 0x02B9F662;
 		} else if (extension.startsWith("." + submixExtension)) {
 			return 0x02C9EFF2;
+		} else if (extension.startsWith("." + modeExtension)) {
+			return 0x0497925E;
 		}
 		return 0x00B1B104;
 	}

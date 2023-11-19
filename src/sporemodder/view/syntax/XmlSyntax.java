@@ -101,7 +101,10 @@ public class XmlSyntax implements SyntaxFormatFactory {
 	public boolean isSupportedFile(File file) {
 		try {
 			// Unfortunately, this syntax highlighter is too slow for "big" files
-			return file.getName().endsWith(".xml") && Files.size(file.toPath()) < 10240;
+			return Files.size(file.toPath()) < 10240 && (
+				file.getName().endsWith(".xml") |
+				file.getName().endsWith(".eapdPixie")
+			);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;

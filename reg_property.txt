@@ -5853,3 +5853,6 @@ renderDepthMRT
 allowSporepediaViewableAssetsIntoOTDB	0x74a47468
 ScaleHandleOffset
 GainHandleOffset
+startsounds
+preloadsounds
+pausegroups

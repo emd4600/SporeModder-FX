@@ -86,7 +86,7 @@ public class AnimConverter implements Converter {
 			ResourceKey name = packer.getTemporaryName();
 			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
 			name.setGroupID(groupID);
-			name.setTypeID(TYPE_ID);  // soundProp or prop
+			name.setTypeID(TYPE_ID);  // audioProp or prop
 			
 			packer.writeFile(name, output -> anim.write(output, input.getAbsolutePath(), name.getInstanceID()));
 			

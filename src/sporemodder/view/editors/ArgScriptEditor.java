@@ -291,20 +291,23 @@ public abstract class ArgScriptEditor<T> extends TextEditorWithErrors {
 			path = HashManager.get().getFileName(0) + File.separatorChar + names[1];
 		}
 		
-		// By default, try .prop/.soundProp files
+		// By default, try .prop/.audioProp files
 		String prop = HashManager.get().getTypeName(0x00B1B104);
-		String soundProp = HashManager.get().getTypeName(0x02B9F662);
+		String soundProp = "soundProp"; // Deprecated, backwards compatibility only
+		String audioProp = HashManager.get().getTypeName(0x02B9F662);
 		
 		if (names[2] != null) {
 			path = path + '.' + names[2];
 			
-			if (names[2].equals(prop) || names[2].equals(soundProp)) {
+			if (names[2].equals(prop) || names[2].equals(audioProp) || names[2].equals(soundProp) ) {
 				path = path + ".prop_t";
 			}
 		} else {
 			File file = getFile();
 			
-			if (file.getName().contains(soundProp)) {
+			if (file.getName().contains(audioProp)) {
+				path = path + '.' + audioProp;
+			} else if (file.getName().contains(soundProp)) {
 				path = path + '.' + soundProp;
 			} else {
 				path = path + '.' + prop;

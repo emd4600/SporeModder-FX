@@ -98,7 +98,7 @@ public class PropConverter implements Converter {
 		ResourceKey key = packer.getTemporaryName();
 		key.setInstanceID(HashManager.get().getFileHash(name));
 		key.setGroupID(groupID);
-		key.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // soundProp or prop
+		key.setTypeID(extension.startsWith(soundExtension) ? 0x02B9F662 : 0x00B1B104);  // audioProp or prop
 		packer.writeFile(key, data, length);
 	}
 	

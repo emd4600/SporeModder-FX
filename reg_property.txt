@@ -5832,3 +5832,24 @@ KeyDecrement
 MaxLoudness
 StartLoudness
 NoiseDuration
+PaletteIDTribeSetup
+CityTutorialKey
+ColonyTutorialKey
+TribeTutorialKey
+TurretCost
+TribeGameIdentityColorSkin	0x36bfc39
+CivGameIdentityColorSkin	0x36bfc3a
+RecordMovieWidth	0x473b872
+RecordMovieHeight	0x473b873
+EditorShadowQuality	0x5bb023a
+ShowTutorials	0x5c01583
+EditorConvolutionShadows	0x5c159c7
+FlushGPU	0x5c9d1be
+GIFPaletteMethod	0x5d2c031
+GIFFilter	0x5d2c827
+GIFAngle	0x5d2e2a7
+renderTerrainWaterReflexion
+renderDepthMRT
+allowSporepediaViewableAssetsIntoOTDB	0x74a47468
+ScaleHandleOffset
+GainHandleOffset

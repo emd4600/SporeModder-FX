@@ -19,6 +19,7 @@
 package sporemodder.file.dbpf;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class DebugInformation {
 	}
 	
 	public void addFile(String folderName, String fileName, ResourceKey name) {
-		fileNames.add(folderName + '\\' + fileName);
+		fileNames.add(folderName + File.separator + fileName);
 		fileKeys.add(name);
 	}
 	

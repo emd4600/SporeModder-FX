@@ -30,6 +30,8 @@ public class RWRaster extends RWObject {
 	
 	public static final int TYPE_CODE = 0x20003;
 	public static final int ALIGNMENT = 4;
+
+	public static final int FLAG_CUBE_TEXTURE = 0x1000;
 	
 	public int textureFormat;
 	public int textureFlags = 8;
@@ -95,7 +97,8 @@ public class RWRaster extends RWObject {
 	 * @return
 	 */
 	public DDSTexture toDDSTexture() {
-		return new DDSTexture(width, height, mipmapLevels, textureFormat, textureData.data);
+		boolean isCube = (textureFlags & FLAG_CUBE_TEXTURE) != 0;
+		return new DDSTexture(width, height, mipmapLevels, textureFormat, textureData.data, isCube);
 	}
 	
 	/**
@@ -121,6 +124,10 @@ public class RWRaster extends RWObject {
 			else if ((flags & DDSPixelFormat.ALPHAPIXELS) != 0 || (flags & DDSPixelFormat.ALPHA) != 0) {
 				textureFormat = DDSPixelFormat.D3DFMT_A8;
 			} 
+		}
+
+		if (texture.isCubeMap()) {
+			textureFlags |= FLAG_CUBE_TEXTURE;
 		}
 	}
 	

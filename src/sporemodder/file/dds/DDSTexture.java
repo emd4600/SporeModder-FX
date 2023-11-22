@@ -47,6 +47,10 @@ public class DDSTexture {
 	private DDSHeader header;
 
 	public DDSTexture(long width, long height, int mipmapCount, int textureFormat, byte[] data) {
+		this(width, height, mipmapCount, textureFormat, data, false);
+	}
+
+	public DDSTexture(long width, long height, int mipmapCount, int textureFormat, byte[] data, boolean isCube) {
 
 		long pitchOrLinearSize;
 		boolean isCompressed;
@@ -71,7 +75,18 @@ public class DDSTexture {
 		long caps2 = 0;
 		long caps3 = 0;
 		long caps4 = 0;
-		
+
+		if (isCube) {
+			caps |= DDSHeader.CAPS_COMPLEX;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_POSITIVEX;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_POSITIVEY;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_POSITIVEZ;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_NEGATIVEX;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_NEGATIVEY;
+			caps2 |= DDSHeader.CAPS2_CUBEMAP_NEGATIVEZ;
+		}
+
 		if (textureFormat == DDSPixelFormat.D3DFMT_A8) {
 			pfFlags |= DDSPixelFormat.ALPHAPIXELS;
 			rgbBitCount = 8;
@@ -126,6 +141,10 @@ public class DDSTexture {
 	}
 	public byte[] getData() {
 		return data;
+	}
+
+	public boolean isCubeMap() {
+		return (header.getCaps2() & DDSHeader.CAPS2_CUBEMAP) != 0;
 	}
 
 	public void readHeader(StreamReader stream) throws IOException {

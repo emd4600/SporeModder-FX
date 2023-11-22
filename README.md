@@ -27,4 +27,6 @@ SporeModder FX was programmed in Java 1.8, using the Eclipse tool. Additionally,
 Also wanted to give thanks to:
  - [rob55rod/Splitwirez](
 https://github.com/Splitwirez), for all his advice that ensured the program didn't end up being a total unusable mess.
+ - @0KepOnline, for contributing thousands of discovered names for the game.
+ - @Rosalie241, for their merge requests and contributions.
  - BentLent, Snek, Psi and Darhagonable, for testing the program.

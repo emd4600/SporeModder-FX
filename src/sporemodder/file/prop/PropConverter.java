@@ -190,8 +190,12 @@ public class PropConverter implements Converter {
 
 	@Override
 	public boolean isDecoder(ResourceKey key) {
-		// There are two extensions for PROP: the standard and the sound one
-		return key.getTypeID() == 0x00B1B104 || key.getTypeID() == 0x02B9F662;
+		// prop | audioProp | submix | mode | children
+		return key.getTypeID() == 0x00B1B104 || 
+		key.getTypeID() == 0x02B9F662 || 
+		key.getTypeID() == 0x02C9EFF2 || 
+		key.getTypeID() == 0x0497925E || 
+		key.getTypeID() == 0x03F51892;
 	}
 
 	private void checkExtensions() {

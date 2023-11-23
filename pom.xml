@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sporemodderfx</groupId>
 	<artifactId>sporemodderfx</artifactId>
-	<version>2.2.1</version>
+	<version>${revision}</version>
 	<name>SporeModder FX</name>
 	<properties>
 		<java.version>11</java.version>
@@ -58,6 +58,9 @@
                             <transformer implementation=
                                                  "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                 <mainClass>sporemodder.Launcher</mainClass>
+								<manifestEntries>
+									<Implementation-Version>${project.version}</Implementation-Version>
+								</manifestEntries>
                             </transformer>
                         </transformers>
                     </configuration>

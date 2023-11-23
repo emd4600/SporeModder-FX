@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -23,7 +24,7 @@ import sporemodder.util.NameRegistry;
 
 public class Launcher {
 	
-	public static final String VERSION = "2.2.2";
+	public static final String VERSION = Optional.ofNullable(Launcher.class.getPackage().getImplementationVersion()).orElse("1.0.0");
 
 	public static void main(String[] args) throws InterruptedException {
 		if (args.length == 0) {
@@ -41,8 +42,15 @@ public class Launcher {
 	    	return HashManager.get().int32(value);
 	    }
 	}
+
+	private static class SMFXVersionProvider implements CommandLine.IVersionProvider {
+		@Override
+		public String[] getVersion() throws Exception {
+			return new String[] { VERSION };
+		}
+	}
 	
-	@Command(name = "sporemodderfx", mixinStandardHelpOptions = true, version = VERSION,
+	@Command(name = "sporemodderfx", mixinStandardHelpOptions = true, versionProvider = SMFXVersionProvider.class,
 			subcommands = {
 					NameToIdCommand.class, 
 					IdToNameCommand.class, 

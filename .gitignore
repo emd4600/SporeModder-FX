@@ -67,5 +67,6 @@ WinMerge/**
 .classpath
 config.properties
 /target/
+/shade/
 SporeModderFX.jar
 desktop.ini

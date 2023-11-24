@@ -5856,3 +5856,7 @@ GainHandleOffset
 startsounds
 preloadsounds
 pausegroups
+sparsecurve
+loopplaylist
+prefade
+numchannels

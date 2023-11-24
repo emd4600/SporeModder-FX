@@ -105563,3 +105563,12 @@ cSPEditorManipulationInterPenetration
 cSPEditorManipulationPlanarInterPenetration
 str_bolt
 audio_editorModel~	0x40C0C200
+sparsecurve
+musiccommpause_group
+loopplaylist
+prefade
+spacebattlepause_group
+timeline_group
+ufo_fx_group
+ufo_group
+shoppingmusic_group

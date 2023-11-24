@@ -99,7 +99,7 @@
  */
  
 .tree-cell.project_item_warning {
-	-fx-text-fill: #E09D20;
+	-fx-text-fill: #E09D20 !important;
 } 
  
 .tree-cell.project_item_mod {

@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v1
         with:
           repository: emd4600/SporeModder-FX-Updater
-          persist-credentials: false
+          token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
           ref: main
           path: Updater
 

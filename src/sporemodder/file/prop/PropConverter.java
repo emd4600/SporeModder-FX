@@ -49,6 +49,7 @@ import sporemodder.util.ProjectItem;
 public class PropConverter implements Converter {
 	
 	private static String extension = null;
+	private static String soundExtension = "soundProp"; // Deprecated
 	private static String audioExtension = null;
 	private static String submixExtension = null;
 	private static String modeExtension = null;
@@ -101,7 +102,7 @@ public class PropConverter implements Converter {
 		ResourceKey key = packer.getTemporaryName();
 		key.setInstanceID(HashManager.get().getFileHash(name));
 		key.setGroupID(groupID);
-		if (extension.startsWith(audioExtension)) {
+		if (extension.startsWith(audioExtension) || extension.startsWith(soundExtension)) {
 			key.setTypeID(0x02B9F662);
 		} else if (extension.startsWith(submixExtension)) {
 			key.setTypeID(0x02C9EFF2);
@@ -132,6 +133,7 @@ public class PropConverter implements Converter {
 				
 		if (
 			splits[1].equals(extension + ".xml") ||
+			splits[1].equals(soundExtension + ".xml") ||
 			splits[1].equals(audioExtension + ".xml") ||
 			splits[1].equals(submixExtension + ".xml") || 
 			splits[1].equals(modeExtension + ".xml") || 
@@ -156,6 +158,7 @@ public class PropConverter implements Converter {
 		}
 		else if (
 			splits[1].equals(extension + ".prop_t") ||
+			splits[1].equals(soundExtension + ".prop_t") ||
 			splits[1].equals(audioExtension + ".prop_t") ||
 			splits[1].equals(submixExtension + ".prop_t") ||
 			splits[1].equals(modeExtension + ".prop_t") ||
@@ -214,6 +217,8 @@ public class PropConverter implements Converter {
 		return file.isFile() && (
 			file.getName().endsWith("." + extension + ".xml") || 
 			file.getName().endsWith("." + extension + ".prop_t") ||
+			file.getName().endsWith("." + soundExtension + ".xml") || 
+			file.getName().endsWith("." + soundExtension + ".prop_t") ||
 			file.getName().endsWith("." + audioExtension + ".xml") || 
 			file.getName().endsWith("." + audioExtension + ".prop_t") ||
 			file.getName().endsWith("." + submixExtension + ".xml") || 
@@ -243,7 +248,7 @@ public class PropConverter implements Converter {
 	@Override
 	public int getOriginalTypeID(String extension) {
 		checkExtensions();
-		if (extension.startsWith("." + audioExtension)) {
+		if (extension.startsWith("." + audioExtension) || extension.startsWith("." + soundExtension)) {
 			return 0x02B9F662;
 		} else if (extension.startsWith("." + submixExtension)) {
 			return 0x02C9EFF2;

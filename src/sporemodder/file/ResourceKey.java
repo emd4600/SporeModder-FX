@@ -103,24 +103,47 @@ public class ResourceKey {
 		stream.writeInt(groupID);
 	}
 	
-	@Override
-	public String toString() {
+	/**
+	 * @param groupSeparator Separates the group ID from the instance ID ('!' as standard).
+	 * @param typeSeparator Separates the type ID from the instance ID ('.' as standard).
+	 * @param quotesIfNeeded If true, the returned string will have quotes at the beginning and end if it contains spaces.
+	 * @param hexOnly If true, the returned string will only have hexadecimal IDs with no conversion.
+	 */
+	public String toFormattedString(char groupSeparator, char typeSeparator, boolean quotesIfNeeded, boolean hexOnly) {
 		HashManager hasher = HashManager.get();
 		StringBuilder sb = new StringBuilder();
 		
-		if (groupID != 0) {
-			sb.append(hasher.getFileName(groupID));
-			sb.append('!');
+		if (!hexOnly) {
+			if (groupID != 0) {
+				sb.append(hasher.getFileName(groupID));
+				sb.append(groupSeparator);
+			}
+			sb.append(hasher.getFileName(instanceID));
+			if (typeID != 0) {
+				sb.append(typeSeparator);
+				sb.append(hasher.getTypeName(typeID));
+			}
+		}
+		else {
+			if (groupID != 0) {
+				sb.append(hasher.hexToStringUC(groupID));
+				sb.append(groupSeparator);
+			}
+			sb.append(hasher.hexToStringUC(instanceID));
+			if (typeID != 0) {
+				sb.append(typeSeparator);
+				sb.append(hasher.hexToStringUC(typeID));
+			}
 		}
 		
-		sb.append(hasher.getFileName(instanceID));
 		
-		if (typeID != 0) {
-			sb.append('.');
-			sb.append(hasher.getTypeName(typeID));
-		}
-		
+		if (sb.toString().indexOf(' ') != -1 && quotesIfNeeded) return '"' + sb.toString() + '"';
 		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return toFormattedString('!', '.', true, false);
 	}
 	
 	public boolean isEquivalent(ResourceKey other) {

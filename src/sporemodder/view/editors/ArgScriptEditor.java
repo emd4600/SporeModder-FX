@@ -291,21 +291,40 @@ public abstract class ArgScriptEditor<T> extends TextEditorWithErrors {
 			path = HashManager.get().getFileName(0) + File.separatorChar + names[1];
 		}
 		
-		// By default, try .prop/.soundProp files
+		// By default, try .prop/.audioProp/.submix/.mode/.children files
 		String prop = HashManager.get().getTypeName(0x00B1B104);
-		String soundProp = HashManager.get().getTypeName(0x02B9F662);
+		String soundProp = "soundProp"; // Deprecated, backwards compatibility only
+		String audioProp = HashManager.get().getTypeName(0x02B9F662);
+		String submix = HashManager.get().getTypeName(0x02C9EFF2);
+		String mode = HashManager.get().getTypeName(0x0497925E);
+		String children = HashManager.get().getTypeName(0x03F51892);
 		
 		if (names[2] != null) {
 			path = path + '.' + names[2];
 			
-			if (names[2].equals(prop) || names[2].equals(soundProp)) {
+			if (
+				names[2].equals(prop) ||
+				names[2].equals(audioProp) ||
+				names[2].equals(soundProp) ||
+				names[2].equals(submix) ||
+				names[2].equals(mode) ||
+				names[2].equals(children)
+			) {
 				path = path + ".prop_t";
 			}
 		} else {
 			File file = getFile();
 			
-			if (file.getName().contains(soundProp)) {
+			if (file.getName().contains(audioProp)) {
+				path = path + '.' + audioProp;
+			} else if (file.getName().contains(soundProp)) {
 				path = path + '.' + soundProp;
+			} else if (file.getName().contains(submix)) {
+				path = path + '.' + submix;
+			} else if (file.getName().contains(mode)) {
+				path = path + '.' + mode;
+			} else if (file.getName().contains(children)) {
+				path = path + '.' + children;
 			} else {
 				path = path + '.' + prop;
 			}

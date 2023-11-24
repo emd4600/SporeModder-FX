@@ -80,7 +80,7 @@ jobs:
           architecture: x64
 
       - name: Build with Maven
-        run: cd Updater && mvn -B package --file pom.xml
+        run: cd ../Updater && mvn -B package --file pom.xml
 
       - run: ls
       - run: ls Updater
@@ -126,6 +126,7 @@ jobs:
         id: version_number
         run: |
           git log $(git describe --tags --abbrev=0)..HEAD --oneline --format=%s > changelog.txt
+          sed -i -e 's/^/- /' changelog.txt
           version=$( bash calculate_new_version.sh )
           echo "version=$version" >> $GITHUB_OUTPUT
 

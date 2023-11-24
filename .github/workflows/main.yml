@@ -55,13 +55,13 @@ jobs:
       - run: ls ../Updater
 
       - name: Update reg_file.txt
-        run: bash ../Updater/collect_reg_changes.sh reg_file.txt >> Updater/src/sporemodder/updater/resources/reg_file.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_file.txt >> ../Updater/src/sporemodder/updater/resources/reg_file.txt
 
       - name: Update reg_property.txt
-        run: bash ../Updater/collect_reg_changes.sh reg_property.txt >> Updater/src/sporemodder/updater/resources/reg_property.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_property.txt >> ../Updater/src/sporemodder/updater/resources/reg_property.txt
 
       - name: Update reg_type.txt
-        run: bash ../Updater/collect_reg_changes.sh reg_type.txt >> Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_type.txt >> ../Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
 
       - name: Download SporeModderFX.jar
         uses: actions/download-artifact@v3

@@ -52,16 +52,16 @@ jobs:
           path: Updater
 
       - run: ls
-      - run: ls Updater
+      - run: ls ../Updater
 
       - name: Update reg_file.txt
-        run: bash Updater/collect_reg_changes.sh reg_file.txt >> Updater/src/sporemodder/updater/resources/reg_file.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_file.txt >> Updater/src/sporemodder/updater/resources/reg_file.txt
 
       - name: Update reg_property.txt
-        run: bash Updater/collect_reg_changes.sh reg_property.txt >> Updater/src/sporemodder/updater/resources/reg_property.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_property.txt >> Updater/src/sporemodder/updater/resources/reg_property.txt
 
       - name: Update reg_type.txt
-        run: bash Updater/collect_reg_changes.sh reg_type.txt >> Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
+        run: bash ../Updater/collect_reg_changes.sh reg_type.txt >> Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
 
       - name: Download SporeModderFX.jar
         uses: actions/download-artifact@v3
@@ -70,7 +70,7 @@ jobs:
           path: SporeModder-FX-jar
 
       - name: Copy sporemodderfx.jar
-        run: cp SporeModder-FX-jar/sporemodderfx.jar Updater/src/sporemodder/updater/resources/SporeModderFX.jar
+        run: cp SporeModder-FX-jar/sporemodderfx.jar ../Updater/src/sporemodder/updater/resources/SporeModderFX.jar
         
       - name: Set up JDK 11 for x64
         uses: actions/setup-java@v3
@@ -88,16 +88,16 @@ jobs:
 
       - name: Update release files
         run: |
-          cp reg_cnv.txt "Updater/SporeModder FX/reg_cnv.txt"
-          cp reg_file.txt "Updater/SporeModder FX/reg_file.txt"
-          cp reg_property.txt "Updater/SporeModder FX/reg_property.txt"
-          cp reg_simulator.txt "Updater/SporeModder FX/reg_simulator.txt"
-          cp reg_simulator_stub.txt "Updater/SporeModder FX/reg_simulator_stub.txt"
-          cp reg_type.txt "Updater/SporeModder FX/reg_type.txt"
-          cp sporemodderfx.jar "Updater/SporeModder FX/SporeModderFX.jar"
+          cp reg_cnv.txt "../Updater/SporeModder FX/reg_cnv.txt"
+          cp reg_file.txt "../Updater/SporeModder FX/reg_file.txt"
+          cp reg_property.txt "../Updater/SporeModder FX/reg_property.txt"
+          cp reg_simulator.txt "../Updater/SporeModder FX/reg_simulator.txt"
+          cp reg_simulator_stub.txt "../Updater/SporeModder FX/reg_simulator_stub.txt"
+          cp reg_type.txt "../Updater/SporeModder FX/reg_type.txt"
+          cp sporemodderfx.jar "../Updater/SporeModder FX/SporeModderFX.jar"
 
       - name: Generate release zip
-        run: zip -r "SporeModder FX.zip" "Updater/SporeModder FX"
+        run: zip -r "SporeModder FX.zip" "../Updater/SporeModder FX"
 
       - name: "Upload build: Updater"
         uses: actions/upload-artifact@v3.1.3

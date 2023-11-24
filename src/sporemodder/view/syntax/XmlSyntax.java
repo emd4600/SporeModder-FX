@@ -102,8 +102,7 @@ public class XmlSyntax implements SyntaxFormatFactory {
 		try {
 			// Unfortunately, this syntax highlighter is too slow for "big" files
 			return (
-				file.getName().endsWith(".xml") |
-				file.getName().endsWith(".eapdPixie") &
+				(file.getName().endsWith(".xml") || file.getName().endsWith(".eapdPixie")) &&
 				Files.size(file.toPath()) < 10240
 			);
 		} catch (IOException e) {

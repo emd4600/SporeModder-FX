@@ -83,7 +83,7 @@ jobs:
         run: cd ../Updater && mvn -B package --file pom.xml
 
       - run: ls
-      - run: ls Updater
+      - run: ls ../Updater
       - run: ls SporeModder-FX-jar
 
       - name: Update release files
@@ -94,7 +94,7 @@ jobs:
           cp reg_simulator.txt "../Updater/SporeModder FX/reg_simulator.txt"
           cp reg_simulator_stub.txt "../Updater/SporeModder FX/reg_simulator_stub.txt"
           cp reg_type.txt "../Updater/SporeModder FX/reg_type.txt"
-          cp sporemodderfx.jar "../Updater/SporeModder FX/SporeModderFX.jar"
+          cp SporeModder-FX-jar/sporemodderfx.jar "../Updater/SporeModder FX/SporeModderFX.jar"
 
       - name: Generate release zip
         run: zip -r "SporeModder FX.zip" "../Updater/SporeModder FX"

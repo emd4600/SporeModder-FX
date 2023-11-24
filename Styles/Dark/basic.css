@@ -152,6 +152,10 @@
  * -- The project tree view. -- 
  */
  
+.tree-cell.project_item_warning {
+	-fx-text-fill: #E09D20;
+} 
+
 .tree-cell.project_item_mod {
 	-fx-text-fill: #22B1E0;
 } 

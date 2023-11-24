@@ -131,6 +131,36 @@ public class ProjectTreeCell extends TreeCell<ProjectItem> {
         restoreItem(getItem());
     }
 	
+	private boolean hasNonConvertibleExtension(ProjectItem item, String extension) {
+		return (item.getName().endsWith(extension) && item.getName().substring(item.getName().indexOf('.')).equals(extension));
+	}
+
+	public boolean hasAnyNonConvertibleExtension(ProjectItem item) {
+		return (
+			hasNonConvertibleExtension(item, ".prop_t") ||
+			hasNonConvertibleExtension(item, ".tsla_t") ||
+			hasNonConvertibleExtension(item, ".pctp_t") ||
+			hasNonConvertibleExtension(item, ".cnv_t") ||
+			hasNonConvertibleExtension(item, ".smt_t") ||
+			hasNonConvertibleExtension(item, ".animation_t") ||
+			hasNonConvertibleExtension(item, ".gait_t") ||
+			hasNonConvertibleExtension(item, ".globals_t") ||
+			hasNonConvertibleExtension(item, ".world_t") ||
+			hasNonConvertibleExtension(item, ".backgroundMap_t") ||
+			hasNonConvertibleExtension(item, ".powers_t") ||
+			hasNonConvertibleExtension(item, ".loottable_t") ||
+			hasNonConvertibleExtension(item, ".cell_t") ||
+			hasNonConvertibleExtension(item, ".randomcreature_t") ||
+			hasNonConvertibleExtension(item, ".structure_t") ||
+			hasNonConvertibleExtension(item, ".populate_t") ||
+			hasNonConvertibleExtension(item, ".effectMap_t") ||
+			hasNonConvertibleExtension(item, ".looktable_t") ||
+			hasNonConvertibleExtension(item, ".arth_t") ||
+			hasNonConvertibleExtension(item, ".summary_t") ||
+			hasNonConvertibleExtension(item, ".pollen_metadata_t")
+		);
+	}
+
 	private void showWarning(String text) {
 		Point2D point = localToScreen(new Point2D(getWidth(), getHeight()));
 		warningTooltip = new Tooltip(text);
@@ -193,10 +223,11 @@ public class ProjectTreeCell extends TreeCell<ProjectItem> {
 			else {
 				setText(item.getName());
 				setGraphic(item.getIcon());
-				
-				getStyleClass().setAll("tree-cell", 
+
+				getStyleClass().setAll("tree-cell",
 						item.isMod() ? "project_item_mod" : "project_item_not_mod",
-						item.isSource() ? "project_item_source" : "project_item_not_source"
+						item.isSource() ? "project_item_source" : "project_item_not_source",
+						hasAnyNonConvertibleExtension(item) ? "project_item_warning" : null
 						);
 			}
 		}
@@ -214,7 +245,8 @@ public class ProjectTreeCell extends TreeCell<ProjectItem> {
 			
 			getStyleClass().setAll("tree-cell", 
 					item.isMod() ? "project_item_mod" : "project_item_not_mod",
-					item.isSource() ? "project_item_source" : "project_item_not_source"
+					item.isSource() ? "project_item_source" : "project_item_not_source",
+					hasAnyNonConvertibleExtension(item) ? "project_item_warning" : null
 					);
 		}
 	}

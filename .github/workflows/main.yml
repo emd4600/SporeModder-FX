@@ -48,6 +48,7 @@ jobs:
         uses: actions/checkout@v1
         with:
           repository: emd4600/SporeModder-FX-Updater
+          ref: main
           path: Updater
 
       - name: Update reg_file.txt

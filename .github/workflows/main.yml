@@ -90,10 +90,12 @@ jobs:
           cp SporeModder-FX-jar/sporemodderfx.jar "../Updater/SporeModder FX/SporeModderFX.jar"
 
       - name: Generate release zip
-        run: zip -r "SporeModder FX.zip" "../Updater/SporeModder FX"
+        run: cd ../Updater && zip -r "SporeModder FX.zip" "SporeModder FX"
 
       - name: Copy updater
-        run: cp ../Updater/shade/SporeModderFX.Updater.jar SporeModderFX.Updater.jar
+        run: |
+          cp ../Updater/shade/SporeModderFX.Updater.jar SporeModderFX.Updater.jar
+          cp "../Updater/SporeModder FX.zip" "SporeModder FX.zip"
 
       - name: "Upload build: Updater"
         uses: actions/upload-artifact@v3.1.3

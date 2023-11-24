@@ -113,7 +113,7 @@ public class ResourceKey {
 		HashManager hasher = HashManager.get();
 		StringBuilder sb = new StringBuilder();
 		
-		if (hexOnly == false) {
+		if (!hexOnly) {
 			if (groupID != 0) {
 				sb.append(hasher.getFileName(groupID));
 				sb.append(groupSeparator);
@@ -137,7 +137,7 @@ public class ResourceKey {
 		}
 		
 		
-		if (sb.toString().indexOf(' ') != -1 && quotesIfNeeded == true) return '"' + sb.toString() + '"';
+		if (sb.toString().indexOf(' ') != -1 && quotesIfNeeded) return '"' + sb.toString() + '"';
 		return sb.toString();
 	}
 

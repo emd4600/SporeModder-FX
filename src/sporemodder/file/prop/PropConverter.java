@@ -227,7 +227,12 @@ public class PropConverter implements Converter {
 
 	@Override
 	public String getName() {
-		return "Properties File (." + HashManager.get().getTypeName(0x00B1B104) + ", ." + HashManager.get().getTypeName(0x02B9F662) + ")";
+		return "Properties File (." +
+		HashManager.get().getTypeName(0x00B1B104) + ", ." +
+		HashManager.get().getTypeName(0x02B9F662) + ", ." +
+		HashManager.get().getTypeName(0x02C9EFF2) + ", ." +
+		HashManager.get().getTypeName(0x0497925E) + ", ." +
+		HashManager.get().getTypeName(0x03F51892) + ")";
 	}
 
 	@Override

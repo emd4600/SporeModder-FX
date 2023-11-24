@@ -92,11 +92,14 @@ jobs:
       - name: Generate release zip
         run: zip -r "SporeModder FX.zip" "../Updater/SporeModder FX"
 
+      - name: Copy updater
+        run: cp ../Updater/shade/SporeModderFX.Updater.jar SporeModderFX.Updater.jar
+
       - name: "Upload build: Updater"
         uses: actions/upload-artifact@v3.1.3
         with:
           name: SporeModder-FX-Release
-          path: ../Updater/shade/SporeModderFX.Updater.jar
+          path: SporeModderFX.Updater.jar
           
       - name: "Upload build: Release"
         uses: actions/upload-artifact@v3.1.3

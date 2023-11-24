@@ -89,8 +89,6 @@ jobs:
           cd ../Updater
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git remote add origin https://github.com/emd4600/SporeModder-FX-Updater.git
-          git fetch
           git add --all "SporeModder FX"
           git add src/sporemodder/updater/resources/reg_file.txt
           git add src/sporemodder/updater/resources/reg_property.txt

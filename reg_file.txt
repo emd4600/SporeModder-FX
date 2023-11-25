@@ -105549,6 +105549,7 @@ timestamp-frame
 creature_health_stat
 terrain_cursor
 skinpaint_coat_elemental_fire
+ce_skinpaint_coat_elemental_fire
 ce_skinpaint_theme_elemental_fire
 MissionLogItemWithBurst
 trader_gold
@@ -105572,3 +105573,17 @@ timeline_group
 ufo_fx_group
 ufo_group
 shoppingmusic_group
+trg_vo_group
+cursor-drop-off
+cursor-abduct-off
+cursor_drop-stick
+cursor_drop-stone
+cursor-feed-baby
+cur-weapon-off
+cur-weapon-on
+cursor-drop-on
+cursor-abduct-Norm
+cursor-abduct-on
+ring_light
+isplanethot
+isplanetcold

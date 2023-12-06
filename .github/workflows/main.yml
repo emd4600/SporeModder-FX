@@ -49,7 +49,7 @@ jobs:
         with:
           repository: emd4600/SporeModder-FX-Updater
           #token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
-          token: ${{ secrets.pat }} #${{ secrets.MY_TOKEN }}
+          #token: ${{ secrets.pat }} #${{ secrets.MY_TOKEN }}
           ref: main
           path: Updater
 
@@ -90,6 +90,8 @@ jobs:
           \cp -r Styles "Updater/SporeModder FX/Styles"
 
       - name: Commit changes to Updater repo
+        env:
+          GITHUB_TOKEN: ${{secrets.PAT}}
         run: |
           cd Updater
           git config --local user.email "github-actions[bot]@users.noreply.github.com"

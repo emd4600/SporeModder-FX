@@ -49,7 +49,7 @@ jobs:
         with:
           repository: emd4600/SporeModder-FX-Updater
           #token:  ${{ secrets.ACTIONS_GITHUB_TOKEN }}
-          token: ${{ secrets.MY_TOKEN }}
+          token: ${{ secrets.pat }} #${{ secrets.MY_TOKEN }}
           ref: main
           path: Updater
 

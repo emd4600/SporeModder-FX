@@ -54,20 +54,19 @@ jobs:
 
       - run: ls
       - run: ls ..
-      - run: ls ../Updater
 
       - name: Update registry files
         run: |
-          bash ../Updater/collect_reg_changes.sh reg_file.txt >> ../Updater/src/sporemodder/updater/resources/reg_file.txt
-          bash ../Updater/collect_reg_changes.sh reg_property.txt >> ../Updater/src/sporemodder/updater/resources/reg_property.txt
-          bash ../Updater/collect_reg_changes.sh reg_type.txt >> ../Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
+          bash Updater/collect_reg_changes.sh reg_file.txt >> Updater/src/sporemodder/updater/resources/reg_file.txt
+          bash Updater/collect_reg_changes.sh reg_property.txt >> Updater/src/sporemodder/updater/resources/reg_property.txt
+          bash Updater/collect_reg_changes.sh reg_type.txt >> Updater/src/sporemodder/updater/resources/reg_type_noforce.txt
 
       - name: Update style files
         run: |
-          cp Styles/Default/basic.css ../Updater/src/sporemodder/updater/resources/Styles/basic.css
-          cp Styles/Default/syntax.css ../Updater/src/sporemodder/updater/resources/Styles/syntax.css
-          cp Styles/Dark/basic.css ../Updater/src/sporemodder/updater/resources/Styles/Dark/basic.css
-          cp Styles/Dark/syntax.css ../Updater/src/sporemodder/updater/resources/Styles/Dark/syntax.css
+          cp Styles/Default/basic.css Updater/src/sporemodder/updater/resources/Styles/basic.css
+          cp Styles/Default/syntax.css Updater/src/sporemodder/updater/resources/Styles/syntax.css
+          cp Styles/Dark/basic.css Updater/src/sporemodder/updater/resources/Styles/Dark/basic.css
+          cp Styles/Dark/syntax.css Updater/src/sporemodder/updater/resources/Styles/Dark/syntax.css
 
       - name: Download SporeModderFX.jar
         uses: actions/download-artifact@v3
@@ -76,22 +75,22 @@ jobs:
           path: SporeModder-FX-jar
 
       - name: Copy sporemodderfx.jar
-        run: cp SporeModder-FX-jar/sporemodderfx.jar ../Updater/src/sporemodder/updater/resources/SporeModderFX.jar
+        run: cp SporeModder-FX-jar/sporemodderfx.jar Updater/src/sporemodder/updater/resources/SporeModderFX.jar
 
       - name: Update release files
         run: |
-          cp reg_cnv.txt "../Updater/SporeModder FX/reg_cnv.txt"
-          cp reg_file.txt "../Updater/SporeModder FX/reg_file.txt"
-          cp reg_property.txt "../Updater/SporeModder FX/reg_property.txt"
-          cp reg_simulator.txt "../Updater/SporeModder FX/reg_simulator.txt"
-          cp reg_simulator_stub.txt "../Updater/SporeModder FX/reg_simulator_stub.txt"
-          cp reg_type.txt "../Updater/SporeModder FX/reg_type.txt"
-          cp SporeModder-FX-jar/sporemodderfx.jar "../Updater/SporeModder FX/SporeModderFX.jar"
-          \cp -r Styles "../Updater/SporeModder FX/Styles"
+          cp reg_cnv.txt "Updater/SporeModder FX/reg_cnv.txt"
+          cp reg_file.txt "Updater/SporeModder FX/reg_file.txt"
+          cp reg_property.txt "Updater/SporeModder FX/reg_property.txt"
+          cp reg_simulator.txt "Updater/SporeModder FX/reg_simulator.txt"
+          cp reg_simulator_stub.txt "Updater/SporeModder FX/reg_simulator_stub.txt"
+          cp reg_type.txt "Updater/SporeModder FX/reg_type.txt"
+          cp SporeModder-FX-jar/sporemodderfx.jar "Updater/SporeModder FX/SporeModderFX.jar"
+          \cp -r Styles "Updater/SporeModder FX/Styles"
 
       - name: Commit changes to Updater repo
         run: |
-          cd ../Updater
+          cd Updater
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add --all "SporeModder FX"
@@ -111,10 +110,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
-          directory: ../Updater
+          directory: Updater
 
       - name: Generate release zip
-        run: cd ../Updater && zip -r "SporeModder FX.zip" "SporeModder FX"
+        run: cd Updater && zip -r "SporeModder FX.zip" "SporeModder FX"
 
       - name: Set up JDK 11 for x64
         uses: actions/setup-java@v3
@@ -124,12 +123,12 @@ jobs:
           architecture: x64
 
       - name: Build with Maven
-        run: cd ../Updater && mvn -B package --file pom.xml
+        run: cd Updater && mvn -B package --file pom.xml
 
       - name: Copy updater
         run: |
-          cp ../Updater/shade/SporeModderFX.Updater.jar SporeModderFX.Updater.jar
-          cp "../Updater/SporeModder FX.zip" "SporeModder FX.zip"
+          cp Updater/shade/SporeModderFX.Updater.jar SporeModderFX.Updater.jar
+          cp "Updater/SporeModder FX.zip" "SporeModder FX.zip"
 
       - name: "Upload build: Updater"
         uses: actions/upload-artifact@v3.1.3

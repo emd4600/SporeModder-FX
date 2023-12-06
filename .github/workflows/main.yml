@@ -52,6 +52,10 @@ jobs:
           ref: main
           path: Updater
 
+      - run: ls
+      - run: ls ..
+      - run: ls ../Updater
+
       - name: Update registry files
         run: |
           bash ../Updater/collect_reg_changes.sh reg_file.txt >> ../Updater/src/sporemodder/updater/resources/reg_file.txt

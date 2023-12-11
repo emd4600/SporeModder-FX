@@ -12,7 +12,7 @@ jobs:
           owner: emd4600
           repo: SporeModder-FX-Updater
           ref: main
-          github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.PAT }}
 
   build_updater:
     runs-on: ubuntu-latest

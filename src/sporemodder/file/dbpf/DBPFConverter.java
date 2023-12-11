@@ -79,7 +79,7 @@ public class DBPFConverter implements Converter {
 			ResourceKey name = packer.getTemporaryName();
 			name.setInstanceID(HashManager.get().getFileHash(splits[0]));
 			name.setGroupID(groupID);
-			name.setTypeID(TYPE_ID);  // soundProp or prop
+			name.setTypeID(TYPE_ID);  // audioProp or prop
 			
 			packer.writeFile(name, stream -> {
 				DBPFPackingTask task = new DBPFPackingTask(input, stream);

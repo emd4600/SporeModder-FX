@@ -1,5 +1,6 @@
 prop	0xb1b104
 soundProp	0x2b9f662
+audioProp	0x2b9f662
 gmdl	0xe6bce5
 plt	0x11989b7
 creature_traits	0x1ad2416

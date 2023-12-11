@@ -42,7 +42,8 @@ public class XmlEditorFactory implements EditorFactory {
 				item.getName().endsWith(".flr") |
 				item.getName().endsWith(".bld") |
 				item.getName().endsWith(".vcl") |
-				item.getName().endsWith(".ufo"));
+				item.getName().endsWith(".ufo") |
+				item.getName().endsWith(".eapdPixie"));
 	}
 	
 	@Override

@@ -12,6 +12,7 @@ jobs:
           owner: emd4600
           repo: SporeModder-FX-Updater
           ref: main
+          workflow_file_name: main.yml
           github_token: ${{ secrets.PAT }}
 
   build_updater:

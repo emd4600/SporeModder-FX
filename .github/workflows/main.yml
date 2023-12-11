@@ -80,7 +80,6 @@ jobs:
       - name: Release to GitHub
         uses: softprops/action-gh-release@v1
         with:
-          prerelease: true
           name: SporeModder FX v${{ steps.version_number.outputs.version }}
           tag_name: v${{ steps.version_number.outputs.version }}
           body_path: changelog.txt

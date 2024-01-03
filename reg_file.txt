@@ -105560,8 +105560,8 @@ cell_nanite
 str_nanite
 ci_spice_oceanpump
 ci_spice_oceanpump_unpack
-cSPEditorManipulationInterPenetration
-cSPEditorManipulationPlanarInterPenetration
+cSPEditorManipulationInterpenetration
+cSPEditorManipulationPlanarInterpenetration
 str_bolt
 audio_editorModel~	0x40C0C200
 sparsecurve
@@ -106490,3 +106490,17 @@ BlendClip
 RedatingCube
 DefoormAxisUp
 DefomrAxisUp
+ci_spice_oceanpump_LOD1
+ci_spice_oceanpump_LOD2
+icon_poisoncloud
+cursor-drop-off
+cursor-abduct-off
+cursor_drop-stick
+cursor_drop-stone
+cursor-feed-baby
+cur-weapon-off
+cur-weapon-on
+cursor-drop-on
+cursor-abduct-norm
+cursor-abduct-on
+Tp

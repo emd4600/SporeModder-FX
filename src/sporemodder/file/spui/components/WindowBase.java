@@ -272,4 +272,12 @@ public class WindowBase extends SpuiElement implements IWindow {
 	public void setState(int state) {
 		this.stateFlags = state;
 	}
+
+	public String getControlID() {
+		return controlID;
+	}
+
+	public String getCommandID() {
+		return commandID;
+	}
 }

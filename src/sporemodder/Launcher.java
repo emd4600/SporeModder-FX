@@ -2,6 +2,7 @@ package sporemodder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import sporemodder.file.dbpf.DBPFUnpackingTask;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.util.NameRegistry;
 
 public class Launcher {
@@ -57,7 +59,8 @@ public class Launcher {
 					DecodeCommand.class,
 					EncodeCommand.class,
 					UnpackCommand.class,
-					PackCommand.class
+					PackCommand.class,
+					FindSpuiForControlId.class
 			})
 	public static class SMFXCommand implements Callable<Integer> {
 
@@ -383,6 +386,21 @@ public class Launcher {
 			
 			return 0;
 		}
-		
+	}
+
+	@Command(name = "find-spui", description = "Find all SPUIs that have a specific control ID", mixinStandardHelpOptions = true)
+	public static class FindSpuiForControlId implements Callable<Integer> {
+		@Parameters(index = "0", description = "The program will look all .spui files in this folder and subfolders")
+		private File inputFolder;
+
+		@Parameters(index = "1", description = "The control ID to find in SPUIs", converter = IdConverter.class)
+		private int controlId;
+
+		@Override
+		public Integer call() throws Exception {
+			SporeUserInterface.findSpuisWithControlId(inputFolder, controlId, true);
+
+			return 0;
+		}
 	}
 }

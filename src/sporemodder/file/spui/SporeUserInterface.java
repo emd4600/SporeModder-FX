@@ -19,7 +19,10 @@
 package sporemodder.file.spui;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
@@ -38,6 +43,7 @@ import sporemodder.file.ResourceKey;
 import sporemodder.file.spui.components.DirectImage;
 import sporemodder.file.spui.components.ISporeImage;
 import sporemodder.file.spui.components.IWindow;
+import sporemodder.file.spui.components.WindowBase;
 import sporemodder.file.spui.uidesigner.DesignerClass;
 import sporemodder.file.spui.uidesigner.SpuiDesigner;
 import sporemodder.view.editors.SpuiEditor;
@@ -414,6 +420,33 @@ public class SporeUserInterface {
 		SpuiElement element = clazz.createInstance();
 		clazz.fillDefaults(editor, element);
 		return element;
+	}
+
+	public static List<Path> findSpuisWithControlId(File folder, int controlId, boolean print) throws IOException {
+		try (Stream<Path> pathStream = Files.walk(folder.toPath())) {
+			return pathStream.filter(path -> path.getFileName().toString().endsWith(".spui"))
+				.filter(path -> {
+					try (FileStream stream = new FileStream(path.toFile(), "r")) {
+						SporeUserInterface spui = new SporeUserInterface();
+						spui.read(stream);
+						boolean anyMatch = spui.getElements().stream().anyMatch(element -> {
+							if (element instanceof WindowBase) {
+								String controlIdStr = ((WindowBase)element).getControlID();
+								return controlIdStr != null && HashManager.get().getFileHash(controlIdStr) == controlId;
+							} else {
+								return false;
+							}
+						});
+						if (print && anyMatch) {
+							System.out.println(path);
+						}
+						return anyMatch;
+					} catch (IOException e) {
+						return false;
+					}
+				})
+				.collect(Collectors.toList());
+		}
 	}
 	
 	public static void main(String[] args) throws IOException

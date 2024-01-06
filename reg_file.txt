@@ -106504,3 +106504,5 @@ cursor-drop-on
 cursor-abduct-norm
 cursor-abduct-on
 Tp
+ep1_terrain_intensityhandle
+ep1_terrain_scalehandle

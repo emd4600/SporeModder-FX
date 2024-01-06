@@ -65,6 +65,7 @@ public class DBPFPackingTask extends Task<Void> {
 	
 	private boolean noJavaFX = false;
 	private Consumer<Double> noJavaFXProgressListener;
+	private int compressThreshold = -1;
 	
 	public DBPFPackingTask(Project project, boolean storeDebugInformation) {
 		this.inputFolder = project.getFolder();
@@ -298,6 +299,7 @@ public class DBPFPackingTask extends Task<Void> {
 			}
 			
 			this.packer = packer;
+			packer.setCompressThreshold(compressThreshold);
 			
 			pack();
 		}
@@ -377,6 +379,22 @@ public class DBPFPackingTask extends Task<Void> {
 			
 			packer.addFile(item);
 		}
+	}
+
+	/**
+	 * If a file size is bigger than this threshold, the file data will be compressed.
+	 * @param compressThreshold
+	 */
+	public void setCompressThreshold(int compressThreshold) {
+		this.compressThreshold = compressThreshold;
+	}
+
+	/**
+	 * If a file size is bigger than this threshold, the file data will be compressed.
+	 * @return
+	 */
+	public int getCompressThreshold() {
+		return compressThreshold;
 	}
 
 }

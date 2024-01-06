@@ -364,9 +364,12 @@ public class Launcher {
 
 		@Parameters(index = "0", description = "The input folder to pack.")
 		private File input;
-		
+
 		@Parameters(index = "1", description = "The output DBPF file to generate.")
 		private File output;
+
+		@Option(names = {"--compress"}, description = "[Experimental] Compress files bigger than N bytes")
+		private int compressThreshold = -1;
 		
 		@Override
 		public Integer call() throws Exception {
@@ -375,6 +378,7 @@ public class Launcher {
 			
 			startTime = System.currentTimeMillis();
 			final DBPFPackingTask task = new DBPFPackingTask(input, output);
+			task.setCompressThreshold(compressThreshold);
 			task.setNoJavaFX();
 			task.setNoJavaFXProgressListener(PROGRESS_BAR_LISTENER);
 			

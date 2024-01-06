@@ -18,18 +18,37 @@
 ****************************************************************************/
 package sporemodder.file.simulator;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.HashManager;
 import sporemodder.file.simulator.attributes.SimulatorAttribute;
+import sporemodder.util.IntPair;
+
+import javax.management.Attribute;
 
 public abstract class SimulatorClass {
 
+	public static int GENERIC_SERIALIZER_ID = 0x1A80D26;
+
+	public class AttributeHeader {
+		public int id;
+		public int size;
+
+		public AttributeHeader(int id, int size) {
+			this.id = id;
+			this.size = size;
+		}
+	}
+
 	protected final LinkedHashMap<String, SimulatorAttribute> attributes = new LinkedHashMap<String, SimulatorAttribute>();
 	protected int classID;
+	protected int classSize;
 	
 	public SimulatorClass(int classID) {
 		this.classID = classID;
@@ -41,6 +60,9 @@ public abstract class SimulatorClass {
 	 */
 	public int getClassID() {
 		return classID;
+	}
+	public int getClassSize() {
+		return classSize;
 	}
 	
 	/**
@@ -60,33 +82,31 @@ public abstract class SimulatorClass {
 		
 		return size;
 	}
+
+	public List<AttributeHeader> readHeader(StreamReader stream) throws IOException {
+		classID = stream.readInt();
+		classSize = stream.readInt();
+
+		int count = stream.readInt();
+		List<AttributeHeader> headers = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			headers.add(new AttributeHeader(stream.readInt(), stream.readInt()));
+		}
+		return headers;
+	}
 	
 	public void read(StreamReader stream) throws Exception {
-		
-		classID = stream.readInt();
-		
-		// size
-		stream.readInt();
-		
-		int count = stream.readInt();
-		int[] ids = new int[count];
-		int[] sizes = new int[count];
-		
+		List<AttributeHeader> headers = readHeader(stream);
+
 		HashManager hasher = HashManager.get();
-		
-		for (int i = 0; i < count; i++) {
-			ids[i] = stream.readInt();
-			sizes[i] = stream.readInt();
-		}
-		
-		for (int i = 0; i < count; i++) {
-			String name = hasher.getSimulatorName(ids[i]);
-			
-			SimulatorAttribute attribute = createAttribute(name);
-			attribute.read(stream, sizes[i]);
-			
-			setAttribute(name, attribute);
-		}
+        for (AttributeHeader header : headers) {
+            String name = hasher.getSimulatorName(header.id);
+
+            SimulatorAttribute attribute = createAttribute(name);
+            attribute.read(stream, header.size);
+
+            setAttribute(name, attribute);
+        }
 	}
 	
 	public void write(StreamWriter stream) throws Exception {
@@ -168,4 +188,49 @@ public abstract class SimulatorClass {
 //		default:	return null;
 //		}
 //	}
+
+	public static class UnknownSimulatorClass extends SimulatorClass {
+		public UnknownSimulatorClass(int classID) {
+			super(classID);
+		}
+
+		@Override
+		public SimulatorAttribute createAttribute(String name) {
+			return null;
+		}
+	}
+
+	public static void scanClasses(StreamReader stream) throws IOException {
+		while (stream.getFilePointer() + 4 < stream.length()) {
+			int testValue = stream.readInt();
+			if (testValue == GENERIC_SERIALIZER_ID) {
+				stream.seek(stream.getFilePointer() - 4);
+				SimulatorClass simulatorClass = new UnknownSimulatorClass(GENERIC_SERIALIZER_ID);
+				long classOffset = stream.getFilePointer();
+				List<AttributeHeader> headers = simulatorClass.readHeader(stream);
+				long offset = stream.getFilePointer();
+
+				System.out.println("Found class at offset " + classOffset + ", attributes:");
+				for (AttributeHeader header : headers) {
+					StringBuilder sb = new StringBuilder();
+					sb.append("  ");
+					sb.append(HashManager.get().hexToString(header.id));
+					String attributeName = HashManager.get().getSimulatorName(header.id);
+					if (attributeName != null) {
+						sb.append(" ");
+						sb.append(attributeName);
+					}
+					sb.append(": offset = ");
+					sb.append(offset);
+					sb.append("    size = ");
+					sb.append(header.size);
+					System.out.println(sb.toString());
+
+					offset += header.size;
+				}
+				System.out.println();
+				stream.seek(offset);
+			}
+		}
+	}
 }

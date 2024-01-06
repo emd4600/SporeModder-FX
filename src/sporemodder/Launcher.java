@@ -2,6 +2,7 @@ package sporemodder;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +20,10 @@ import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFPackingTask;
 import sporemodder.file.dbpf.DBPFUnpackingTask;
 import sporemodder.file.filestructures.FileStream;
+import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.StreamReader;
 import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.simulator.SimulatorClass;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.util.NameRegistry;
 
@@ -60,7 +63,8 @@ public class Launcher {
 					EncodeCommand.class,
 					UnpackCommand.class,
 					PackCommand.class,
-					FindSpuiForControlId.class
+					FindSpuiForControlIdCommand.class,
+					ScanSimulatorCommand.class
 			})
 	public static class SMFXCommand implements Callable<Integer> {
 
@@ -393,7 +397,7 @@ public class Launcher {
 	}
 
 	@Command(name = "find-spui", description = "Find all SPUIs that have a specific control ID", mixinStandardHelpOptions = true)
-	public static class FindSpuiForControlId implements Callable<Integer> {
+	public static class FindSpuiForControlIdCommand implements Callable<Integer> {
 		@Parameters(index = "0", description = "The program will look all .spui files in this folder and subfolders")
 		private File inputFolder;
 
@@ -403,6 +407,21 @@ public class Launcher {
 		@Override
 		public Integer call() throws Exception {
 			SporeUserInterface.findSpuisWithControlId(inputFolder, controlId, true);
+
+			return 0;
+		}
+	}
+
+	@Command(name = "scan-simulator", description = "Scan file offsets of attributes in simulator data files", mixinStandardHelpOptions = true)
+	public static class ScanSimulatorCommand implements Callable<Integer> {
+		@Parameters(index = "0", description = "Input simulator data file")
+		private File inputFile;
+
+		@Override
+		public Integer call() throws Exception {
+			try (StreamReader stream = new MemoryStream(Files.readAllBytes(inputFile.toPath()))) {
+				SimulatorClass.scanClasses(stream);
+			}
 
 			return 0;
 		}

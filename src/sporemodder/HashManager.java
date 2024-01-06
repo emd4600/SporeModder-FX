@@ -95,6 +95,7 @@ public class HashManager extends AbstractManager {
 		
 		UIManager.get().tryAction(() -> {
 			simulatorRegistry.read(PathManager.get().getProgramFile(simulatorRegistry.getFileName()));
+			simulatorRegistry.read(PathManager.get().getProgramFile("reg_simulator_stub.txt"));
 		}, "The simulator attributes registry (reg_simulator.txt) is corrupt or missing.");
 		
 		CnvUnit.loadNameRegistry();

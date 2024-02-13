@@ -80,6 +80,7 @@ public class HashManager extends AbstractManager {
 		decimalSymbols.setDecimalSeparator('.');
 		decimalFormat = "#.#######";
 		defaultDecimalFormat = new DecimalFormat(decimalFormat, decimalSymbols);
+		defaultDecimalFormat.setNegativePrefix("-");
 		
 		UIManager.get().tryAction(() -> {
 			fileRegistry.read(PathManager.get().getProgramFile(fileRegistry.getFileName()));

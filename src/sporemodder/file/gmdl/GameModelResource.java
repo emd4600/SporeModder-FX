@@ -343,11 +343,11 @@ public class GameModelResource {
 			buffer.read(stream, vertexDescriptors);
 			vertexBuffers.add(buffer);
 		}
-		
+
 		for (int i = 0; i < meshCount; i++) {
 			Mesh mesh = new Mesh();
-			mesh.vertexBuffer = vertexBuffers.get(stream.readLEInt());
 			mesh.indexBuffer = indexBuffers.get(stream.readLEInt());
+			mesh.vertexBuffer = vertexBuffers.get(stream.readLEInt());
 			meshes.add(mesh);
 		}
 		

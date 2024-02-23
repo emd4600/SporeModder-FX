@@ -93341,7 +93341,6 @@ TabBracket2L
 CityLog-Popup
 SmAvatar
 SimCityWorldLogo
-LeaderboardContent
 ChallengesTab
 FreeTrial-FEUnlockMessage
 Button_Orange_Normal
@@ -93406,7 +93405,6 @@ NewCity
 MyGamesPanel
 mood-marker
 MissingAvatar
-MiniRegionInfoTile
 Icon-Sandbox-On
 Icon-Sandbox-Off
 MessageEnter_Selected
@@ -93447,7 +93445,6 @@ LeaderboardRegionEntry
 LeaderboardPaginator
 LeaderboardContent
 LeaderboardCityEntry
-Leaderboard-Button
 Launcher3D
 WaitingRoom
 sick
@@ -93460,7 +93457,6 @@ front_end_hub
 EcoGame
 EAOrangeLogoSM
 dots1
-disaster
 datagrid
 CurtainScreen
 currency-happiness
@@ -95527,7 +95523,6 @@ warp_impact_effect
 spacetime_haste_target_effect
 el_firetempest_active_pet_enrage_glow
 burrower_burrowIn
-fadeaway_spacetime
 puller_melee_fast_hit
 el_lightning_tempest_passive_level1
 el_lightning_tempest_passive_level2
@@ -98135,7 +98130,6 @@ common_death_critical_spacetime_effect_necro
 common_death_critical_necro_effect_spacetime_noblood
 common_death_critical_necro_effect_necro_noblood
 common_death_critical_necro_effect_bio_noblood
-common_death_critical_necro_effect_spacetime
 common_death_critical_necro_effect_necro
 common_death_critical_necro_effect_bio
 common_death_critical_bio_effect_spacetime_noblood
@@ -98329,7 +98323,6 @@ character_exit_spacetime
 character_exit_cyber
 character_exit_necro
 character_filter_entry_plasma_flame
-character_filter_effects
 ChargedFist
 ChronoResistant
 CitadelBasicGunner
@@ -98658,7 +98651,6 @@ SpawnPoint_DirectorHorde
 SpawnPoint_HordeTrigger
 TeleporterSpawnPoint
 HordeGateTeleporter
-cryos_1_AI_Horde_1
 cryos_1_AI_Spike_1a
 cryos_1_AI_Spike_1b
 cryos_1_AI_Spike_1c
@@ -99194,7 +99186,6 @@ terrain_control_2
 terrain_control_3
 terrain_control_4
 terrain_control_5
-AboveColorRamp
 terrain_height_0
 terrain_height_1
 terrain_height_2
@@ -99393,7 +99384,6 @@ kc-croissanthighlands
 kc-silky1
 kc-silky2
 DebugDraw3DNoDepth
-GenericStatic
 BadgeUnlockToolReward
 ufo_config~	0x40650100
 editor_asset~	0x40602000
@@ -99812,11 +99802,9 @@ SpaceGame_CargoItems
 EP1-FirstClickAudioCategory
 EP1-FirstClickPartialCategory
 EP1-FirstClickAllCastCategory
-EP1-DragGoal
 SG_ufo_icecapseeder_hitWater
 Uncommon
 SuperRare
-Common
 SG_ufo_icecapseeder_hitCombatant
 SG_ufo_icecapseeder_hitGround
 SG_ufo_icecapseeder_muzzle
@@ -100178,7 +100166,6 @@ cursor-symmetry-off
 cip-icon-happy-sad-strip
 civ-vehicle-purpose-strip
 relation-scale
-sp_circleislands
 sp_islands_multi_soft
 sp_islands_multi_square
 sp_mesavalleys
@@ -100437,7 +100424,6 @@ bangtime
 shuffler_groups
 drum_looper
 ecomelody
-loadstore
 DemoModeServer
 GalaxyMap
 HUB_Abilities
@@ -105296,7 +105282,6 @@ loop-timer
 SG_meaning_of_life_journey
 SG_meaning_of_life_reverse
 master_gold
-master_platinum
 nearencounter_tin
 defender_gold
 missionista_copper
@@ -106492,20 +106477,10 @@ DefomrAxisUp
 ci_spice_oceanpump_LOD1
 ci_spice_oceanpump_LOD2
 icon_poisoncloud
-cursor-drop-off
-cursor-abduct-off
-cursor_drop-stick
-cursor_drop-stone
-cursor-feed-baby
-cur-weapon-off
-cur-weapon-on
-cursor-drop-on
 cursor-abduct-norm
-cursor-abduct-on
 Tp
 ep1_terrain_intensityhandle
 ep1_terrain_scalehandle
-tweak_top_bottom
 EDT_building_doors-on-act
 EDT_building_details-off
 EDT_building_details-act
@@ -106740,7 +106715,6 @@ bend_vert
 tweak_sideways
 tweak_top_bottom
 scale_horiz
-Stretch
 cursor_unknown
 EDT_creature_cell-hitmask
 EDT_creature_cell-off
@@ -106941,12 +106915,6 @@ btn_space04
 btn_space05
 btn_space06
 
-palette_editorTextureDiffuse~	0x406B2900
-palette_editorTextureNormal~	0x406B2901
-cell_editorTextureDiffuse~	0x40612900
-cell_editorTextureNormal~	0x40612901
-creature_editorTextureDiffuse~	0x40622900
-creature_editorTextureNormal~	0x40622901
 creature+babyModels_LOD2~	0x41626202
 creature+babyModels_LOD3~	0x41626203
 planetImpostor~	0x40842800
@@ -106954,23 +106922,16 @@ planetImpostorModels_atmosphere~	0x47842800
 planetImpostor_TextureScatter~	0x44842800
 planetImpostor_TextureNormal~	0x45842800
 planetImpostor_TextureAtmosphere~	0x46842800
-building_editorTextureDiffuse~	0x40632900
 building_editorTextureScatter~	0x40632901
 building_editorTextureNormal~	0x40632902
 vehicleModels_UserColor~	0x40647100
-vehicle_editorTextureDiffuse~	0x40642900
 vehicle_editorTextureScatter~	0x40642901
 vehicle_editorTextureNormal~	0x40642902
 ufoModels_UserColor~	0x40657100
-ufo_editorTextureDiffuse~	0x40652900
 ufo_editorTextureScatter~	0x40652901
 ufo_editorTextureNormal~	0x40652902
-flora_editorTextureDiffuse~	0x40662900
-flora_editorTextureNormal~	0x40662901
-flora_editorModelSpritesTop~	0x40662800
 flora_editorModelSpritesSide~	0x40662801
 flora_editorModelSpritesTopNormal~	0x40662c00
-flora_editorModelSpritesSideNormal~	0x40662c01
 
 be_effect_details_light_16b
 be_effect_details_light_16a
@@ -107132,7 +107093,6 @@ EDT-dropper-over
 EDT-dropper-on
 EDT-dropper-off
 EDT-planner
-ce_skinpaint_coat_elemental_fire
 coral_largerock1-physics
 coral_largerock2-physics
 coral_massiverock1-physics
@@ -107156,8 +107116,6 @@ organic_smallRock2-physics
 goo_largerock1-hull
 trg_superweapons_trap_part1
 algae_cell
-ci_spice_oceanpump_LOD1
-ci_spice_oceanpump_LOD2
 SpaceContribBadgeItem
 SG_terraintool_snoblower
 SG_terraintool_snoblower_LOD1

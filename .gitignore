@@ -70,3 +70,4 @@ config.properties
 /shade/
 SporeModderFX.jar
 desktop.ini
+dependency-reduced-pom.xml

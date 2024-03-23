@@ -5860,3 +5860,7 @@ sparsecurve
 loopplaylist
 prefade
 numchannels
+numNouns
+forestNouns
+speciesFiles
+parentAudio	0x5F6317D5

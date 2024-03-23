@@ -125,13 +125,18 @@ public class PropertyList {
 		orderedProperties = new LinkedHashMap<String, BaseProperty>();
 		Map<String, BaseProperty> names = new TreeMap<String, BaseProperty>();  // alphabetical order
 		Map<String, BaseProperty> hashes = new TreeMap<String, BaseProperty>();
-		BaseProperty description = null;
-		BaseProperty parent = null;
+		
+		BaseProperty propertyParent = null;
+		BaseProperty propertyParentAudio = null;
+		BaseProperty propertyName = null;
+		BaseProperty propertyDescription = null;
 		
 		for (Map.Entry<Integer, BaseProperty> entry : properties.entrySet()) {
 			int key = entry.getKey();
-			if (key == 0x00B2CCCA) description = entry.getValue();
-			else if (key == 0x00B2CCCB) parent = entry.getValue();
+			if (key == 0x00B2CCCA) propertyDescription = entry.getValue();
+			else if (key == 0x00B2CCCB) propertyParent = entry.getValue();
+			else if (key == 0x2F8B3BF4) propertyName = entry.getValue(); // FNV132 hash of "name"
+			else if (key == 0x5F6317D5) propertyParentAudio = entry.getValue(); // FNV132 hash of "parent"
 			else {
 				String name = hasher.getPropName(key);
 				if (name.startsWith("0x")) hashes.put(name, entry.getValue());
@@ -139,8 +144,10 @@ public class PropertyList {
 			}
 		}
 		
-		if (parent != null) orderedProperties.put(hasher.getPropName(0x00B2CCCB), parent);
-		if (description != null) orderedProperties.put(hasher.getPropName(0x00B2CCCA), description);
+		if (propertyParent != null) orderedProperties.put(hasher.getPropName(0x00B2CCCB), propertyParent);
+		if (propertyParentAudio != null) orderedProperties.put(hasher.getPropName(0x5F6317D5), propertyParentAudio);
+		if (propertyName != null) orderedProperties.put(hasher.getPropName(0x2F8B3BF4), propertyName);
+		if (propertyDescription != null) orderedProperties.put(hasher.getPropName(0x00B2CCCA), propertyDescription);
 		orderedProperties.putAll(names);
 		orderedProperties.putAll(hashes);
 		

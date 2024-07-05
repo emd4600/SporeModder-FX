@@ -101,6 +101,7 @@ bmdl	0x72047de2
 lua	0x3681d755
 bitImage	0x3e421e9
 8bitImage	0x3e421ec
+16bitImage	0x3e421f0
 32bitImage	0x3e421ed
 48bitImage	0x3e421ef
 blockdata	0x5caa5e28

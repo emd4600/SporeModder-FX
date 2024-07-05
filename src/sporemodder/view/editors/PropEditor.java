@@ -28,12 +28,15 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
+import org.fxmisc.richtext.NavigationActions;
 import sporemodder.DocumentationManager;
 import sporemodder.HashManager;
 import sporemodder.file.TextUtils;
 import sporemodder.file.argscript.ArgScriptStream.HyperlinkData;
 import sporemodder.file.prop.PropertyList;
 import sporemodder.view.UserInterface;
+
+import java.util.Set;
 
 public class PropEditor extends ArgScriptEditor<PropertyList> {
 	
@@ -107,6 +110,18 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 				hideAutocomplete();
 			}
 		});
+		autocompleteList.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+			Set<KeyCode> discardedKeys = Set.of(KeyCode.SPACE, KeyCode.UP, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.DOWN);
+			if (discardedKeys.contains(event.getCode())) {
+				event.consume();
+
+				if (event.getCode() == KeyCode.LEFT) {
+					getCodeArea().moveTo(getCodeArea().getCaretPosition() - 1);
+				} else if (event.getCode() == KeyCode.RIGHT) {
+					getCodeArea().moveTo(getCodeArea().getCaretPosition() + 1);
+				}
+			}
+		});
 		
 		final CodeArea codeArea = getCodeArea();
 		
@@ -116,7 +131,7 @@ public class PropEditor extends ArgScriptEditor<PropertyList> {
 		
 		codeArea.caretPositionProperty().addListener((obs, oldValue, newValue) -> {
 			// The caret also moves when typing, but we don't want to close the popup there
-			if (caretMouseEvent && autocompletePopup.isShowing()) {
+			if (autocompletePopup.isShowing()) {
 				if (newValue > currentWordEnd || newValue < currentWordStart) {
 					hideAutocomplete();
 				}

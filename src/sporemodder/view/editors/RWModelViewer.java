@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import javafx.scene.control.*;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.StreamReader;
@@ -39,13 +40,6 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -72,23 +66,9 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.file.BoundingBox;
 import sporemodder.file.dds.DDSTexture;
+import sporemodder.file.rw4.*;
 import sporemodder.file.rw4.Direct3DEnums.RWDECLUSAGE;
-import sporemodder.file.rw4.MaterialStateCompiler;
-import sporemodder.file.rw4.RWBBox;
-import sporemodder.file.rw4.RWBaseResource;
-import sporemodder.file.rw4.RWBlendShapeBuffer;
-import sporemodder.file.rw4.RWCompiledState;
 import sporemodder.file.rw4.RWHeader.RenderWareType;
-import sporemodder.file.rw4.RWIndexBuffer;
-import sporemodder.file.rw4.RWMesh;
-import sporemodder.file.rw4.RWMeshCompiledStateLink;
-import sporemodder.file.rw4.RWMorphHandle;
-import sporemodder.file.rw4.RWObject;
-import sporemodder.file.rw4.RWRaster;
-import sporemodder.file.rw4.RWTextureOverride;
-import sporemodder.file.rw4.RWVertexBuffer;
-import sporemodder.file.rw4.RWVertexElement;
-import sporemodder.file.rw4.RenderWare;
 import sporemodder.file.shaders.MaterialStateLink;
 import sporemodder.util.ProjectItem;
 import sporemodder.util.Vector3;
@@ -213,7 +193,8 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	private final ScrollPane propertiesContainer = new ScrollPane();
 	private final TreeView<String> treeView = new TreeView<>();
 	private final CheckBox cbIgnoreAlpha = new CheckBox("Ignore alpha");
-	
+
+	private final TreeItem<String> tiAnimations = new TreeItem<String>("Animations");
 	private final TreeItem<String> tiMorphs = new TreeItem<String>("Morph Handles");
 	private final TreeItem<String> tiTextures = new TreeItem<String>("Textures");
 	private final TreeItem<String> tiExternalTextures = new TreeItem<String>("External Textures");
@@ -242,8 +223,9 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
     	treeView.setRoot(rootItem);
     	treeView.setShowRoot(false);
     	treeView.setMaxHeight(TREE_VIEW_HEIGHT);
-    	
-    	rootItem.getChildren().add(tiMorphs);
+
+    	rootItem.getChildren().add(tiAnimations);
+		rootItem.getChildren().add(tiMorphs);
     	rootItem.getChildren().add(tiTextures);
     	rootItem.getChildren().add(tiExternalTextures);
     	rootItem.getChildren().add(tiCompiledStates);
@@ -734,6 +716,12 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 				itemsMap.put(name, item);
 				tiMorphs.getChildren().add(item);
 			}
+
+			List<RWAnimations> animations = renderWare.getObjects(RWAnimations.class);
+			if (!animations.isEmpty()) {
+				nameMap.put("Animations", animations.get(0));
+				itemsMap.put("Animations", tiAnimations);
+			}
 		}
 	}
 	
@@ -802,7 +790,7 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 	
 	private void fillPropertiesPane(TreeItem<String> item, String selectedName) {
 		RWObject object = nameMap.get(selectedName);
-		
+
 		if (object instanceof RWMorphHandle) {
 			fillMorphPane(item, selectedName, (RWMorphHandle) object);
 			return;
@@ -821,8 +809,24 @@ public class RWModelViewer extends AbstractEditableEditor implements ItemEditor,
 			}, "Error with compiled state.");
 			// We don't return because we want to empty the properties container
 		}
+		else if (object instanceof RWAnimations) {
+			fillAnimationsPane(item, (RWAnimations) object);
+			return;
+		}
 		
 		propertiesContainer.setContent(null);
+	}
+
+	private void fillAnimationsPane(TreeItem<String> item, RWAnimations animations) {
+		PropertyPane pane = new PropertyPane();
+
+		for (int animationID : animations.animations.keySet()) {
+			Label label = new Label(HashManager.get().getFileName(animationID));
+			label.getStyleClass().add("inspector-value-label");
+			pane.add(label);
+		}
+
+		propertiesContainer.setContent(pane.getNode());
 	}
 	
 	private void fillExternalTexturePane(TreeItem<String> item, String name, RWTextureOverride texture) {

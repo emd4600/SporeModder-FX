@@ -1432,7 +1432,7 @@ public class ProjectManager extends AbstractManager {
 		if (failedPackages.isEmpty()) {
 			infoLabel.setText("Finished! All presets were unpacked successfully. Below you can check a list of all the packages they include:");
 		} else {
-			infoLabel.setText("Finished! Some packages could not be unpaked; below there is a list with the packages the presets contains, the ones in red were missing:");
+			infoLabel.setText("Finished! Some packages could not be unpacked; below there is a list with the packages the presets contains, the ones in red were missing:");
 		}
 		
 		boolean openedByDefault = true;

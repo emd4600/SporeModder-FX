@@ -111,6 +111,8 @@ public class CompiledShaderViewer implements ItemEditor {
 			catch (InterruptedException e) {
 				throw new IOException(e);
 			}
+		} else {
+			shaderText = "FXC.exe not found, shader could not be decompiled. Install FXC (Windows Kit) to view the shader.";
 		}
 		
 		codeArea.replaceText(shaderText);

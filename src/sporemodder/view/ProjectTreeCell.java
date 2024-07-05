@@ -141,7 +141,6 @@ public class ProjectTreeCell extends TreeCell<ProjectItem> {
 			hasNonConvertibleExtension(item, ".tsla_t") ||
 			hasNonConvertibleExtension(item, ".pctp_t") ||
 			hasNonConvertibleExtension(item, ".cnv_t") ||
-			hasNonConvertibleExtension(item, ".smt_t") ||
 			hasNonConvertibleExtension(item, ".animation_t") ||
 			hasNonConvertibleExtension(item, ".gait_t") ||
 			hasNonConvertibleExtension(item, ".globals_t") ||

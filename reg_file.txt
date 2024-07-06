@@ -107755,3 +107755,16 @@ Explosion_2x2
 lightningAnims_4x4
 lightningAnims_4x2
 edit_camera
+chord-generator-help
+shuffle2
+shuffle3
+chordcoll
+scaletomidi2
+chord-arp
+patplayer5-cp
+patplayer5-cp2
+counter2-help
+masterScript
+shitaake_objectdecal
+crableg_objectdecal
+coral_objectdecal

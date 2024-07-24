@@ -5913,3 +5913,5 @@ struct_goldy1
 struct_goldy2
 struct_goldy3
 struct_boosterMed
+struct_chomperRock
+markForests

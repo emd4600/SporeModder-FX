@@ -88237,6 +88237,7 @@ bubble_yoyo
 bubble_shaker
 bubble_horn
 bubble_flute
+tribe_chat_icon_asterisk
 tribe_chat_icon_axe
 tribe_chat_icon_ball
 tribe_chat_icon_beaker
@@ -88270,6 +88271,7 @@ tribe_chat_icon_yoyo
 tribe_chat_icon_shaker
 tribe_chat_icon_horn
 tribe_chat_icon_flute
+tribe_chat_icon_plumbbob
 thought_death
 thought_question
 thought_foodomnivore

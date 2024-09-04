@@ -5869,4 +5869,5 @@ FoodBundleScale	0x9AD14166
 creatureBrainLevelScales	0xB561B9EB
 AllowCreaturePickup	0x39B674A2
 AssociatedGameNounIDs	0xDB9BFC2C
+tribeCreatureScaleMultiplier	0xF463852C
 

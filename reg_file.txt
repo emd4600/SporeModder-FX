@@ -107743,3 +107743,5 @@ eEp1_vomit_epic_v1ROXcr02
 eEp1_vomit_epic_v2ROXcr
 eEp1_vomit_epic_v2ROXcr01
 eEp1_vomit_epic_v2ROXcr02
+
+noun_placement_markers~	0x0302A1C9

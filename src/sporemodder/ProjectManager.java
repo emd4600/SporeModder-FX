@@ -20,11 +20,9 @@
 package sporemodder;
 
 import java.awt.Desktop;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -74,22 +72,10 @@ import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFUnpackingTask;
 import sporemodder.file.prop.PropertyList;
 import sporemodder.file.prop.XmlPropParser;
-import sporemodder.util.DefaultProjectItemFactory;
-import sporemodder.util.ImportProjectTask;
-import sporemodder.util.NameRegistry;
-import sporemodder.util.OmitProjectItemFactory;
-import sporemodder.util.Project;
-import sporemodder.util.ProjectItem;
-import sporemodder.util.ProjectItemFactory;
-import sporemodder.util.ProjectNamesItemFactory;
-import sporemodder.util.ProjectPreset;
-import sporemodder.util.ProjectSearcher;
+import sporemodder.util.*;
 import sporemodder.view.ProjectTreeItem;
 import sporemodder.view.ProjectTreeUI;
-import sporemodder.view.dialogs.PackProgressUI;
-import sporemodder.view.dialogs.ProgressDialogUI;
-import sporemodder.view.dialogs.ProjectSettingsUI;
-import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.dialogs.*;
 import sporemodder.view.editors.AbstractEditableEditor;
 import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
@@ -123,6 +109,8 @@ public class ProjectManager extends AbstractManager {
 	/** A map that assigns the project name (in lowercase) to the project itself. */
 	private final Map<String, Project> projects = new TreeMap<>();
 	private Project activeProject;
+
+	private final ModBundlesList modBundles = new ModBundlesList();
 	
 	/** Special items that are always displayed in the bottom part of the project tree. */
 	private final List<ProjectItem> specialItems = new ArrayList<>(); 
@@ -163,13 +151,13 @@ public class ProjectManager extends AbstractManager {
 		specialItems.add(new EffectEditorItem());
 		specialItems.add(new AnimEditorItem());
 		
-		// Load all projects
+		// Load all standalone projects
 		File projectsFolder = PathManager.get().getProjectsFolder();
 		if (!projectsFolder.exists()) projectsFolder.mkdir();
 		
 		File[] children = projectsFolder.listFiles();
-		
-		for (File folder : children) {
+        assert children != null;
+        for (File folder : children) {
 			Project project = null;
 			if (folder.isDirectory()) {
 				project = new Project(folder.getName());
@@ -199,6 +187,17 @@ public class ProjectManager extends AbstractManager {
 				projects.put(project.getName().toLowerCase(), project);
 			}
 		}
+
+		// Load all mod bundles
+		try {
+			modBundles.loadList();
+		} catch (IOException e) {
+			System.err.println("Failed to read mod bundles list: " + e.getMessage());
+		}
+		// Add projects inside mods to the projects list
+		modBundles.getAll().forEach(mod -> mod.getProjects().forEach(
+				proj -> projects.put(proj.getName().toLowerCase(), proj)
+		));
 		
 		// Load the project settings after all projects are loaded
 		for (Project project : projects.values()) {
@@ -794,6 +793,11 @@ public class ProjectManager extends AbstractManager {
 	public List<ProjectPreset> getPresets() {
 		return presets;
 	}
+
+	/** Returns a collection of mod bundles, ordered alphabetically */
+	public Collection<ModBundle> getModBundles() {
+		return modBundles.getAll();
+	}
 	
 	/**
 	 * Returns a certain number of the most recent projects; that is, the projects that were last set as active.
@@ -839,6 +843,10 @@ public class ProjectManager extends AbstractManager {
 	 */
 	public Project getProject(String name) {
 		return projects.get(name.toLowerCase());
+	}
+
+	public ModBundle getModBundle(String name) {
+		return modBundles.get(name.toLowerCase());
 	}
 	
 	public Project getOrCreateProject(String name) {
@@ -974,7 +982,7 @@ public class ProjectManager extends AbstractManager {
 			}
 		});
 		
-		loadItemFolder(activeProject, activeProject.getSources(), rootItem);
+		loadItemFolder(activeProject, activeProject.getReferences(), rootItem);
 		
 		treeView.setRoot(rootItem);
 		rootItem.setExpanded(true);
@@ -984,7 +992,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public void loadItemFolder(ProjectTreeItem parentItem) {
-		loadItemFolder(parentItem.getValue().getProject(), parentItem.getValue().getProject().getSources(), parentItem);
+		loadItemFolder(parentItem.getValue().getProject(), parentItem.getValue().getProject().getReferences(), parentItem);
 	}
 	
 	public void loadItemFolder(Project project, List<Project> sources, ProjectTreeItem parentItem) {
@@ -1154,6 +1162,10 @@ public class ProjectManager extends AbstractManager {
 	public boolean hasProject(String name) {
 		return projects.containsKey(name.toLowerCase());
 	}
+
+	public boolean hasModBundle(String name) {
+		return modBundles.exists(name);
+	}
 	
 	/**
 	 * Deletes this project, removing it from the list and deleting all its content.
@@ -1188,6 +1200,56 @@ public class ProjectManager extends AbstractManager {
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
+	}
+
+	/**
+	 * Creates the root folders of a mod bundle and adds it to the list.
+	 * Does not initialize the git repository.
+	 * @param modBundle
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void initializeModBundle(ModBundle modBundle) throws IOException {
+		// Ensure the folder does not exist yet
+		if (modBundle.getFolder().exists()) {
+			FileManager.get().deleteDirectory(modBundle.getFolder());
+		}
+
+		// Create root folder and 'src', 'data' folders
+		if (!modBundle.getFolder().mkdir()) {
+			throw new RuntimeException("Failed to create base folder for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+		if (!modBundle.getDataFolder().mkdir() || !modBundle.getSrcFolder().mkdir()) {
+			modBundle.getFolder().delete();
+			throw new RuntimeException("Failed to create 'data' and 'src' folders for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+
+		// Add .gitignore in the C++ 'src' folder
+		File srcGitignore = new File(modBundle.getSrcFolder(), ".gitignore");
+		try (InputStream inputStream = ProjectManager.class.getResourceAsStream("/sporemodder/resources/srcGitignore.txt")) {
+            assert inputStream != null;
+            Files.copy(inputStream, srcGitignore.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		// Write a default readme file
+		File readmeFile = new File(modBundle.getFolder(), "README.md");
+		Files.writeString(readmeFile.toPath(), "# " + modBundle.getName() + "\nYou can download the mod in the Releases page.");
+
+		// Add to mods list
+		modBundles.add(modBundle);
+	}
+
+	/**
+	 * Initialize git repository and commit initial files for a mod bundle
+	 * @param modBundle
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void initializeModBundleGit(ModBundle modBundle) throws IOException, InterruptedException {
+		Path gitDirectory = modBundle.getFolder().toPath();
+		GitManager.gitInit(gitDirectory);
+		GitManager.gitAddAll(gitDirectory);
+		GitManager.gitCommit(gitDirectory, "Initial commit");
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {
@@ -1298,7 +1360,7 @@ public class ProjectManager extends AbstractManager {
 	 */
 	public boolean hasSource(String relativePath) {
 		// This method is faster than getting the item and then checking
-		for (Project source : activeProject.getSources()) {
+		for (Project source : activeProject.getReferences()) {
 			if (new File(source.getFolder(), relativePath).exists()) return true;
 		}
 		return false;
@@ -1320,7 +1382,7 @@ public class ProjectManager extends AbstractManager {
 	}
  	
  	public File getSourceFile(String relativePath) {
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			File file = new File(source.getFolder(), relativePath);
  			if (file.exists()) return file;
  		}
@@ -1329,7 +1391,7 @@ public class ProjectManager extends AbstractManager {
  	
  	public Project getProjectByFile(String relativePath) {
  		if (getModFile(relativePath) != null) return activeProject;
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			if (new File(source.getFolder(), relativePath).exists()) return source;
  		}
  		return null;
@@ -1345,7 +1407,7 @@ public class ProjectManager extends AbstractManager {
  		File file = new File(activeProject.getFolder(), relativePath);
 		if (file.exists()) return file;
 
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			file = new File(source.getFolder(), relativePath);
  			if (file.exists()) return file;
  		}

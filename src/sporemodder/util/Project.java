@@ -95,13 +95,16 @@ public class Project {
 	
 	/** The name of the DBPF file generated when packing. */
 	private String packageName;
+
+	/** Parent mod bundle that contains this project, if any */
+	private ModBundle parentMod;
 	
 	/** The folder that contains the data of the project. */
 	private File folder;
 	/** External projects have a file in the Projects folder that links to the real path. */
 	private File externalLink;
 	
-	private final List<Project> sources = new ArrayList<>();
+	private final List<Project> references = new ArrayList<>();
 	
 	/** The object that holds the path to the folder where the project DBPF is packed. */
 	private final GamePathConfiguration packPath;
@@ -135,8 +138,8 @@ public class Project {
 		onNameChanged(null);
 	}
 	
-	public List<Project> getSources() {
-		return sources;
+	public List<Project> getReferences() {
+		return references;
 	}
 	
 	private String[] stringListSplit(String propertyName) {
@@ -168,7 +171,7 @@ public class Project {
 				String[] sourceNames = stringListSplit(PROPERTY_sources);
 				for (String str : sourceNames) {
 					Project p = projectManager.getProject(str);
-					if (p != null) sources.add(p);
+					if (p != null) references.add(p);
 				}
 				
 				String[] tabPaths = stringListSplit(PROPERTY_fixedTabPaths);
@@ -217,9 +220,9 @@ public class Project {
 			{
 				StringBuilder sb = new StringBuilder();
 				
-				for (int i = 0; i < sources.size(); i++) {
-					sb.append("\"" + sources.get(i).name + "\"");
-					if (i != sources.size()-1) sb.append("|");
+				for (int i = 0; i < references.size(); i++) {
+					sb.append("\"" + references.get(i).name + "\"");
+					if (i != references.size()-1) sb.append("|");
 				}
 				
 				settings.setProperty(PROPERTY_sources, sb.toString());
@@ -413,5 +416,13 @@ public class Project {
 	/** For projects that are not stored in the standard Projects folder, this sets the file that links to the real folder. */
 	public void setExternalLinkFile(File linkFile) {
 		this.externalLink = linkFile;
+	}
+
+	public ModBundle getParentMod() {
+		return parentMod;
+	}
+
+	public void setParentMod(ModBundle parentMod) {
+		this.parentMod = parentMod;
 	}
 }

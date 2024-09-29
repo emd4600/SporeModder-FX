@@ -100,7 +100,7 @@ public class ProjectSearcher {
 		
 		projectFolders.clear();
 		projectFolders.add(project.getFolder());
-		for (Project source : project.getSources()) {
+		for (Project source : project.getReferences()) {
 			projectFolders.add(source.getFolder());
 		}
 	}

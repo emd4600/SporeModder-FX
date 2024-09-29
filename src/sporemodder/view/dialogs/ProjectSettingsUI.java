@@ -190,7 +190,7 @@ public class ProjectSettingsUI implements Controller {
 			ProjectManager.get().rename(project, tfName.getText());
 		}
 		
-		List<Project> oldSources = project.getSources();
+		List<Project> oldSources = project.getReferences();
 		List<Project> newSources = sourcesList.getItems();
 		boolean sourcesChanged = oldSources.size() != newSources.size();
 		
@@ -206,8 +206,8 @@ public class ProjectSettingsUI implements Controller {
 		project.setPackageName(packageNameField.getText());
 		
 		if (sourcesChanged) {
-			project.getSources().clear();
-			project.getSources().addAll(sourcesList.getItems());
+			project.getReferences().clear();
+			project.getReferences().addAll(sourcesList.getItems());
 		}
 		
 		switch (packPathBox.getSelectionModel().getSelectedItem()) {
@@ -245,7 +245,7 @@ public class ProjectSettingsUI implements Controller {
 		
 		
 		tfName.setText(project.getName());
-		sourcesList.getItems().setAll(project.getSources());
+		sourcesList.getItems().setAll(project.getReferences());
 		
 		String packPath = project.getPackPath().getCustomPath();
 		if (packPath != null) {

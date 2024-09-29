@@ -199,7 +199,7 @@ public class ProjectItem {
 					path = projectParentPath.relativize(filePath);
 				}
 				else {
-					for (Project p : project.getSources()) {
+					for (Project p : project.getReferences()) {
 						projectParentPath = p.getFolder().getParentFile().toPath();
 						if (filePath.startsWith(projectParentPath)) {
 							path = projectParentPath.relativize(filePath);

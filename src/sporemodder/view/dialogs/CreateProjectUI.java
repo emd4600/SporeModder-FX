@@ -18,20 +18,27 @@
 ****************************************************************************/
 package sporemodder.view.dialogs;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.util.Duration;
+import sporemodder.FileManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
+import sporemodder.util.ModBundle;
 import sporemodder.util.Project;
 import sporemodder.util.ProjectPreset;
 import sporemodder.view.Controller;
@@ -44,73 +51,139 @@ public class CreateProjectUI implements Controller {
 	private Pane mainNode;
 	
 	@FXML
-	private Label alreadyExistsLabel;
+	private Label modAlreadyExistsLabel;
+	@FXML
+	private Label projectAlreadyExistsLabel;
 	
 	@FXML
-	private TextField nameField;
+	private TextField modNameField;
+	@FXML
+	private TextField projectNameField;
+
+	@FXML
+	private ChoiceBox<String> existingModChoiceBox;
+
+	@FXML
+	private Pane newModPane;
+	@FXML
+	private Pane existingModPane;
+
+	@FXML
+	private RadioButton newModButton;
+	@FXML
+	private RadioButton existingModButton;
+
+	@FXML
+	private ImageView referencesInfoImage;
 	
-	private final List<CheckBox> presetBoxes = new ArrayList<CheckBox>();
+	private final List<CheckBox> presetBoxes = new ArrayList<>();
+
+	private boolean projectNameEqualsModName = true;
 
 	@Override
 	public Pane getMainNode() {
 		return mainNode;
 	}
-	
+
+	public void createMod() throws IOException, InterruptedException {
+		ProjectManager projectManager = ProjectManager.get();
+
+		// Create base mod
+		ModBundle modBundle;
+		if (newModButton.isSelected()) {
+			modBundle = new ModBundle(modNameField.getText());
+			projectManager.initializeModBundle(modBundle);
+		} else {
+			modBundle = projectManager.getModBundle(existingModChoiceBox.getValue());
+			assert modBundle != null;
+		}
+
+		// Create package project
+		File projectFolder = new File(modBundle.getDataFolder(), projectNameField.getText());
+		Project project = new Project(projectNameField.getText(), projectFolder, null);
+		modBundle.addProject(project);
+
+		// Add project references
+		project.getReferences().addAll(presetBoxes.stream()
+				.filter(CheckBox::isSelected)
+				.map(box -> projectManager.getProject(((ProjectPreset)box.getUserData()).getName()))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList()));
+
+		// Initialize package project folder
+		projectManager.initializeProject(project);
+
+		// Initialize git repository
+		projectManager.initializeModBundleGit(modBundle);
+	}
+
 	public static void show() {
 		CreateProjectUI node = UIManager.get().loadUI("dialogs/CreateProjectUI");
-		node.dialog = new Dialog<ButtonType>();
+		node.dialog = new Dialog<>();
 		node.dialog.getDialogPane().setContent(node.getMainNode());
 		
 		node.dialog.setTitle("Create new project");
 		node.dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
 		
 		UIManager.get().showDialog(node.dialog).ifPresent(result -> {
-			if (result == ButtonType.OK) {
-				ProjectManager projectManager = ProjectManager.get();
-				
-				Project project = new Project(node.nameField.getText());
-				
-				List<ProjectPreset> presets = ProjectManager.get().getPresets();
-				for (int i = 0; i < node.presetBoxes.size(); i++) {
-					if (node.presetBoxes.get(i).isSelected()) {
-						Project source = projectManager.getProject(presets.get(i).getName());
-						if (source != null) {
-							project.getSources().add(source);
-						}
-					}
-				}
-				
-				if (UIManager.get().tryAction(() -> projectManager.initializeProject(project), 
+			if (result == ButtonType.OK && UIManager.get().tryAction(node::createMod,
 						"Cannot initialize project. Try manually deleting the project folder in SporeModder FX\\Projects\\"))
-				{
-					projectManager.setActive(project);
-				}
+			{
+				ProjectManager.get().setActive(ProjectManager.get().getProject(node.projectNameField.getText()));
 			}
 		});
+	}
+
+	private boolean isValid() {
+		if (projectNameField.getText().isEmpty() || ProjectManager.get().hasProject(projectNameField.getText())) {
+			return false;
+		}
+		if (newModButton.isSelected() && (modNameField.getText().isEmpty() || ProjectManager.get().hasModBundle(modNameField.getText()))) {
+			return false;
+		}
+		return true;
 	}
 
 	@FXML
 	private void initialize() {
 		// Set a default text
-		nameField.setText("Project " + (ProjectManager.get().getProjects().size() + 1));
-		
-		alreadyExistsLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
-		
-		nameField.textProperty().addListener((obs, oldValue, newValue) -> {
-			if (ProjectManager.get().hasProject(newValue)) {
-				alreadyExistsLabel.setVisible(true);
-				
-				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
+		projectNameField.setText("Project " + (ProjectManager.get().getProjects().size() + 1));
+		modNameField.setText(projectNameField.getText());
+
+		modAlreadyExistsLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+		projectAlreadyExistsLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+
+		modNameField.textProperty().addListener((obs, oldValue, newValue) -> {
+			// Replicate changes to project name
+			if (projectNameEqualsModName) {
+				projectNameField.setText(newValue);
 			}
-			else {
-				alreadyExistsLabel.setVisible(false);
-				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(false);
+			// Show alert if name collides
+			if (ProjectManager.get().hasModBundle(newValue)) {
+				modAlreadyExistsLabel.setVisible(true);
+				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
+			} else {
+				modAlreadyExistsLabel.setVisible(false);
+				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
 			}
 		});
-		
-		nameField.requestFocus();
-		nameField.selectAll();
-		nameField.requestFocus();
+		projectNameField.textProperty().addListener((obs, oldValue, newValue) -> {
+			// Check if mod name and project name have to be coordinated
+			// If the project name has changed to be different, don't coordinate anymore
+			projectNameEqualsModName = newValue.equals(modNameField.getText());
+			// Show alert if name collides
+			if (ProjectManager.get().hasProject(newValue)) {
+				projectAlreadyExistsLabel.setVisible(true);
+				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
+			} else {
+				projectAlreadyExistsLabel.setVisible(false);
+				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
+			}
+		});
+
+		modNameField.requestFocus();
+		modNameField.selectAll();
+		modNameField.requestFocus();
 		
 		List<ProjectPreset> presets = ProjectManager.get().getPresets();
 		for (ProjectPreset preset : presets) {
@@ -122,5 +195,29 @@ public class CreateProjectUI implements Controller {
 			presetBoxes.add(checkBox);
 			mainNode.getChildren().add(checkBox);
 		}
+
+		newModPane.visibleProperty().bind(newModButton.selectedProperty());
+		existingModPane.visibleProperty().bind(existingModButton.selectedProperty());
+
+		newModButton.selectedProperty().addListener((obs, oldValue, newValue) -> {
+			dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
+		});
+
+		newModButton.setSelected(true);
+
+		Collection<ModBundle> modBundles = ProjectManager.get().getModBundles();
+		ObservableList<String> modBundleItems = FXCollections.observableArrayList(modBundles.stream().map(ModBundle::getName).collect(Collectors.toList()));
+		existingModButton.setDisable(modBundles.isEmpty());
+		existingModChoiceBox.setItems(modBundleItems);
+		if (!modBundles.isEmpty()) {
+			existingModChoiceBox.getSelectionModel().select(0);  //TODO find most recent mod bundle
+		}
+
+		Image image = UIManager.get().loadImage("dialog-information.png");
+		referencesInfoImage.setImage(image);
+		Tooltip tooltip = new Tooltip();
+		tooltip.setShowDelay(Duration.ZERO);
+		tooltip.setText("References allow you to see files from other projects, and edit and copy them to your mod. You can change them later in the project settings.");
+		Tooltip.install(referencesInfoImage, tooltip);
 	}
 }

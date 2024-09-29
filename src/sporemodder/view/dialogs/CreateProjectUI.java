@@ -44,16 +44,25 @@ import sporemodder.util.ProjectPreset;
 import sporemodder.view.Controller;
 
 public class CreateProjectUI implements Controller {
-	
+
+	private static final String ILLEGAL_CHARACTERS = "/\\";
+
+	private static final String WARNING_MOD_NAME_EMPTY = "Mod name cannot be empty";
+	private static final String WARNING_PROJECT_NAME_EMPTY = "Package project name cannot be empty";
+	private static final String WARNING_MOD_NAME_REPEATED = "A mod with this name already exists";
+	private static final String WARNING_PROJECT_NAME_REPEATED = "A package project with this name already exists";
+	private static final String WARNING_MOD_NAME_INVALID = "Mod name cannot contain any character from " + ILLEGAL_CHARACTERS;
+	private static final String WARNING_PROJECT_NAME_INVALID = "Package project name cannot contain any character from " + ILLEGAL_CHARACTERS;
+
 	private Dialog<ButtonType> dialog;
 	
 	@FXML
 	private Pane mainNode;
 	
 	@FXML
-	private Label modAlreadyExistsLabel;
+	private Label modWarningLabel;
 	@FXML
-	private Label projectAlreadyExistsLabel;
+	private Label projectWarningLabel;
 	
 	@FXML
 	private TextField modNameField;
@@ -134,14 +143,31 @@ public class CreateProjectUI implements Controller {
 		});
 	}
 
+	private static boolean hasIllegalChar(String text) {
+		return ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1);
+	}
+
 	private boolean isValid() {
-		if (projectNameField.getText().isEmpty() || ProjectManager.get().hasProject(projectNameField.getText())) {
+		String projectName = projectNameField.getText();
+		String modName = modNameField.getText();
+		if (projectName.isEmpty() || hasIllegalChar(projectName) ||
+				ProjectManager.get().hasProject(projectNameField.getText())) {
 			return false;
 		}
-		if (newModButton.isSelected() && (modNameField.getText().isEmpty() || ProjectManager.get().hasModBundle(modNameField.getText()))) {
+		if (newModButton.isSelected() &&
+				(modName.isEmpty() || hasIllegalChar(modName) || ProjectManager.get().hasModBundle(modName))) {
 			return false;
 		}
 		return true;
+	}
+
+	private void setWarningLabel(Label label, String text) {
+		if (text == null) {
+			label.setVisible(false);
+		} else {
+			label.setText(text);
+			label.setVisible(true);
+		}
 	}
 
 	@FXML
@@ -150,8 +176,8 @@ public class CreateProjectUI implements Controller {
 		projectNameField.setText("Project " + (ProjectManager.get().getProjects().size() + 1));
 		modNameField.setText(projectNameField.getText());
 
-		modAlreadyExistsLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
-		projectAlreadyExistsLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+		modWarningLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
+		projectWarningLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
 
 		modNameField.textProperty().addListener((obs, oldValue, newValue) -> {
 			// Replicate changes to project name
@@ -160,10 +186,16 @@ public class CreateProjectUI implements Controller {
 			}
 			// Show alert if name collides
 			if (ProjectManager.get().hasModBundle(newValue)) {
-				modAlreadyExistsLabel.setVisible(true);
+				setWarningLabel(modWarningLabel, WARNING_MOD_NAME_REPEATED);
 				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
 			} else {
-				modAlreadyExistsLabel.setVisible(false);
+				if (newValue.isEmpty()) {
+					setWarningLabel(modWarningLabel, WARNING_MOD_NAME_EMPTY);
+				} else if (hasIllegalChar(newValue)) {
+					setWarningLabel(modWarningLabel, WARNING_MOD_NAME_INVALID);
+				} else {
+					setWarningLabel(modWarningLabel, null);
+				}
 				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
 			}
 		});
@@ -173,10 +205,16 @@ public class CreateProjectUI implements Controller {
 			projectNameEqualsModName = newValue.equals(modNameField.getText());
 			// Show alert if name collides
 			if (ProjectManager.get().hasProject(newValue)) {
-				projectAlreadyExistsLabel.setVisible(true);
+				setWarningLabel(projectWarningLabel, WARNING_PROJECT_NAME_REPEATED);
 				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
 			} else {
-				projectAlreadyExistsLabel.setVisible(false);
+				if (newValue.isEmpty()) {
+					setWarningLabel(projectWarningLabel, WARNING_PROJECT_NAME_EMPTY);
+				} else if (hasIllegalChar(newValue)) {
+					setWarningLabel(projectWarningLabel, WARNING_PROJECT_NAME_INVALID);
+				} else {
+					setWarningLabel(projectWarningLabel, null);
+				}
 				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
 			}
 		});

@@ -43,7 +43,7 @@
                         <TextField fx:id="modNameField" HBox.hgrow="ALWAYS" />
                      </children>
                   </HBox>
-                  <Label fx:id="modAlreadyExistsLabel" text="A mod with this name already exists." visible="false">
+                  <Label fx:id="modWarningLabel" text="A mod with this name already exists." visible="false">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
@@ -67,7 +67,7 @@
       </StackPane>
       <Label text="Package Project Name:" />
       <TextField fx:id="projectNameField" />
-      <Label fx:id="projectAlreadyExistsLabel" text="A package project with this name already exists." visible="false" />
+      <Label fx:id="projectWarningLabel" text="A package project with this name already exists." visible="false" />
       <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
          <children>
             <Label text="References:" />

@@ -72,7 +72,8 @@ public class ModBundle {
 
 
     /**
-     * Load all the projects contained inside this mod 'data' folder, does not add them to the ProjectManager.
+     * Load all the projects contained inside this mod 'data' folder, does not add them to the ProjectManager
+     * nor read their settings.
      */
     public void loadProjects() {
         assert projects.isEmpty();
@@ -80,7 +81,6 @@ public class ModBundle {
         if (dataFolder.exists()) {
             for (File folder : Objects.requireNonNull(dataFolder.listFiles(File::isDirectory))) {
                 Project project = new Project(folder.getName(), folder, null);
-                project.loadSettings();
                 projects.add(project);
             }
         }

@@ -106,10 +106,10 @@ public class ProjectManager extends AbstractManager {
 
 	/** All the factories that can be used to parse files and create project items. */
 	private final List<ProjectItemFactory> itemFactories = new ArrayList<>();
-	/** A map that assigns the project name (in lowercase) to the project itself. */
-	private final Map<String, Project> projects = new TreeMap<>();
+
 	private Project activeProject;
 
+	private final ProjectsList projects = new ProjectsList();
 	private final ModBundlesList modBundles = new ModBundlesList();
 	
 	/** Special items that are always displayed in the bottom part of the project tree. */
@@ -150,57 +150,18 @@ public class ProjectManager extends AbstractManager {
 		
 		specialItems.add(new EffectEditorItem());
 		specialItems.add(new AnimEditorItem());
-		
-		// Load all standalone projects
-		File projectsFolder = PathManager.get().getProjectsFolder();
-		if (!projectsFolder.exists()) projectsFolder.mkdir();
-		
-		File[] children = projectsFolder.listFiles();
-        assert children != null;
-        for (File folder : children) {
-			Project project = null;
-			if (folder.isDirectory()) {
-				project = new Project(folder.getName());
-			}
-			else {
-				try {
-					List<String> lines = Files.readAllLines(folder.toPath());
-					
-					if (lines.size() != 1) {
-						System.err.println("File " + folder.getAbsolutePath() + " doesn't follow external project link format");
-					}
-					else {
-						File externalFolder = new File(lines.get(0).trim());
-						if (externalFolder.isDirectory()) {
-							project = new Project(folder.getName(), externalFolder, folder);
-						}
-						else {
-							System.err.println("Error reading external project link " + folder.getName() + ": folder " + externalFolder.getAbsolutePath() + " does not exist.");
-						}
-					}
-				} 
-				catch (IOException e) {
-					System.err.println("Error reading external project link " + folder.getAbsolutePath());
-				}
-			}
-			if (project != null) {
-				projects.put(project.getName().toLowerCase(), project);
-			}
-		}
 
-		// Load all mod bundles
-		try {
-			modBundles.loadList();
-		} catch (IOException e) {
-			System.err.println("Failed to read mod bundles list: " + e.getMessage());
-		}
+		// First load mod bundles, as it is necessary to exclude those when loading projects
+		modBundles.loadList();
+		// Load all standalone projects
+		projects.loadStandaloneProjects();
 		// Add projects inside mods to the projects list
-		modBundles.getAll().forEach(mod -> mod.getProjects().forEach(
-				proj -> projects.put(proj.getName().toLowerCase(), proj)
-		));
+		modBundles.getAll().forEach(mod -> mod.getProjects().forEach(projects::add));
 		
-		// Load the project settings after all projects are loaded
-		for (Project project : projects.values()) {
+		// Load the project settings after all projects are loaded,
+		// because settings can use references to other projects
+		projects.loadLastActiveTimes();
+		for (Project project : projects.getAll()) {
 			project.loadSettings();
 		}
 		
@@ -306,9 +267,8 @@ public class ProjectManager extends AbstractManager {
 		String[] splits = text.toLowerCase().split(" ");
 		searchedWords.clear();
 		
-		for (int i = 0; i < splits.length;) 
-		{
-			if (splits[i].length() == 0) {
+		for (int i = 0; i < splits.length;) {
+			if (splits[i].isEmpty()) {
 				i++;
 				continue;
 			}
@@ -740,17 +700,17 @@ public class ProjectManager extends AbstractManager {
 		});
 		
 		itemName.setOnAction(event -> UIManager.get().tryAction(() -> selectItem(item), "Cannot select file"));
-		itemNewFile.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFile(), "Cannot create new file."));
-		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFolder(), "Cannot create new folder."));
-		itemRename.setOnAction(event -> UIManager.get().tryAction(() -> item.renameItem(), "Cannot rename item."));
-		itemRemove.setOnAction(event -> UIManager.get().tryAction(() -> item.removeItem(), "Cannot remove item."));
-		itemModify.setOnAction(event -> UIManager.get().tryAction(() -> item.modifyItem(), "Cannot modify item."));
-		itemImportFiles.setOnAction(event -> UIManager.get().tryAction(() -> item.importFiles(), "Cannot import files."));
-		itemRefresh.setOnAction(event -> UIManager.get().tryAction(() -> item.refreshItem(), "Cannot refresh item."));
+		itemNewFile.setOnAction(event -> UIManager.get().tryAction(item::createNewFile, "Cannot create new file."));
+		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(item::createNewFolder, "Cannot create new folder."));
+		itemRename.setOnAction(event -> UIManager.get().tryAction(item::renameItem, "Cannot rename item."));
+		itemRemove.setOnAction(event -> UIManager.get().tryAction(item::removeItem, "Cannot remove item."));
+		itemModify.setOnAction(event -> UIManager.get().tryAction(item::modifyItem, "Cannot modify item."));
+		itemImportFiles.setOnAction(event -> UIManager.get().tryAction(item::importFiles, "Cannot import files."));
+		itemRefresh.setOnAction(event -> UIManager.get().tryAction(item::refreshItem, "Cannot refresh item."));
 		
-		itemCompare.setOnAction(event -> UIManager.get().tryAction(() -> item.compareItem(), "Cannot compare item."));
-		itemExploreSource.setOnAction(event -> UIManager.get().tryAction(() -> item.openSourceFolder(), "Cannot open source folder."));
-		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(() -> item.openModFolder(), "Cannot open mod folder."));
+		itemCompare.setOnAction(event -> UIManager.get().tryAction(item::compareItem, "Cannot compare item."));
+		itemExploreSource.setOnAction(event -> UIManager.get().tryAction(item::openSourceFolder, "Cannot open source folder."));
+		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(item::openModFolder, "Cannot open mod folder."));
 		
 		contextMenu.getItems().clear();
 		contextMenu.getItems().addAll(itemName, new SeparatorMenuItem());
@@ -805,13 +765,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public List<Project> getRecentProjects(int count) {
-		List<Project> list = new ArrayList<Project>(projects.values());
-		Collections.sort(list, (arg0, arg1) -> {
-			return -Long.compare(arg0.getLastTimeUsed(), arg1.getLastTimeUsed());
-		});
-		
-		
-		return list.subList(0, Math.min(count, list.size()));
+		return projects.getRecentProjects(count);
 	}
 	
 	/**
@@ -857,12 +811,11 @@ public class ProjectManager extends AbstractManager {
 	public void rename(Project project, String name) {
 		Project existing = getProject(name);
 		if (existing == null || existing == project) {
-			projects.remove(project.getName().toLowerCase());
-			
+			projects.remove(project);
 			project.setName(name);
-			
-			projects.put(name.toLowerCase(), project);
-			
+			projects.add(project);
+			projects.saveLastActiveTimesNoException();
+
 			if (project == activeProject) {
 				rootItem.getValue().setName(name);
 				getTreeView().refresh();
@@ -871,12 +824,16 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public Project getProjectByPackageName(String packageName) {
-		for (Project project : projects.values()) {
+		for (Project project : projects.getAll()) {
 			if (project.getPackageName().equals(packageName)) return project;
 		}
 		return null;
 	}
-	
+
+	public void saveProjectsLastActiveTimes() {
+		projects.saveLastActiveTimesNoException();
+	}
+
 	/**
 	 * Changes the active project. This will update the user interface.
 	 * @param project
@@ -901,7 +858,7 @@ public class ProjectManager extends AbstractManager {
 		
 		// Update time and save it
 		activeProject.updateLastTimeUsed();
-		activeProject.saveSettings();
+		saveProjectsLastActiveTimes();
 		
 		// Project names registry
 		loadNamesRegistry();
@@ -1151,7 +1108,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public Collection<Project> getProjects() {
-		return projects.values();
+		return projects.getAll();
 	}
 	
 	/**
@@ -1160,7 +1117,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public boolean hasProject(String name) {
-		return projects.containsKey(name.toLowerCase());
+		return projects.exists(name);
 	}
 
 	public boolean hasModBundle(String name) {
@@ -1175,7 +1132,8 @@ public class ProjectManager extends AbstractManager {
 	public void deleteProject(Project project) throws IOException {
 		FileManager.get().deleteDirectory(project.getFolder());
 		
-		projects.remove(project.getName().toLowerCase());
+		projects.remove(project);
+		projects.saveLastActiveTimesNoException();
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
@@ -1196,7 +1154,7 @@ public class ProjectManager extends AbstractManager {
 		
 		project.saveSettings();
 		
-		projects.put(project.getName().toLowerCase(), project);
+		projects.add(project);
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
@@ -2224,7 +2182,7 @@ public class ProjectManager extends AbstractManager {
 				project.setExternalLinkFile(linkFile);
 				project.saveSettings();
 				
-				projects.put(project.getName().toLowerCase(), project);
+				projects.add(project);
 			}, "Error adding external project")) {
 				loadedCorrectly = false;
 			}

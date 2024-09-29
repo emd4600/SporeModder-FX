@@ -19,17 +19,14 @@
 
 package sporemodder.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import sporemodder.MessageManager;
 import sporemodder.MessageManager.MessageType;
@@ -122,6 +119,8 @@ public class Project {
 	
 	/** Extra properties that can be used by plugins. */
 	private Map<String, Object> extraProperties = new HashMap<>();
+
+	private long lastTimeUsed = -1;
 	
 	
 	public Project(String name) {
@@ -196,6 +195,8 @@ public class Project {
 				}
 				
 				isReadOnly = Boolean.parseBoolean(settings.getProperty(PROPERTY_isReadOnly, "false"));
+
+				lastTimeUsed = Long.parseLong(settings.getProperty(PROPERTY_lastTimeUsed, "-1"));
 				
 				MessageManager.get().postMessage(MessageType.OnProjectSettingsLoad, this);
 			} 
@@ -213,49 +214,51 @@ public class Project {
 	 * Saves the project settings into the configuration file inside the project folder.
 	 */
 	public void saveSettings() {
-		try (OutputStream stream = new FileOutputStream(new File(folder, SETTINGS_FILE_NAME))) {
-			
-			//if (!sources.isEmpty()) {
-			// Do this even if it's empty, as we need to update it if sources were removed
-			{
-				StringBuilder sb = new StringBuilder();
-				
-				for (int i = 0; i < references.size(); i++) {
-					sb.append("\"" + references.get(i).name + "\"");
-					if (i != references.size()-1) sb.append("|");
-				}
-				
-				settings.setProperty(PROPERTY_sources, sb.toString());
+		//if (!sources.isEmpty()) {
+		// Do this even if it's empty, as we need to update it if sources were removed
+		{
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < references.size(); i++) {
+				sb.append("\"" + references.get(i).name + "\"");
+				if (i != references.size()-1) sb.append("|");
 			}
-			if (!fixedTabPaths.isEmpty()) {
-				StringBuilder sb = new StringBuilder();
-				
-				for (int i = 0; i < fixedTabPaths.size(); i++) {
-					sb.append("\"" + fixedTabPaths.get(i) + "\"");
-					if (i != fixedTabPaths.size()-1) sb.append("|");
-				}
-				
-				settings.setProperty(PROPERTY_fixedTabPaths, sb.toString());
-			}
-			
-			settings.put(PROPERTY_packageName, packageName);
-			
-			if (packPath.getCustomPath() != null) {
-				settings.put(PROPERTY_customPackPath, packPath.getCustomPath());
-			}
-			settings.put(PROPERTY_packPathType, packPath.getType().toString());
-			
-			settings.put(PROPERTY_packageSignature, packageSignature.toString());
-			
-			settings.put(PROPERTY_isReadOnly, Boolean.toString(isReadOnly));
-			
-			MessageManager.get().postMessage(MessageType.OnProjectSettingsSave, this);
-			
-			settings.store(stream, null);
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
+
+			settings.setProperty(PROPERTY_sources, sb.toString());
 		}
+		if (!fixedTabPaths.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+
+			for (int i = 0; i < fixedTabPaths.size(); i++) {
+				sb.append("\"" + fixedTabPaths.get(i) + "\"");
+				if (i != fixedTabPaths.size()-1) sb.append("|");
+			}
+
+			settings.setProperty(PROPERTY_fixedTabPaths, sb.toString());
+		}
+
+		settings.put(PROPERTY_packageName, packageName);
+
+		if (packPath.getCustomPath() != null) {
+			settings.put(PROPERTY_customPackPath, packPath.getCustomPath());
+		}
+		settings.put(PROPERTY_packPathType, packPath.getType().toString());
+
+		settings.put(PROPERTY_packageSignature, packageSignature.toString());
+
+		settings.put(PROPERTY_isReadOnly, Boolean.toString(isReadOnly));
+
+		MessageManager.get().postMessage(MessageType.OnProjectSettingsSave, this);
+
+		// settings.store always prints a first line with a time stamp
+		// We don't want it, as that makes it look modified in git version control
+		try (StringWriter stringWriter = new StringWriter()) {
+			settings.store(stringWriter, null);
+			File outputFile = new File(folder, SETTINGS_FILE_NAME);
+			Files.write(outputFile.toPath(), stringWriter.toString().lines().skip(1).collect(Collectors.toList()));
+		} catch (IOException e) {
+			e.printStackTrace();
+        }
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
@@ -306,14 +309,18 @@ public class Project {
 	 * @return
 	 */
 	public long getLastTimeUsed() {
-		return Long.parseLong(settings.getProperty(PROPERTY_lastTimeUsed, "-1"));
+		return lastTimeUsed;
 	}
 	
 	/**
 	 * Updates the last time this project was active in the program, setting it to the current time.
 	 */
 	public void updateLastTimeUsed() {
-		settings.setProperty(PROPERTY_lastTimeUsed, Long.toString(System.currentTimeMillis()));
+		lastTimeUsed = System.currentTimeMillis();
+	}
+
+	public void setLastTimeUsed(long time) {
+		lastTimeUsed = time;
 	}
 	
 	@Override

@@ -26,6 +26,7 @@ import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.simulator.SimulatorClass;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.util.NameRegistry;
+import sporemodder.util.Project;
 
 public class Launcher {
 	
@@ -369,7 +370,7 @@ public class Launcher {
 		@Parameters(index = "0", description = "The input folder to pack.")
 		private File input;
 
-		@Parameters(index = "1", description = "The output DBPF file to generate.")
+		@Parameters(index = "1", description = "The output DBPF file to generate. If the output is a folder, the input must be a project, and the output DBPF name will be taken from the project settings.")
 		private File output;
 
 		@Option(names = {"--compress"}, description = "[Experimental] Compress files bigger than N bytes")
@@ -379,6 +380,12 @@ public class Launcher {
 		public Integer call() throws Exception {
 			input = input.getAbsoluteFile();
 			output = output.getAbsoluteFile();
+
+			if (output.isDirectory()) {
+				Project project = new Project(input.getName(), input, null);
+				project.loadSettings();
+				output = new File(output, project.getPackageName());
+			}
 			
 			startTime = System.currentTimeMillis();
 			final DBPFPackingTask task = new DBPFPackingTask(input, output);

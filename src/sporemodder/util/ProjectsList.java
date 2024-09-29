@@ -140,7 +140,9 @@ public class ProjectsList {
                 assert splits.length == 2;
                 long lastActiveTime = Long.parseLong(splits[0]);
                 Project project = ProjectManager.get().getProject(splits[1]);
-                project.setLastTimeUsed(lastActiveTime);
+                if (project != null) {
+                    project.setLastTimeUsed(lastActiveTime);
+                }
             });
         } catch (IOException e) {
             System.err.println("Failed to read projects last active times list: " + e.getMessage());

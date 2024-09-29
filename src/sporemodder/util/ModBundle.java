@@ -80,7 +80,7 @@ public class ModBundle {
         File dataFolder = getDataFolder();
         if (dataFolder.exists()) {
             for (File folder : Objects.requireNonNull(dataFolder.listFiles(File::isDirectory))) {
-                Project project = new Project(folder.getName(), folder, null);
+                Project project = new Project(folder.getName(), this);
                 projects.add(project);
             }
         }

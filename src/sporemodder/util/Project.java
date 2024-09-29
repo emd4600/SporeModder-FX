@@ -126,6 +126,11 @@ public class Project {
 	public Project(String name) {
 		this(name, new File(PathManager.get().getProjectsFolder(), name), null);
 	}
+
+	public Project(String name, ModBundle parentMod) {
+		this(name, new File(parentMod.getDataFolder(), name), null);
+		this.parentMod = parentMod;
+	}
 	
 	public Project(String name, File folder, File externalLink) {
 		this.name = name;
@@ -139,6 +144,10 @@ public class Project {
 	
 	public List<Project> getReferences() {
 		return references;
+	}
+
+	public ModBundle getParentModBundle() {
+		return parentMod;getParentMod()
 	}
 	
 	private String[] stringListSplit(String propertyName) {
@@ -423,13 +432,5 @@ public class Project {
 	/** For projects that are not stored in the standard Projects folder, this sets the file that links to the real folder. */
 	public void setExternalLinkFile(File linkFile) {
 		this.externalLink = linkFile;
-	}
-
-	public ModBundle getParentMod() {
-		return parentMod;
-	}
-
-	public void setParentMod(ModBundle parentMod) {
-		this.parentMod = parentMod;
 	}
 }

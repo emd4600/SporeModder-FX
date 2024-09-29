@@ -11,6 +11,7 @@ trait_pill	0x1c3c4b3
 css	0x248f226
 trigger	0x24a0e52
 formation	0x2523258
+ttf	0x276CA4B9
 ttf	0x27c5cef
 summary	0x2d5c9af
 summary_pill	0x2d5c9b0
@@ -592,6 +593,10 @@ ObjectExtents.bin	0x3583564e
 LevelObjectives.bin	0x68232164
 Level.bin	0xb9193960
 NavPowerTuning.bin	0xbba5400d
+LootSuffix.bin	0x447DC2E5
+bak.png	0xDEAF6ADE
+bak2.png	0xDC74130E
 
 arg	0x2523258
 blockinfo	0x793f6424
+adv 0x366a930d

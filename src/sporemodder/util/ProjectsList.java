@@ -139,7 +139,7 @@ public class ProjectsList {
                 String[] splits = line.split(" ", 2);
                 assert splits.length == 2;
                 long lastActiveTime = Long.parseLong(splits[0]);
-                Project project = ProjectManager.get().getProject(splits[1]);
+                Project project = get(splits[1]);
                 if (project != null) {
                     project.setLastTimeUsed(lastActiveTime);
                 }

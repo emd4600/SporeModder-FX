@@ -35,7 +35,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
-import sporemodder.FileManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
@@ -43,9 +42,12 @@ import sporemodder.util.Project;
 import sporemodder.util.ProjectPreset;
 import sporemodder.view.Controller;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 public class CreateProjectUI implements Controller {
 
-	private static final String ILLEGAL_CHARACTERS = "/\\";
+	private static final String ILLEGAL_CHARACTERS = "/\\[]{}";
 
 	private static final String WARNING_MOD_NAME_EMPTY = "Mod name cannot be empty";
 	private static final String WARNING_PROJECT_NAME_EMPTY = "Package project name cannot be empty";
@@ -94,7 +96,7 @@ public class CreateProjectUI implements Controller {
 		return mainNode;
 	}
 
-	public void createMod() throws IOException, InterruptedException {
+	public void createMod() throws IOException, InterruptedException, ParserConfigurationException, TransformerException {
 		ProjectManager projectManager = ProjectManager.get();
 
 		// Create base mod
@@ -108,8 +110,7 @@ public class CreateProjectUI implements Controller {
 		}
 
 		// Create package project
-		File projectFolder = new File(modBundle.getDataFolder(), projectNameField.getText());
-		Project project = new Project(projectNameField.getText(), projectFolder, null);
+		Project project = new Project(projectNameField.getText(), modBundle);
 		modBundle.addProject(project);
 
 		// Add project references
@@ -121,6 +122,9 @@ public class CreateProjectUI implements Controller {
 
 		// Initialize package project folder
 		projectManager.initializeProject(project);
+
+		// Save ModInfo
+		modBundle.saveModInfo();
 
 		// Initialize git repository
 		projectManager.initializeModBundleGit(modBundle);

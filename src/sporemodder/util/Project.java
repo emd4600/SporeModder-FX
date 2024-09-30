@@ -147,7 +147,7 @@ public class Project {
 	}
 
 	public ModBundle getParentModBundle() {
-		return parentMod;getParentMod()
+		return parentMod;
 	}
 	
 	private String[] stringListSplit(String propertyName) {
@@ -205,7 +205,10 @@ public class Project {
 				
 				isReadOnly = Boolean.parseBoolean(settings.getProperty(PROPERTY_isReadOnly, "false"));
 
-				lastTimeUsed = Long.parseLong(settings.getProperty(PROPERTY_lastTimeUsed, "-1"));
+				String lastTimeUsedStr = settings.getProperty(PROPERTY_lastTimeUsed);
+				if (lastTimeUsedStr != null && !lastTimeUsedStr.isBlank()) {
+					lastTimeUsed = Long.parseLong(lastTimeUsedStr);
+				}
 				
 				MessageManager.get().postMessage(MessageType.OnProjectSettingsLoad, this);
 			} 

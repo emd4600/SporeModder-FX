@@ -26,6 +26,7 @@ import sporemodder.file.filestructures.StreamWriter;
 import sporemodder.file.simulator.SimulatorClass;
 import sporemodder.file.spui.SporeUserInterface;
 import sporemodder.util.NameRegistry;
+import sporemodder.util.Project;
 
 public class Launcher {
 	
@@ -379,6 +380,17 @@ public class Launcher {
 		public Integer call() throws Exception {
 			input = input.getAbsoluteFile();
 			output = output.getAbsoluteFile();
+
+			if (!input.exists() || !input.isFile()) {
+				System.err.println("Cannot pack: input file '" + input.getPath() + "' does not exist");
+				return 1;
+			}
+
+			if (output.isDirectory()) {
+				Project project = new Project(input.getName(), input, null);
+				project.loadSettings();
+				output = new File(output, project.getPackageName());
+			}
 			
 			startTime = System.currentTimeMillis();
 			final DBPFPackingTask task = new DBPFPackingTask(input, output);

@@ -37,6 +37,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
 
@@ -95,7 +96,8 @@ public class ProjectManager extends AbstractManager {
 	
 	private static final String PROPERTY_dontAskAgain_removeItem = "dontAskAgain_removeItem";
 	private static final String PROPERTY_dontAskAgain_saveAsMod = "dontAskAgain_saveAsMod";
-	
+	private static final String PROPERTY_closeEditedFileDecision = "closeEditedFileDecision";
+
 	private static enum ItemEditType { NEW_FILE, NEW_FOLDER, RENAME, NONE };
 	
 	public static final String NAMES_REGISTRY_PATH = "sporemaster/names.txt";
@@ -132,7 +134,13 @@ public class ProjectManager extends AbstractManager {
 	
 	private boolean dontAskAgain_removeItem;
 	private boolean dontAskAgain_saveAsMod;
-	
+	private enum CloseEditedFileDecision {
+		SAVE,
+		IGNORE,
+		ASK
+	}
+	private CloseEditedFileDecision closeEditedFileDecision = CloseEditedFileDecision.ASK;
+
 	private ProjectTreeItem lastSelectedItem;
 	
 	private ContextMenu contextMenu;
@@ -142,7 +150,8 @@ public class ProjectManager extends AbstractManager {
 		
 		dontAskAgain_removeItem = Boolean.parseBoolean(properties.getProperty(PROPERTY_dontAskAgain_removeItem, "false"));
 		dontAskAgain_saveAsMod = Boolean.parseBoolean(properties.getProperty(PROPERTY_dontAskAgain_saveAsMod, "false"));
-		
+		closeEditedFileDecision = CloseEditedFileDecision.valueOf(properties.getProperty(PROPERTY_closeEditedFileDecision, "ASK"));
+
 		itemFactories.add(new DefaultProjectItemFactory());
 		itemFactories.add(new OmitProjectItemFactory());
 		itemFactories.add(new ProjectNamesItemFactory());
@@ -233,6 +242,7 @@ public class ProjectManager extends AbstractManager {
 	@Override public void saveSettings(Properties properties) {
 		properties.put(PROPERTY_dontAskAgain_removeItem, dontAskAgain_removeItem ? "true" : "false");
 		properties.put(PROPERTY_dontAskAgain_saveAsMod, dontAskAgain_saveAsMod ? "true" : "false");
+		properties.put(PROPERTY_closeEditedFileDecision, closeEditedFileDecision.toString());
 	}
 	
 	public TreeView<ProjectItem> getTreeView() {
@@ -796,7 +806,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public Project getProject(String name) {
-		return projects.get(name.toLowerCase());
+		return projects.get(name);
 	}
 
 	public ModBundle getModBundle(String name) {
@@ -859,10 +869,26 @@ public class ProjectManager extends AbstractManager {
 		// Update time and save it
 		activeProject.updateLastTimeUsed();
 		saveProjectsLastActiveTimes();
+
+		// If it doesn't have a mod info, generate it
+		ModBundle modBundle = activeProject.getParentModBundle();
+		if (modBundle != null) {
+			File modInfoFile = modBundle.getModInfoFile();
+			if (!modInfoFile.exists()) {
+				try {
+					modBundle.saveModInfo();
+				} catch (ParserConfigurationException | TransformerException e) {
+					System.err.println("Failed to generate ModInfo.xml for mod: " + modBundle.getName());
+					e.printStackTrace();
+				}
+            }
+		}
+
 		
 		// Project names registry
 		loadNamesRegistry();
-		
+
+		// Update UI
 		ItemEditor activeEditor = EditorManager.get().getActiveEditor();
 		if (activeEditor != null) activeEditor.setActive(false);
 		EditorManager.get().clearTabs();
@@ -1054,6 +1080,10 @@ public class ProjectManager extends AbstractManager {
 	 */
 	public Project getActive() {
 		return activeProject;
+	}
+
+	public ModBundle getActiveModBundle() {
+		return activeProject == null ? null : activeProject.getParentModBundle();
 	}
 	
 	/**
@@ -1682,7 +1712,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	private void removeEmptyNonSourceParents(ProjectTreeItem parent) {
-		if (parent != null && parent.getParent() != null && !parent.getValue().isSource() && parent.getInternalChildren().size() == 0) {
+		if (parent != null && parent.getParent() != null && !parent.getValue().isSource() && parent.getInternalChildren().isEmpty()) {
 			
 			// Get it before removing the item
 			ProjectTreeItem nextParent = (ProjectTreeItem) parent.getParent();
@@ -1707,6 +1737,7 @@ public class ProjectManager extends AbstractManager {
 			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.CANCEL);
 			if (result == ButtonType.YES) {
 				dontAskAgain_removeItem = cb.isSelected();
+				MainApp.get().saveSettings();
 				return true;
 			} else {
 				return false;
@@ -2223,6 +2254,7 @@ public class ProjectManager extends AbstractManager {
 			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
 			if (result == ButtonType.YES) {
 				dontAskAgain_saveAsMod = cb.isSelected();
+				MainApp.get().saveSettings();
 				return true;
 			} else {
 				return false;
@@ -2233,21 +2265,29 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public boolean showSaveDialog() {
-		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
-		dialog.setTitle("Confirm action");
-		
-		CheckBox cb = new CheckBox("Don't ask me again.");
-		
-		dialog.getDialogPane().setHeaderText("This file has unsaved changes. Do you want to save it? If you press no, all changes will be discarded.");
-		dialog.getDialogPane().setContent(cb);
-		
-		dialog.getDialogPane().getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-		
-		ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
-		if (result == ButtonType.YES) {
-			return true;
+		if (closeEditedFileDecision == CloseEditedFileDecision.ASK) {
+			Dialog<ButtonType> dialog = new Dialog<>();
+			dialog.setTitle("Confirm action");
+
+			CheckBox cb = new CheckBox("Remember my decision.");
+
+			dialog.getDialogPane().setHeaderText("This file has unsaved changes. Do you want to save it? If you press no, all changes will be discarded.");
+			dialog.getDialogPane().setContent(cb);
+
+			dialog.getDialogPane().getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+
+			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
+			if (result == ButtonType.YES) {
+				closeEditedFileDecision = CloseEditedFileDecision.SAVE;
+				MainApp.get().saveSettings();
+				return true;
+			} else {
+				closeEditedFileDecision = CloseEditedFileDecision.IGNORE;
+				MainApp.get().saveSettings();
+				return false;
+			}
 		} else {
-			return false;
+			return closeEditedFileDecision == CloseEditedFileDecision.SAVE;
 		}
 	}
 }

@@ -1,7 +1,9 @@
 package sporemodder.util;
 
+import org.xml.sax.SAXException;
 import sporemodder.PathManager;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,6 +62,12 @@ public class ModBundlesList {
                 if (modBundle != null) {
                     modBundle.loadProjects();
                     modBundles.put(modBundle.getName().toLowerCase(), modBundle);
+                    try {
+                        modBundle.loadModInfo();
+                    } catch (IOException | SAXException | ParserConfigurationException e) {
+                        System.err.println("Failed to load ModInfo.xml for mod: " + modBundle.getName());
+                        e.printStackTrace();
+                    }
                 }
             });
         } catch (IOException e) {

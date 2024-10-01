@@ -173,6 +173,8 @@ public class ProjectManager extends AbstractManager {
 		for (Project project : projects.getAll()) {
 			project.loadSettings();
 		}
+		// Load mod infos after project settings, as they need to know package names
+		modBundles.loadModInfos();
 		
 		presets.add(new ProjectPreset("Spore (Game & Graphics)", "The Spore and Galactic Adventures packages containing everything needed for most mods.", true,
 				item -> {
@@ -1222,6 +1224,16 @@ public class ProjectManager extends AbstractManager {
 		// Write a default readme file
 		File readmeFile = new File(modBundle.getFolder(), "README.md");
 		Files.writeString(readmeFile.toPath(), "# " + modBundle.getName() + "\nYou can download the mod in the Releases page.");
+
+		// Add GitHub action to compile the mod
+		File githubActionFolder = new File(modBundle.getFolder(), ".github/workflows");
+		if (!githubActionFolder.mkdirs()) {
+			throw new RuntimeException("Failed to create GitHub action folders for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+		try (InputStream inputStream = ProjectManager.class.getResourceAsStream("/sporemodder/resources/githubAction.yml")) {
+			assert inputStream != null;
+			Files.copy(inputStream, new File(githubActionFolder, "build.yml").toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
 
 		// Add to mods list
 		modBundles.add(modBundle);

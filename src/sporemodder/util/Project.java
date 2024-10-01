@@ -251,7 +251,7 @@ public class Project {
 
 		settings.put(PROPERTY_packageName, packageName);
 
-		if (packPath.getCustomPath() != null) {
+		if (packPath.getCustomPath() != null && !packPath.getCustomPath().isBlank()) {
 			settings.put(PROPERTY_customPackPath, packPath.getCustomPath());
 		}
 		settings.put(PROPERTY_packPathType, packPath.getType().toString());

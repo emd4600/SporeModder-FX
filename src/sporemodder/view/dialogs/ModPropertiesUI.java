@@ -121,21 +121,21 @@ public class ModPropertiesUI implements Controller {
             }
         });
 
-        // Set C++ DLLs editable items
-        dllsListView.setCellFactory(TextFieldListCell.forListView());
-        // Add a listener to add a new item at the end if the last item is being edited
-        dllsListView.setOnEditCommit(event -> {
-            int index = event.getIndex();
-            String newValue = event.getNewValue();
-
-            // Update the edited item
-            dllsListView.getItems().set(index, newValue);
-
-            // If the last item is edited, add a new blank item at the end
-            if (index == dllsListView.getItems().size() - 1 && !newValue.isEmpty()) {
-                dllsListView.getItems().add(DLLS_LIST_NEW_ITEM_TEXT);
-            }
-        });
+//        // Set C++ DLLs editable items
+//        dllsListView.setCellFactory(TextFieldListCell.forListView());
+//        // Add a listener to add a new item at the end if the last item is being edited
+//        dllsListView.setOnEditCommit(event -> {
+//            int index = event.getIndex();
+//            String newValue = event.getNewValue();
+//
+//            // Update the edited item
+//            dllsListView.getItems().set(index, newValue);
+//
+//            // If the last item is edited, add a new blank item at the end
+//            if (index == dllsListView.getItems().size() - 1 && !newValue.isEmpty()) {
+//                dllsListView.getItems().add(DLLS_LIST_NEW_ITEM_TEXT);
+//            }
+//        });
 
         // Ban certain characters from unique tag
         uniqueTextField.setTextFormatter(new TextFormatter<String>(change -> {
@@ -189,8 +189,9 @@ public class ModPropertiesUI implements Controller {
 
         customModInfoLabel.setVisible(modBundle.hasCustomModInfo());
 
+        modBundle.detectAndUpdateDllFiles(false);
         dllsListView.getItems().setAll(modBundle.getDllsToInstall());
-        dllsListView.getItems().add(DLLS_LIST_NEW_ITEM_TEXT);
+//        dllsListView.getItems().add(DLLS_LIST_NEW_ITEM_TEXT);
 
         Optional<ButtonType> result = UIManager.get().showDialog(dialog);
         if (result.isPresent() && result.get() == ButtonType.APPLY) {
@@ -211,9 +212,11 @@ public class ModPropertiesUI implements Controller {
         modBundle.setRequiresGalaxyReset(galaxyResetCheckBox.isSelected());
         modBundle.setExperimentalStatus(experimentalChoiceBox.getValue());
 
-        modBundle.getDllsToInstall().clear();
-        // Discard the last item, which is a placeholder "Double click to add new file"
-        modBundle.getDllsToInstall().addAll(dllsListView.getItems().subList(0, dllsListView.getItems().size() - 1));
+        // We don't support editing the DLLs to install, always default to autodetected
+        modBundle.detectAndUpdateDllFiles(false);
+//        modBundle.getDllsToInstall().clear();
+//        // Discard the last item, which is a placeholder "Double click to add new file"
+//        modBundle.getDllsToInstall().addAll(dllsListView.getItems().subList(0, dllsListView.getItems().size() - 1));
 
         projectsListView.getItems().forEach(projectWithTarget -> modBundle.setPackageFileTarget(projectWithTarget.project, projectWithTarget.target));
 

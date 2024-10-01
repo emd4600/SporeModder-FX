@@ -123,11 +123,14 @@ public class CreateProjectUI implements Controller {
 		// Initialize package project folder
 		projectManager.initializeProject(project);
 
+		//TODO only if doesn't have custom data
 		// Save ModInfo
 		modBundle.saveModInfo();
 
-		// Initialize git repository
-		projectManager.initializeModBundleGit(modBundle);
+		if (newModButton.isSelected()) {
+			// Initialize git repository
+			projectManager.initializeModBundleGit(modBundle);
+		}
 	}
 
 	public static void show() {

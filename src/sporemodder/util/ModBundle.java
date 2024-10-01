@@ -15,7 +15,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ModBundle {
     private static final Runtime.Version DEFAULT_INSTALLER_VERSION = Runtime.Version.parse("1.0.1.2");
@@ -159,7 +162,7 @@ public class ModBundle {
     }
 
     public List<String> getDllsToInstall() {
-        return dllsToInstall;
+        return Collections.unmodifiableList(dllsToInstall);
     }
 
     public ExperimentalStatus getExperimentalStatus() {
@@ -187,7 +190,7 @@ public class ModBundle {
     }
 
     public List<Project> getProjects() {
-        return projects;
+        return Collections.unmodifiableList(projects);
     }
 
     public File getFolder() {
@@ -232,7 +235,8 @@ public class ModBundle {
 
     /**
      * Load all the projects contained inside this mod 'data' folder, does not add them to the ProjectManager
-     * nor read their settings.
+     * nor read their settings. It also fills the dllsToInstall list by auto-detecting Visual Studio
+     * projects in the src/ folder
      */
     public void loadProjects() {
         assert projects.isEmpty();
@@ -243,6 +247,12 @@ public class ModBundle {
                 projects.add(project);
                 packageFileTargets.put(project, FileTarget.fromGamePathType(project.getPackPath().getType()));
             }
+        }
+
+        List<String> dllFiles = detectDllFiles();
+        if (dllFiles != null) {
+            dllsToInstall.clear();
+            dllsToInstall.addAll(dllFiles);
         }
     }
 
@@ -270,10 +280,49 @@ public class ModBundle {
         return new File(getFolder(), "ModInfo.xml");
     }
 
+    private List<String> detectDllFiles() {
+        File srcFolder = getSrcFolder();
+        if (!srcFolder.isDirectory()) {
+            return null;
+        }
+        try (Stream<Path> stream = Files.walk(getSrcFolder().toPath())) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".vcxproj"))
+                    .map(path -> path.getFileName().toString())
+                    .map(fileName -> fileName.substring(0, fileName.length() - ".vcxproj".length()) + ".dll")
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            System.err.println("Failed to detect Visual Studio Projects in mod: " + name);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Detects the Visual Studio projects in the src/ folder, and generates the .dll names from them.
+     * It updates the dllsToInstall list and, if saveModInfo and the ModInfo.xml wasn't custom, it saves it with the new info.
+     */
+    public void detectAndUpdateDllFiles(boolean saveModInfo) {
+        List<String> dllFiles = detectDllFiles();
+        dllsToInstall.clear();
+        if (dllFiles != null) {
+            dllsToInstall.addAll(dllFiles);
+        }
+        if (!hasCustomModInfo && saveModInfo) {
+            try {
+                saveModInfo();
+            } catch (ParserConfigurationException | TransformerException e) {
+                System.err.println("Failed to save ModInfo in detectAndUpdateDllFiles() for mod: " + name);
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Reads the ModInfo.xml file from the root folder, loading all its properties.
      */
-    public void loadModInfo() throws IOException, SAXException, ParserConfigurationException {
+    public void loadModInfo(boolean saveModInfoIfItNeedsUpdate) throws IOException, SAXException, ParserConfigurationException, TransformerException {
         hasCustomModInfo = false;
 
         File xmlFile = getModInfoFile();
@@ -340,7 +389,11 @@ public class ModBundle {
         }
         String installerVersion = modElement.getAttribute("installerSystemVersion");
         if (!installerVersion.isEmpty()) {
-            Runtime.Version.parse(installerVersion);
+            try {
+                Runtime.Version.parse(installerVersion);
+            } catch (Exception e) {
+                hasCustomModInfo = true;
+            }
         }
 
         // Removing old files is an advanced use case
@@ -348,16 +401,19 @@ public class ModBundle {
             hasCustomModInfo = true;
         }
 
-        //TODO dllsBuild
-
         // Detect files to install
-        // If one does not match existing projects, then consider it as custom ModInfo
+        // We have two special scenarios:
+        // - ModInfo contains prerequisite files that are autodetected as mod projects or dlls.
+        //   In this case, consider it as custom ModInfo.
+        // - All prerequisite files are part of autodetected, but there are some autodetected projects/dlls
+        //   that are not in ModInfo. In this case, don't consider it as custom, and just add them
         Map<String, Project> autoPackageNames = new HashMap<>();
         for (Project project : projects) {
             autoPackageNames.put(project.getPackageName(), project);
         }
+        Set<String> unincludedPackages  = new HashSet<>(autoPackageNames.keySet());
+        Set<String> unincludedDlls = new HashSet<>(dllsToInstall);
 
-        Set<Project> prerequisiteProjects = new HashSet<>();
         NodeList prerequisiteFiles = modElement.getElementsByTagName("prerequisite");
         for (int i = 0; i < prerequisiteFiles.getLength(); i++) {
             Element element = (Element)prerequisiteFiles.item(i);
@@ -370,18 +426,24 @@ public class ModBundle {
                 target = FileTarget.DATA;
             }
 
-            String packageName = element.getTextContent();
-            if (!autoPackageNames.containsKey(packageName)) {
-                hasCustomModInfo = true;
+            String fileName = element.getTextContent();
+            if (target == FileTarget.MODAPI) {
+                unincludedDlls.remove(fileName);
             } else {
-                Project project = autoPackageNames.get(packageName);
-                packageFileTargets.put(project, target);
-                prerequisiteProjects.add(project);
+                if (!autoPackageNames.containsKey(fileName)) {
+                    hasCustomModInfo = true;
+                } else {
+                    Project project = autoPackageNames.get(fileName);
+                    packageFileTargets.put(project, target);
+                    unincludedPackages.remove(fileName);
+                }
             }
         }
-        // If not all projects are outputs, mark it as special
-        if (prerequisiteProjects.size() != projects.size()) {
-            hasCustomModInfo = true;
+
+        if (!hasCustomModInfo && saveModInfoIfItNeedsUpdate &&
+                (!unincludedPackages.isEmpty() || !unincludedDlls.isEmpty())) {
+            // Add any autodetected projects and dlls that were not in the ModInfo.xml
+            saveModInfo();
         }
     }
 
@@ -391,7 +453,7 @@ public class ModBundle {
 
         Element rootElement = document.createElement("mod");
         document.appendChild(rootElement);
-        rootElement.setAttribute("displayName", name);
+        rootElement.setAttribute("displayName", displayName);
         rootElement.setAttribute("unique", uniqueTag);
         rootElement.setAttribute("description", description);
         if (githubUrl != null && !githubUrl.isBlank()) {
@@ -430,6 +492,8 @@ public class ModBundle {
             prerequisite.appendChild(document.createTextNode(dllFile));
             rootElement.appendChild(prerequisite);
         }
+
+        hasCustomModInfo = false;
 
         DOMSource dom = new DOMSource(document);
         Transformer transformer = TransformerFactory.newInstance().newTransformer();

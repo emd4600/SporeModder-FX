@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Label?>
+<VBox fx:id="mainNode" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.GitCommitUI">
+    <children>
+        <Accordion fx:id="filesAccordion" prefHeight="400.0">
+            <panes>
+                <TitledPane fx:id="modifiedFilesPane" animated="false" text="Modified Files">
+                    <content>
+                        <ListView fx:id="modifiedFilesListView" />
+                    </content>
+                </TitledPane>
+                <TitledPane fx:id="newFilesPane" animated="false" text="New Files">
+                    <content>
+                        <ListView fx:id="newFilesListView" />
+                    </content>
+                </TitledPane>
+            </panes>
+        </Accordion>
+        <TextArea fx:id="commitMessageTextArea" prefHeight="120.0" prefWidth="600.0" promptText="Write your commit message here" />
+        <Label fx:id="warningLabel" text="Commit message cannot be empty" visible="false" />
+    </children>
+</VBox>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" prefWidth="450.0" spacing="15.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.GitSyncUI">
+   <children>
+      <TextArea fx:id="consoleTextArea" editable="false" prefHeight="200.0" prefWidth="200.0" />
+      <GridPane alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Button fx:id="pushButton" contentDisplay="CENTER" mnemonicParsing="false" text="Push&#10;(Upload changes to GitHub)&#10;" textAlignment="CENTER" wrapText="true" />
+            <Button fx:id="pullButton" mnemonicParsing="false" text="Pull&#10;(Download changes from GitHub)" textAlignment="CENTER" wrapText="true" GridPane.columnIndex="1" />
+         </children>
+      </GridPane>
+   </children>
+</VBox>

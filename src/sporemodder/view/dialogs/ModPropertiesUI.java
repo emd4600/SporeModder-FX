@@ -248,6 +248,6 @@ public class ModPropertiesUI implements Controller {
 
     @Override
     public Node getMainNode() {
-        return null;
+        return mainNode;
     }
 }

@@ -14,6 +14,13 @@ import java.util.stream.Stream;
 
 public class GitManager {
 
+    public static String getPublishedUrl(String githubUrl) {
+        if (!githubUrl.endsWith("/")) {
+            githubUrl += "/";
+        }
+        return githubUrl + "releases/latest";
+    }
+
     public static abstract class CommandTask extends Task<Void> {
         public Process process;
     }
@@ -26,15 +33,9 @@ public class GitManager {
                 .command(command)
                 .directory(directory.toFile());
         Process p = pb.start();
-//        StreamGobbler errorGobbler = new StreamGobbler(p.getErrorStream(), "ERROR");
-//        StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), "OUTPUT");
-//        outputGobbler.start();
-//        errorGobbler.start();
         int exit = p.waitFor();
-//        errorGobbler.join();
-//        outputGobbler.join();
         if (exit != 0) {
-            throw new AssertionError(String.format("runCommand returned %d", exit));
+            throw new RuntimeException(String.format("runCommand returned %d", exit));
         }
     }
 
@@ -69,7 +70,7 @@ public class GitManager {
         outputReader.start();
         int exit = p.waitFor();
         if (exit != 0) {
-            throw new AssertionError(String.format("runCommand returned %d", exit));
+            throw new RuntimeException(String.format("runCommand returned %d", exit));
         }
         // Wait for the thread to finish
         outputReader.join();
@@ -152,6 +153,13 @@ public class GitManager {
         return runCommandAsync(task, directory, "git", "pull");
     }
 
+    public static Thread gitCreateTag(CommandTask task, Path directory, String tag) throws IOException, InterruptedException {
+        return runCommandAsync(task, directory, "git", "tag", tag);
+    }
+
+    public static Thread gitPushTag(CommandTask task, Path directory, String tag) throws IOException, InterruptedException {
+        return runCommandAsync(task, directory, "git", "push", "origin", "tag", tag);
+    }
 
     /**
      * Adds the given list of files to the Git index in the given directory.

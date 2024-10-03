@@ -88,9 +88,8 @@ public class GitCommitUI implements Controller {
                 newFilesListView.getItems().stream()
         ).filter(file -> file.selectedProperty.get()).map(file -> file.name).collect(Collectors.toList());
 
-        Path gitDirectory = modBundle.getFolder().toPath();
-        GitManager.gitAddAll(gitDirectory, files);
-        GitManager.gitCommit(modBundle.getFolder().toPath(), commitMessageTextArea.getText());
+        GitManager.gitAddAll(modBundle.getGitRepository(), files);
+        GitManager.gitCommit(modBundle.getGitRepository(), commitMessageTextArea.getText());
     }
 
     private void checkCommitText(String newValue) {
@@ -124,17 +123,16 @@ public class GitCommitUI implements Controller {
     public static void show(ModBundle modBundle) {
         List<String> modifiedFiles;
         List<String> newFiles;
-        Path gitDirectory = modBundle.getFolder().toPath();
         try {
-            modifiedFiles = GitManager.gitGetModifiedFiles(gitDirectory);
-        } catch (IOException | InterruptedException e) {
+            modifiedFiles = GitManager.gitGetModifiedFiles(modBundle.getGitRepository());
+        } catch (Exception e) {
             UIManager.get().showErrorDialog(e, "Error getting unstaged files, the contents of the lists may not be accurate", false);
             e.printStackTrace();
             modifiedFiles = Collections.emptyList();
         }
         try {
-            newFiles = GitManager.gitGetUntrackedFiles(gitDirectory);
-        } catch (IOException | InterruptedException e) {
+            newFiles = GitManager.gitGetUntrackedFiles(modBundle.getGitRepository());
+        } catch (Exception e) {
             UIManager.get().showErrorDialog(e, "Error getting unstaged files, the contents of the lists may not be accurate", false);
             e.printStackTrace();
             newFiles = Collections.emptyList();

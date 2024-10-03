@@ -1246,10 +1246,9 @@ public class ProjectManager extends AbstractManager {
 	 * @throws InterruptedException
 	 */
 	public void initializeModBundleGit(ModBundle modBundle) throws IOException, InterruptedException {
-		Path gitDirectory = modBundle.getFolder().toPath();
-		GitManager.gitInit(gitDirectory);
-		GitManager.gitAddAll(gitDirectory);
-		GitManager.gitCommit(gitDirectory, "Initial commit");
+		GitManager.gitInit(modBundle.getGitRepository());
+		GitManager.gitAddAll(modBundle.getGitRepository());
+		GitManager.gitCommit(modBundle.getGitRepository(), "Initial commit");
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {

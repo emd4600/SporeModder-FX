@@ -15,5 +15,6 @@
                 <Pane prefHeight="16.0" prefWidth="70.0" />
             </graphic>
         </RibbonButton>
+        <RibbonButton fx:id="btnGitPublish" contentDisplay="TOP" mnemonicParsing="false" text="Publish Mod" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
     </nodes>
 </RibbonGroup>

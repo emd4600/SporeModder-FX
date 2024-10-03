@@ -197,6 +197,10 @@ public class ModBundle {
         return folder;
     }
 
+    public Path getGitRepository() {
+        return getFolder().toPath();
+    }
+
     /**
      * Returns the 'data' folder that contains this mod's SMFX package projects.
      * @return

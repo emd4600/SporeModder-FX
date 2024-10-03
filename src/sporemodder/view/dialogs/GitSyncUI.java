@@ -31,28 +31,11 @@ public class GitSyncUI implements Controller {
     @FXML
     private Button pullButton;
 
-    private class ConsoleOutputCommandTask extends GitManager.CommandTask {
-        @Override
-        public Void call() throws Exception {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    final String text = line;
-                    Platform.runLater(() -> consoleTextArea.appendText(text + "\n"));
-                }
-            }
-            int exit = process.waitFor();
-            if (exit != 0) {
-                throw new AssertionError(String.format("runCommand returned %d", exit));
-            }
-            Platform.runLater(() -> {
-                consoleTextArea.appendText("Done\n");
-                pullButton.setDisable(false);
-                pushButton.setDisable(false);
-            });
-            return null;
-        }
-    }
+    private Runnable onConsoleDone = () -> {
+        consoleTextArea.appendText("Done\n");
+        pullButton.setDisable(false);
+        pushButton.setDisable(false);
+    };
 
     @FXML
     private void initialize() {
@@ -61,8 +44,8 @@ public class GitSyncUI implements Controller {
             pullButton.setDisable(true);
             pushButton.setDisable(true);
             try {
-                GitManager.gitPull(new ConsoleOutputCommandTask(), modBundle.getFolder().toPath());
-            } catch (IOException | InterruptedException e) {
+                GitManager.gitPull(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
+            } catch (Exception e) {
                 UIManager.get().showErrorDialog(e, "Failed to pull to git", false);
             }
         });
@@ -71,8 +54,8 @@ public class GitSyncUI implements Controller {
             pullButton.setDisable(true);
             pushButton.setDisable(true);
             try {
-                GitManager.gitPush(new ConsoleOutputCommandTask(), modBundle.getFolder().toPath());
-            } catch (IOException | InterruptedException e) {
+                GitManager.gitPush(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
+            } catch (Exception e) {
                 UIManager.get().showErrorDialog(e, "Failed to push to git", false);
             }
         });

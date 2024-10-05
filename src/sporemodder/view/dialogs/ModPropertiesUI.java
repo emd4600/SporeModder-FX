@@ -26,7 +26,6 @@ public class ModPropertiesUI implements Controller {
     private static final String WARNING_UNIQUE_TAG_EMPTY = "Unique tag cannot be empty";
     private static final int MIN_UNIQUE_TAG_LENGTH = 6;
     private static final String WARNING_UNIQUE_TOO_SHORT = "Unique tag must have at least " + MIN_UNIQUE_TAG_LENGTH + " characters";
-    private static final String DLLS_LIST_NEW_ITEM_TEXT = "Double-click to add a file";
 
 
     private Dialog<ButtonType> dialog;

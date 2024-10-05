@@ -1,23 +1,12 @@
 package sporemodder.view.dialogs;
 
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import sporemodder.GitManager;
+import sporemodder.util.GitCommands;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
 import sporemodder.view.Controller;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class GitSyncUI implements Controller {
     private Dialog<ButtonType> dialog;
@@ -44,7 +33,7 @@ public class GitSyncUI implements Controller {
             pullButton.setDisable(true);
             pushButton.setDisable(true);
             try {
-                GitManager.gitPull(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
+                GitCommands.gitPull(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
             } catch (Exception e) {
                 UIManager.get().showErrorDialog(e, "Failed to pull to git", false);
             }
@@ -54,7 +43,7 @@ public class GitSyncUI implements Controller {
             pullButton.setDisable(true);
             pushButton.setDisable(true);
             try {
-                GitManager.gitPush(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
+                GitCommands.gitPush(new ConsoleOutputCommandTask(consoleTextArea, onConsoleDone), modBundle.getGitRepository());
             } catch (Exception e) {
                 UIManager.get().showErrorDialog(e, "Failed to push to git", false);
             }

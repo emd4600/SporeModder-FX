@@ -22,7 +22,6 @@ package sporemodder;
 import java.awt.Desktop;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -1246,9 +1245,9 @@ public class ProjectManager extends AbstractManager {
 	 * @throws InterruptedException
 	 */
 	public void initializeModBundleGit(ModBundle modBundle) throws IOException, InterruptedException {
-		GitManager.gitInit(modBundle.getGitRepository());
-		GitManager.gitAddAll(modBundle.getGitRepository());
-		GitManager.gitCommit(modBundle.getGitRepository(), "Initial commit");
+		GitCommands.gitInit(modBundle.getGitRepository());
+		GitCommands.gitAddAll(modBundle.getGitRepository());
+		GitCommands.gitCommit(modBundle.getGitRepository(), "Initial commit");
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {

@@ -1,0 +1,359 @@
+package sporemodder;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import sporemodder.util.GamePathConfiguration;
+import sporemodder.util.GitCommands;
+import sporemodder.view.dialogs.GitAuthenticateUI;
+import sporemodder.view.dialogs.GitPublishModUI;
+import sporemodder.view.dialogs.SetGitUserUI;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
+
+public class GitHubManager extends AbstractManager {
+
+    private static final String PROPERTY_gitUsername = "gitUsername";
+    private static final String PROPERTY_gitEmail = "gitEmail";
+
+    private String clientId;
+    private String username;
+    private String emailAddress;
+    private String userAccessToken;
+    private String lastDeviceLoginCode;
+
+    /**
+     * Returns the current instance of the GitHubManager class.
+     */
+    public static GitHubManager get() {
+        return MainApp.get().getGitHubManager();
+    }
+
+    // If we reuse the same instance, it hangs on some requests...
+    private HttpClient getHttpClient() {
+        return HttpClient.newBuilder().connectTimeout(Duration.of(15, SECONDS)).build();
+    }
+
+    @Override
+    public void initialize(Properties properties) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(GitHubManager.class.getResourceAsStream("/sporemodder/resources/githubApp.txt")))) {
+            clientId = reader.readLine().trim();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        username = properties.getProperty(PROPERTY_gitUsername);
+        emailAddress = properties.getProperty(PROPERTY_gitEmail);
+        if (username != null) username = username.trim();
+        if (emailAddress != null) emailAddress = emailAddress.trim();
+    }
+
+    @Override public void saveSettings(Properties properties) {
+        if (username != null && !username.isBlank()) {
+            properties.put(PROPERTY_gitUsername, username);
+        }
+        if (emailAddress != null && !emailAddress.isBlank()) {
+            properties.put(PROPERTY_gitEmail, emailAddress);
+        }
+    }
+
+    public boolean hasUsernameAndEmail() {
+        return username != null && !username.isBlank() && emailAddress != null && !emailAddress.isBlank();
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    /**
+     * Processes an HTTP response by checking the status code and if it's OK, splitting the body into key-value pairs
+     * and returning them as a map. If the status code is not OK, throws an IOException with the body as the message.
+     *
+     * @param httpResponse the HTTP response to process
+     * @return the map of key-value pairs from the response body
+     * @throws IOException if the status code is not OK
+     */
+    private static Map<String, String> processHttpResponse(HttpResponse<String> httpResponse) throws IOException {
+        if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
+            System.out.println(httpResponse.body());
+            String[] splits = httpResponse.body().split("&");
+            Map<String, String> result = new HashMap<>();
+            for (String split : splits) {
+                String[] keyValue = split.split("=", 2);
+                result.put(keyValue[0], keyValue.length > 1 ? keyValue[1] : "");
+            }
+            return result;
+        } else {
+            System.err.println("HTTP Error: " + httpResponse.statusCode());
+            throw new IOException(httpResponse.body());
+        }
+    }
+
+    private HttpRequest.Builder builderWithAuth(String url) {
+        return HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/vnd.github+json")
+                .header("Authorization", "Bearer " + userAccessToken)
+                .header("X-GitHub-Api-Version", "2022-11-28");
+    }
+
+    public Map<String, String> requestDeviceLogin() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://github.com/login/device/code?client_id=" + clientId))
+                .version(HttpClient.Version.HTTP_1_1)
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        Map<String, String> result = processHttpResponse(getHttpClient().send(request, HttpResponse.BodyHandlers.ofString()));
+        lastDeviceLoginCode = result.get("device_code");
+        return result;
+    }
+
+    public Map<String, String> checkDeviceLoginRequest() throws IOException, InterruptedException {
+        assert lastDeviceLoginCode != null;
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://github.com/login/oauth/access_token" +
+                        "?client_id=" + clientId +
+                        "&device_code=" + lastDeviceLoginCode +
+                        "&grant_type=urn:ietf:params:oauth:grant-type:device_code"))
+                .version(HttpClient.Version.HTTP_1_1)
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        return processHttpResponse(getHttpClient().send(request, HttpResponse.BodyHandlers.ofString()));
+    }
+
+    private boolean validateUserAccessToken() throws IOException, InterruptedException {
+        HttpRequest request = builderWithAuth("https://api.github.com/user")
+                .version(HttpClient.Version.HTTP_1_1)
+                .GET()
+                .build();
+        HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        // Our App does not have access for user data, but we don't care
+        // We only want to know if we were authenticated
+        return httpResponse.statusCode() != HttpURLConnection.HTTP_UNAUTHORIZED;
+    }
+
+    private boolean hasValidUserAccessToken() {
+        if (userAccessToken == null) {
+            return false;
+        }
+        try {
+            return validateUserAccessToken();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void setUserAccessToken(String userAccessToken) {
+        this.userAccessToken = userAccessToken;
+    }
+
+    public boolean requireUserAccessToken() {
+        if (hasValidUserAccessToken()) {
+            return true;
+        } else {
+            return GitAuthenticateUI.show();
+        }
+    }
+
+    public boolean requireUsernameAndEmail() {
+        if (hasUsernameAndEmail()) {
+            return true;
+        } else {
+            return SetGitUserUI.show();
+        }
+    }
+
+    public JSONArray getGitHubSSHKeys() throws IOException, InterruptedException {
+        HttpRequest request = builderWithAuth("https://api.github.com/user/keys")
+                .version(HttpClient.Version.HTTP_1_1)
+                .GET()
+                .build();
+        HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println(httpResponse.statusCode());
+        System.out.println(httpResponse.body());
+        if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
+            return new JSONArray(httpResponse.body());
+        } else {
+            return null;
+        }
+    }
+
+    public boolean addGitHubSSHKey(String sshKey) throws IOException, InterruptedException {
+        String computerName = System.getenv("COMPUTERNAME");
+        if (computerName == null) {
+            computerName = System.getenv("HOSTNAME");
+        }
+        String title = emailAddress + (computerName == null ? "" : computerName);
+        HttpRequest request = builderWithAuth("https://api.github.com/user/keys")
+                .version(HttpClient.Version.HTTP_1_1)
+                .POST(HttpRequest.BodyPublishers.ofString(new JSONObject()
+                .put("title", title)
+                .put("key", sshKey)
+                .toString()))
+                .build();
+        HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println(httpResponse.statusCode());
+        System.out.println(httpResponse.body());
+        return httpResponse.statusCode() == HttpURLConnection.HTTP_CREATED;
+    }
+
+    private String checkSSHKeyIfSameEmail(String sshKey) {
+        String[] splits = sshKey.trim().split(" ");
+        if (splits[splits.length - 1].equalsIgnoreCase(emailAddress)) {
+            return sshKey.trim();
+        }
+        return null;
+    }
+
+    /**
+     * Reads the contents of the file and, if the last segment (separated by whitespace) is the same as
+     * the configured email address, it returns the contents.
+     * @param path
+     * @return
+     * @throws IOException
+     */
+    private String readSSHKeyIfSameEmail(Path path) throws IOException {
+        if (Files.exists(path)) {
+            return checkSSHKeyIfSameEmail(Files.readString(path));
+        }
+        return null;
+    }
+
+    private Path findGitBashExecutable() {
+        try {
+            List<String> gitPaths = GitCommands.runCommandCaptureOutput(Paths.get(System.getProperty("user.home")), "where", "git.exe");
+            if (!gitPaths.isEmpty()) {
+                Path gitPath = Paths.get(gitPaths.get(0));
+                Path gitBashPath = gitPath.resolve("../../bin/bash.exe");
+                if (Files.exists(gitBashPath)) {
+                    return gitBashPath.normalize();
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the text of an existing ssh key in this computer associated with the current emailAddress.
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String findComputerSSHKeys() throws IOException, InterruptedException {
+        // First try: find directly under User/.ssh/id_ed25519.pub or id_rsa.pub
+        Path userDir = Paths.get(System.getProperty("user.home"));
+        Path edFile = userDir.resolve(".ssh/id_ed25519.pub");
+        String sshKey = readSSHKeyIfSameEmail(edFile);
+        if (sshKey != null) {
+            return sshKey;
+        }
+
+        Path rsaFile = userDir.resolve(".ssh/id_rsa.pub");
+        sshKey = readSSHKeyIfSameEmail(rsaFile);
+        if (sshKey != null) {
+            return sshKey;
+        }
+
+        // Second try: using git bash
+        Path gitBashPath = findGitBashExecutable();
+        if (gitBashPath != null) {
+            try {
+                sshKey = checkSSHKeyIfSameEmail(GitCommands.runCommandCaptureOutput(userDir,
+                        gitBashPath.toAbsolutePath().toString(), "-c", "cat ~/.ssh/id_ed25519.pub").get(0));
+                if (sshKey != null) {
+                    return sshKey;
+                }
+            } catch (Exception e) {
+            }
+            return checkSSHKeyIfSameEmail(GitCommands.runCommandCaptureOutput(userDir,
+                    gitBashPath.toAbsolutePath().toString(), "-c", "cat ~/.ssh/id_rsa.pub").get(0));
+        }
+
+        return null;
+    }
+
+    // GitHub sshKey does not contain the email, which the computer one does at the end
+    private String removeEmailFromSSHKey(String sshKey) {
+        return sshKey.substring(0, sshKey.lastIndexOf(" "));
+    }
+
+    /**
+     * Ensures that the GitHub account has an SSH key associated with the current computer.
+     * First it finds the existing SSH keys in the computer, and tries connecting those to GitHub.
+     * If no computer SSH key is found, it creates a new one.
+     * Returns true if the SSH key existed or was created and added successfully, false otherwise.
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public boolean ensureGitHubUserHasSSHKey() throws IOException, InterruptedException {
+        String sshKey = null;
+        try {
+            sshKey = findComputerSSHKeys();
+            if (sshKey != null) {
+                sshKey = removeEmailFromSSHKey(sshKey);
+                // Check if user already has this key in the GitHub account
+                JSONArray keys = getGitHubSSHKeys();
+                if (keys != null) {
+                    for (int i = 0; i < keys.length(); ++i) {
+                        JSONObject item = keys.getJSONObject(i);
+                        if (sshKey.equals(item.getString("key"))) {
+                            System.out.println("FOUND ONE!");
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (sshKey == null) {
+            // Create new ssh key
+            Path gitBashPath = findGitBashExecutable();
+            if (gitBashPath == null) {
+                throw new IOException("Failed to generate SSH keys, cannot find Git Bash");
+            }
+            GitCommands.runCommand(gitBashPath, "-c", "ssh-keygen -t ed25519 -C \"" + emailAddress +
+                    "\" -f ~/.ssh/id_ed25519 -N \"\"");
+            sshKey = GitCommands.runCommandCaptureOutput(gitBashPath, "-c", "cat ~/.ssh/id_ed25519.pub").get(0);
+        }
+
+        // Add SSH key to GitHub
+        System.out.println("Adding key...");
+        return addGitHubSSHKey(sshKey);
+    }
+}

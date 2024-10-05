@@ -1,25 +1,19 @@
 package sporemodder.view.dialogs;
 
-import javafx.application.Platform;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import sporemodder.GitManager;
+import sporemodder.util.GitCommands;
 import sporemodder.MainApp;
-import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
 import sporemodder.view.Controller;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 public class GitPublishModUI implements Controller {
     private static final String WARNING_EMPTY = "Version tag cannot be empty";
@@ -98,9 +92,9 @@ public class GitPublishModUI implements Controller {
     }
 
     private void doGitPushTag() throws IOException, InterruptedException {
-        GitManager.gitPushTag(new ConsoleOutputCommandTask(consoleTextArea, () -> {
+        GitCommands.gitPushTag(new ConsoleOutputCommandTask(consoleTextArea, () -> {
 
-            String publishedUrl = GitManager.getPublishedUrl(modBundle.getGithubUrl());
+            String publishedUrl = GitCommands.getPublishedUrl(modBundle.getGithubUrl());
 
             VBox vbox = new VBox();
             vbox.getChildren().add(new Label("Congratulations! Your mod '" + modBundle.getName() + "', version " +
@@ -120,7 +114,7 @@ public class GitPublishModUI implements Controller {
     }
 
     private void doGitPushAndPushTag() throws IOException, InterruptedException {
-        GitManager.gitPush(new ConsoleOutputCommandTask(consoleTextArea, () -> {
+        GitCommands.gitPush(new ConsoleOutputCommandTask(consoleTextArea, () -> {
             consoleTextArea.appendText("Pushing tag...\n");
             UIManager.get().tryAction(this::doGitPushTag, ERROR_MOD_PUBLISH, false);
         }), modBundle.getGitRepository());
@@ -130,7 +124,7 @@ public class GitPublishModUI implements Controller {
         consoleTextArea.appendText("Creating tag...\n");
 
         ConsoleOutputCommandTask pushTagTask = new ConsoleOutputCommandTask(consoleTextArea, () -> {
-            String publishedUrl = GitManager.getPublishedUrl(modBundle.getGithubUrl());
+            String publishedUrl = GitCommands.getPublishedUrl(modBundle.getGithubUrl());
 
             Hyperlink hyperlink = new Hyperlink(publishedUrl);
             hyperlink.setOnAction(event -> {
@@ -158,16 +152,16 @@ public class GitPublishModUI implements Controller {
         });
         ConsoleOutputCommandTask pushTask = new ConsoleOutputCommandTask(consoleTextArea, () -> {
             consoleTextArea.appendText("Pushing tag...\n");
-            UIManager.get().tryAction(() ->  GitManager.gitPushTag(pushTagTask, modBundle.getGitRepository(), versionTextField.getText()),
+            UIManager.get().tryAction(() ->  GitCommands.gitPushTag(pushTagTask, modBundle.getGitRepository(), versionTextField.getText()),
                     ERROR_MOD_PUBLISH, false);
         });
         ConsoleOutputCommandTask createTagTask = new ConsoleOutputCommandTask(consoleTextArea, () -> {
             consoleTextArea.appendText("Pushing changes...\n");
-            UIManager.get().tryAction(() -> GitManager.gitPush(pushTask, modBundle.getGitRepository()),
+            UIManager.get().tryAction(() -> GitCommands.gitPush(pushTask, modBundle.getGitRepository()),
                     ERROR_MOD_PUBLISH, false);
         });
 
-        GitManager.gitCreateTag(createTagTask, modBundle.getGitRepository(), versionTextField.getText());
+        GitCommands.gitCreateTag(createTagTask, modBundle.getGitRepository(), versionTextField.getText());
 
         BiConsumer<ConsoleOutputCommandTask, WorkerStateEvent> failAction =
                 (task, event) -> UIManager.get().showErrorDialog(task.getException(), ERROR_MOD_PUBLISH, false);

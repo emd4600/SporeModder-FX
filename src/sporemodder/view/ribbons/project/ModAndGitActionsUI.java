@@ -6,7 +6,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import sporemodder.GitManager;
+import sporemodder.GitHubManager;
+import sporemodder.util.GitCommands;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
@@ -14,7 +15,6 @@ import sporemodder.view.Controller;
 import sporemodder.view.UIUpdateListener;
 import sporemodder.view.dialogs.*;
 
-import java.io.IOException;
 import java.util.Optional;
 
 public class ModAndGitActionsUI implements Controller, UIUpdateListener {
@@ -29,6 +29,8 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
     private Button btnGitSync;
     @FXML
     private Button btnGitPublish;
+    @FXML
+    private Button btnGitLogin;
 
     @Override
     public Node getMainNode() {
@@ -48,7 +50,7 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you push without committed, these changes won't be uploaded, \n" +
                             "and pulling might cause merging trouble. Are you sure you want to continue?",
-                    "Sync without commiting")) {
+                    "Sync without committing")) {
                 GitSyncUI.show(modBundle);
             }
         });
@@ -57,8 +59,15 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you publish without committing, these changes won't be part \n" +
                             "of the published mod. Are you sure you want to continue?",
-                    "Publish without commiting")) {
+                    "Publish without committing")) {
                 GitPublishModUI.show(modBundle);
+            }
+        });
+
+        btnGitLogin.setOnAction(event -> {
+            if (GitHubManager.get().requireUsernameAndEmail() && GitHubManager.get().requireUserAccessToken()) {
+                UIManager.get().showDialog("You logged in successfully!");
+                UIManager.get().setOverlay(false);
             }
         });
 
@@ -67,8 +76,8 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
 
     private boolean checkAndShowUncommitedChangesDialog(ModBundle modBundle, String text, String continueText) {
         try {
-            if (!GitManager.gitGetUntrackedFiles(modBundle.getGitRepository()).isEmpty() ||
-                    !GitManager.gitGetModifiedFiles(modBundle.getGitRepository()).isEmpty()) {
+            if (!GitCommands.gitGetUntrackedFiles(modBundle.getGitRepository()).isEmpty() ||
+                    !GitCommands.gitGetModifiedFiles(modBundle.getGitRepository()).isEmpty()) {
                 Label label = new Label();
                 label.setWrapText(true);
 

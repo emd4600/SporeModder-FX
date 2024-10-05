@@ -2,12 +2,12 @@ package sporemodder.view.dialogs;
 
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;
-import sporemodder.GitManager;
+import sporemodder.util.GitCommands;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class ConsoleOutputCommandTask extends GitManager.CommandTask {
+public class ConsoleOutputCommandTask extends GitCommands.CommandTask {
 
     private Runnable onDone;
     private TextArea consoleTextArea;

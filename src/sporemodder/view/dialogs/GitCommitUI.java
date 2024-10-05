@@ -6,13 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.util.Callback;
-import sporemodder.GitManager;
+import sporemodder.util.GitCommands;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
 import sporemodder.view.Controller;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -88,8 +87,8 @@ public class GitCommitUI implements Controller {
                 newFilesListView.getItems().stream()
         ).filter(file -> file.selectedProperty.get()).map(file -> file.name).collect(Collectors.toList());
 
-        GitManager.gitAddAll(modBundle.getGitRepository(), files);
-        GitManager.gitCommit(modBundle.getGitRepository(), commitMessageTextArea.getText());
+        GitCommands.gitAddAll(modBundle.getGitRepository(), files);
+        GitCommands.gitCommit(modBundle.getGitRepository(), commitMessageTextArea.getText());
     }
 
     private void checkCommitText(String newValue) {
@@ -124,14 +123,14 @@ public class GitCommitUI implements Controller {
         List<String> modifiedFiles;
         List<String> newFiles;
         try {
-            modifiedFiles = GitManager.gitGetModifiedFiles(modBundle.getGitRepository());
+            modifiedFiles = GitCommands.gitGetModifiedFiles(modBundle.getGitRepository());
         } catch (Exception e) {
             UIManager.get().showErrorDialog(e, "Error getting unstaged files, the contents of the lists may not be accurate", false);
             e.printStackTrace();
             modifiedFiles = Collections.emptyList();
         }
         try {
-            newFiles = GitManager.gitGetUntrackedFiles(modBundle.getGitRepository());
+            newFiles = GitCommands.gitGetUntrackedFiles(modBundle.getGitRepository());
         } catch (Exception e) {
             UIManager.get().showErrorDialog(e, "Error getting unstaged files, the contents of the lists may not be accurate", false);
             e.printStackTrace();

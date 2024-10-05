@@ -1,4 +1,4 @@
-package sporemodder;
+package sporemodder.util;
 
 import javafx.concurrent.Task;
 
@@ -9,10 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
-public class GitManager {
+public class GitCommands {
 
     public static String getPublishedUrl(String githubUrl) {
         if (!githubUrl.endsWith("/")) {

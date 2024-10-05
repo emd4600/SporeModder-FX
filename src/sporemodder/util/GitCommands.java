@@ -198,11 +198,37 @@ public class GitCommands {
         runCommand(directory, "git", "commit", "-m", message);
     }
 
+    public static void gitSetMainBranch(Path directory, String branch) throws IOException, InterruptedException {
+        runCommand(directory, "git", "branch", "-m", branch);
+    }
+
     public static void gitConfig(Path directory, String key, String value) throws IOException, InterruptedException {
         runCommand(directory, "git", "config", key, value);
     }
 
     public static void gitConfigGet(Path directory, String key) throws IOException, InterruptedException {
         runCommand(directory, "git", "config", "--get", key);
+    }
+
+    /**
+     * Returns the URL of the remote named "origin" for the given Git repository directory,
+     * or null if there is no such remote or if the command fails.
+     * @param directory the directory of the Git repository
+     * @return the URL of the remote named "origin", or null
+     */
+    public static String gitGetOriginURL(Path directory) {
+        try {
+            return runCommandCaptureOutput(directory, "git", "remote", "get-url", "origin").get(0);
+        } catch (IOException | InterruptedException e) {
+            return null;
+        }
+    }
+
+    public static void gitSetOriginURL(Path directory, String url) throws IOException, InterruptedException {
+        runCommand(directory, "git", "remote", "set-url", "origin", url);
+    }
+
+    public static void gitAddOriginURL(Path directory, String url) throws IOException, InterruptedException {
+        runCommand(directory, "git", "remote", "add", "origin", url);
     }
 }

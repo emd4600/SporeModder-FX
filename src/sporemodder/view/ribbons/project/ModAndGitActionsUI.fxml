@@ -17,5 +17,6 @@
         </RibbonButton>
         <RibbonButton fx:id="btnGitPublish" contentDisplay="TOP" mnemonicParsing="false" text="Publish Mod" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
         <RibbonButton fx:id="btnGitLogin" contentDisplay="TOP" mnemonicParsing="false" text="Log in to GitHub" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnCreateRepository" contentDisplay="TOP" mnemonicParsing="false" text="Create GitHub Repository" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
     </nodes>
 </RibbonGroup>

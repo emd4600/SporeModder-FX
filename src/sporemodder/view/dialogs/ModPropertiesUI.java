@@ -205,7 +205,7 @@ public class ModPropertiesUI implements Controller {
         modBundle.setDisplayName(nameTextField.getText());
         modBundle.setDescription(descriptionTextField.getText());
         modBundle.setUniqueTag(uniqueTextField.getText());
-        modBundle.setGithubUrl(githubTextField.getText());
+//        modBundle.setGithubUrl(githubTextField.getText());
         modBundle.setWebsiteUrl(websiteTextField.getText());
         modBundle.setCausesSaveDataDependency(dataDependencyCheckBox.isSelected());
         modBundle.setRequiresGalaxyReset(galaxyResetCheckBox.isSelected());

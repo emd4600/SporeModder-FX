@@ -123,9 +123,10 @@ public class CreateProjectUI implements Controller {
 		// Initialize package project folder
 		projectManager.initializeProject(project);
 
-		//TODO only if doesn't have custom data
 		// Save ModInfo
-		modBundle.saveModInfo();
+		if (!modBundle.hasCustomModInfo()) {
+			modBundle.saveModInfo();
+		}
 
 		if (newModButton.isSelected()) {
 			// Initialize git repository

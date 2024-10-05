@@ -31,6 +31,8 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
     private Button btnGitPublish;
     @FXML
     private Button btnGitLogin;
+    @FXML
+    private Button btnCreateRepository;
 
     @Override
     public Node getMainNode() {
@@ -83,6 +85,15 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             }
         });
 
+        btnCreateRepository.setOnAction(event -> {
+            ModBundle modBundle = ProjectManager.get().getActiveModBundle();
+            if (!GitHubManager.get().warnIfRepositoryAlreadyHasRemote(modBundle.getGitRepository()) ||
+                    !GitHubManager.get().requireUserAccessToken()) {
+                return;
+            }
+            CreateRepositoryUI.show(modBundle);
+        });
+
         UIManager.get().addListener(this);
     }
 
@@ -123,6 +134,7 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
         boolean hasNoActiveMod = ProjectManager.get().getActiveModBundle() == null;
         btnModProperties.setDisable(hasNoActiveMod);
         btnGitCommit.setDisable(hasNoActiveMod);
+        btnCreateRepository.setDisable(hasNoActiveMod);
         // TODO for these, check that it has github url and user
         btnGitSync.setDisable(hasNoActiveMod);
         btnGitPublish.setDisable(hasNoActiveMod);

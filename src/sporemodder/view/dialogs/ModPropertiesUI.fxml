@@ -48,18 +48,18 @@
                </tooltip></Label>
             <TextField fx:id="uniqueTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="descriptionTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label text="GitHub Page:" GridPane.rowIndex="3">
+            <Label text="GitHub Page:" GridPane.rowIndex="4">
                <tooltip>
                   <Tooltip text="URL to the GitHub repository that hosts the mod. This is where the mod will be uploaded and published, and where the launcher can check for updates to your mod." />
                </tooltip>
             </Label>
-            <TextField fx:id="githubTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label text="Website:" GridPane.rowIndex="4">
+            <TextField fx:id="githubTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text="Website:" GridPane.rowIndex="3">
                <tooltip>
                   <Tooltip text="URL to a website with more info of your mod; usually, it is the GitHub repository's README page." />
                </tooltip>
             </Label>
-            <TextField fx:id="websiteTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="websiteTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <Label text="Is experimental" GridPane.rowIndex="5">
                <tooltip>
                   <Tooltip text="The user will be warned when installed a mod marked as experimental. If set to 'AUTO', it will depend on the version tag used when publishing the mod." />

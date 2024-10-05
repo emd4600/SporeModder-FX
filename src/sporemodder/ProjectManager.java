@@ -1248,6 +1248,7 @@ public class ProjectManager extends AbstractManager {
 		GitCommands.gitInit(modBundle.getGitRepository());
 		GitCommands.gitAddAll(modBundle.getGitRepository());
 		GitCommands.gitCommit(modBundle.getGitRepository(), "Initial commit");
+		GitCommands.gitSetMainBranch(modBundle.getGitRepository(), "main");
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {

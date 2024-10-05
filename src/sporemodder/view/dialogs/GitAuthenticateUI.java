@@ -109,6 +109,8 @@ public class GitAuthenticateUI implements Controller {
                                 "You authenticated as '" + userDataLogin + "', but the username saved in SporeModder FX" +
                                         " is '" + GitHubManager.get().getUsername() + "'. This might cause problems with git.\n" +
                                         "If you want to change it, restart SporeModder FX, or change the username in 'config.properties'.");
+
+                        GitHubManager.get().setUsername(userDataLogin);
                     }
                 }
             } catch (Exception e) {

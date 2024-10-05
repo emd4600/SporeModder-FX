@@ -26,10 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -434,5 +431,93 @@ public class GitHubManager extends AbstractManager {
 
             return hasGitInstalled();
         }
+    }
+
+    public List<String> getUserRepositoryNames() {
+        List<String> result = new ArrayList<>();
+        try {
+            HttpRequest request = builderWithAuth("https://api.github.com/user/repos" +
+                    "?visibility=all" +
+                    "&per_page=100" +
+                    "&affiliation=owner")
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .GET()
+                    .build();
+            HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
+                JSONArray items = new JSONArray(httpResponse.body());
+                for (int i = 0; i < items.length(); ++i) {
+                    JSONObject item = items.getJSONObject(i);
+                    result.add(item.getString("name"));
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public JSONObject createGitHubRepository(String repositoryName, String description, boolean isPrivate) throws IOException, InterruptedException {
+        HttpRequest request = builderWithAuth("https://api.github.com/user/repos")
+                .version(HttpClient.Version.HTTP_1_1)
+                .POST(HttpRequest.BodyPublishers.ofString(new JSONObject()
+                        .put("name", repositoryName)
+                        .put("description", description)
+                        .put("homepage", "https://github.com/" + username + "/" + repositoryName)
+                        .put("private", isPrivate)
+                        .toString()))
+                .build();
+        HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        if (httpResponse.statusCode() == HttpURLConnection.HTTP_CREATED) {
+            return new JSONObject(httpResponse.body());
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * If the mod already has a remote repository configured, show a warning dialog
+     * asking the user if they want to overwrite it. If the user chooses to overwrite,
+     * this method returns true. If the user chooses to cancel, this method returns false.
+     * If the mod does not have a remote repository configured, this method returns true.
+     * @param directory The directory of the mod.
+     * @return true if the user chooses to overwrite, false if the user chooses to cancel.
+     */
+    public boolean warnIfRepositoryAlreadyHasRemote(Path directory) {
+        String remoteUrl = null;
+        try {
+            remoteUrl = GitCommands.gitGetOriginURL(directory);
+        } catch (Exception e) {
+        }
+
+        if (remoteUrl != null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    null,
+                    ButtonType.YES, ButtonType.CANCEL);
+            alert.setTitle("Mod already has repository");
+            Label label = new Label("The mod already has a remote repository configured. Do you want to overwrite it?");
+            label.setWrapText(true);
+            alert.getDialogPane().setContent(label);
+
+            Optional<ButtonType> result = UIManager.get().showDialog(alert);
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    public void setRepositoryTopics(String repositoryName, List<String> topics) throws IOException, InterruptedException {
+        HttpRequest request = builderWithAuth("https://api.github.com/repos/" + username + "/" + repositoryName + "/topics")
+                .version(HttpClient.Version.HTTP_1_1)
+                .POST(HttpRequest.BodyPublishers.ofString(new JSONObject()
+                        .put("names", new JSONArray().putAll(topics))
+                        .toString()))
+                .build();
+        HttpResponse<String> result = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        return;
     }
 }

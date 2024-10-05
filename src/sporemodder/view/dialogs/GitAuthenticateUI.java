@@ -1,11 +1,10 @@
 package sporemodder.view.dialogs;
 
 import javafx.application.Platform;
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import org.json.JSONObject;
 import sporemodder.GitHubManager;
 import sporemodder.MainApp;
 import sporemodder.UIManager;
@@ -17,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GitAuthenticateUI implements Controller {
 
@@ -101,6 +99,23 @@ public class GitAuthenticateUI implements Controller {
             currentTimer.purge();
         }
         if (dialogResult) {
+            // Check if authenticated user is the same as the SMFX config one
+            try {
+                JSONObject userData = GitHubManager.get().getGitHubUserDataJson();
+                if (userData != null && userData.has("login")) {
+                    String userDataLogin = userData.getString("login");
+                    if (!userDataLogin.equals(GitHubManager.get().getUsername())) {
+                        UIManager.get().showDialog(Alert.AlertType.WARNING,
+                                "You authenticated as '" + userDataLogin + "', but the username saved in SporeModder FX" +
+                                        " is '" + GitHubManager.get().getUsername() + "'. This might cause problems with git.\n" +
+                                        "If you want to change it, restart SporeModder FX, or change the username in 'config.properties'.");
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Try to generate SSH keys
             UIManager.get().tryAction(() -> {
                 if (!GitHubManager.get().ensureGitHubUserHasSSHKey()) {
                     throw new RuntimeException("Failed to generate SSH keys. Some git actions might not work.");

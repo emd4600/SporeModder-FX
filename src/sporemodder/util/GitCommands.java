@@ -197,4 +197,12 @@ public class GitCommands {
     public static void gitCommit(Path directory, String message) throws IOException, InterruptedException {
         runCommand(directory, "git", "commit", "-m", message);
     }
+
+    public static void gitConfig(Path directory, String key, String value) throws IOException, InterruptedException {
+        runCommand(directory, "git", "config", key, value);
+    }
+
+    public static void gitConfigGet(Path directory, String key) throws IOException, InterruptedException {
+        runCommand(directory, "git", "config", "--get", key);
+    }
 }

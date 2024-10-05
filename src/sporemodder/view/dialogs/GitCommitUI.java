@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.util.Callback;
+import sporemodder.GitHubManager;
 import sporemodder.util.GitCommands;
 import sporemodder.UIManager;
 import sporemodder.util.ModBundle;
@@ -115,7 +116,15 @@ public class GitCommitUI implements Controller {
 
         Optional<ButtonType> result = UIManager.get().showDialog(dialog);
         if (result.isPresent() && result.get() == ButtonType.APPLY) {
-            UIManager.get().tryAction(this::doGitCommit, "Failed to commit changes into git");
+            boolean doCommit = true;
+            if (!GitHubManager.get().hasConfigGitUsernameAndEmailInRepo(modBundle.getGitRepository())) {
+                doCommit = UIManager.get().tryAction(
+                        () -> GitHubManager.get().configGitUsernameAndEmailForRepo(modBundle.getGitRepository()),
+                        "Failed to configure git username and email. Commit will not be performed.", false);
+            }
+            if (doCommit) {
+                UIManager.get().tryAction(this::doGitCommit, "Failed to commit changes into git");
+            }
         }
     }
 

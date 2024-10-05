@@ -5,7 +5,9 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import sporemodder.GitHubManager;
 import sporemodder.MainApp;
+import sporemodder.ProjectManager;
 import sporemodder.UIManager;
+import sporemodder.util.ModBundle;
 import sporemodder.view.Controller;
 
 import java.io.IOException;
@@ -88,6 +90,16 @@ public class SetGitUserUI implements Controller {
             GitHubManager.get().setUsername(usernameTextField.getText());
             GitHubManager.get().setEmailAddress(emailTextField.getText());
             MainApp.get().saveSettings();
+
+            ModBundle currentMod = ProjectManager.get().getActiveModBundle();
+            if (currentMod != null) {
+                try {
+                    GitHubManager.get().configGitUsernameAndEmailForRepo(currentMod.getGitRepository());
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             return true;
         } else {
             return false;

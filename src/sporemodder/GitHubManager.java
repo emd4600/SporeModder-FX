@@ -1,5 +1,10 @@
 package sporemodder;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import sporemodder.util.GamePathConfiguration;
@@ -105,7 +110,6 @@ public class GitHubManager extends AbstractManager {
      */
     private static Map<String, String> processHttpResponse(HttpResponse<String> httpResponse) throws IOException {
         if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
-            System.out.println(httpResponse.body());
             String[] splits = httpResponse.body().split("&");
             Map<String, String> result = new HashMap<>();
             for (String split : splits) {
@@ -151,15 +155,28 @@ public class GitHubManager extends AbstractManager {
         return processHttpResponse(getHttpClient().send(request, HttpResponse.BodyHandlers.ofString()));
     }
 
-    private boolean validateUserAccessToken() throws IOException, InterruptedException {
+    private HttpResponse<String> getGitHubUserData() throws IOException, InterruptedException {
         HttpRequest request = builderWithAuth("https://api.github.com/user")
                 .version(HttpClient.Version.HTTP_1_1)
                 .GET()
                 .build();
-        HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        return getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private boolean validateUserAccessToken() throws IOException, InterruptedException {
+        HttpResponse<String> httpResponse = getGitHubUserData();
         // Our App does not have access for user data, but we don't care
         // We only want to know if we were authenticated
         return httpResponse.statusCode() != HttpURLConnection.HTTP_UNAUTHORIZED;
+    }
+
+    public JSONObject getGitHubUserDataJson() throws IOException, InterruptedException {
+        HttpResponse<String> httpResponse = getGitHubUserData();
+        if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
+            return new JSONObject(httpResponse.body());
+        } else {
+            return null;
+        }
     }
 
     private boolean hasValidUserAccessToken() {
@@ -200,8 +217,6 @@ public class GitHubManager extends AbstractManager {
                 .GET()
                 .build();
         HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(httpResponse.statusCode());
-        System.out.println(httpResponse.body());
         if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK) {
             return new JSONArray(httpResponse.body());
         } else {
@@ -223,8 +238,6 @@ public class GitHubManager extends AbstractManager {
                 .toString()))
                 .build();
         HttpResponse<String> httpResponse = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(httpResponse.statusCode());
-        System.out.println(httpResponse.body());
         return httpResponse.statusCode() == HttpURLConnection.HTTP_CREATED;
     }
 
@@ -331,7 +344,6 @@ public class GitHubManager extends AbstractManager {
                     for (int i = 0; i < keys.length(); ++i) {
                         JSONObject item = keys.getJSONObject(i);
                         if (sshKey.equals(item.getString("key"))) {
-                            System.out.println("FOUND ONE!");
                             return true;
                         }
                     }
@@ -353,7 +365,74 @@ public class GitHubManager extends AbstractManager {
         }
 
         // Add SSH key to GitHub
-        System.out.println("Adding key...");
         return addGitHubSSHKey(sshKey);
+    }
+
+    /**
+     * Sets the Git username and email for the given repository directory.
+     * @param directory the directory of the repository
+     * @throws IOException if there is an error running the command
+     * @throws InterruptedException if the thread is interrupted
+     */
+    public void configGitUsernameAndEmailForRepo(Path directory) throws IOException, InterruptedException {
+        GitCommands.gitConfig(directory, "user.name", username);
+        GitCommands.gitConfig(directory, "user.email", emailAddress);
+    }
+
+    public boolean hasConfigGitUsernameAndEmailInRepo(Path directory) {
+        try {
+            // If it is not set the command returns 1, so it raises an exception
+            GitCommands.gitConfigGet(directory, "user.name");
+            GitCommands.gitConfigGet(directory, "user.email");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the user has Git installed.
+     * @return true if the user has Git installed, false otherwise
+     */
+    public boolean hasGitInstalled() {
+        try {
+            // If it is not installed the command returns 1, so it raises an exception
+            GitCommands.runCommand(Paths.get(System.getProperty("user.home")), "git", "--version");
+            return true;
+        } catch (IOException | InterruptedException e) {
+            return false;
+        }
+    }
+
+    /**
+     * If the user has Git installed, returns true. Otherwise, shows a dialog explaining that Git is not installed
+     * and offers a link to download it. If the user closes the dialog and Git is still not installed, returns false.
+     * @return true if the user has Git installed, false otherwise
+     */
+    public boolean requireGitInstalled() {
+        if (hasGitInstalled()) {
+            return true;
+        } else {
+            Label label = new Label("Git is not installed on your computer. You can download it here:");
+            label.setWrapText(true);
+
+            Hyperlink link = new Hyperlink("https://git-scm.com/downloads");
+            link.setWrapText(true);
+            link.setOnAction(event -> {
+                MainApp.get().getHostServices().showDocument(link.getText());
+            });
+
+            VBox vbox = new VBox();
+            vbox.setSpacing(5.0);
+            vbox.getChildren().addAll(label, link);
+
+            Alert alert = new Alert(Alert.AlertType.WARNING, null, ButtonType.OK);
+            alert.setTitle("Git not installed");
+            alert.getDialogPane().setContent(vbox);
+
+            UIManager.get().showDialog(alert);
+
+            return hasGitInstalled();
+        }
     }
 }

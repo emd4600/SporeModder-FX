@@ -43,9 +43,15 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             ModPropertiesUI.show(ProjectManager.get().getActiveModBundle(), true);
         });
         btnGitCommit.setOnAction((event) -> {
+            if (!GitHubManager.get().requireGitInstalled()) {
+                return;
+            }
             GitCommitUI.show(ProjectManager.get().getActiveModBundle());
         });
         btnGitSync.setOnAction((event) -> {
+            if (!GitHubManager.get().requireGitInstalled()) {
+                return;
+            }
             ModBundle modBundle = ProjectManager.get().getActiveModBundle();
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you push without committed, these changes won't be uploaded, \n" +
@@ -55,6 +61,9 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             }
         });
         btnGitPublish.setOnAction((event) -> {
+            if (!GitHubManager.get().requireGitInstalled()) {
+                return;
+            }
             ModBundle modBundle = ProjectManager.get().getActiveModBundle();
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you publish without committing, these changes won't be part \n" +
@@ -65,6 +74,9 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
         });
 
         btnGitLogin.setOnAction(event -> {
+            if (!GitHubManager.get().requireGitInstalled()) {
+                return;
+            }
             if (GitHubManager.get().requireUsernameAndEmail() && GitHubManager.get().requireUserAccessToken()) {
                 UIManager.get().showDialog("You logged in successfully!");
                 UIManager.get().setOverlay(false);

@@ -98,7 +98,9 @@ public class CreateRepositoryUI implements Controller {
                     String newUrl = repository.getString("html_url");
                     modBundle.setDescription(descriptionTextField.getText());
                     modBundle.setGithubUrl(newUrl);
-                    modBundle.setWebsiteUrl(newUrl);
+                    if (modBundle.getWebsiteUrl() == null || modBundle.getWebsiteUrl().isBlank()) {
+                        modBundle.setWebsiteUrl(newUrl);
+                    }
                     modBundle.saveModInfo();
 
                     try {

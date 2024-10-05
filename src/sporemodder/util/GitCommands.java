@@ -231,4 +231,8 @@ public class GitCommands {
     public static void gitAddOriginURL(Path directory, String url) throws IOException, InterruptedException {
         runCommand(directory, "git", "remote", "add", "origin", url);
     }
+
+    public static String gitGetCurrentBranch(Path directory) throws IOException, InterruptedException {
+        return runCommandCaptureOutput(directory, "git", "rev-parse", "--abbrev-ref", "HEAD").get(0);
+    }
 }

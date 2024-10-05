@@ -513,11 +513,10 @@ public class GitHubManager extends AbstractManager {
     public void setRepositoryTopics(String repositoryName, List<String> topics) throws IOException, InterruptedException {
         HttpRequest request = builderWithAuth("https://api.github.com/repos/" + username + "/" + repositoryName + "/topics")
                 .version(HttpClient.Version.HTTP_1_1)
-                .POST(HttpRequest.BodyPublishers.ofString(new JSONObject()
+                .PUT(HttpRequest.BodyPublishers.ofString(new JSONObject()
                         .put("names", new JSONArray().putAll(topics))
                         .toString()))
                 .build();
-        HttpResponse<String> result = getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        return;
+        getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 }

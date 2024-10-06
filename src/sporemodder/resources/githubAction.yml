@@ -122,6 +122,7 @@ jobs:
   build-dlls:
     name: Build C++ Project DLL
     needs: find-cpp-projects
+    if: ${{ toJSON(fromJSON(needs.find-cpp-projects.outputs.matrix).solution) != '[]' }}
     strategy:
       matrix: ${{ fromJSON(needs.find-cpp-projects.outputs.matrix) }}
     runs-on: windows-2022
@@ -199,6 +200,7 @@ jobs:
   build-sporemod:
     name: Build Sporemod
     needs: [ build-packages, build-dlls ]
+    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -226,7 +228,7 @@ jobs:
 
       # any tag that doesn't match v.X.X.X (with an optional single character path, eg v1.2.73b) will be marked as experimental
       - name: Check if version tag is experimental
-        run: echo "${{ github.ref_name }}" | grep -qE '^v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+[[:alpha:]]?$'
+        run: echo "${{ github.ref_name }}" | grep -qE '^v?[[:digit:]]+(\.[[:digit:]]+)?(\.[[:digit:]]+)?[[:alpha:]]?$'
         id: test_experimental
         continue-on-error: true
       - name: Save isExperimental on environment variable

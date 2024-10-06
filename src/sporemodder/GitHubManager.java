@@ -41,6 +41,7 @@ public class GitHubManager extends AbstractManager {
     private String emailAddress;
     private String userAccessToken;
     private String lastDeviceLoginCode;
+    private boolean hasAskedForGitUser;
 
     /**
      * Returns the current instance of the GitHubManager class.
@@ -518,5 +519,13 @@ public class GitHubManager extends AbstractManager {
                         .toString()))
                 .build();
         getHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    /**
+     * If the user has never inputted their GitHub username, shows a dialog that asks for it.
+     * After the dialog is shown, it will not be shown again.
+     */
+    public void showFirstTimeDialog() {
+        SetGitUserUI.show();
     }
 }

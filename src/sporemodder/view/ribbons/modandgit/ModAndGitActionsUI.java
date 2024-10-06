@@ -1,11 +1,12 @@
-package sporemodder.view.ribbons.project;
+package sporemodder.view.ribbons.modandgit;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import sporemodder.GitHubManager;
 import sporemodder.util.GitCommands;
 import sporemodder.ProjectManager;
@@ -41,8 +42,36 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
         return mainNode;
     }
 
+    private Node createSizedGraphic(ImageView imageView, int width) {
+        HBox pane = new HBox(imageView);
+        pane.setAlignment(Pos.CENTER);
+        pane.setPrefHeight(imageView.getFitHeight());
+        pane.setPrefWidth(width);
+//        imageView.setTranslateX((width - imageView.getFitWidth()) / 2);
+        return pane;
+    }
+
     @FXML
     protected void initialize() {
+
+        UIManager ui = UIManager.get();
+
+        btnModProperties.setGraphic(ui.loadIcon("config.png", 0, 38, true));
+        btnGitSync.setGraphic(createSizedGraphic(ui.loadIcon("git-sync.png", 0, 38, true), 55));
+        btnCreateRepository.setGraphic(ui.loadIcon("git-new-repo.png", 0, 38, true));
+        btnGitCommit.setGraphic(ui.loadIcon("git-commit.png", 0, 38, true));
+        btnGitLogin.setGraphic(ui.loadIcon("git-login.png", 0, 38, true));
+        btnGitPublish.setGraphic(ui.loadIcon("git-publish.png", 0, 38, true));
+        btnConnectExistingRepository.setGraphic(ui.loadIcon("git-connect-existing-repo.png", 0, 38, true));
+
+        btnModProperties.setTooltip(new Tooltip("Configure the properties of the mod, such as name and description"));
+        btnGitSync.setTooltip(new Tooltip("Upload or download changes from the git repository"));
+        btnCreateRepository.setTooltip(new Tooltip("Create a new GitHub repository for this mod"));
+        btnGitCommit.setTooltip(new Tooltip("Commit (i.e. save) changes to the git repository"));
+        btnGitLogin.setTooltip(new Tooltip("Log in to your GitHub account"));
+        btnGitPublish.setTooltip(new Tooltip("Package and publish the mod into the GitHub repository"));
+        btnConnectExistingRepository.setTooltip(new Tooltip("Connect the mod with an existing GitHub repository"));
+
         btnModProperties.setOnAction((event) -> {
             ModPropertiesUI.show(ProjectManager.get().getActiveModBundle(), true);
         });
@@ -53,10 +82,11 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             GitCommitUI.show(ProjectManager.get().getActiveModBundle());
         });
         btnGitSync.setOnAction((event) -> {
-            if (!GitHubManager.get().requireGitInstalled()) {
+            ModBundle modBundle = ProjectManager.get().getActiveModBundle();
+            if (!GitHubManager.get().requireGitInstalled() ||
+                    !requireGitRemote(modBundle, "Pull & Push")) {
                 return;
             }
-            ModBundle modBundle = ProjectManager.get().getActiveModBundle();
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you push without committed, these changes won't be uploaded, \n" +
                             "and pulling might cause merging trouble. Are you sure you want to continue?",
@@ -65,10 +95,11 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
             }
         });
         btnGitPublish.setOnAction((event) -> {
-            if (!GitHubManager.get().requireGitInstalled()) {
+            ModBundle modBundle = ProjectManager.get().getActiveModBundle();
+            if (!GitHubManager.get().requireGitInstalled() ||
+                    !requireGitRemote(modBundle, "Mod Publish")) {
                 return;
             }
-            ModBundle modBundle = ProjectManager.get().getActiveModBundle();
             if (checkAndShowUncommitedChangesDialog(modBundle,
                     "You have uncommitted changes. If you publish without committing, these changes won't be part \n" +
                             "of the published mod. Are you sure you want to continue?",
@@ -89,7 +120,8 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
 
         btnCreateRepository.setOnAction(event -> {
             ModBundle modBundle = ProjectManager.get().getActiveModBundle();
-            if (!GitHubManager.get().warnIfRepositoryAlreadyHasRemote(modBundle.getGitRepository()) ||
+            if (!GitHubManager.get().requireGitInstalled() ||
+                    !GitHubManager.get().warnIfRepositoryAlreadyHasRemote(modBundle.getGitRepository()) ||
                     !GitHubManager.get().requireUserAccessToken()) {
                 return;
             }
@@ -98,13 +130,26 @@ public class ModAndGitActionsUI implements Controller, UIUpdateListener {
 
         btnConnectExistingRepository.setOnAction(event -> {
             ModBundle modBundle = ProjectManager.get().getActiveModBundle();
-            if (!GitHubManager.get().warnIfRepositoryAlreadyHasRemote(modBundle.getGitRepository())) {
+            if (!GitHubManager.get().requireGitInstalled() ||
+                    !GitHubManager.get().warnIfRepositoryAlreadyHasRemote(modBundle.getGitRepository())) {
                 return;
             }
             ConnectToRepositoryUI.show(modBundle);
         });
 
         UIManager.get().addListener(this);
+    }
+
+    private boolean requireGitRemote(ModBundle modBundle, String actionName) {
+        if (GitCommands.gitGetOriginURL(modBundle.getGitRepository()) != null) {
+            return true;
+        } else {
+            UIManager.get().showDialog(Alert.AlertType.INFORMATION,
+                    "This repository doesn't have a remote set up. " + actionName + " is not possible.\n" +
+                            "Use 'Create GitHub Repository' or 'Connect to Existing Repository' before.");
+
+            return false;
+        }
     }
 
     private boolean checkAndShowUncommitedChangesDialog(ModBundle modBundle, String text, String continueText) {

@@ -270,6 +270,8 @@ public class MainApp extends Application {
 		
 		if (uiManager.isFirstTime()) {
 			gameManager.showFirstTimeDialog();
+
+			gitHubManager.showFirstTimeDialog();
 			
 			projectManager.showFirstTimeDialog();
 			

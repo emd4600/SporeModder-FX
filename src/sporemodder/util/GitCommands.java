@@ -25,7 +25,7 @@ public class GitCommands {
 
     public static void runCommand(Path directory, String... command) throws IOException, InterruptedException {
         if (directory == null || !Files.exists(directory)) {
-            throw new RuntimeException("Can't run command in non-existing directory '" + directory + "'");
+            throw new IOException("Can't run command in non-existing directory '" + directory + "'");
         }
         ProcessBuilder pb = new ProcessBuilder()
                 .command(command)
@@ -33,7 +33,7 @@ public class GitCommands {
         Process p = pb.start();
         int exit = p.waitFor();
         if (exit != 0) {
-            throw new RuntimeException(String.format("runCommand returned %d", exit));
+            throw new IOException(String.format("runCommand returned %d", exit));
         }
     }
 
@@ -47,7 +47,7 @@ public class GitCommands {
      */
     public static List<String> runCommandCaptureOutput(Path directory, String... command) throws IOException, InterruptedException {
         if (directory == null || !Files.exists(directory)) {
-            throw new RuntimeException("Can't run command in non-existing directory '" + directory + "'");
+            throw new IOException("Can't run command in non-existing directory '" + directory + "'");
         }
         ProcessBuilder pb = new ProcessBuilder()
                 .command(command)
@@ -68,7 +68,7 @@ public class GitCommands {
         outputReader.start();
         int exit = p.waitFor();
         if (exit != 0) {
-            throw new RuntimeException(String.format("runCommand returned %d", exit));
+            throw new IOException(String.format("runCommand returned %d", exit));
         }
         // Wait for the thread to finish
         outputReader.join();
@@ -87,7 +87,7 @@ public class GitCommands {
      */
     public static Thread runCommandAsync(CommandTask task, Path directory, String... command) throws IOException, InterruptedException {
         if (directory == null || !Files.exists(directory)) {
-            throw new RuntimeException("Can't run command in non-existing directory '" + directory + "'");
+            throw new IOException("Can't run command in non-existing directory '" + directory + "'");
         }
         ProcessBuilder pb = new ProcessBuilder()
                 .redirectErrorStream(true)

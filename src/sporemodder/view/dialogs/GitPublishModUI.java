@@ -82,6 +82,7 @@ public class GitPublishModUI implements Controller {
         // Avoid the Publish button closing by default
         button.addEventFilter(ActionEvent.ACTION, event -> {
             event.consume();
+            button.setDisable(true);
             consoleTextArea.clear();
             UIManager.get().tryAction(this::doPublishMod, ERROR_MOD_PUBLISH, false);
         });
@@ -89,35 +90,6 @@ public class GitPublishModUI implements Controller {
         validateVersionTag();
 
         UIManager.get().showDialog(dialog);
-    }
-
-    private void doGitPushTag() throws IOException, InterruptedException {
-        GitCommands.gitPushTag(new ConsoleOutputCommandTask(consoleTextArea, () -> {
-
-            String publishedUrl = GitCommands.getPublishedUrl(modBundle.getGithubUrl());
-
-            VBox vbox = new VBox();
-            vbox.getChildren().add(new Label("Congratulations! Your mod '" + modBundle.getName() + "', version " +
-                    versionTextField.getText() + " has been published."));
-            vbox.getChildren().add(new Hyperlink(publishedUrl));
-            vbox.getChildren().add(new Label("The mod is not public yet. When you are sure you want to release it, head over to the link and make it public."));
-
-            Alert alert = new Alert(Alert.AlertType.NONE, null, ButtonType.OK);
-            alert.setTitle("Mod published");
-            alert.getDialogPane().setContent(vbox);
-            UIManager.get().showDialog(alert);
-
-            dialog.setResult(ButtonType.OK);
-            dialog.close();
-
-        }), modBundle.getGitRepository(), versionTextField.getText());
-    }
-
-    private void doGitPushAndPushTag() throws IOException, InterruptedException {
-        GitCommands.gitPush(new ConsoleOutputCommandTask(consoleTextArea, () -> {
-            consoleTextArea.appendText("Pushing tag...\n");
-            UIManager.get().tryAction(this::doGitPushTag, ERROR_MOD_PUBLISH, false);
-        }), modBundle.getGitRepository());
     }
 
     private void doPublishMod() throws IOException, InterruptedException {
@@ -222,8 +194,8 @@ public class GitPublishModUI implements Controller {
                 return "Version tag cannot end with a dot";
             }
             String[] splits = versionTag.split("\\.");
-            if (splits.length > 4) {
-                return "Version tag cannot have more than 4 parts";
+            if (splits.length > 3) {
+                return "Version tag cannot have more than 3 parts";
             }
             for (int i = 0; i < splits.length - 1; i++) {
                 if (splits[i].isEmpty()) {

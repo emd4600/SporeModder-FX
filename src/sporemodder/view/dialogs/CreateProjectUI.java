@@ -49,6 +49,7 @@ public class CreateProjectUI implements Controller {
 
 	private static final String ILLEGAL_CHARACTERS = "/\\[]{}";
 
+	private static final String WARNING_UNIQUE_TAG_EMPTY = "Unique tag cannot be empty";
 	private static final String WARNING_MOD_NAME_EMPTY = "Mod name cannot be empty";
 	private static final String WARNING_PROJECT_NAME_EMPTY = "Package project name cannot be empty";
 	private static final String WARNING_MOD_NAME_REPEATED = "A mod with this name already exists";
@@ -68,6 +69,10 @@ public class CreateProjectUI implements Controller {
 	
 	@FXML
 	private TextField modNameField;
+	@FXML
+	private TextField uniqueTagTextField;
+	@FXML
+	private TextField descriptionTextField;
 	@FXML
 	private TextField projectNameField;
 
@@ -89,8 +94,6 @@ public class CreateProjectUI implements Controller {
 	
 	private final List<CheckBox> presetBoxes = new ArrayList<>();
 
-	private boolean projectNameEqualsModName = true;
-
 	@Override
 	public Pane getMainNode() {
 		return mainNode;
@@ -103,6 +106,8 @@ public class CreateProjectUI implements Controller {
 		ModBundle modBundle;
 		if (newModButton.isSelected()) {
 			modBundle = new ModBundle(modNameField.getText());
+			modBundle.setDescription(descriptionTextField.getText());
+			modBundle.setUniqueTag(uniqueTagTextField.getText());
 			projectManager.initializeModBundle(modBundle);
 		} else {
 			modBundle = projectManager.getModBundle(existingModChoiceBox.getValue());
@@ -141,6 +146,8 @@ public class CreateProjectUI implements Controller {
 		
 		node.dialog.setTitle("Create new project");
 		node.dialog.getDialogPane().getButtonTypes().setAll(ButtonType.CANCEL, ButtonType.OK);
+
+		node.validateModFields();
 		
 		UIManager.get().showDialog(node.dialog).ifPresent(result -> {
 			if (result == ButtonType.OK && UIManager.get().tryAction(node::createMod,
@@ -163,10 +170,33 @@ public class CreateProjectUI implements Controller {
 			return false;
 		}
 		if (newModButton.isSelected() &&
-				(modName.isEmpty() || hasIllegalChar(modName) || ProjectManager.get().hasModBundle(modName))) {
+				(modName.isEmpty() || hasIllegalChar(modName) || ProjectManager.get().hasModBundle(modName)) ||
+				uniqueTagTextField.getText().isBlank()) {
 			return false;
 		}
 		return true;
+	}
+
+	private void validateModFields() {
+		boolean showWarning = true;
+		// Show warning if name collides
+		String modName = modNameField.getText();
+		if (ProjectManager.get().hasModBundle(modName)) {
+			modWarningLabel.setText(WARNING_MOD_NAME_REPEATED);
+		} else {
+			if (modName.isEmpty()) {
+				modWarningLabel.setText(WARNING_MOD_NAME_EMPTY);
+			} else if (hasIllegalChar(modName)) {
+				modWarningLabel.setText(WARNING_MOD_NAME_INVALID);
+			} else if (uniqueTagTextField.getText().isBlank()) {
+				modWarningLabel.setText(WARNING_UNIQUE_TAG_EMPTY);
+			} else {
+				showWarning = false;
+			}
+		}
+
+		modWarningLabel.setVisible(showWarning);
+		dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(showWarning || !isValid());
 	}
 
 	private void setWarningLabel(Label label, String text) {
@@ -183,34 +213,45 @@ public class CreateProjectUI implements Controller {
 		// Set a default text
 		projectNameField.setText("Project " + (ProjectManager.get().getProjects().size() + 1));
 		modNameField.setText(projectNameField.getText());
+		uniqueTagTextField.setText(ModBundle.generateUniqueTagFromName(projectNameField.getText()));
 
 		modWarningLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
 		projectWarningLabel.setGraphic(UIManager.get().getAlertIcon(AlertType.WARNING, 16, 16));
 
+		// Ban illegal characters
+		modNameField.setTextFormatter(new TextFormatter<>(change -> {
+			String text = change.getControlNewText();
+			if (ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
+				return null;
+			} else {
+				return change;
+			}
+		}));
+		projectNameField.setTextFormatter(new TextFormatter<>(change -> {
+			String text = change.getControlNewText();
+			if (ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
+				return null;
+			} else {
+				return change;
+			}
+		}));
+		uniqueTagTextField.setTextFormatter(new TextFormatter<>(change -> {
+			String text = change.getControlNewText();
+			if (text.matches(ModBundle.UNIQUETAG_ALLOWED_REGEX + "+")) {
+				return change;
+			} else {
+				return null;  // reject the change
+			}
+		}));
+
 		modNameField.textProperty().addListener((obs, oldValue, newValue) -> {
 			// Replicate changes to project name
-			if (projectNameEqualsModName) {
+			if (projectNameField.getText().equals(oldValue)) {
 				projectNameField.setText(newValue);
 			}
-			// Show alert if name collides
-			if (ProjectManager.get().hasModBundle(newValue)) {
-				setWarningLabel(modWarningLabel, WARNING_MOD_NAME_REPEATED);
-				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(true);
-			} else {
-				if (newValue.isEmpty()) {
-					setWarningLabel(modWarningLabel, WARNING_MOD_NAME_EMPTY);
-				} else if (hasIllegalChar(newValue)) {
-					setWarningLabel(modWarningLabel, WARNING_MOD_NAME_INVALID);
-				} else {
-					setWarningLabel(modWarningLabel, null);
-				}
-				dialog.getDialogPane().lookupButton(ButtonType.OK).setDisable(!isValid());
-			}
+			validateModFields();
 		});
 		projectNameField.textProperty().addListener((obs, oldValue, newValue) -> {
-			// Check if mod name and project name have to be coordinated
-			// If the project name has changed to be different, don't coordinate anymore
-			projectNameEqualsModName = newValue.equals(modNameField.getText());
 			// Show alert if name collides
 			if (ProjectManager.get().hasProject(newValue)) {
 				setWarningLabel(projectWarningLabel, WARNING_PROJECT_NAME_REPEATED);

@@ -40,11 +40,7 @@ import sporemodder.PathManager;
 import sporemodder.UIManager;
 import sporemodder.util.ProjectItem;
 import sporemodder.view.HideablePane.HideSide;
-import sporemodder.view.ribbons.EditRibbonTab;
-import sporemodder.view.ribbons.ProgramMenu;
-import sporemodder.view.ribbons.ProjectRibbonTab;
-import sporemodder.view.ribbons.RibbonTabController;
-import sporemodder.view.ribbons.UtilRibbonTab;
+import sporemodder.view.ribbons.*;
 
 /**
  * The class that contains the main user interface. The SporeModderFX UI is basically a window with a ribbon, and the following objects:
@@ -195,6 +191,10 @@ public class UserInterface extends RibbonWindow {
 		UtilRibbonTab utilRibbonTab = new UtilRibbonTab();
 		utilRibbonTab.addTab(ribbon);
 		ribbonTabs.put(UtilRibbonTab.ID.toUpperCase(), utilRibbonTab);
+
+		ModAndGitRibbonTab modAndGitRibbonTab = new ModAndGitRibbonTab();
+		modAndGitRibbonTab.addTab(ribbon);
+		ribbonTabs.put(ModAndGitRibbonTab.ID.toUpperCase(), modAndGitRibbonTab);
 		
 		programMenu = new ProgramMenu();
 		programMenu.initialize(ribbon);

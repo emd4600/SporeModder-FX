@@ -71,3 +71,5 @@ config.properties
 SporeModderFX.jar
 desktop.ini
 dependency-reduced-pom.xml
+/src/sporemodder/resources/githubApp.txt
+/config.properties

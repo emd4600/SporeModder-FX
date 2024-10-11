@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import io.github.emd4600.javafxribbon.RibbonGroup?>
+<?import io.github.emd4600.javafxribbon.RibbonButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<?import javafx.scene.layout.Pane?>
+<RibbonGroup fx:id="mainNode" text="" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ribbons.modandgit.ModAndGitActionsUI">
+    <nodes>
+        <RibbonButton fx:id="btnModProperties" contentDisplay="TOP" mnemonicParsing="false" text="Mod Properties" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnGitPublish" contentDisplay="TOP" mnemonicParsing="false" text="Publish Mod" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnGitLogin" contentDisplay="TOP" mnemonicParsing="false" text="Log in to GitHub" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnGitCommit" contentDisplay="TOP" mnemonicParsing="false" text="Git Commit" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnGitSync" contentDisplay="TOP" mnemonicParsing="false" prefWidth="70.0" text="Git Sync&#10;(Push &#38; Pull)" textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
+            <graphic>
+                <Pane prefHeight="16.0" prefWidth="70.0" />
+            </graphic>
+        </RibbonButton>
+        <RibbonButton fx:id="btnCreateRepository" contentDisplay="TOP" mnemonicParsing="false" text="Create GitHub Repository" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+        <RibbonButton fx:id="btnConnectExistingRepository" contentDisplay="TOP" mnemonicParsing="false" text="Connect to Existing Repository" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+    </nodes>
+</RibbonGroup>

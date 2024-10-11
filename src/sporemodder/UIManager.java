@@ -677,6 +677,18 @@ public class UIManager extends AbstractManager {
 			return false;
 		}
 	}
+
+	public boolean tryAction(SimpleAction action, String errorText, boolean disableOverlay) {
+		try {
+			action.doAction();
+			return true;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			showErrorDialog(e, errorText, disableOverlay);
+			return false;
+		}
+	}
 	
 	/**
 	 * Shows an error dialog that displays information about an exception. This method blocks execution until the user closes the dialog.

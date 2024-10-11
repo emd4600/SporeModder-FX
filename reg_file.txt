@@ -107542,7 +107542,6 @@ sg_binaryog_16pack
 gge_ring_soft
 civ_icon_food
 sola_disk
-<<<<<<< HEAD
 
 ep1_epic_predator_cinematic~	0xF94481EC
 
@@ -108261,7 +108260,6 @@ design_blockin_switch_static
 gait2_mage
 branches_MetaballBone
 ce_leg_insect
-<<<<<<< HEAD
 planetplanner
 ep1_teleporter_entrance
 icn-talk-to

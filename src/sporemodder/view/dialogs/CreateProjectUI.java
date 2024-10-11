@@ -20,6 +20,7 @@ package sporemodder.view.dialogs;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +36,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import sporemodder.GitHubManager;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
+import sporemodder.util.GitCommands;
 import sporemodder.util.ModBundle;
 import sporemodder.util.Project;
 import sporemodder.util.ProjectPreset;

@@ -3,9 +3,9 @@
 <?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="mainNode" prefHeight="538.0" spacing="20.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.IntroUI">
+<HBox fx:id="mainNode" prefHeight="538.0" spacing="20.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.IntroUI">
    <children>
       <GridPane prefHeight="518.0" prefWidth="545.0">
         <columnConstraints>
@@ -74,15 +74,23 @@
          </children>
       </GridPane>
       <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <BorderPane fx:id="documentationPane">
-         <top>
-            <Label styleClass="introUI-title" text="Documentation &amp; Tutorials" BorderPane.alignment="CENTER">
+      <VBox fx:id="documentationPane" spacing="5.0">
+         <children>
+            <Label styleClass="introUI-title" text="Community Links">
                <font>
                   <Font name="System Bold" size="17.0" />
                </font>
             </Label>
-         </top>
-      </BorderPane>
+            <Hyperlink fx:id="modBrowserLink" text="Spore Mod Browser" />
+            <Hyperlink fx:id="moddingServerLink" layoutX="10.0" layoutY="47.0" text="Spore Modding Discord Server" />
+            <Hyperlink fx:id="officialServerLink" text="Spore Official Discord Server" />
+            <Label layoutX="10.0" layoutY="10.0" styleClass="introUI-title" text="Documentation &amp; Tutorials">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
    </children>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

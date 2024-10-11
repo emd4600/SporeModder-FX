@@ -2214,6 +2214,7 @@ public class ProjectManager extends AbstractManager {
 		}
 		
 		boolean loadedCorrectly = true;
+
 		final Project project = new Project(sourceFolder.getName(), sourceFolder, null);
 		project.loadSettings();
 		if (ProjectSettingsUI.show(project, false)) {

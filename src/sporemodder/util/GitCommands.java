@@ -24,17 +24,7 @@ public class GitCommands {
     }
 
     public static void runCommand(Path directory, String... command) throws IOException, InterruptedException {
-        if (directory == null || !Files.exists(directory)) {
-            throw new IOException("Can't run command in non-existing directory '" + directory + "'");
-        }
-        ProcessBuilder pb = new ProcessBuilder()
-                .command(command)
-                .directory(directory.toFile());
-        Process p = pb.start();
-        int exit = p.waitFor();
-        if (exit != 0) {
-            throw new IOException(String.format("runCommand returned %d", exit));
-        }
+        runCommandCaptureOutput(directory, command);
     }
 
     /**
@@ -50,6 +40,7 @@ public class GitCommands {
             throw new IOException("Can't run command in non-existing directory '" + directory + "'");
         }
         ProcessBuilder pb = new ProcessBuilder()
+                .redirectErrorStream(true)
                 .command(command)
                 .directory(directory.toFile());
         Process p = pb.start();
@@ -68,7 +59,17 @@ public class GitCommands {
         outputReader.start();
         int exit = p.waitFor();
         if (exit != 0) {
-            throw new IOException(String.format("runCommand returned %d", exit));
+            outputReader.join();
+            StringBuilder sb = new StringBuilder();
+            sb.append("runCommand returned ");
+            sb.append(exit);
+            sb.append("\n");
+            System.err.println("[ERROR] runCommand returned " + exit);
+            for (String line : lines) {
+                System.err.println(line);
+                sb.append(line).append('\n');
+            }
+            throw new IOException(sb.toString());
         }
         // Wait for the thread to finish
         outputReader.join();

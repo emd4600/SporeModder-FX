@@ -277,6 +277,24 @@ public class GitHubManager extends AbstractManager {
         return null;
     }
 
+    private static boolean isWindowsOS() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
+    }
+
+    private static List<String> runGitBashCommand(Path gitBashPath, Path directory, String... args) throws IOException, InterruptedException {
+        if (isWindowsOS()) {
+            StringBuilder sb = new StringBuilder();
+            for (String arg : args) {
+                sb.append(arg).append(' ');
+            }
+            String argString = sb.toString().trim();
+            System.out.println(argString);
+            return GitCommands.runCommandCaptureOutput(directory, gitBashPath.toAbsolutePath().toString(), "-c", argString);
+        } else {
+            return GitCommands.runCommandCaptureOutput(directory, args);
+        }
+    }
+
     /**
      * Returns the text of an existing ssh key in this computer associated with the current emailAddress.
      * @return
@@ -286,8 +304,14 @@ public class GitHubManager extends AbstractManager {
     public String findComputerSSHKeys() throws IOException, InterruptedException {
         // First try: find directly under User/.ssh/id_ed25519.pub or id_rsa.pub
         Path userDir = Paths.get(System.getProperty("user.home"));
-        Path edFile = userDir.resolve(".ssh/id_ed25519.pub");
+        Path edFile = userDir.resolve(".ssh/id_ed25519_smfx.pub");
         String sshKey = readSSHKeyIfSameEmail(edFile);
+        if (sshKey != null) {
+            return sshKey;
+        }
+
+        edFile = userDir.resolve(".ssh/id_ed25519.pub");
+        sshKey = readSSHKeyIfSameEmail(edFile);
         if (sshKey != null) {
             return sshKey;
         }
@@ -299,18 +323,17 @@ public class GitHubManager extends AbstractManager {
         }
 
         // Second try: using git bash
-        Path gitBashPath = findGitBashExecutable();
-        if (gitBashPath != null) {
+        boolean windowsOS = isWindowsOS();
+        Path gitBashPath = windowsOS ? findGitBashExecutable() : null;
+        if (!windowsOS || gitBashPath != null) {
             try {
-                sshKey = checkSSHKeyIfSameEmail(GitCommands.runCommandCaptureOutput(userDir,
-                        gitBashPath.toAbsolutePath().toString(), "-c", "cat ~/.ssh/id_ed25519.pub").get(0));
+                sshKey = checkSSHKeyIfSameEmail(runGitBashCommand(gitBashPath, userDir, "cat", "~/.ssh/id_ed25519.pub").get(0));
                 if (sshKey != null) {
                     return sshKey;
                 }
             } catch (Exception e) {
             }
-            return checkSSHKeyIfSameEmail(GitCommands.runCommandCaptureOutput(userDir,
-                    gitBashPath.toAbsolutePath().toString(), "-c", "cat ~/.ssh/id_rsa.pub").get(0));
+            return checkSSHKeyIfSameEmail(runGitBashCommand(gitBashPath, userDir, "cat", "~/.ssh/id_rsa.pub").get(0));
         }
 
         return null;
@@ -335,6 +358,7 @@ public class GitHubManager extends AbstractManager {
         try {
             sshKey = findComputerSSHKeys();
             if (sshKey != null) {
+                System.out.println("[GitHubManager] Found existing SSH key in computer");
                 sshKey = removeEmailFromSSHKey(sshKey);
                 // Check if user already has this key in the GitHub account
                 JSONArray keys = getGitHubSSHKeys();
@@ -342,24 +366,31 @@ public class GitHubManager extends AbstractManager {
                     for (int i = 0; i < keys.length(); ++i) {
                         JSONObject item = keys.getJSONObject(i);
                         if (sshKey.equals(item.getString("key"))) {
+                            System.out.println("[GitHubManager] SSH key already configured in GitHub account; nothing was done");
                             return true;
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
         if (sshKey == null) {
             // Create new ssh key
-            Path gitBashPath = findGitBashExecutable();
-            if (gitBashPath == null) {
-                throw new IOException("Failed to generate SSH keys, cannot find Git Bash");
+            Path gitBashPath = null;
+            if (isWindowsOS()) {
+                gitBashPath = findGitBashExecutable();
+                if (gitBashPath == null) {
+                    throw new IOException("Failed to generate SSH keys, cannot find Git Bash");
+                }
             }
-            GitCommands.runCommand(gitBashPath, "-c", "ssh-keygen -t ed25519 -C \"" + emailAddress +
-                    "\" -f ~/.ssh/id_ed25519 -N \"\"");
-            sshKey = GitCommands.runCommandCaptureOutput(gitBashPath, "-c", "cat ~/.ssh/id_ed25519.pub").get(0);
+            Path userHome = Paths.get(System.getProperty("user.home"));
+            // This does not work on linux because it seems ProcessBuilder does not like empty parameters
+            // In Windows it should work
+            System.out.println("[GitHubManager] Creating a SSH key for GitHub account");
+            runGitBashCommand(gitBashPath, userHome, "ssh-keygen", "-t", "ed25519",
+                    "-C", emailAddress, "-f", "~/.ssh/id_ed25519_smfx", "-N", "''");
+            sshKey = runGitBashCommand(gitBashPath, userHome, "cat", "~/.ssh/id_ed25519_smfx.pub").get(0);
         }
 
         // Add SSH key to GitHub

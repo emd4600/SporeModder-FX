@@ -74,10 +74,12 @@ public class SetGitUserUI implements Controller {
 
         dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
 
-        usernameTextField.setText(GitHubManager.get().getUsername());
-        emailTextField.setText(GitHubManager.get().getEmailAddress());
-        if (usernameTextField.getText() == null) usernameTextField.setText("");
-        if (emailTextField.getText() == null) emailTextField.setText("");
+        String username = GitHubManager.get().getUsername();
+        String email = GitHubManager.get().getEmailAddress();
+        if (username == null) username = "";
+        if (email == null) email = "";
+        usernameTextField.setText(username);
+        emailTextField.setText(email);
 
         Button okButton = ((Button)dialog.getDialogPane().lookupButton(ButtonType.OK));
         okButton.setText("Continue to log in");

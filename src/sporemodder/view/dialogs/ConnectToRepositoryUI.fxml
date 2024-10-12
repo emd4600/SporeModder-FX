@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+
+<VBox fx:id="mainNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" spacing="10.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ConnectToRepositoryUI">
+   <children>
+      <Label text="Set the URL to an existing repository, such as 'https://github.com/emd4600/advanced-creature-paint'. You must have permissions to write to that repository." wrapText="true" />
+      <Label text="Doing this will not synchronize any data between your local computer and the GitHub repository. You can do it later in the 'Git Sync' wnidow (push &amp; pull)." wrapText="true" />
+      <TextField fx:id="urlTextField" />
+      <Label fx:id="warningLabel" text="Repository URL cannot be empty" visible="false" />
+   </children>
+</VBox>

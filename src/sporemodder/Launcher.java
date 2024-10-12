@@ -370,7 +370,7 @@ public class Launcher {
 		@Parameters(index = "0", description = "The input folder to pack.")
 		private File input;
 
-		@Parameters(index = "1", description = "The output DBPF file to generate.")
+		@Parameters(index = "1", description = "The output DBPF file to generate. If the output is a folder, the input must be a project, and the output DBPF name will be taken from the project settings.")
 		private File output;
 
 		@Option(names = {"--compress"}, description = "[Experimental] Compress files bigger than N bytes")

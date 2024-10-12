@@ -5864,3 +5864,53 @@ numNouns
 forestNouns
 speciesFiles
 parentAudio	0x5F6317D5
+
+foodTrayScale	0x9AD14166
+creatureBrainLevelScales	0xB561B9EB
+AllowCreaturePickup	0x39B674A2
+AssociatedGameNounIDs	0xDB9BFC2C
+tribeCreatureScaleMultiplier	0xF463852C
+healthToolRegenRate	0xD21A82B1
+
+struct_puffish
+struct_ducky
+struct_jawheadSmall
+struct_grubby
+struct_booster
+struct_poker
+struct_shysterAlpha
+struct_jawhead
+struct_megamouth
+struct_pinkyAlpha
+struct_stabber
+struct_squiggly
+struct_poisoner
+struct_buzzy
+struct_chomper
+struct_minno1
+struct_minno2
+struct_minno3
+struct_goldy
+struct_shyster
+struct_pinky
+struct_squid
+struct_eggdad
+struct_spikey
+struct_nosey
+struct_stabberAlpha
+struct_eggkid
+struct_eggmom
+struct_jetster
+struct_duckySmall
+struct_goldySpecial
+struct_chomperSmall
+struct_stabberSmall
+struct_spikeySpecial
+struct_buzzyAlpha
+struct_chomperSpecial
+struct_goldy1
+struct_goldy2
+struct_goldy3
+struct_boosterMed
+struct_chomperRock
+markForests

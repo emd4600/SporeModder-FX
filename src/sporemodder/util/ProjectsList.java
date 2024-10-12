@@ -134,6 +134,9 @@ public class ProjectsList {
     }
 
     public void loadLastActiveTimes() {
+        if (!Files.exists(getTimesListFile())) {
+            return;
+        }
         try {
             Files.readAllLines(getTimesListFile()).forEach(line -> {
                 String[] splits = line.split(" ", 2);

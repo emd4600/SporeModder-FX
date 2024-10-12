@@ -45,6 +45,9 @@ public class ModBundlesList {
     }
 
     public void loadList() {
+        if (!Files.exists(getFile())) {
+            return;
+        }
         try {
             Files.readAllLines(getFile()).forEach(line -> {
                 ModBundle modBundle = null;
@@ -65,7 +68,7 @@ public class ModBundlesList {
                     modBundles.put(modBundle.getName().toLowerCase(), modBundle);
                 }
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Failed to read mod bundles list: " + e.getMessage());
         }
     }

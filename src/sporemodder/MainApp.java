@@ -267,6 +267,8 @@ public class MainApp extends Application {
 			Platform.exit();
 			return;
 		}
+
+		hashManager.showInitializationError();
 		
 		if (uiManager.isFirstTime()) {
 			gameManager.showFirstTimeDialog();

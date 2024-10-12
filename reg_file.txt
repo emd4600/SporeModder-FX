@@ -99770,6 +99770,7 @@ SG_destroyed_planet_material
 SG_destroyed_planet_trail_material
 playmode-icon-creepy
 playmode-icon-cute
+TRG_StarterCreaturesOmnivores
 CRG_StarterCreaturesOmnivores
 CRG_StarterCreaturesHerbivores
 CRG_StarterCreaturesCarnivores

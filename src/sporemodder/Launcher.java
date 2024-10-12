@@ -381,8 +381,8 @@ public class Launcher {
 			input = input.getAbsoluteFile();
 			output = output.getAbsoluteFile();
 
-			if (!input.exists() || !input.isFile()) {
-				System.err.println("Cannot pack: input file '" + input.getPath() + "' does not exist");
+			if (!input.exists() || !input.isDirectory()) {
+				System.err.println("Cannot pack: input directory '" + input.getPath() + "' does not exist");
 				return 1;
 			}
 

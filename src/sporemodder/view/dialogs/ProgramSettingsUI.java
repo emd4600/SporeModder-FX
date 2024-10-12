@@ -93,7 +93,7 @@ public class ProgramSettingsUI implements Controller {
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_EXE);
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_ALL);
 			if (!fxcPathField.getText().isEmpty()) chooser.setInitialDirectory(new File(fxcPathField.getText()).getParentFile());
-			
+
 			File result = chooser.showOpenDialog(UIManager.get().getScene().getWindow());
 			
 			if (result != null) {

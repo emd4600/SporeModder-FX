@@ -252,6 +252,9 @@ public class CreateProjectUI implements Controller {
 			if (projectNameField.getText().equals(oldValue)) {
 				projectNameField.setText(newValue);
 			}
+			if (Objects.equals(uniqueTagTextField.getText(), ModBundle.generateUniqueTagFromName(oldValue))) {
+				uniqueTagTextField.setText(ModBundle.generateUniqueTagFromName(newValue));
+			}
 			validateModFields();
 		});
 		projectNameField.textProperty().addListener((obs, oldValue, newValue) -> {

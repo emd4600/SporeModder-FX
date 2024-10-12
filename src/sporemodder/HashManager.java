@@ -74,8 +74,6 @@ public class HashManager extends AbstractManager {
 	private NameRegistry extraRegistry;
 	
 	private final HashMap<String, NameRegistry> registries = new HashMap<String, NameRegistry>();
-
-	private String registryError;
 	
 	@Override
 	public void initialize(Properties properties) {
@@ -88,23 +86,23 @@ public class HashManager extends AbstractManager {
 		try {
 			fileRegistry.read(PathManager.get().getProgramFile(fileRegistry.getFileName()));
 		} catch (Exception e) {
-			registryError = "The file name registry (reg_file.txt) is corrupt or missing.";
+			UIManager.get().setInitializationError("The file name registry (reg_file.txt) is corrupt or missing.");
 		}
 		try {
 			typeRegistry.read(PathManager.get().getProgramFile(typeRegistry.getFileName()));
 		} catch (Exception e) {
-			registryError = "The types registry (reg_type.txt) is corrupt or missing.";
+			UIManager.get().setInitializationError("The types registry (reg_type.txt) is corrupt or missing.");
 		}
 		try {
 			propRegistry.read(PathManager.get().getProgramFile(propRegistry.getFileName()));
 		} catch (Exception e) {
-			registryError = "The property registry (reg_property.txt) is corrupt or missing.";
+			UIManager.get().setInitializationError("The property registry (reg_property.txt) is corrupt or missing.");
 		}
 		try {
 			simulatorRegistry.read(PathManager.get().getProgramFile(simulatorRegistry.getFileName()));
 			simulatorRegistry.read(PathManager.get().getProgramFile("reg_simulator_stub.txt"));
 		} catch (Exception e) {
-			registryError = "The simulator attributes registry (reg_simulator.txt or reg_simulator_stub.txt) is corrupt or missing.";
+			UIManager.get().setInitializationError("The simulator attributes registry (reg_simulator.txt or reg_simulator_stub.txt) is corrupt or missing.");
 		}
 		
 		CnvUnit.loadNameRegistry();
@@ -114,12 +112,6 @@ public class HashManager extends AbstractManager {
 		registries.put(propRegistry.getFileName(), propRegistry);
 		registries.put(simulatorRegistry.getFileName(), simulatorRegistry);
 		registries.put(projectRegistry.getFileName(), projectRegistry);
-	}
-
-	public void showInitializationError() {
-		if (registryError != null) {
-			UIManager.get().showDialog(Alert.AlertType.ERROR, registryError);
-		}
 	}
 	
 	public void replaceRegistries(NameRegistry file, NameRegistry prop, NameRegistry type) {

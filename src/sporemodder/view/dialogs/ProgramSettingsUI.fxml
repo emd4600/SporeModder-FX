@@ -6,12 +6,40 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="mainNode" prefWidth="600.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ProgramSettingsUI">
+<VBox fx:id="mainNode" prefWidth="600.0" styleClass="dialog-content" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ProgramSettingsUI">
    <children>
+      <TitledPane fx:id="gameSettingsPanel1" animated="false" collapsible="false" layoutX="10.0" layoutY="10.0" text="General Settings">
+         <content>
+            <VBox prefWidth="465.0">
+               <children>
+                  <Label text="Projects Folder (leave blank to use default folder):" />
+                  <BorderPane>
+                     <right>
+                        <Button fx:id="findProjectsFolderButton" mnemonicParsing="false" text="Browse..." BorderPane.alignment="CENTER" />
+                     </right>
+                     <center>
+                        <TextField fx:id="projectsFolderTextField" prefHeight="18.0" prefWidth="386.0" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                           <tooltip>
+                              <Tooltip text="SporeModder FX will store and load its projects in this folder" />
+                           </tooltip>
+                        </TextField>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </BorderPane>
+               </children>
+            </VBox>
+         </content>
+      </TitledPane>
       <TitledPane fx:id="gameSettingsPanel" animated="false" collapsible="false" text="Game Settings">
          <content>
             <VBox prefWidth="465.0">

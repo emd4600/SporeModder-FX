@@ -188,6 +188,8 @@ public class MainApp extends Application {
 				e.printStackTrace();
 			}
 		}
+
+		pathManager.loadSettings(settings);
 		
 		// The path managers might be used in other manager initialization methods,
 		// so we ensure we initialize them first.
@@ -268,7 +270,7 @@ public class MainApp extends Application {
 			return;
 		}
 
-		hashManager.showInitializationError();
+		uiManager.showInitializationError();
 		
 		if (uiManager.isFirstTime()) {
 			gameManager.showFirstTimeDialog();

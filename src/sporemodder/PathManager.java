@@ -20,7 +20,9 @@
 package sporemodder;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -33,6 +35,11 @@ public class PathManager extends AbstractManager {
 	private File programFolder;
 	/** The folder where SporeModder projects are. */
 	private File projectsFolder;
+	private boolean isDefaultProjectsFolder;
+	/** Path that will get saved as the Projects folder */
+	public String nextProjectsFolder;
+
+	private static final String PROPERTY_projectsPath = "projectsFolderPath";
 	
 	
 	/**
@@ -73,8 +80,62 @@ public class PathManager extends AbstractManager {
 		    // run in ide
 			programFolder = new File(System.getProperty("user.dir"));
 		}
-		
-		projectsFolder = new File(programFolder, "Projects");
+	}
+
+	public void loadSettings(Properties properties) {
+		String path = properties.getProperty(PROPERTY_projectsPath);
+		if (path != null) {
+			projectsFolder = new File(path);
+			if (!Files.isDirectory(projectsFolder.toPath())) {
+				UIManager.get().setInitializationError("The path to the projects folder does not exist: " + path);
+				projectsFolder = null;
+			}
+		}
+		if (projectsFolder == null) {
+			projectsFolder = getDefaultProjectsFolder();
+		}
+		// Check if the custom path points to the same folder
+		try {
+			isDefaultProjectsFolder = Files.isSameFile(projectsFolder.toPath(), getDefaultProjectsFolder().toPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+			isDefaultProjectsFolder = path == null || path.isBlank();
+		}
+	}
+
+	@Override public void saveSettings(Properties properties) {
+		if (nextProjectsFolder != null) {
+			// non null but blank means reset to default
+			if (nextProjectsFolder.isBlank()) {
+				properties.remove(PROPERTY_projectsPath);
+			} else {
+				properties.put(PROPERTY_projectsPath, nextProjectsFolder);
+			}
+		} else if (!isDefaultProjectsFolder) {
+			properties.put(PROPERTY_projectsPath, projectsFolder.getAbsolutePath());
+		}
+	}
+
+	public File getDefaultProjectsFolder() {
+		return new File(programFolder, "Projects");
+	}
+
+	public String getProjectsFolderStringForSettings() {
+		if (nextProjectsFolder != null) {
+			return nextProjectsFolder;
+		} else if (isDefaultProjectsFolder) {
+			return "";
+		} else {
+			return projectsFolder.getAbsolutePath();
+		}
+	}
+
+	public boolean isDefaultProjectsFolder() {
+		return isDefaultProjectsFolder;
+	}
+
+	public void setNextProjectsFolder(String path) {
+		nextProjectsFolder = path;
 	}
 	
 	/** Returns the folder where the program files are. */

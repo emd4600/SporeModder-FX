@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import sporemodder.ProjectManager;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.MemoryStream;
 import sporemodder.file.filestructures.StreamWriter;
@@ -203,7 +204,7 @@ public class ImportProjectTask extends ResumableTask<Void> {
 			}
 			
 			destination.updateLastTimeUsed();
-			destination.saveSettings();
+			ProjectManager.get().saveProjectsLastActiveTimes();
 		});
 		
 		progressUI.setOnFailed(() -> {

@@ -52,6 +52,7 @@ public class MainApp extends Application {
 	private FileManager fileManager;
 	private UpdateManager updateManager;
 	private FXCompiler fxCompiler;
+	private GitHubManager gitHubManager;
 	
 	private Properties settings;
 	
@@ -61,6 +62,10 @@ public class MainApp extends Application {
 	 */
 	public UIManager getUIManager() {
 		return uiManager;
+	}
+
+	public GitHubManager getGitHubManager() {
+		return gitHubManager;
 	}
 	
 	/**
@@ -169,7 +174,8 @@ public class MainApp extends Application {
 		fileManager = new FileManager();
 		updateManager = new UpdateManager();
 		fxCompiler = new FXCompiler();
-		
+		gitHubManager = new GitHubManager();
+
 		// Initialize it first, otherwise we can't get the settings
 		pathManager.initialize(null);
 		
@@ -182,6 +188,8 @@ public class MainApp extends Application {
 				e.printStackTrace();
 			}
 		}
+
+		pathManager.loadSettings(settings);
 		
 		// The path managers might be used in other manager initialization methods,
 		// so we ensure we initialize them first.
@@ -196,7 +204,8 @@ public class MainApp extends Application {
 		if (!testInit) documentationManager.initialize(settings);
 		formatManager.initialize(settings);
 		fxCompiler.initialize(settings);
-		
+		gitHubManager.initialize(settings);
+
 		ShaderData.initialize();
 		
 		messageManager.postMessage(MessageType.OnSettingsLoad, settings);
@@ -214,7 +223,8 @@ public class MainApp extends Application {
 		formatManager.saveSettings(settings);
 		fileManager.saveSettings(settings);
 		fxCompiler.saveSettings(settings);
-		
+		gitHubManager.saveSettings(settings);
+
 		messageManager.postMessage(MessageType.OnSettingsSave, settings);
 		
 		try (OutputStream stream = new FileOutputStream(pathManager.getProgramFile("config.properties"))) {
@@ -231,6 +241,7 @@ public class MainApp extends Application {
 	
 	@Override
 	public void stop() {
+		gitHubManager.dispose();
 		fxCompiler.dispose();
 		documentationManager.dispose();
 		formatManager.dispose();
@@ -238,7 +249,7 @@ public class MainApp extends Application {
 		projectManager.dispose();
 		hashManager.dispose();
 		uiManager.dispose();
-		
+
 		fileManager.dispose();
 		pathManager.dispose();
 		gameManager.dispose();
@@ -258,9 +269,13 @@ public class MainApp extends Application {
 			Platform.exit();
 			return;
 		}
+
+		uiManager.showInitializationError();
 		
 		if (uiManager.isFirstTime()) {
 			gameManager.showFirstTimeDialog();
+
+			gitHubManager.showFirstTimeDialog();
 			
 			projectManager.showFirstTimeDialog();
 			

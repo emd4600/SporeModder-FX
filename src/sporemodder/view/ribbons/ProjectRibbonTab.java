@@ -23,6 +23,7 @@ import io.github.emd4600.javafxribbon.RibbonGroup;
 import io.github.emd4600.javafxribbon.RibbonTab;
 import sporemodder.UIManager;
 import sporemodder.view.ribbons.project.BasicActionsUI;
+import sporemodder.view.ribbons.modandgit.ModAndGitActionsUI;
 import sporemodder.view.ribbons.project.ModdingActionsUI;
 import sporemodder.view.ribbons.project.OtherProjectRibbonUI;
 
@@ -41,7 +42,7 @@ public class ProjectRibbonTab extends RibbonTabController {
 		basicActions = UIManager.get().loadUI("ribbons/project/BasicActionsUI");
 		moddingActions = UIManager.get().loadUI("ribbons/project/ModdingActionsUI");
 		otherProjectRibbon = UIManager.get().loadUI("ribbons/project/OtherProjectRibbonUI");
-		
+
 		tab.getGroups().add((RibbonGroup) basicActions.getMainNode());
 		tab.getGroups().add((RibbonGroup) moddingActions.getMainNode());
 		tab.getGroups().add((RibbonGroup) otherProjectRibbon.getMainNode());
@@ -58,5 +59,4 @@ public class ProjectRibbonTab extends RibbonTabController {
 	public OtherProjectRibbonUI getOtherProjectRibbonUI() {
 		return otherProjectRibbon;
 	}
-
 }

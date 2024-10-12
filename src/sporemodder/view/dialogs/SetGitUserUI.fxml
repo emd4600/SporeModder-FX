@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" spacing="10.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.SetGitUserUI">
+    <children>
+        <Label text="SporeModder FX allows integration with GitHub. Being connected to GitHub will allow you to upload your mods, and automatically publish them." wrapText="true" />
+        <VBox>
+            <Label text="If you don't have 'git' installed, you can download it here:" wrapText="true" />
+            <Hyperlink fx:id="gitDownloadLink" text="https://git-scm.com/downloads">
+            </Hyperlink>
+        </VBox>
+        <Label text="To use git, you must specify your GitHub username and email. We won't send you anything, it's just to sign git actions with your user." wrapText="true" />
+        <GridPane hgap="10.0" vgap="5.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+            </columnConstraints>
+            <children>
+                <Label text="GitHub Username:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="usernameTextField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Email Address:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <TextField fx:id="emailTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            </children>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+      <Label text="Afterwards, you will be asked to log into GitHub in your browser. Then, if there weren't already, SporeModder FX will set up SSH keys that will allow your computer to upload code to your GitHub repositories." wrapText="true" />
+      <Label fx:id="warningLabel" text="Label" visible="false" />
+    </children>
+</VBox>

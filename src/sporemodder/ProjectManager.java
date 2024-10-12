@@ -20,10 +20,7 @@
 package sporemodder;
 
 import java.awt.Desktop;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -39,6 +36,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.xml.sax.SAXException;
 
@@ -74,22 +72,10 @@ import sporemodder.file.ResourceKey;
 import sporemodder.file.dbpf.DBPFUnpackingTask;
 import sporemodder.file.prop.PropertyList;
 import sporemodder.file.prop.XmlPropParser;
-import sporemodder.util.DefaultProjectItemFactory;
-import sporemodder.util.ImportProjectTask;
-import sporemodder.util.NameRegistry;
-import sporemodder.util.OmitProjectItemFactory;
-import sporemodder.util.Project;
-import sporemodder.util.ProjectItem;
-import sporemodder.util.ProjectItemFactory;
-import sporemodder.util.ProjectNamesItemFactory;
-import sporemodder.util.ProjectPreset;
-import sporemodder.util.ProjectSearcher;
+import sporemodder.util.*;
 import sporemodder.view.ProjectTreeItem;
 import sporemodder.view.ProjectTreeUI;
-import sporemodder.view.dialogs.PackProgressUI;
-import sporemodder.view.dialogs.ProgressDialogUI;
-import sporemodder.view.dialogs.ProjectSettingsUI;
-import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.dialogs.*;
 import sporemodder.view.editors.AbstractEditableEditor;
 import sporemodder.view.editors.AnimEditorItem;
 import sporemodder.view.editors.EffectEditorItem;
@@ -109,7 +95,8 @@ public class ProjectManager extends AbstractManager {
 	
 	private static final String PROPERTY_dontAskAgain_removeItem = "dontAskAgain_removeItem";
 	private static final String PROPERTY_dontAskAgain_saveAsMod = "dontAskAgain_saveAsMod";
-	
+	private static final String PROPERTY_closeEditedFileDecision = "closeEditedFileDecision";
+
 	private static enum ItemEditType { NEW_FILE, NEW_FOLDER, RENAME, NONE };
 	
 	public static final String NAMES_REGISTRY_PATH = "sporemaster/names.txt";
@@ -120,9 +107,11 @@ public class ProjectManager extends AbstractManager {
 
 	/** All the factories that can be used to parse files and create project items. */
 	private final List<ProjectItemFactory> itemFactories = new ArrayList<>();
-	/** A map that assigns the project name (in lowercase) to the project itself. */
-	private final Map<String, Project> projects = new TreeMap<>();
+
 	private Project activeProject;
+
+	private final ProjectsList projects = new ProjectsList();
+	private final ModBundlesList modBundles = new ModBundlesList();
 	
 	/** Special items that are always displayed in the bottom part of the project tree. */
 	private final List<ProjectItem> specialItems = new ArrayList<>(); 
@@ -144,7 +133,13 @@ public class ProjectManager extends AbstractManager {
 	
 	private boolean dontAskAgain_removeItem;
 	private boolean dontAskAgain_saveAsMod;
-	
+	private enum CloseEditedFileDecision {
+		SAVE,
+		IGNORE,
+		ASK
+	}
+	private CloseEditedFileDecision closeEditedFileDecision = CloseEditedFileDecision.ASK;
+
 	private ProjectTreeItem lastSelectedItem;
 	
 	private ContextMenu contextMenu;
@@ -154,7 +149,8 @@ public class ProjectManager extends AbstractManager {
 		
 		dontAskAgain_removeItem = Boolean.parseBoolean(properties.getProperty(PROPERTY_dontAskAgain_removeItem, "false"));
 		dontAskAgain_saveAsMod = Boolean.parseBoolean(properties.getProperty(PROPERTY_dontAskAgain_saveAsMod, "false"));
-		
+		closeEditedFileDecision = CloseEditedFileDecision.valueOf(properties.getProperty(PROPERTY_closeEditedFileDecision, "ASK"));
+
 		itemFactories.add(new DefaultProjectItemFactory());
 		itemFactories.add(new OmitProjectItemFactory());
 		itemFactories.add(new ProjectNamesItemFactory());
@@ -162,48 +158,22 @@ public class ProjectManager extends AbstractManager {
 		
 		specialItems.add(new EffectEditorItem());
 		specialItems.add(new AnimEditorItem());
+
+		// First load mod bundles, as it is necessary to exclude those when loading projects
+		modBundles.loadList();
+		// Load all standalone projects
+		projects.loadStandaloneProjects();
+		// Add projects inside mods to the projects list
+		modBundles.getAll().forEach(mod -> mod.getProjects().forEach(projects::add));
 		
-		// Load all projects
-		File projectsFolder = PathManager.get().getProjectsFolder();
-		if (!projectsFolder.exists()) projectsFolder.mkdir();
-		
-		File[] children = projectsFolder.listFiles();
-		
-		for (File folder : children) {
-			Project project = null;
-			if (folder.isDirectory()) {
-				project = new Project(folder.getName());
-			}
-			else {
-				try {
-					List<String> lines = Files.readAllLines(folder.toPath());
-					
-					if (lines.size() != 1) {
-						System.err.println("File " + folder.getAbsolutePath() + " doesn't follow external project link format");
-					}
-					else {
-						File externalFolder = new File(lines.get(0).trim());
-						if (externalFolder.isDirectory()) {
-							project = new Project(folder.getName(), externalFolder, folder);
-						}
-						else {
-							System.err.println("Error reading external project link " + folder.getName() + ": folder " + externalFolder.getAbsolutePath() + " does not exist.");
-						}
-					}
-				} 
-				catch (IOException e) {
-					System.err.println("Error reading external project link " + folder.getAbsolutePath());
-				}
-			}
-			if (project != null) {
-				projects.put(project.getName().toLowerCase(), project);
-			}
-		}
-		
-		// Load the project settings after all projects are loaded
-		for (Project project : projects.values()) {
+		// Load the project settings after all projects are loaded,
+		// because settings can use references to other projects
+		projects.loadLastActiveTimes();
+		for (Project project : projects.getAll()) {
 			project.loadSettings();
 		}
+		// Load mod infos after project settings, as they need to know package names
+		modBundles.loadModInfos();
 		
 		presets.add(new ProjectPreset("Spore (Game & Graphics)", "The Spore and Galactic Adventures packages containing everything needed for most mods.", true,
 				item -> {
@@ -273,6 +243,7 @@ public class ProjectManager extends AbstractManager {
 	@Override public void saveSettings(Properties properties) {
 		properties.put(PROPERTY_dontAskAgain_removeItem, dontAskAgain_removeItem ? "true" : "false");
 		properties.put(PROPERTY_dontAskAgain_saveAsMod, dontAskAgain_saveAsMod ? "true" : "false");
+		properties.put(PROPERTY_closeEditedFileDecision, closeEditedFileDecision.toString());
 	}
 	
 	public TreeView<ProjectItem> getTreeView() {
@@ -307,9 +278,8 @@ public class ProjectManager extends AbstractManager {
 		String[] splits = text.toLowerCase().split(" ");
 		searchedWords.clear();
 		
-		for (int i = 0; i < splits.length;) 
-		{
-			if (splits[i].length() == 0) {
+		for (int i = 0; i < splits.length;) {
+			if (splits[i].isEmpty()) {
 				i++;
 				continue;
 			}
@@ -741,17 +711,17 @@ public class ProjectManager extends AbstractManager {
 		});
 		
 		itemName.setOnAction(event -> UIManager.get().tryAction(() -> selectItem(item), "Cannot select file"));
-		itemNewFile.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFile(), "Cannot create new file."));
-		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(() -> item.createNewFolder(), "Cannot create new folder."));
-		itemRename.setOnAction(event -> UIManager.get().tryAction(() -> item.renameItem(), "Cannot rename item."));
-		itemRemove.setOnAction(event -> UIManager.get().tryAction(() -> item.removeItem(), "Cannot remove item."));
-		itemModify.setOnAction(event -> UIManager.get().tryAction(() -> item.modifyItem(), "Cannot modify item."));
-		itemImportFiles.setOnAction(event -> UIManager.get().tryAction(() -> item.importFiles(), "Cannot import files."));
-		itemRefresh.setOnAction(event -> UIManager.get().tryAction(() -> item.refreshItem(), "Cannot refresh item."));
+		itemNewFile.setOnAction(event -> UIManager.get().tryAction(item::createNewFile, "Cannot create new file."));
+		itemNewFolder.setOnAction(event -> UIManager.get().tryAction(item::createNewFolder, "Cannot create new folder."));
+		itemRename.setOnAction(event -> UIManager.get().tryAction(item::renameItem, "Cannot rename item."));
+		itemRemove.setOnAction(event -> UIManager.get().tryAction(item::removeItem, "Cannot remove item."));
+		itemModify.setOnAction(event -> UIManager.get().tryAction(item::modifyItem, "Cannot modify item."));
+		itemImportFiles.setOnAction(event -> UIManager.get().tryAction(item::importFiles, "Cannot import files."));
+		itemRefresh.setOnAction(event -> UIManager.get().tryAction(item::refreshItem, "Cannot refresh item."));
 		
-		itemCompare.setOnAction(event -> UIManager.get().tryAction(() -> item.compareItem(), "Cannot compare item."));
-		itemExploreSource.setOnAction(event -> UIManager.get().tryAction(() -> item.openSourceFolder(), "Cannot open source folder."));
-		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(() -> item.openModFolder(), "Cannot open mod folder."));
+		itemCompare.setOnAction(event -> UIManager.get().tryAction(item::compareItem, "Cannot compare item."));
+		itemExploreSource.setOnAction(event -> UIManager.get().tryAction(item::openSourceFolder, "Cannot open source folder."));
+		itemExploreMod.setOnAction(event -> UIManager.get().tryAction(item::openModFolder, "Cannot open mod folder."));
 		
 		contextMenu.getItems().clear();
 		contextMenu.getItems().addAll(itemName, new SeparatorMenuItem());
@@ -794,6 +764,11 @@ public class ProjectManager extends AbstractManager {
 	public List<ProjectPreset> getPresets() {
 		return presets;
 	}
+
+	/** Returns a collection of mod bundles, ordered alphabetically */
+	public Collection<ModBundle> getModBundles() {
+		return modBundles.getAll();
+	}
 	
 	/**
 	 * Returns a certain number of the most recent projects; that is, the projects that were last set as active.
@@ -801,13 +776,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public List<Project> getRecentProjects(int count) {
-		List<Project> list = new ArrayList<Project>(projects.values());
-		Collections.sort(list, (arg0, arg1) -> {
-			return -Long.compare(arg0.getLastTimeUsed(), arg1.getLastTimeUsed());
-		});
-		
-		
-		return list.subList(0, Math.min(count, list.size()));
+		return projects.getRecentProjects(count);
 	}
 	
 	/**
@@ -838,7 +807,11 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public Project getProject(String name) {
-		return projects.get(name.toLowerCase());
+		return projects.get(name);
+	}
+
+	public ModBundle getModBundle(String name) {
+		return modBundles.get(name.toLowerCase());
 	}
 	
 	public Project getOrCreateProject(String name) {
@@ -849,12 +822,11 @@ public class ProjectManager extends AbstractManager {
 	public void rename(Project project, String name) {
 		Project existing = getProject(name);
 		if (existing == null || existing == project) {
-			projects.remove(project.getName().toLowerCase());
-			
+			projects.remove(project);
 			project.setName(name);
-			
-			projects.put(name.toLowerCase(), project);
-			
+			projects.add(project);
+			projects.saveLastActiveTimesNoException();
+
 			if (project == activeProject) {
 				rootItem.getValue().setName(name);
 				getTreeView().refresh();
@@ -863,12 +835,16 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public Project getProjectByPackageName(String packageName) {
-		for (Project project : projects.values()) {
+		for (Project project : projects.getAll()) {
 			if (project.getPackageName().equals(packageName)) return project;
 		}
 		return null;
 	}
-	
+
+	public void saveProjectsLastActiveTimes() {
+		projects.saveLastActiveTimesNoException();
+	}
+
 	/**
 	 * Changes the active project. This will update the user interface.
 	 * @param project
@@ -893,11 +869,27 @@ public class ProjectManager extends AbstractManager {
 		
 		// Update time and save it
 		activeProject.updateLastTimeUsed();
-		activeProject.saveSettings();
+		saveProjectsLastActiveTimes();
+
+		// If it doesn't have a mod info, generate it
+		ModBundle modBundle = activeProject.getParentModBundle();
+		if (modBundle != null) {
+			File modInfoFile = modBundle.getModInfoFile();
+			if (!modInfoFile.exists()) {
+				try {
+					modBundle.saveModInfo();
+				} catch (ParserConfigurationException | TransformerException e) {
+					System.err.println("Failed to generate ModInfo.xml for mod: " + modBundle.getName());
+					e.printStackTrace();
+				}
+            }
+		}
+
 		
 		// Project names registry
 		loadNamesRegistry();
-		
+
+		// Update UI
 		ItemEditor activeEditor = EditorManager.get().getActiveEditor();
 		if (activeEditor != null) activeEditor.setActive(false);
 		EditorManager.get().clearTabs();
@@ -974,7 +966,7 @@ public class ProjectManager extends AbstractManager {
 			}
 		});
 		
-		loadItemFolder(activeProject, activeProject.getSources(), rootItem);
+		loadItemFolder(activeProject, activeProject.getReferences(), rootItem);
 		
 		treeView.setRoot(rootItem);
 		rootItem.setExpanded(true);
@@ -984,7 +976,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public void loadItemFolder(ProjectTreeItem parentItem) {
-		loadItemFolder(parentItem.getValue().getProject(), parentItem.getValue().getProject().getSources(), parentItem);
+		loadItemFolder(parentItem.getValue().getProject(), parentItem.getValue().getProject().getReferences(), parentItem);
 	}
 	
 	public void loadItemFolder(Project project, List<Project> sources, ProjectTreeItem parentItem) {
@@ -1090,6 +1082,10 @@ public class ProjectManager extends AbstractManager {
 	public Project getActive() {
 		return activeProject;
 	}
+
+	public ModBundle getActiveModBundle() {
+		return activeProject == null ? null : activeProject.getParentModBundle();
+	}
 	
 	/**
 	 * Creates a dialog for packing the active project (if any), an operation which will start immediately. 
@@ -1143,7 +1139,7 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public Collection<Project> getProjects() {
-		return projects.values();
+		return projects.getAll();
 	}
 	
 	/**
@@ -1152,7 +1148,11 @@ public class ProjectManager extends AbstractManager {
 	 * @return
 	 */
 	public boolean hasProject(String name) {
-		return projects.containsKey(name.toLowerCase());
+		return projects.exists(name);
+	}
+
+	public boolean hasModBundle(String name) {
+		return modBundles.exists(name);
 	}
 	
 	/**
@@ -1163,7 +1163,8 @@ public class ProjectManager extends AbstractManager {
 	public void deleteProject(Project project) throws IOException {
 		FileManager.get().deleteDirectory(project.getFolder());
 		
-		projects.remove(project.getName().toLowerCase());
+		projects.remove(project);
+		projects.saveLastActiveTimesNoException();
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
@@ -1184,10 +1185,70 @@ public class ProjectManager extends AbstractManager {
 		
 		project.saveSettings();
 		
-		projects.put(project.getName().toLowerCase(), project);
+		projects.add(project);
 		
 		// Update the UI
 		UIManager.get().notifyUIUpdate(false);
+	}
+
+	/**
+	 * Creates the root folders of a mod bundle and adds it to the list.
+	 * Does not initialize the git repository.
+	 * @param modBundle
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void initializeModBundle(ModBundle modBundle) throws IOException {
+		// Ensure the folder does not exist yet
+		if (modBundle.getFolder().exists()) {
+			FileManager.get().deleteDirectory(modBundle.getFolder());
+		}
+
+		// Create root folder and 'src', 'data' folders
+		if (!modBundle.getFolder().mkdir()) {
+			throw new RuntimeException("Failed to create base folder for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+		if (!modBundle.getDataFolder().mkdir() || !modBundle.getSrcFolder().mkdir()) {
+			modBundle.getFolder().delete();
+			throw new RuntimeException("Failed to create 'data' and 'src' folders for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+
+		// Add .gitignore in the C++ 'src' folder
+		File srcGitignore = new File(modBundle.getSrcFolder(), ".gitignore");
+		try (InputStream inputStream = ProjectManager.class.getResourceAsStream("/sporemodder/resources/srcGitignore.txt")) {
+            assert inputStream != null;
+            Files.copy(inputStream, srcGitignore.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		// Write a default readme file
+		File readmeFile = new File(modBundle.getFolder(), "README.md");
+		Files.writeString(readmeFile.toPath(), "# " + modBundle.getName() + "\nYou can download the mod in the Releases page.");
+
+		// Add GitHub action to compile the mod
+		File githubActionFolder = new File(modBundle.getFolder(), ".github/workflows");
+		if (!githubActionFolder.mkdirs()) {
+			throw new RuntimeException("Failed to create GitHub action folders for mod: " + modBundle.getFolder().getAbsolutePath());
+		}
+		try (InputStream inputStream = ProjectManager.class.getResourceAsStream("/sporemodder/resources/githubAction.yml")) {
+			assert inputStream != null;
+			Files.copy(inputStream, new File(githubActionFolder, "build.yml").toPath(), StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		// Add to mods list
+		modBundles.add(modBundle);
+	}
+
+	/**
+	 * Initialize git repository and commit initial files for a mod bundle
+	 * @param modBundle
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
+	public void initializeModBundleGit(ModBundle modBundle) throws IOException, InterruptedException {
+		GitCommands.gitInit(modBundle.getGitRepository());
+		GitCommands.gitAddAll(modBundle.getGitRepository());
+		GitCommands.gitCommit(modBundle.getGitRepository(), "Initial commit");
+		GitCommands.gitSetMainBranch(modBundle.getGitRepository(), "main");
 	}
 	
 	private ProjectTreeItem getItemRecursive(ProjectTreeItem node, String completeRelativePath, String relativePath, boolean forceLoad) {
@@ -1298,7 +1359,7 @@ public class ProjectManager extends AbstractManager {
 	 */
 	public boolean hasSource(String relativePath) {
 		// This method is faster than getting the item and then checking
-		for (Project source : activeProject.getSources()) {
+		for (Project source : activeProject.getReferences()) {
 			if (new File(source.getFolder(), relativePath).exists()) return true;
 		}
 		return false;
@@ -1320,7 +1381,7 @@ public class ProjectManager extends AbstractManager {
 	}
  	
  	public File getSourceFile(String relativePath) {
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			File file = new File(source.getFolder(), relativePath);
  			if (file.exists()) return file;
  		}
@@ -1329,7 +1390,7 @@ public class ProjectManager extends AbstractManager {
  	
  	public Project getProjectByFile(String relativePath) {
  		if (getModFile(relativePath) != null) return activeProject;
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			if (new File(source.getFolder(), relativePath).exists()) return source;
  		}
  		return null;
@@ -1345,7 +1406,7 @@ public class ProjectManager extends AbstractManager {
  		File file = new File(activeProject.getFolder(), relativePath);
 		if (file.exists()) return file;
 
- 		for (Project source : activeProject.getSources()) {
+ 		for (Project source : activeProject.getReferences()) {
  			file = new File(source.getFolder(), relativePath);
  			if (file.exists()) return file;
  		}
@@ -1662,7 +1723,7 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	private void removeEmptyNonSourceParents(ProjectTreeItem parent) {
-		if (parent != null && parent.getParent() != null && !parent.getValue().isSource() && parent.getInternalChildren().size() == 0) {
+		if (parent != null && parent.getParent() != null && !parent.getValue().isSource() && parent.getInternalChildren().isEmpty()) {
 			
 			// Get it before removing the item
 			ProjectTreeItem nextParent = (ProjectTreeItem) parent.getParent();
@@ -1687,6 +1748,7 @@ public class ProjectManager extends AbstractManager {
 			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.CANCEL);
 			if (result == ButtonType.YES) {
 				dontAskAgain_removeItem = cb.isSelected();
+				MainApp.get().saveSettings();
 				return true;
 			} else {
 				return false;
@@ -2152,6 +2214,7 @@ public class ProjectManager extends AbstractManager {
 		}
 		
 		boolean loadedCorrectly = true;
+
 		final Project project = new Project(sourceFolder.getName(), sourceFolder, null);
 		project.loadSettings();
 		if (ProjectSettingsUI.show(project, false)) {
@@ -2162,7 +2225,7 @@ public class ProjectManager extends AbstractManager {
 				project.setExternalLinkFile(linkFile);
 				project.saveSettings();
 				
-				projects.put(project.getName().toLowerCase(), project);
+				projects.add(project);
 			}, "Error adding external project")) {
 				loadedCorrectly = false;
 			}
@@ -2203,6 +2266,7 @@ public class ProjectManager extends AbstractManager {
 			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
 			if (result == ButtonType.YES) {
 				dontAskAgain_saveAsMod = cb.isSelected();
+				MainApp.get().saveSettings();
 				return true;
 			} else {
 				return false;
@@ -2213,21 +2277,29 @@ public class ProjectManager extends AbstractManager {
 	}
 	
 	public boolean showSaveDialog() {
-		Dialog<ButtonType> dialog = new Dialog<ButtonType>();
-		dialog.setTitle("Confirm action");
-		
-		CheckBox cb = new CheckBox("Don't ask me again.");
-		
-		dialog.getDialogPane().setHeaderText("This file has unsaved changes. Do you want to save it? If you press no, all changes will be discarded.");
-		dialog.getDialogPane().setContent(cb);
-		
-		dialog.getDialogPane().getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-		
-		ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
-		if (result == ButtonType.YES) {
-			return true;
+		if (closeEditedFileDecision == CloseEditedFileDecision.ASK) {
+			Dialog<ButtonType> dialog = new Dialog<>();
+			dialog.setTitle("Confirm action");
+
+			CheckBox cb = new CheckBox("Remember my decision.");
+
+			dialog.getDialogPane().setHeaderText("This file has unsaved changes. Do you want to save it? If you press no, all changes will be discarded.");
+			dialog.getDialogPane().setContent(cb);
+
+			dialog.getDialogPane().getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+
+			ButtonType result = UIManager.get().showDialog(dialog).orElse(ButtonType.NO);
+			if (result == ButtonType.YES) {
+				closeEditedFileDecision = CloseEditedFileDecision.SAVE;
+				MainApp.get().saveSettings();
+				return true;
+			} else {
+				closeEditedFileDecision = CloseEditedFileDecision.IGNORE;
+				MainApp.get().saveSettings();
+				return false;
+			}
 		} else {
-			return false;
+			return closeEditedFileDecision == CloseEditedFileDecision.SAVE;
 		}
 	}
 }

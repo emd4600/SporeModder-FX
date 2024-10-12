@@ -1,0 +1,280 @@
+name: Build Spore Mod
+
+on:
+  push:
+    tags:
+      - '*'           # Push events to every tag not containing /
+  workflow_dispatch:
+
+env:
+  # Build Packages Variables
+  SPORE_MODDER_FX_FILE: 'SporeModder.FX.zip'
+
+  # Build DLLs Variables
+  SPORE_MODAPI_FILE: ' SporeModAPIdlls.zip '
+
+jobs:
+  find-package-projects:
+    name: Find SMFX Package Projects
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.projects-scan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for non-empty projects in data folder
+        id: projects-scan
+        run: |
+          # Initialize an empty string to store the result
+          directories=""
+          index=0
+
+          # Use a while loop with redirection instead of piping to avoid subshell
+          while read dir; do
+              # Count the number of subdirectories inside each directory
+              subdir_count=$(find "$dir" -mindepth 1 -maxdepth 1 -type d | wc -l)
+
+              if [ "$subdir_count" -gt 0 ]; then
+                  # Append the directory to the result string
+                  if [ ! -z "$directories" ]; then
+              		  directories="$directories, "
+                    indices="$indices, "
+              	  fi
+                  directories="$directories {\"dir\": \"$dir\", \"index\": $index}"
+                  # Increment the index for each directory
+                  index=$((index + 1))
+              fi
+          done < <(find "data/" -mindepth 1 -maxdepth 1 -type d)
+
+          # Print all directories in a single line
+          directories="matrix={ \"project\": [ $directories ] }"
+          echo "$directories"
+          echo "$directories" >> $GITHUB_OUTPUT
+
+  find-cpp-projects:
+    name: Find C++ Projects
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.projects-scan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for Visual Studio solutions in src folder
+        id: projects-scan
+        run: |
+          # Initialize an empty string to store the result
+          solutions=""
+          index=0
+
+          # Use a while loop with redirection instead of piping to avoid subshell
+          while read dir; do
+            while read file; do
+              # Append the directory to the result string
+              if [ ! -z "$solutions" ]; then
+          	    solutions="$solutions, "
+              fi
+              solutions="$solutions {\"directory\": \"$dir\", \"sln\": \"$file\", \"index\": $index}"
+              # Increment the index for each directory
+              index=$((index + 1))
+            done < <(find "$dir" -mindepth 1 -maxdepth 1 -type f -name "*.sln"  -printf "%f\n")
+          done < <(find "src/" -mindepth 1 -maxdepth 1 -type d)
+
+          solutions="matrix={ \"solution\": [ $solutions ] }"
+          echo "$solutions"
+          echo "$solutions" >> $GITHUB_OUTPUT
+
+  build-packages:
+    name: Build Project .package
+    needs: find-package-projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.find-package-projects.outputs.matrix) }}
+    steps:
+      - run: echo "Building Package for Project ${{ matrix.project.dir }}"
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+          java-package: 'jre'
+      - name: Setup SMFX
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: 'emd4600/SporeModder-FX'
+          latest: true
+          fileName: ${{ env.SPORE_MODDER_FX_FILE }}
+          tarBall: false
+          zipBall: false
+          out-file-path: ''
+          extract: true
+      - run: mkdir -p Packages
+      - name: Build SMFX Project
+        run: |
+          cd "SporeModder FX"
+          java -jar SporeModderFX.jar pack "../${{ matrix.project.dir }}" "../Packages/"
+      - name: Upload Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'packages${{ matrix.project.index }}'
+          retention-days: 1
+          compression-level: 0
+          path: Packages/*
+
+  build-dlls:
+    name: Build C++ Project DLL
+    needs: find-cpp-projects
+    if: ${{ toJSON(fromJSON(needs.find-cpp-projects.outputs.matrix).solution) != '[]' }}
+    strategy:
+      matrix: ${{ fromJSON(needs.find-cpp-projects.outputs.matrix) }}
+    runs-on: windows-2022
+    steps:
+      - run: echo "Building DLL for C++ Project ${{ matrix.solution.directory }}"
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - name: Download ModAPI DLL Library
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: 'emd4600/Spore-ModAPI'
+          latest: true
+          fileName: ${{ env.SPORE_MODAPI_FILE }}
+          tarBall: false
+          zipBall: false
+          out-file-path: ''
+          extract: true
+
+      - name: Move ModAPI DLL Library
+        run: |
+          ls
+          mkdir coreLibs
+          mkdir mLibs
+          cp SporeModAPI.lib coreLibs/SporeModAPI.lib
+
+      - name: Download ModAPI Source
+        uses: actions/checkout@v4
+        with:
+          repository: 'emd4600/Spore-ModAPI'
+          path: 'Spore-ModAPI'
+          submodules: 'true'
+
+      - name: Replace ModAPI Project in .sln File
+        run: |
+          cd "${{ matrix.solution.directory }}"
+          pwd
+          ls '${{ github.workspace }}'
+          ls '${{ github.workspace }}\Spore-ModAPI\'
+          ls '${{ github.workspace }}\Spore-ModAPI\Spore ModAPI\'
+
+          cat "${{ matrix.solution.sln }}"
+
+          $re='Project\(("{[a-zA-Z0-9\-]+}")\) = "Spore ModAPI", ".+", ("{[a-zA-Z0-9\-]+}")'
+          $target='Project($1) = "Spore ModAPI", "${{ github.workspace }}\Spore-ModAPI\Spore ModAPI\Spore ModAPI.vcxproj", $2'
+          (Get-Content '${{ matrix.solution.sln }}' -Raw) -replace $re,$target |
+            out-file -encoding utf-8 '${{ matrix.solution.sln }}'
+
+          echo ""
+          echo ""
+          cat "${{ matrix.solution.sln }}"
+
+      - name: Build C++ Project
+        run: |
+         cd "${{ matrix.solution.directory }}"
+         msbuild "${{ matrix.solution.sln }}" /m "/p:Configuration=Release,Platform=x86" `
+           "/p:SporeSDKPath=${{ github.workspace }}\Spore-ModAPI\,SporeLauncherPath=${{ github.workspace }}\" `
+           /clp:Summary /v:m
+
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'dll${{ matrix.solution.index }}'
+          retention-days: 1
+          compression-level: 0
+          path: |
+            mLibs/*.dll
+            mLibs/*.pdb
+
+  build-sporemod:
+    name: Build Sporemod
+    needs: [ build-packages, build-dlls ]
+    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Find latest ModAPI DLLs build
+        id: find-latest-dlls-build
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: emd4600/Spore-ModAPI
+          releases-only: true
+      - name: Save ModAPI DLLs build in environment variable
+        run: |
+          version_text="${{ steps.find-latest-dlls-build.outputs.tag }}"
+          if [[ ${version_text:0:1} == "v" ]]; then
+            version_text=${version_text:1}
+          fi
+          echo "SPOREMOD_DLLS_BUILD=$version_text" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+      - run: mkdir "${{ github.workspace }}/Sporemod"
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/Sporemod
+          merge-multiple: true
+
+      # any tag that doesn't match v.X.X.X (with an optional single character path, eg v1.2.73b) will be marked as experimental
+      - name: Check if version tag is experimental
+        run: echo "${{ github.ref_name }}" | grep -qE '^v?[[:digit:]]+(\.[[:digit:]]+)?(\.[[:digit:]]+)?[[:alpha:]]?$'
+        id: test_experimental
+        continue-on-error: true
+      - name: Save isExperimental on environment variable
+        run: echo "SPOREMOD_EXPERIMENTAL=${{ steps.test_experimental.outcome != 'success' }}" >> $GITHUB_ENV
+
+      - name: Replace variables in ModInfo.xml
+        uses: iamazeem/substitute-action@v1
+        with:
+          input-files: |
+            ModInfo.xml
+          enable-in-place: true
+      - name: Copy ModInfo.xml file
+        run: cp ModInfo.xml "${{ github.workspace }}/Sporemod/ModInfo.xml"
+      - run: ls ${{ github.workspace }}/Sporemod
+
+      - if: ${{ contains(github.ref_type, 'tag') }}
+        run: echo "SPOREMOD_NAME=${{ github.event.repository.name }}-${{ github.ref_name }}.sporemod" >> $GITHUB_ENV
+      - if: ${{ ! contains(github.ref_type, 'tag') }}
+        run: echo "SPOREMOD_NAME=${{ github.event.repository.name }}${{ github.ref_name }}-$(git rev-parse --short HEAD).sporemod" >> $GITHUB_ENV
+
+      - run: echo "DRAFT_RELEASE_NAME=$(echo "${{ github.event.repository.name }} ${{ github.ref_name }}" | tr '-' ' ')" >> $GITHUB_ENV
+
+      - name: Create .sporemod
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: ${{ env.SPOREMOD_NAME }}
+          path: 'Sporemod'
+          custom: '-j -9'
+
+      - name: Create draft release
+        if: ${{ contains(github.ref_type, 'tag') }}
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          draft: true
+          name: ${{ env.DRAFT_RELEASE_NAME }}
+          prerelease: ${{ env.SPOREMOD_EXPERIMENTAL }}
+          makeLatest: true
+          tag: ${{ github.ref_name }}
+          artifacts: ${{ env.SPOREMOD_NAME }}
+
+      - name: Upload .sporemod artifact
+        if: ${{ ! contains(github.ref_type, 'tag') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sporemod
+          retention-days: 30
+          compression-level: 0
+          path: ${{ env.SPOREMOD_NAME }}

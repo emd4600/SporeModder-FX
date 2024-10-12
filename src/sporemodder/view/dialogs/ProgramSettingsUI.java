@@ -19,6 +19,7 @@
 package sporemodder.view.dialogs;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Map;
 
 import javafx.fxml.FXML;
@@ -35,12 +36,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import sporemodder.FileManager;
-import sporemodder.GameManager;
+import sporemodder.*;
 import sporemodder.GameManager.GameType;
 import sporemodder.file.shaders.FXCompiler;
-import sporemodder.MainApp;
-import sporemodder.UIManager;
 import sporemodder.util.GamePathConfiguration.GamePathType;
 import sporemodder.util.SporeGame;
 import sporemodder.view.Controller;
@@ -75,6 +73,9 @@ public class ProgramSettingsUI implements Controller {
 	@FXML private Control gameTypeLabel;
 	@FXML private Control styleLabel;
 	@FXML private Control fxcLabel;
+
+	@FXML private TextField projectsFolderTextField;
+	@FXML private Button findProjectsFolderButton;
 	
 	private Dialog<ButtonType> dialog;
 
@@ -92,10 +93,8 @@ public class ProgramSettingsUI implements Controller {
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_EXE);
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_ALL);
 			if (!fxcPathField.getText().isEmpty()) chooser.setInitialDirectory(new File(fxcPathField.getText()).getParentFile());
-			
-			UIManager.get().setOverlay(true);
+
 			File result = chooser.showOpenDialog(UIManager.get().getScene().getWindow());
-			UIManager.get().setOverlay(false);
 			
 			if (result != null) {
 				fxcPathField.setText(result.getAbsolutePath());
@@ -116,10 +115,8 @@ public class ProgramSettingsUI implements Controller {
 		findSporeButton.setOnAction(event -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			if (!sporeField.getText().isEmpty()) chooser.setInitialDirectory(new File(sporeField.getText()));
-			
-			UIManager.get().setOverlay(true);
+
 			File result = chooser.showDialog(UIManager.get().getScene().getWindow());
-			UIManager.get().setOverlay(false);
 			
 			if (result != null) {
 				result = gameMgr.findInstallationFolder(GameManager.SPORE_SPOREBIN, result);
@@ -136,10 +133,8 @@ public class ProgramSettingsUI implements Controller {
 		findGAButton.setOnAction(event -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			if (!gaField.getText().isEmpty()) chooser.setInitialDirectory(new File(gaField.getText()));
-			
-			UIManager.get().setOverlay(true);
+
 			File result = chooser.showDialog(UIManager.get().getScene().getWindow());
-			UIManager.get().setOverlay(false);
 			
 			if (result != null) {
 				result = gameMgr.findInstallationFolder(GameManager.GA_SPOREBIN, result);
@@ -162,10 +157,8 @@ public class ProgramSettingsUI implements Controller {
 			}
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_ALL);
 			chooser.getExtensionFilters().add(FileManager.FILEFILTER_EXE);
-			
-			UIManager.get().setOverlay(true);
+
 			File result = chooser.showOpenDialog(UIManager.get().getScene().getWindow());
-			UIManager.get().setOverlay(false);
 			
 			if (result != null) {
 				customPathField.setText(result.getAbsolutePath());
@@ -223,6 +216,25 @@ public class ProgramSettingsUI implements Controller {
 		if (FXCompiler.get().getFXCFile() != null) {
 			fxcPathField.setText(FXCompiler.get().getFXCFile().getAbsolutePath());
 		}
+
+
+		findProjectsFolderButton.setOnAction(event -> {
+			DirectoryChooser chooser = new DirectoryChooser();
+			File initialDirectory;
+			if (projectsFolderTextField.getText().isBlank()) {
+				initialDirectory = PathManager.get().getProjectsFolder();
+			} else {
+				initialDirectory = new File(projectsFolderTextField.getText());
+			}
+			chooser.setInitialDirectory(initialDirectory);
+
+			File result = chooser.showDialog(UIManager.get().getScene().getWindow());
+
+			if (result != null) {
+				projectsFolderTextField.setText(result.getAbsolutePath());
+			}
+		});
+		projectsFolderTextField.setText(PathManager.get().getProjectsFolderStringForSettings());
 	}
 	
 	private void applyChanges() {
@@ -284,7 +296,27 @@ public class ProgramSettingsUI implements Controller {
 		} else {
 			FXCompiler.get().setFXCFile(new File(path));
 		}
-		
+
+
+		String newProjectsFolder = null;
+		if (!projectsFolderTextField.getText().isBlank()) {
+			File projectsFolder = new File(projectsFolderTextField.getText());
+			if (!Files.isDirectory(projectsFolder.toPath())) {
+				UIManager.get().showDialog(AlertType.ERROR, "The Projects folder does not exist: " + projectsFolderTextField.getText());
+			} else {
+				newProjectsFolder = projectsFolderTextField.getText();
+			}
+		} else {
+			// Reset projects folder if it has been changed to default
+			if (!PathManager.get().isDefaultProjectsFolder()) {
+				newProjectsFolder = "";
+			}
+		}
+
+		if (newProjectsFolder != null) {
+			UIManager.get().showDialog("The Projects folder has been changed. The changes won't apply until you restart SporeModder FX.");
+			PathManager.get().setNextProjectsFolder(newProjectsFolder);
+		}
 		
 		MainApp.get().saveSettings();
 	}
@@ -322,7 +354,7 @@ public class ProgramSettingsUI implements Controller {
 	
 	public static void show() {
 		ProgramSettingsUI node = UIManager.get().loadUI("dialogs/ProgramSettingsUI");
-		node.dialog = new Dialog<ButtonType>();
+		node.dialog = new Dialog<>();
 		node.showInternal();
 	}
 }

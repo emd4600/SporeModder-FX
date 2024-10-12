@@ -59,6 +59,9 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 
+# Codeium metadata
+*.*~
+
 Projects/**
 bin
 WinMerge
@@ -71,3 +74,5 @@ config.properties
 SporeModderFX.jar
 desktop.ini
 dependency-reduced-pom.xml
+/src/sporemodder/resources/githubApp.txt
+/config.properties

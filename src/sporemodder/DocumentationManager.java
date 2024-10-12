@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import javafx.geometry.Insets;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
@@ -146,6 +147,7 @@ public class DocumentationManager extends AbstractManager {
 					hl.setDisable(true);
 				} 
 				else {
+					hl.setTooltip(new Tooltip(link.url));
 					hl.setOnAction(event -> {
 						MainApp.get().getHostServices().showDocument(link.url);
 					});

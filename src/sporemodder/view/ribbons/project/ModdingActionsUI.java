@@ -36,7 +36,7 @@ public class ModdingActionsUI implements Controller, UIUpdateListener {
 	@FXML
 	private Button btnCompare;
 	@FXML
-	private Button btnExploreSource;
+	private Button btnExploreReference;
 	@FXML
 	private Button btnExploreMod;
 	
@@ -55,19 +55,19 @@ public class ModdingActionsUI implements Controller, UIUpdateListener {
 //		btnExploreMod.setGraphic(ui.loadIcon("explore-mod.png", 0, 48, true));
 		
 		btnCompare.setGraphic(ui.loadIcon("compare.png", 0, 38, true));
-		btnExploreSource.setGraphic(ui.loadIcon("explore-source.png", 0, 38, true));
+		btnExploreReference.setGraphic(ui.loadIcon("explore-source.png", 0, 38, true));
 		btnExploreMod.setGraphic(ui.loadIcon("explore-mod.png", 0, 38, true));
 		
 		btnCompare.setDisable(true);
-		btnExploreSource.setDisable(true);
+		btnExploreReference.setDisable(true);
 		btnExploreMod.setDisable(true);
 		
 		btnCompare.setOnAction((event) -> {
 			UIManager.get().tryAction(() -> EditorManager.get().getActiveItem().compareItem(), "Cannot compare item.");
 		});
-		
-		btnExploreSource.setOnAction((event) -> {
-			UIManager.get().tryAction(() -> EditorManager.get().getActiveItem().openSourceFolder(), "Cannot open source folder.");
+
+		btnExploreReference.setOnAction((event) -> {
+			UIManager.get().tryAction(() -> EditorManager.get().getActiveItem().openSourceFolder(), "Cannot open reference folder.");
 		});
 		
 		btnExploreMod.setOnAction((event) -> {
@@ -84,12 +84,12 @@ public class ModdingActionsUI implements Controller, UIUpdateListener {
 		if (item != null) {
 			
 			btnCompare.setDisable(!item.canCompareItem());
-			btnExploreSource.setDisable(!item.canOpenSourceFolder());
+			btnExploreReference.setDisable(!item.canOpenSourceFolder());
 			btnExploreMod.setDisable(!item.canOpenModFolder());
 		}
 		else {
 			btnCompare.setDisable(true);
-			btnExploreSource.setDisable(true);
+			btnExploreReference.setDisable(true);
 			btnExploreMod.setDisable(true);
 		}
 	}

@@ -121,6 +121,8 @@ public class UIManager extends AbstractManager {
 	private Image programIcon;
 	
 	private double dpiScaling;
+
+	private String initializationError;
 	
 
 	/**
@@ -133,6 +135,16 @@ public class UIManager extends AbstractManager {
 	
 	public Stage getPrimaryStage() {
 		return primaryStage;
+	}
+
+	public void setInitializationError(String initializationError) {
+		this.initializationError = initializationError;
+	}
+
+	public void showInitializationError() {
+		if (initializationError != null) {
+			UIManager.get().showDialog(Alert.AlertType.ERROR, initializationError);
+		}
 	}
 
 	@Override
@@ -674,6 +686,18 @@ public class UIManager extends AbstractManager {
 		catch (Exception e) {
 			e.printStackTrace();
 			showErrorDialog(e, errorText, true);
+			return false;
+		}
+	}
+
+	public boolean tryAction(SimpleAction action, String errorText, boolean disableOverlay) {
+		try {
+			action.doAction();
+			return true;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			showErrorDialog(e, errorText, disableOverlay);
 			return false;
 		}
 	}

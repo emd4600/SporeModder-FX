@@ -8,7 +8,7 @@
 <RibbonGroup fx:id="mainNode" text="Mod Actions" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.ribbons.project.ModdingActionsUI">
    <nodes>
       <RibbonButton fx:id="btnCompare" contentDisplay="TOP" mnemonicParsing="false" text="Compare" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
-      <RibbonButton fx:id="btnExploreSource" contentDisplay="TOP" mnemonicParsing="false" text="Explore Source" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
+      <RibbonButton fx:id="btnExploreReference" contentDisplay="TOP" mnemonicParsing="false" text="Explore Reference" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
       <RibbonButton fx:id="btnExploreMod" contentDisplay="TOP" mnemonicParsing="false" text="Explore Mod" textAlignment="CENTER" textOverrun="CLIP" wrapText="true" />
    </nodes>
 </RibbonGroup>

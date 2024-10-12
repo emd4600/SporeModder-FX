@@ -23,10 +23,12 @@ import java.util.List;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import sporemodder.DocumentationManager;
+import sporemodder.MainApp;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.Project;
@@ -41,7 +43,7 @@ public class IntroUI implements Controller {
 	private static final int RECENT_COUNT = 10;
 	
 	@FXML private Node mainNode;
-	@FXML private BorderPane documentationPane;
+	@FXML private VBox documentationPane;
 	
 	@FXML private VBox recentProjectsList;
 	
@@ -52,6 +54,10 @@ public class IntroUI implements Controller {
 	@FXML private Button btnImport;
 	@FXML private Button btnAddExternal;
 
+	@FXML private Hyperlink modBrowserLink;
+	@FXML private Hyperlink moddingServerLink;
+	@FXML private Hyperlink officialServerLink;
+
 	@Override
 	public Node getMainNode() {
 		return mainNode;
@@ -61,6 +67,12 @@ public class IntroUI implements Controller {
 		Button button = new Button(text, graphic);
 		button.getStyleClass().add("artificial-menu-item");
 		return button;
+	}
+
+	private void setHyperlinkURL(Hyperlink hyperlink, String url) {
+		hyperlink.getStyleClass().add("inspector-docs-link");
+		hyperlink.setTooltip(new Tooltip(url));
+		hyperlink.setOnAction(event -> MainApp.get().getHostServices().showDocument(url));
 	}
 
 	@FXML private void initialize() {
@@ -107,6 +119,10 @@ public class IntroUI implements Controller {
 			recentProjectsList.getChildren().add(button);
 		}
 		
-		documentationPane.setCenter(DocumentationManager.get().createDocumentationPane("main"));
+		documentationPane.getChildren().add(DocumentationManager.get().createDocumentationPane("main"));
+
+		setHyperlinkURL(modBrowserLink, "https://mods.sporecommunity.com/");
+		setHyperlinkURL(moddingServerLink, "https://discord.gg/QR8CjQT");
+		setHyperlinkURL(officialServerLink, "https://discord.gg/sporeofficial");
 	}
 }

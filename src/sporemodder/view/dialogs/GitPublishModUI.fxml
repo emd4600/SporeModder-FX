@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" prefWidth="450.0" spacing="15.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.GitPublishModUI">
+   <children>
+      <Label prefWidth="450.0" text="Set a version tag for the published mod. The version must be stuff like 'v1.2.0', '3.5.9b', 'v0.0.3-beta', etc" wrapText="true" />
+      <HBox alignment="CENTER_LEFT" prefWidth="200.0" spacing="10.0">
+         <children>
+            <Label text="Version Tag:" />
+            <TextField fx:id="versionTextField" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+      <Label fx:id="warningLabel" text="Label" visible="false" />
+      <TextArea fx:id="consoleTextArea" editable="false" prefHeight="200.0" prefWidth="200.0" />
+   </children>
+</VBox>

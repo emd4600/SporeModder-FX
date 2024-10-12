@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="mainNode" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="650.0" spacing="10.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sporemodder.view.dialogs.ModPropertiesUI">
+   <children>
+      <Label text="These are the properties for your mod. These properties will be used when publishing your mod, and it is what other users will see.&#10;To publish the mod, you need to have a GitHub account, and create an empty repository for the mod. Then set the GitHub URL here.&#10;These properties are saved in the ModInfo.xml file in the root folder of the mod. If you want more advanced features, such as mod components, you have to edit it manually." wrapText="true" />
+      <GridPane hgap="10.0" vgap="5.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+          <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Display Name:">
+               <tooltip>
+                  <Tooltip text="The name of your mod that is shown to players." />
+               </tooltip></Label>
+            <TextField fx:id="nameTextField" GridPane.columnIndex="1" />
+            <Label text="Description:" GridPane.rowIndex="2">
+               <tooltip>
+                  <Tooltip text="A more detailed description of your mod." />
+               </tooltip></Label>
+            <Label text="Unique Tag:" GridPane.rowIndex="1">
+               <tooltip>
+                  <Tooltip text="A tag name that uniquely identifies your mod, it must be different from other mod tags. Cannot contain whitespaces." wrapText="true" />
+               </tooltip></Label>
+            <TextField fx:id="uniqueTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="descriptionTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="GitHub Repository:" GridPane.rowIndex="4">
+               <tooltip>
+                  <Tooltip text="URL to the GitHub repository that hosts the mod. This is where the mod will be uploaded and published, and where the launcher can check for updates to your mod. To set it, use 'Create GitHub Repository' or 'Connect to Existing Repository' buttons." wrapText="true" />
+               </tooltip>
+            </Label>
+            <TextField fx:id="githubTextField" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text="Website:" GridPane.rowIndex="3">
+               <tooltip>
+                  <Tooltip text="URL to a website with more info of your mod; usually, it is the GitHub repository's README page." wrapText="true" />
+               </tooltip>
+            </Label>
+            <TextField fx:id="websiteTextField" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Is experimental" GridPane.rowIndex="5">
+               <tooltip>
+                  <Tooltip text="The user will be warned when installed a mod marked as experimental. If set to 'AUTO', it will depend on the version tag used when publishing the mod." wrapText="true" />
+               </tooltip>
+            </Label>
+            <ChoiceBox fx:id="experimentalChoiceBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+         </children>
+      </GridPane>
+      <CheckBox fx:id="galaxyResetCheckBox" mnemonicParsing="false" text="Requires galaxy reset">
+         <tooltip>
+            <Tooltip text="Select if the player needs to reset the Galaxy before the mod can take effect." />
+         </tooltip>
+      </CheckBox>
+      <CheckBox fx:id="dataDependencyCheckBox" layoutX="10.0" layoutY="344.0" mnemonicParsing="false" text="Causes save data dependency">
+         <tooltip>
+            <Tooltip text="Select if this mod uses C++ code to add save data, which might render saved games unplayable if the mod is uninstalled." />
+         </tooltip>
+      </CheckBox>
+      <Separator prefWidth="200.0" />
+      <Label text="List of files included in the mod:" />
+      <Accordion fx:id="filesAccordion" maxHeight="200.0" prefHeight="200.0">
+        <panes>
+          <TitledPane fx:id="packagesPane" animated="false" text="Package Projects">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                  <padding>
+                      <Insets bottom="0" left="0" right="0" top="0" />
+                  </padding>
+                     <children>
+                        <ListView fx:id="projectsListView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </TitledPane>
+          <TitledPane fx:id="dllsPane" animated="false" expanded="false" text="C++ DLLs">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                  <padding>
+                      <Insets bottom="0" left="0" right="0" top="0" />
+                  </padding>
+                     <children>
+                        <ListView fx:id="dllsListView" editable="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children></AnchorPane>
+            </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
+      <Separator prefWidth="200.0" />
+      <Label fx:id="warningLabel" text="Label" visible="false" />
+      <Label fx:id="customModInfoLabel" text="This ModInfo.xml contains advanced data that is not displayed here. Saving these properties will remove the advanced data." visible="false" wrapText="true" />
+   </children>
+</VBox>

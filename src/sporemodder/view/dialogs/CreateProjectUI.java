@@ -136,8 +136,8 @@ public class CreateProjectUI implements Controller {
 			modBundle.saveModInfo();
 		}
 
-		if (newModButton.isSelected()) {
-			// Initialize git repository
+		// Initialize git repository, but don't try if git is not installed
+		if (newModButton.isSelected() && GitHubManager.get().hasGitInstalled()) {
 			projectManager.initializeModBundleGit(modBundle);
 		}
 	}

@@ -271,11 +271,11 @@ public class MainApp extends Application {
 		}
 
 		uiManager.showInitializationError();
+
+		gitHubManager.showFirstTimeDialog();
 		
 		if (uiManager.isFirstTime()) {
 			gameManager.showFirstTimeDialog();
-
-			gitHubManager.showFirstTimeDialog();
 			
 			projectManager.showFirstTimeDialog();
 			

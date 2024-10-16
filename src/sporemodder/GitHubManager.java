@@ -35,13 +35,14 @@ public class GitHubManager extends AbstractManager {
 
     private static final String PROPERTY_gitUsername = "gitUsername";
     private static final String PROPERTY_gitEmail = "gitEmail";
+    private static final String PROPERTY_hasShowGitDialog = "hasShowGitDialog";
 
     private String clientId;
     private String username;
     private String emailAddress;
     private String userAccessToken;
     private String lastDeviceLoginCode;
-    private boolean hasAskedForGitUser;
+    private boolean hasShowGitDialog;
 
     /**
      * Returns the current instance of the GitHubManager class.
@@ -67,6 +68,8 @@ public class GitHubManager extends AbstractManager {
         emailAddress = properties.getProperty(PROPERTY_gitEmail);
         if (username != null) username = username.trim();
         if (emailAddress != null) emailAddress = emailAddress.trim();
+
+        hasShowGitDialog = properties.getProperty(PROPERTY_hasShowGitDialog, "false").equals("true");
     }
 
     @Override public void saveSettings(Properties properties) {
@@ -76,6 +79,7 @@ public class GitHubManager extends AbstractManager {
         if (emailAddress != null && !emailAddress.isBlank()) {
             properties.put(PROPERTY_gitEmail, emailAddress);
         }
+        properties.put(PROPERTY_hasShowGitDialog, hasShowGitDialog ? "true" : "false");
     }
 
     public boolean hasUsernameAndEmail() {
@@ -557,6 +561,10 @@ public class GitHubManager extends AbstractManager {
      * After the dialog is shown, it will not be shown again.
      */
     public void showFirstTimeDialog() {
-        SetGitUserUI.show();
+        if (!hasShowGitDialog) {
+            SetGitUserUI.show();
+            hasShowGitDialog = true;
+            MainApp.get().saveSettings();
+        }
     }
 }

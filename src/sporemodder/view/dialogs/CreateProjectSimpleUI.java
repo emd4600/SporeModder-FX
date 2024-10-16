@@ -72,6 +72,8 @@ public class CreateProjectSimpleUI implements Controller {
     }
 
     public static void show() {
+        ProjectManager.get().removeInexistantMods();
+
         CreateProjectSimpleUI node = UIManager.get().loadUI("dialogs/CreateProjectSimpleUI");
         node.dialog = new Dialog<>();
         node.dialog.getDialogPane().setContent(node.getMainNode());

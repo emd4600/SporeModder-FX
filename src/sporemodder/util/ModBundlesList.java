@@ -2,6 +2,7 @@ package sporemodder.util;
 
 import org.xml.sax.SAXException;
 import sporemodder.PathManager;
+import sporemodder.ProjectManager;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -70,6 +71,41 @@ public class ModBundlesList {
             });
         } catch (Exception e) {
             System.err.println("Failed to read mod bundles list: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Reads the mod bundles file again, and removes from the list any mod bundles whose folder
+     * no longer exists.
+     */
+    public void removeInexistantMods() {
+        if (!Files.exists(getFile())) {
+            return;
+        }
+        try {
+            Files.readAllLines(getFile()).forEach(line -> {
+                File modFolder;
+                if (line.contains("/") || line.contains("\\")) {
+                    // External mod folder
+                    modFolder = new File(line);
+                } else {
+                    // Normal mod inside SMFX Projects
+                    modFolder = new File(PathManager.get().getProjectsFolder(), line);
+                }
+                if (!modFolder.exists()) {
+                    for (Project project : modBundles.get(modFolder.getName().toLowerCase()).getProjects()) {
+                        try {
+                            ProjectManager.get().deleteProject(project);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    modBundles.remove(modFolder.getName().toLowerCase());
+                }
+            });
+            saveList();
+        } catch (Exception e) {
+            System.err.println("Failed to prune mod bundles list: " + e.getMessage());
         }
     }
 

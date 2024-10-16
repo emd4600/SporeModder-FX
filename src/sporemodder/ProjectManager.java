@@ -2334,4 +2334,8 @@ public class ProjectManager extends AbstractManager {
 		assert modBundle != null;
 		createNewProjectCommon(modBundle, projectName, presets);
 	}
+
+	public void removeInexistantMods() {
+		modBundles.removeInexistantMods();
+	}
 }

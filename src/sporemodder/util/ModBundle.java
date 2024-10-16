@@ -84,6 +84,8 @@ public class ModBundle {
     public static final String UNIQUETAG_ALLOWED_REGEX = "[" + UNIQUETAG_REGEX + "]";
     public static final String UNIQUETAG_FORBIDDEN_REGEX = "[^" + UNIQUETAG_REGEX + "]";
 
+    public static final String NAME_ILLEGAL_CHARACTERS = "/\\[]{}";
+
     private final String name;
     private final List<Project> projects = new ArrayList<>();
     /** The base folder with all the data and source code of the mod. */

@@ -24,16 +24,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -2301,5 +2293,45 @@ public class ProjectManager extends AbstractManager {
 		} else {
 			return closeEditedFileDecision == CloseEditedFileDecision.SAVE;
 		}
+	}
+
+	private void createNewProjectCommon(ModBundle modBundle, String projectName, List<ProjectPreset> presets) throws ParserConfigurationException, TransformerException, IOException {
+		// Set default presets if not specified
+		if (presets == null) {
+			presets = this.presets.stream().filter(ProjectPreset::isRecommendable).collect(Collectors.toList());
+		}
+
+		// Create package project
+		Project project = new Project(projectName, modBundle);
+		modBundle.addProject(project);
+
+		// Add project references
+		project.getReferences().addAll(presets.stream().map(preset -> getProject(preset.getName())).collect(Collectors.toList()));
+
+		// Initialize package project folder
+		initializeProject(project);
+
+		// Save ModInfo
+		if (!modBundle.hasCustomModInfo()) {
+			modBundle.saveModInfo();
+		}
+	}
+
+	public void createNewMod(String modName, String uniqueTag, String description, String projectName, List<ProjectPreset> presets) throws IOException, ParserConfigurationException, TransformerException, InterruptedException {
+		ModBundle modBundle = new ModBundle(modName);
+		modBundle.setDescription(description);
+		modBundle.setUniqueTag(uniqueTag);
+		initializeModBundle(modBundle);
+		createNewProjectCommon(modBundle, projectName, presets);
+
+		// Initialize git repository, but don't try if git is not installed
+		if (GitHubManager.get().hasGitInstalled()) {
+			initializeModBundleGit(modBundle);
+		}
+	}
+
+	public void createNewProjectInMod(ModBundle modBundle, String projectName, List<ProjectPreset> presets) throws ParserConfigurationException, IOException, TransformerException {
+		assert modBundle != null;
+		createNewProjectCommon(modBundle, projectName, presets);
 	}
 }

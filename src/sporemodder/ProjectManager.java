@@ -971,7 +971,7 @@ public class ProjectManager extends AbstractManager {
 		loadItemFolder(parentItem.getValue().getProject(), parentItem.getValue().getProject().getReferences(), parentItem);
 	}
 	
-	public void loadItemFolder(Project project, List<Project> sources, ProjectTreeItem parentItem) {
+	public void loadItemFolder(Project project, Collection<Project> sources, ProjectTreeItem parentItem) {
 					
 		/** The nodes that have already been loaded in this level. */
 		Map<String, ProjectTreeItem> loadedItems = createChildrenMap(null);
@@ -980,7 +980,7 @@ public class ProjectManager extends AbstractManager {
 		String relativePath = parentItem.getValue().getRelativePath();
 		
 		// Iterate the sources in reverse orders, as the last ones (the least important) have to be loaded first
-		ListIterator<Project> iterable = sources.listIterator(sources.size());
+		ListIterator<Project> iterable = new LinkedList<>(sources).listIterator(sources.size());
 		while (iterable.hasPrevious())
 		{
 			Project source = iterable.previous();

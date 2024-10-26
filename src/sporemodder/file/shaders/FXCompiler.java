@@ -129,6 +129,10 @@ public class FXCompiler extends AbstractManager {
 	}
 	
 	public File compile(String targetProfile, File sourceHLSL, File includePath, File outputFile) throws IOException, InterruptedException {
+
+		if (fxcFile == null || !fxcFile.exists()) {
+			throw new IOException("Cannot compile " + sourceHLSL.getName() + ": path to FXC.exe (shader compiler) is not set");
+		}
 		
 		String command;
 		if (includePath != null) {

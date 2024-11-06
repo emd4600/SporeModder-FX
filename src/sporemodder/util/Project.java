@@ -21,11 +21,7 @@ package sporemodder.util;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import sporemodder.MessageManager;
@@ -101,13 +97,13 @@ public class Project {
 	/** External projects have a file in the Projects folder that links to the real path. */
 	private File externalLink;
 	
-	private final List<Project> references = new ArrayList<>();
+	private final Set<Project> references = new LinkedHashSet<>();
 	
 	/** The object that holds the path to the folder where the project DBPF is packed. */
 	private final GamePathConfiguration packPath;
 	
 	/** A list of relative paths of all those files that are fixed tabs. */
-	private final List<String> fixedTabPaths = new ArrayList<>();
+	private final Set<String> fixedTabPaths = new LinkedHashSet<>();
 	
 	/** The embedded 'editorPackages~' file that represents the package signature. */
 	private PackageSignature packageSignature = PackageSignature.NONE;
@@ -142,7 +138,7 @@ public class Project {
 		onNameChanged(null);
 	}
 	
-	public List<Project> getReferences() {
+	public Set<Project> getReferences() {
 		return references;
 	}
 
@@ -177,15 +173,15 @@ public class Project {
 				ProjectManager projectManager = ProjectManager.get();
 				
 				String[] sourceNames = stringListSplit(PROPERTY_sources);
+				references.clear();
 				for (String str : sourceNames) {
 					Project p = projectManager.getProject(str);
 					if (p != null) references.add(p);
 				}
 				
 				String[] tabPaths = stringListSplit(PROPERTY_fixedTabPaths);
-				for (String str : tabPaths) {
-					fixedTabPaths.add(str);
-				}
+				fixedTabPaths.clear();
+				fixedTabPaths.addAll(Arrays.asList(tabPaths));
 				
 				packageName = settings.getProperty(PROPERTY_packageName);
 				if (packageName == null) packageName = getDefaultPackageName(name);
@@ -229,24 +225,12 @@ public class Project {
 		//if (!sources.isEmpty()) {
 		// Do this even if it's empty, as we need to update it if sources were removed
 		{
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < references.size(); i++) {
-				sb.append("\"" + references.get(i).name + "\"");
-				if (i != references.size()-1) sb.append("|");
-			}
-
-			settings.setProperty(PROPERTY_sources, sb.toString());
+			String referencesStr = references.stream().map(r -> '"' + r.name + '"').collect(Collectors.joining("|"));
+			settings.setProperty(PROPERTY_sources, referencesStr);
 		}
 		if (!fixedTabPaths.isEmpty()) {
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < fixedTabPaths.size(); i++) {
-				sb.append("\"" + fixedTabPaths.get(i) + "\"");
-				if (i != fixedTabPaths.size()-1) sb.append("|");
-			}
-
-			settings.setProperty(PROPERTY_fixedTabPaths, sb.toString());
+			String str = fixedTabPaths.stream().map(r -> '"' + r + '"').collect(Collectors.joining("|"));
+			settings.setProperty(PROPERTY_fixedTabPaths, str);
 		}
 
 		settings.put(PROPERTY_packageName, packageName);
@@ -304,7 +288,7 @@ public class Project {
 	 * Returns a list of relative paths of all those files that are fixed tabs. 
 	 * @return
 	 */
-	public List<String> getFixedTabPaths() {
+	public Set<String> getFixedTabPaths() {
 		return fixedTabPaths;
 	}
 	

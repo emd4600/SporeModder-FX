@@ -50,15 +50,13 @@ import javax.xml.transform.TransformerException;
 
 public class CreateProjectUI implements Controller {
 
-	private static final String ILLEGAL_CHARACTERS = "/\\[]{}";
-
 	private static final String WARNING_UNIQUE_TAG_EMPTY = "Unique tag cannot be empty";
 	private static final String WARNING_MOD_NAME_EMPTY = "Mod name cannot be empty";
 	private static final String WARNING_PROJECT_NAME_EMPTY = "Package project name cannot be empty";
 	private static final String WARNING_MOD_NAME_REPEATED = "A mod with this name already exists";
 	private static final String WARNING_PROJECT_NAME_REPEATED = "A package project with this name already exists";
-	private static final String WARNING_MOD_NAME_INVALID = "Mod name cannot contain any character from " + ILLEGAL_CHARACTERS;
-	private static final String WARNING_PROJECT_NAME_INVALID = "Package project name cannot contain any character from " + ILLEGAL_CHARACTERS;
+	private static final String WARNING_MOD_NAME_INVALID = "Mod name cannot contain any character from " + ModBundle.NAME_ILLEGAL_CHARACTERS;
+	private static final String WARNING_PROJECT_NAME_INVALID = "Package project name cannot contain any character from " + ModBundle.NAME_ILLEGAL_CHARACTERS;
 
 	private Dialog<ButtonType> dialog;
 	
@@ -103,42 +101,26 @@ public class CreateProjectUI implements Controller {
 	}
 
 	public void createMod() throws IOException, InterruptedException, ParserConfigurationException, TransformerException {
-		ProjectManager projectManager = ProjectManager.get();
-
-		// Create base mod
-		ModBundle modBundle;
-		if (newModButton.isSelected()) {
-			modBundle = new ModBundle(modNameField.getText());
-			modBundle.setDescription(descriptionTextField.getText());
-			modBundle.setUniqueTag(uniqueTagTextField.getText());
-			projectManager.initializeModBundle(modBundle);
-		} else {
-			modBundle = projectManager.getModBundle(existingModChoiceBox.getValue());
-			assert modBundle != null;
-		}
-
-		// Create package project
-		Project project = new Project(projectNameField.getText(), modBundle);
-		modBundle.addProject(project);
-
-		// Add project references
-		project.getReferences().addAll(presetBoxes.stream()
+		List<ProjectPreset> presets = presetBoxes.stream()
 				.filter(CheckBox::isSelected)
-				.map(box -> projectManager.getProject(((ProjectPreset)box.getUserData()).getName()))
+				.map(box -> ((ProjectPreset)box.getUserData()))
 				.filter(Objects::nonNull)
-				.collect(Collectors.toList()));
+				.collect(Collectors.toList());
 
-		// Initialize package project folder
-		projectManager.initializeProject(project);
-
-		// Save ModInfo
-		if (!modBundle.hasCustomModInfo()) {
-			modBundle.saveModInfo();
-		}
-
-		// Initialize git repository, but don't try if git is not installed
-		if (newModButton.isSelected() && GitHubManager.get().hasGitInstalled()) {
-			projectManager.initializeModBundleGit(modBundle);
+		if (newModButton.isSelected()) {
+			ProjectManager.get().createNewMod(
+					modNameField.getText(),
+					uniqueTagTextField.getText(),
+					descriptionTextField.getText(),
+					projectNameField.getText(),
+					presets
+			);
+		} else {
+			ProjectManager.get().createNewProjectInMod(
+					ProjectManager.get().getModBundle(existingModChoiceBox.getValue()),
+					projectNameField.getText(),
+					presets
+			);
 		}
 	}
 
@@ -162,7 +144,7 @@ public class CreateProjectUI implements Controller {
 	}
 
 	private static boolean hasIllegalChar(String text) {
-		return ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1);
+		return ModBundle.NAME_ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1);
 	}
 
 	private boolean isValid() {
@@ -224,7 +206,7 @@ public class CreateProjectUI implements Controller {
 		// Ban illegal characters
 		modNameField.setTextFormatter(new TextFormatter<>(change -> {
 			String text = change.getControlNewText();
-			if (ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
+			if (ModBundle.NAME_ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
 				return null;
 			} else {
 				return change;
@@ -232,7 +214,7 @@ public class CreateProjectUI implements Controller {
 		}));
 		projectNameField.setTextFormatter(new TextFormatter<>(change -> {
 			String text = change.getControlNewText();
-			if (ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
+			if (ModBundle.NAME_ILLEGAL_CHARACTERS.chars().anyMatch(c -> text.indexOf(c) != -1)) {
 				return null;
 			} else {
 				return change;

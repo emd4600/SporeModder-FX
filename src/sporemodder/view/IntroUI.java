@@ -32,10 +32,7 @@ import sporemodder.MainApp;
 import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.Project;
-import sporemodder.view.dialogs.CreateProjectUI;
-import sporemodder.view.dialogs.OpenProjectUI;
-import sporemodder.view.dialogs.UnpackPackageUI;
-import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.dialogs.*;
 
 public class IntroUI implements Controller {
 	
@@ -78,7 +75,7 @@ public class IntroUI implements Controller {
 	@FXML private void initialize() {
 		
 		btnNew.setOnAction(event -> {
-			CreateProjectUI.show();
+			CreateProjectSimpleUI.show();
 		});
 		btnNew.setTooltip(new Tooltip("Creates a new empty project to start modding."));
 		

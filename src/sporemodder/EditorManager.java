@@ -21,10 +21,7 @@ package sporemodder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Properties;
+import java.util.*;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
@@ -519,7 +516,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 	}
 	
 	
-	public void loadFixedTabs(List<String> tabPaths) {
+	public void loadFixedTabs(Collection<String> tabPaths) {
 		disableTabEvents = true;
 		
 		for (String path : tabPaths) {
@@ -587,7 +584,7 @@ public class EditorManager extends AbstractManager implements UIUpdateListener {
 			}
 
 			if (!disableTabEvents) {
-				List<String> paths = ProjectManager.get().getActive().getFixedTabPaths();
+				Set<String> paths = ProjectManager.get().getActive().getFixedTabPaths();
 				paths.clear();
 				for (Tab tab : l.getList()) {
 					

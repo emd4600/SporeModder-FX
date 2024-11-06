@@ -19,8 +19,10 @@
 package sporemodder.view.dialogs;
 
 import java.io.File;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -189,22 +191,12 @@ public class ProjectSettingsUI implements Controller {
 		if (saveSettingsOnExit && nameChanged) {
 			ProjectManager.get().rename(project, tfName.getText());
 		}
-		
-		List<Project> oldSources = project.getReferences();
-		List<Project> newSources = sourcesList.getItems();
-		boolean sourcesChanged = oldSources.size() != newSources.size();
-		
-		if (!sourcesChanged) {
-			for (int i = 0; i < oldSources.size(); i++) {
-				if (oldSources.get(i) != newSources.get(i)) {
-					sourcesChanged = true;
-					break;
-				}
-			}
-		}
-		
+
 		project.setPackageName(packageNameField.getText());
-		
+
+		Set<Project> oldSources = project.getReferences();
+		Set<Project> newSources = new LinkedHashSet<>(sourcesList.getItems());
+		boolean sourcesChanged = !oldSources.equals(newSources);
 		if (sourcesChanged) {
 			project.getReferences().clear();
 			project.getReferences().addAll(sourcesList.getItems());

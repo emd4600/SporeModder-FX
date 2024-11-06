@@ -95283,8 +95283,8 @@ BE_TextureGroup_Tech_1
 BE_TextureGroup_Tech_2
 BE_TextureGroup_Tech_3
 BE_TextureGroup_Tech_4
-BE_TextureGroup_zany_1
-BE_TextureGroup_zany_2
+BE_TextureGroup_Zany_1
+BE_TextureGroup_Zany_2
 BE_TextureGroup_Tech_Parts_1
 BE_TextureGroup_Tech_Parts_2
 BE_TextureGroup_zany_Parts_1

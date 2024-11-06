@@ -47,11 +47,7 @@ import sporemodder.ProjectManager;
 import sporemodder.UIManager;
 import sporemodder.util.Project;
 import sporemodder.view.UIUpdateListener;
-import sporemodder.view.dialogs.CreateProjectUI;
-import sporemodder.view.dialogs.OpenProjectUI;
-import sporemodder.view.dialogs.ProgramSettingsUI;
-import sporemodder.view.dialogs.UnpackPackageUI;
-import sporemodder.view.dialogs.UnpackPresetsUI;
+import sporemodder.view.dialogs.*;
 
 /**
  * The main program menu, which is the first tab of the ribbon. This program menu shows a dropdown panel with a vertical division:
@@ -208,7 +204,7 @@ public class ProgramMenu implements UIUpdateListener {
 		
 		newProjectButton = createButton("New project", null);
 		newProjectButton.setOnAction((event) -> {
-			CreateProjectUI.show();
+			CreateProjectSimpleUI.show();
 		});
 		newProjectButton.setTooltip(new Tooltip("Creates a new empty project to start modding."));
 		

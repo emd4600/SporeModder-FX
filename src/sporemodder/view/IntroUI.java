@@ -27,6 +27,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 import sporemodder.DocumentationManager;
 import sporemodder.MainApp;
 import sporemodder.ProjectManager;
@@ -116,7 +117,10 @@ public class IntroUI implements Controller {
 			recentProjectsList.getChildren().add(button);
 		}
 		
-		documentationPane.getChildren().add(DocumentationManager.get().createDocumentationPane("main"));
+		Pane mainDocumentationPane = DocumentationManager.get().createDocumentationPane("main");
+		if (mainDocumentationPane != null) {
+			documentationPane.getChildren().add(mainDocumentationPane);
+		}
 
 		setHyperlinkURL(modBrowserLink, "https://mods.sporecommunity.com/");
 		setHyperlinkURL(moddingServerLink, "https://discord.gg/QR8CjQT");

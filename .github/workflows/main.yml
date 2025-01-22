@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Trigger SporeModder-FX Updater Workflow
     steps:
-      - uses: convictional/trigger-workflow-and-wait@v1.6.1
+      - uses: convictional/trigger-workflow-and-wait@v1.6.5
         with:
           owner: emd4600
           repo: SporeModder-FX-Updater

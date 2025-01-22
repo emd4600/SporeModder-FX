@@ -33,8 +33,8 @@ public class cSPUIStdDrawable extends StdDrawable {
 	private cSPUIStdDrawableImageInfo image5;
 	private cSPUIStdDrawableImageInfo image6;
 	private cSPUIStdDrawableImageInfo image7;
-	
-	private cSPUIStdDrawableImageInfo getImage(int index) {
+
+	public cSPUIStdDrawableImageInfo getImage(int index) {
 		switch (index) {
 		case 0: return image0;
 		case 1: return image1;
@@ -45,6 +45,20 @@ public class cSPUIStdDrawable extends StdDrawable {
 		case 6: return image6;
 		case 7: return image7;
 		default: return null;
+		}
+	}
+
+	public void setImage(int index, cSPUIStdDrawableImageInfo info) {
+		switch (index) {
+			case 0: image0 = info; break;
+			case 1: image1 = info; break;
+			case 2: image2 = info; break;
+			case 3: image3 = info; break;
+			case 4: image4 = info; break;
+			case 5: image5 = info; break;
+			case 6: image6 = info; break;
+			case 7: image7 = info; break;
+			default: break;
 		}
 	}
 	

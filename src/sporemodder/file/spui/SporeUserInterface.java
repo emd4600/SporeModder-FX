@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.scene.paint.Color;
 import sporemodder.file.filestructures.FileStream;
 import sporemodder.file.filestructures.StreamReader;
 import javafx.scene.image.Image;
@@ -40,10 +41,8 @@ import sporemodder.HashManager;
 import sporemodder.MainApp;
 import sporemodder.ProjectManager;
 import sporemodder.file.ResourceKey;
-import sporemodder.file.spui.components.DirectImage;
-import sporemodder.file.spui.components.ISporeImage;
-import sporemodder.file.spui.components.IWindow;
-import sporemodder.file.spui.components.WindowBase;
+import sporemodder.file.filestructures.StreamWriter;
+import sporemodder.file.spui.components.*;
 import sporemodder.file.spui.uidesigner.DesignerClass;
 import sporemodder.file.spui.uidesigner.SpuiDesigner;
 import sporemodder.view.editors.SpuiEditor;
@@ -448,32 +447,88 @@ public class SporeUserInterface {
 				.collect(Collectors.toList());
 		}
 	}
-	
+
+
+
 	public static void main(String[] args) throws IOException
 	{
 		MainApp.testInit();
-		
-		String path = "E:\\Eric\\Eclipse Projects\\SporeModder FX\\Projects\\Spore (Game & Graphics)\\layouts_atlas~";
-		
-		for (File file : new File(path).listFiles()) {
-			if (file.getName().endsWith(".spui"))
-			{
-				try (FileStream stream = new FileStream(file, "r"))
-				{
-					SporeUserInterface spui = new SporeUserInterface();
-					spui.read(stream);
-					
-					for (SpuiElement element : spui.getElements()) {
-						if (element.getDesignerClass().getProxyID() == 0x0f0b8b73) {
-							System.out.println(file.getName());
-							break;
-						}
-					}
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+
+		SpuiDesigner designer = getDesigner();
+
+		WinButton button = designer.createElementWithDefaults(WinButton.class);
+		button.setControlID("ShareablePlanets-ExportButton");
+
+		AtlasImage backgroundImage = AtlasImage.create(
+				new DirectImage(null, new ResourceKey(0x31A44893, 0x556F123D, 0x2F7D0004)),
+				new int[] { 29, 29 },
+				new SPUIRectangle(0.291016f, 0.4375f, 0.347656f, 0.550781f)
+		);
+		AtlasImage iconImage = AtlasImage.create(
+				new DirectImage(null, new ResourceKey(0x31A44893, 0x556F123C, 0x2F7D0004)),
+				new int[] { 29, 29 },
+				new SPUIRectangle(0.835938f, 0.292969f, 1.0625f, 0.40625f)
+		);
+
+		cSPUIStdDrawable drawable = designer.createElementWithDefaults(cSPUIStdDrawable.class);
+		drawable.setScaleType(cSPUIStdDrawable.TILE_CENTER);
+		drawable.getScaleArea().set(0.333f, 0.333f, 0.333f, 0.333f);
+
+		for (int i = 0; i < 8; i++) {
+			cSPUIStdDrawableImageInfo drawableImageInfo = designer.createElementWithDefaults(cSPUIStdDrawableImageInfo.class);
+
+			drawableImageInfo.setProperty(0xef3c000a, 4);  // scaleType = Tile Center
+			drawableImageInfo.backgroundImage = backgroundImage;
+			drawableImageInfo.backgroundColor = Color.WHITE;
+			drawableImageInfo.iconImage = iconImage;
+			drawableImageInfo.iconColor = Color.web("#a2e4f5");
+			drawableImageInfo.iconDrawMode = 0;  // Image Size
+			drawableImageInfo.iconScale.set(0.9f, 0.9f);
+
+			if (i == 1) {
+				drawableImageInfo.iconDrawMode = 0;  // Window Size
+				drawableImageInfo.iconColor = Color.rgb(255, 255, 255, 0.37);
+				drawableImageInfo.iconImage = null;
+				drawableImageInfo.iconScale.set(1.0f, 1.0f);
+			} else if (i == 2) {
+				drawableImageInfo.iconDrawMode = 0;  // Window Size
+				drawableImageInfo.iconColor = Color.WHITE;
+				drawableImageInfo.iconImage = null;
+				drawableImageInfo.iconScale.set(1.0f, 1.0f);
+			} else if (i == 3) {
+				drawableImageInfo.iconDrawMode = 0;  // Window Size
+				drawableImageInfo.iconColor = Color.web("#01547c");
+				drawableImageInfo.iconImage = null;
+				drawableImageInfo.iconScale.set(1.0f, 1.0f);
 			}
+
+
+			drawable.setImage(i, drawableImageInfo);
+
+//			writer.addElement((AtlasImage)drawableImageInfo.backgroundImage);
+//			writer.addAtlasImage((AtlasImage)drawableImageInfo.backgroundImage);
+//			writer.addElement((AtlasImage)drawableImageInfo.iconImage);
+//			writer.addAtlasImage((AtlasImage)drawableImageInfo.iconImage);
+		}
+
+		button.setFillDrawable(drawable);
+		button.getArea().copy(new SPUIRectangle(0f, 0f, 29f, 29f));
+
+		SpuiElement stateEvent1 = designer.createElementWithDefaults("WindowStateEvent");
+		stateEvent1.setProperty(0x0255eaf8, 0x025a5f8e);  // Message = Button Highlighted
+		stateEvent1.setProperty(0x03339952, 1);  // Trigger = ON
+
+		SpuiElement stateEvent2 = designer.createElementWithDefaults("WindowStateEvent");
+		stateEvent2.setProperty(0x0255eaf8, 0x025a5f95);  // Message = Button Depressed
+		stateEvent2.setProperty(0x03339952, 2);  // Trigger = OFF - ON
+
+		button.getWinProcs().add(new SimpleLayout(SimpleLayout.FLAG_LEFT | SimpleLayout.FLAG_BOTTOM));
+		button.getWinProcs().add((IWinProc)stateEvent1);
+		button.getWinProcs().add((IWinProc)stateEvent2);
+
+		try (StreamWriter stream = new FileStream("E:\\Eric\\SMFX Projects\\Spore-ShareablePlanets\\data\\Spore-ShareablePlanets\\layouts_atlas~\\ShareablePlanets-ExportButton.spui", "rw")) {
+			SpuiWriter writer = new SpuiWriter(List.of(button));
+			writer.write(stream);
 		}
 	}
 }

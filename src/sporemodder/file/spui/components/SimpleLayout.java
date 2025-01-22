@@ -41,6 +41,14 @@ public class SimpleLayout extends ILayoutStyle {
 	
 	private int anchor;
 
+	public SimpleLayout() {
+
+	}
+
+	public SimpleLayout(int anchor) {
+		this.anchor = anchor;
+	}
+
 	@Override
 	public void applyLayout(SPUIRectangle destArea, SPUIRectangle parentArea) {
 		if ((anchor & FLAG_RIGHT) != 0) {

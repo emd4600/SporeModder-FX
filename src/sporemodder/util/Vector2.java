@@ -56,6 +56,11 @@ public class Vector2 {
 		if (i == 0) x = value;
 		else y = value;
 	}
+
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
+	}
 	
 	public float get(int i) {
 		if (i == 0) return x;

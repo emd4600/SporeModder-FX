@@ -21,6 +21,7 @@ package sporemodder.file.argscript;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import sporemodder.HashManager;
@@ -284,7 +285,10 @@ class DefaultParsers {
 
 			@Override
 			public void parse(ArgScriptLine line) {
-						
+
+				meetsCondition = false;
+				ignoreTheRest = false;
+
 				stream.startSpecialBlock(this, "endif");
 				
 				if (line.getArguments(args, 1)) {
@@ -318,11 +322,15 @@ class DefaultParsers {
 				StringBuilder sb = new StringBuilder();
 				
 				while (index < chars.length && Character.isWhitespace(chars[index])) index++;
+				int startIndex = index;
 				while (index < chars.length && !Character.isWhitespace(chars[index])) sb.append(chars[index++]);
 				
 				String keyword = sb.toString();
 				
 				if (keyword.equals("elseif")) {
+					if (stream.hasSyntaxHighlighting()) {
+						stream.getSyntaxHighlighter().add(stream.getCurrentLine(), startIndex, keyword.length(), Collections.singleton(ArgScriptStream.SYNTAX_COMMAND));
+					}
 					// If the condition was met, now it isn't anymore; everything must be ignored from now
 					if (meetsCondition) {
 						meetsCondition = false;
@@ -349,6 +357,9 @@ class DefaultParsers {
 					}
 				}
 				else if (keyword.equals("else")) {
+					if (stream.hasSyntaxHighlighting()) {
+						stream.getSyntaxHighlighter().add(stream.getCurrentLine(), startIndex, keyword.length(), Collections.singleton(ArgScriptStream.SYNTAX_BLOCK));
+					}
 					// If the condition was met, now it isn't anymore; everything must be ignored from now
 					if (meetsCondition) {
 						meetsCondition = false;

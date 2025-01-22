@@ -102,6 +102,14 @@ public class SpuiDesigner {
 		}
 		return null;
 	}
+
+	public SpuiElement createElementWithDefaults(String name) {
+		return getClass(name).createInstanceWithDefaults();
+	}
+
+	public <T extends SpuiElement> T createElementWithDefaults(Class<T> javaClass) {
+		return (T)getClass(javaClass).createInstanceWithDefaults();
+	}
 	
 	public List<DesignerClass> getImplementingClasses(String interfaceName) {
 		List<DesignerClass> list = new ArrayList<>();
@@ -186,7 +194,7 @@ public class SpuiDesigner {
 			boolean hasProject = ProjectManager.get().getActive() != null;
 			String projectUiDesignerFolder = HashManager.get().getFileName(0x0248E873);
 			
-			if (hasProject)
+			if (hasProject && false)
 			{
 				File projectDesignerFolder = ProjectManager.get().getFile(projectUiDesignerFolder);
 				if (projectDesignerFolder != null) {

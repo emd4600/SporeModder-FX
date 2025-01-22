@@ -284,6 +284,12 @@ public class DesignerClass implements DesignerNode {
 			return null;
 		}
 	}
+
+	public SpuiElement createInstanceWithDefaults() {
+		SpuiElement element = createInstance();
+		fillDefaults(null, element);
+		return element;
+	}
 	
 	/**
 	 * Returns the property with the given proxy ID, first looking in this class declaration and, if not

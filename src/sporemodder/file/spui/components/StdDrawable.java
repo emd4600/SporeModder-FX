@@ -59,4 +59,20 @@ public class StdDrawable extends IDrawable {
 		if (image[imageIndex] == null) return super.getDimensions(imageIndex);
 		return new Vector2(image[imageIndex].getWidth(), image[imageIndex].getHeight());
 	}
+
+	public int getScaleType() {
+		return scaleType;
+	}
+
+	public void setScaleType(int scaleType) {
+		this.scaleType = scaleType;
+	}
+
+	public Vector2 getScaleFactor() {
+		return scaleFactor;
+	}
+
+	public Borders getScaleArea() {
+		return scaleArea;
+	}
 }

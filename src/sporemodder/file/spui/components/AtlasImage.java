@@ -62,6 +62,15 @@ public class AtlasImage extends SpuiElement implements ISporeImage {
 		return atlas;
 	}
 
+	public static AtlasImage create(DirectImage atlas, int[] dimensions, SPUIRectangle uvCoordinates) {
+		AtlasImage atlasImage = new AtlasImage();
+		atlasImage.atlas = atlas;
+		atlasImage.dimensions[0] = dimensions[0];
+		atlasImage.dimensions[1] = dimensions[1];
+		atlasImage.uvCoordinates.copy(uvCoordinates);
+		return atlasImage;
+	}
+
 	@Override
 	public void drawImage(GraphicsContext graphics, double sx, double sy, double sw, double sh, double dx, double dy,
 			double dw, double dh, Color shadeColor) {

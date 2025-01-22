@@ -280,4 +280,12 @@ public class WindowBase extends SpuiElement implements IWindow {
 	public String getCommandID() {
 		return commandID;
 	}
+
+	public void setControlID(String controlID) {
+		this.controlID = controlID;
+	}
+
+	public void setCommandID(String commandID) {
+		this.commandID = commandID;
+	}
 }

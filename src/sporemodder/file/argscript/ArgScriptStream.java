@@ -306,7 +306,7 @@ public class ArgScriptStream<T> {
 					startIndex = index + 2;
 					
 					// End the syntax highlighting block
-					if (!isFastParsing && !isIncluding) {
+					if (hasSyntaxHighlighting()) {
 						commentsSyntax.add(blockCommentStart, commentsSyntax.getLinePosition(currentLineNumber) + startIndex - blockCommentStart, Collections.singleton(SYNTAX_COMMENT));
 					}
 					
@@ -329,7 +329,7 @@ public class ArgScriptStream<T> {
 				sb.append(line.substring(startIndex, index));
 				
 				// Add the syntax highlighting
-				if (!isFastParsing && !isIncluding) commentsSyntax.add(currentLineNumber, index, line.length() - index, Collections.singleton(SYNTAX_COMMENT));
+				if (hasSyntaxHighlighting()) commentsSyntax.add(currentLineNumber, index, line.length() - index, Collections.singleton(SYNTAX_COMMENT));
 				
 				insideComment = true;
 			}
@@ -441,7 +441,7 @@ public class ArgScriptStream<T> {
 			this.addError(new DocumentError("Block comment not closed. Close the comment with #>", 0, lines.get(lineNumber).length(), lineNumber));
 		}
 		
-		if (!isFastParsing && !isIncluding) {
+		if (hasSyntaxHighlighting()) {
 			// First add variables, then comments
 			syntaxHighlighter.addExtras(variablesSyntax, true);
 			// Add the comments syntax highlighting, removing any previous style if necessary
@@ -537,7 +537,7 @@ public class ArgScriptStream<T> {
 				
 				addStructureEND();
 				
-				if (!isFastParsing && !isIncluding) {
+				if (hasSyntaxHighlighting()) {
 					syntaxHighlighter.add(currentLineNumber, startIndex, last.value.length(), Collections.singleton(ArgScriptStream.SYNTAX_BLOCK));
 				}
 				
@@ -653,7 +653,7 @@ public class ArgScriptStream<T> {
 	}
 	
 	public void addSyntax(ArgScriptLine line, boolean isBlock) {
-		if (!isFastParsing && !isIncluding) {
+		if (hasSyntaxHighlighting()) {
 			lineHighlighter.syntax(syntaxHighlighter, line, currentLineNumber, isBlock);
 			line.addOptionWarnings();
 		}
@@ -661,7 +661,7 @@ public class ArgScriptStream<T> {
 	
 	private void addStructureEND() {
 		// Modify the last block fragment to change the end position
-		if (!isFastParsing && !isIncluding && !documentBlockFragments.isEmpty()) {
+		if (hasSyntaxHighlighting() && !documentBlockFragments.isEmpty()) {
 			DocumentFragment fragment = documentBlockFragments.get(documentBlockFragments.size() - 1);
 			fragment.setEnd(lineEnds.get(currentLineNumber));
 			
@@ -670,7 +670,7 @@ public class ArgScriptStream<T> {
 	}
 	
 	private void addStructure(ArgScriptLine line, String text, boolean isBlock) {
-		if (!isFastParsing && !isIncluding) {
+		if (hasSyntaxHighlighting()) {
 			DocumentFragment fragment = new DocumentFragment(documentStructure);
 			
 			if (!documentBlockFragments.isEmpty()) {
@@ -1911,12 +1911,16 @@ public class ArgScriptStream<T> {
 		}
 		return true;
 	}
+
+	public boolean hasSyntaxHighlighting() {
+		return !isFastParsing && !isIncluding;
+	}
 	
 	/* -- ----- -- */
 	
 	
 	public void addHyperlink(String type, Object object, int start, int end) {
-		if (!isFastParsing && !isIncluding) {
+		if (hasSyntaxHighlighting()) {
 			hyperlinkData.add(new HyperlinkData(type, object, currentLineNumber, start, end));
 		}
 	}

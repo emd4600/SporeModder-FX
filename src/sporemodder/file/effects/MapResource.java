@@ -174,7 +174,7 @@ public class MapResource extends EffectResource {
 						// The values can either be other maps, which can be names or 0x hashes, or numerical vector4 values
 						for (int i = 1; i < args.size(); i++) 
 						{
-							if (args.get(i).contains("(")) {
+							if (args.get(i).contains(",")) {
 								float[] arr = new float[4];
 								stream.parseVector4(args, i, arr);
 								

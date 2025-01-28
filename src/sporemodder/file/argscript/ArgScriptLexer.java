@@ -541,33 +541,37 @@ public class ArgScriptLexer {
 	 * @throws DocumentException If there is an error while parsing the expression.
 	 */
 	public boolean parseBoolean() throws DocumentException {
+		return parseBooleanInternal() != 0;
+	}
+
+	private long parseBooleanInternal() throws DocumentException {
 		isHexadecimal = false;
-		
+
 		skipWhitespaces();
-		
-		boolean left = parseBoolAnd();
-		
+
+		long left = parseBoolAnd();
+
 		while (true) {
 			skipWhitespaces();
-			
+
 			startIndex = index;
-			
+
 			StringBuilder sb = new StringBuilder();
 			while (index < array.length && Character.isAlphabetic(array[index])) {
 				sb.append(array[index]);
 				index++;
 			}
 			String keyword = sb.toString();
-			
+
 			switch(keyword) {
-			case "or":
-				// We must do the function first, because otherwise it won't run if left is true
-				left = parseBoolAnd() || left;
-				break;
-			default:
-				// The keyword does not belong to this method, restore the original position
-				index = startIndex;
-				return left;
+				case "or":
+					// We must do the function first, because otherwise it won't run if left is true
+					left = parseBoolAnd() != 0 || left != 0 ? 1 : 0;
+					break;
+				default:
+					// The keyword does not belong to this method, restore the original position
+					index = startIndex;
+					return left;
 			}
 		}
 	}
@@ -576,15 +580,15 @@ public class ArgScriptLexer {
 	 * Parses a boolean expression inside a parenthesis, and returns the result of evaluating that expression.
 	 * @throws DocumentException If any of the parenthesis are missing, or there is an error while parsing the expression.
 	 */
-	private boolean parseBoolParenthesis() throws DocumentException {
+	private long parseBoolParenthesis() throws DocumentException {
 		skipWhitespaces();
 		
 		if (index >= array.length || array[index] != '(') {
 			throw new DocumentException(new DocumentError("Expected '(' in boolean expression.", index, index+1));
 		}
 		index++;
-		
-		boolean result = parseBoolean();
+
+		long result = parseBooleanInternal();
 		skipWhitespaces();
 		
 		if (index >= array.length || array[index] != ')') {
@@ -597,19 +601,19 @@ public class ArgScriptLexer {
 	
 	/**
 	 * Parses a boolean keyword and returns the result of evaluating it.
-	 * It supports: <code>true, false, on, off</code>, boolean expressions inside parenthesis, and integer expressions that return either 1 (true) or 0 (false).
+	 * It supports: <code>true, false, on, off</code>, boolean expressions inside parenthesis, and integer expressions.
 	 * @throws DocumentException If there is an error while parsing the expression.
 	 */
-	private boolean parseBoolKeyword() throws DocumentException {
+	private long parseBoolKeyword() throws DocumentException {
 		
 		skipWhitespaces();
-		
+
 		if (array[index] == '(') {
 			return parseBoolParenthesis();
 		}
 		
 		if (!Character.isAlphabetic(array[index])) {
-			return parseInteger() == 0 ? false : true;
+			return parseInteger();
 		}
 		
 		startIndex = index;
@@ -624,18 +628,18 @@ public class ArgScriptLexer {
 		switch (keyword) {
 		case "true":
 		case "on":
-			return true;
+			return 1;
 		case "false":
 		case "off":
-			return false;
+			return 0;
 		default:
 			ArgScriptFunction function = functions.getOrDefault(keyword, null);
 			if (function != null) {
-				return function.getBoolean(this);
+				return function.getInt(this);
 			} else {
 				// The keyword does not belong to this method, restore the original position
 				index = startIndex;
-				return parseInteger() == 0 ? false : true;
+				return parseInteger();
 			}
 		}
 	}
@@ -645,9 +649,9 @@ public class ArgScriptLexer {
 	 * comparison at all.
 	 * @throws DocumentException If there is an error while parsing the expression.
 	 */
-	private boolean parseBoolComparison() throws DocumentException {
+	private long parseBoolComparison() throws DocumentException {
 		
-		boolean left = parseBoolKeyword();
+		long left = parseBoolKeyword();
 
 		while (true) {
 			skipWhitespaces();
@@ -655,18 +659,20 @@ public class ArgScriptLexer {
 			if (index >= array.length) {
 				return left;
 			}
-			
-			// although the comparation symbols are supported, it does the same ==
+
 			switch (array[index]) {
-			
 			case '>':
+				index++;
+				return left > parseBoolComparison() ? 1 : 0;
 			case '<':
+				index++;
+				return left < parseBoolComparison() ? 1 : 0;
 			case '=':
 				index++;
 				if (array[index] == '=') {
 					index++;
 				}
-				left = left == parseBoolComparison();
+				left = left == parseBoolComparison() ? 1 : 0;
 				break;
 				
 			case '!':
@@ -675,7 +681,7 @@ public class ArgScriptLexer {
 					throw new DocumentException(new DocumentError("Invalid operator !" + array[index] + "'. Did you mean != or 'not'?", index-1, index+1));
 				}
 				index++;
-				left = left != parseBoolComparison();
+				left = left != parseBoolComparison() ? 1 : 0;
 				break;
 				
 			default:
@@ -688,7 +694,7 @@ public class ArgScriptLexer {
 	 * Same as {@link #parseBoolComparison()}, but this one supports the keyword 'not'.
 	 * @throws DocumentException 
 	 */
-	private boolean parseBoolExtendedComparison() throws DocumentException {
+	private long parseBoolExtendedComparison() throws DocumentException {
 		
 		skipWhitespaces();
 		
@@ -700,24 +706,23 @@ public class ArgScriptLexer {
 			index++;
 		}
 		String keyword = sb.toString();
-		
-		switch(keyword) {
-		case "not":
-			return !parseBoolExtendedComparison();
-		default:
+
+        if (keyword.equals("not")) {
+            return parseBoolExtendedComparison() == 0 ? 1 : 0;
+        } else {
 			// The keyword does not belong to this method, restore the original position
 			index = startIndex;
 			return parseBoolComparison();
 		}
-	}
+    }
 	
 	/**
 	 * Parses a boolean expression and checks if it is followed by 'and' and another expression.
 	 * @throws DocumentException 
 	 */
-	private boolean parseBoolAnd() throws DocumentException {
+	private long parseBoolAnd() throws DocumentException {
 		
-		boolean left = parseBoolExtendedComparison();
+		long left = parseBoolExtendedComparison();
 		
 		while (true) {
 			skipWhitespaces();
@@ -730,17 +735,15 @@ public class ArgScriptLexer {
 				index++;
 			}
 			String keyword = sb.toString();
-			
-			switch(keyword) {
-			case "and":
+
+            if (keyword.equals("and")) {
 				// Order is important, if we do it the other way it won't finish parsing
-				left = parseBoolExtendedComparison() && left;
-				break;
-			default:
+                left = parseBoolExtendedComparison() != 0 && left != 0 ? 1 : 0;
+            } else {
 				// The keyword does not belong to this method, restore the original position
-				index = startIndex;
-				return left;
-			}
+                index = startIndex;
+                return left;
+            }
 		}
 	}
 	

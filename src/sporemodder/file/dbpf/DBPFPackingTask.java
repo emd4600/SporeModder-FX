@@ -78,6 +78,13 @@ public class DBPFPackingTask extends Task<Void> {
 		}
 	}
 	
+	public DBPFPackingTask(Project project, File outputFile) {
+		this.inputFolder = project.getFolder();
+		this.outputFile = outputFile;
+		this.packageSignature = project.getPackageSignature();
+		this.outputStream = null;
+	}
+	
 	public DBPFPackingTask(File inputFolder, File outputFile) {
 		this.inputFolder = inputFolder;
 		this.outputFile = outputFile;

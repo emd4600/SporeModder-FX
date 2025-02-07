@@ -386,14 +386,15 @@ public class Launcher {
 				return 1;
 			}
 
+			Project project = new Project(input.getName(), input, null);
+			project.loadSettings();
+
 			if (output.isDirectory()) {
-				Project project = new Project(input.getName(), input, null);
-				project.loadSettings();
 				output = new File(output, project.getPackageName());
 			}
 			
 			startTime = System.currentTimeMillis();
-			final DBPFPackingTask task = new DBPFPackingTask(input, output);
+			final DBPFPackingTask task = new DBPFPackingTask(project, output);
 			task.setCompressThreshold(compressThreshold);
 			task.setNoJavaFX();
 			task.setNoJavaFXProgressListener(PROGRESS_BAR_LISTENER);

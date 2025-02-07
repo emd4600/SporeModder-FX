@@ -47,11 +47,6 @@ jobs:
         with:
           name: SporeModder-FX-Release
           path: SporeModderFX.Updater.jar
-          
-      - name: "Upload build: Release"
-        uses: actions/upload-artifact@v4
-        with:
-          name: SporeModder-FX-Release
           path: "SporeModder FX.zip"
           
   publish_release:

@@ -176,17 +176,23 @@ public class GameManager extends AbstractManager {
 		spore = map.get(GameType.SPORE);
 		cc = map.get(GameType.CC);
 		
-		// Read paths from settings
+		// Read paths from settings; a configured path that no longer validates leaves the detected game in place
 		String path = properties.getProperty(PROPERTY_pathSpore, "AUTO");
 		if (!path.equals("AUTO") && !path.isEmpty()) {
-			spore = createSpore(path);
-			isSporeAuto = spore != null;
+			SporeGame configuredSpore = createSpore(path);
+			if (configuredSpore != null) {
+				spore = configuredSpore;
+				isSporeAuto = false;
+			}
 		}
 		
 		path = properties.getProperty(PROPERTY_pathGA, "AUTO");
 		if (!path.equals("AUTO") && !path.isEmpty()) {
-			ga = createGA(path);
-			isGAAuto = ga != null;
+			SporeGame configuredGA = createGA(path);
+			if (configuredGA != null) {
+				ga = configuredGA;
+				isGAAuto = false;
+			}
 		}
 		
 		path = properties.getProperty(PROPERTY_pathCustom);
